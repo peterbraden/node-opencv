@@ -6,6 +6,8 @@
 #include <node_object_wrap.h>
 #include <node_version.h>
 #include <cv.h>
+#include <highgui.h>
+#include <string.h>
 
 using namespace v8;
 using namespace node;

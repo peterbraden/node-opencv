@@ -2,7 +2,9 @@
 
 class Image: public node::ObjectWrap {
   public:
-      IplImage* image;
+	  std::string filename;
+	  cv::Mat image;
+
       static Persistent<FunctionTemplate> constructor;
       static void Init(Handle<Object> target);
       static Handle<Value> New(const Arguments &args);
