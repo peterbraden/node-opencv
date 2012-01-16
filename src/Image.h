@@ -2,8 +2,8 @@
 
 class Image: public node::ObjectWrap {
   public:
-	  std::string filename;
-	  cv::Mat image;
+      std::string filename;
+      cv::Mat image;
 
       static Persistent<FunctionTemplate> constructor;
       static void Init(Handle<Object> target);

@@ -11,4 +11,4 @@ assert.equal(Math.round(new opencv.Point(1.2, 2.75).y *100), 275)
 
 
 
-console.log(opencv.Image("./examples/mona.jpg"))
+console.log(new opencv.Image("./examples/mona.jpg").width, "!!")

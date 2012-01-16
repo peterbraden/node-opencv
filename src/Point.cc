@@ -34,7 +34,7 @@ Point::New(const Arguments &args) {
   double x = 0, y = 0;
   if (args[0]->IsNumber()) x = args[0]->NumberValue();
   if (args[1]->IsNumber()) y = args[1]->NumberValue();
-  Point *pt = new Point(x, y);
+  Point *pt = new Point(x, y);  
   pt->Wrap(args.This());
   return args.This();
 }
