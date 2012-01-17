@@ -56,7 +56,7 @@ Image::Image(int width, int height): ObjectWrap() {
 
 Image::Image(v8::Value* fileName): ObjectWrap() {
     filename = std::string(*v8::String::AsciiValue(fileName->ToString()));
-    //image = cv::imread(filename, -1);
+    image = cv::imread(filename, -1);
 };    
     
     

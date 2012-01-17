@@ -51,8 +51,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         , p2 = new cv.Point(5, 7)
 
       assert.ok(p1.dot);
-      assert.ok(p1.dot(p2));
-          
+      assert.equal(p1.dot(p2), 57);
 
     }
 
