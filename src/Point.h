@@ -12,4 +12,7 @@ class Point: public node::ObjectWrap {
     
       static Handle<Value> GetX(Local<String> prop, const AccessorInfo &info);
       static Handle<Value> GetY(Local<String> prop, const AccessorInfo &info);
+      static void RaiseImmutable(Local<String> property, Local<Value> value, const AccessorInfo& info);
+      static Handle<Value> Dot(const v8::Arguments&);
+
 };

@@ -4,5 +4,9 @@ void
 OpenCV::Init(Handle<Object> target) {
   HandleScope scope;
   
-  target->Set(String::NewSymbol("version"), String::New("1"));
+  
+  // Version string.
+  char out [21];
+  int n = sprintf(out, "%i.%i", CV_MAJOR_VERSION, CV_MINOR_VERSION);
+  target->Set(String::NewSymbol("version"), String::New(out, n));
 }  

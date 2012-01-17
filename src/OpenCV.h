@@ -12,7 +12,6 @@
 using namespace v8;
 using namespace node;
 
-
 class OpenCV: public node::ObjectWrap{
   public:
     static void Init(Handle<Object> target);
