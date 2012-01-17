@@ -60,7 +60,16 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
 
   , "Image" : {
+    topic : require('../lib/opencv')
+
+    , "constructor": function(cv){
+      assert.ok(new cv.Image("./examples/mona.jpg"))
+    }
     
+    , ".width / .height" : function(cv){
+      assert.equal(new cv.Image("./examples/mona.jpg").width, 500)
+      assert.equal(new cv.Image("./examples/mona.jpg").height, 756)
+    }
 
   }
 }).run();

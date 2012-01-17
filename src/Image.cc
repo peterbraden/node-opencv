@@ -18,12 +18,19 @@ Image::Init(Handle<Object> target) {
     proto->SetAccessor(String::NewSymbol("width"), GetWidth);
     proto->SetAccessor(String::NewSymbol("height"), GetHeight);
     
+    NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
+
+
     /*proto->SetAccessor(String::NewSymbol("source"), GetSource, SetSource);
     proto->SetAccessor(String::NewSymbol("complete"), GetComplete);
 
     proto->SetAccessor(String::NewSymbol("onload"), GetOnload, SetOnload);
     proto->SetAccessor(String::NewSymbol("onerror"), GetOnerror, SetOnerror);*/
     target->Set(String::NewSymbol("Image"), constructor->GetFunction());
+
+
+    
+
 };
 
 Handle<Value>
@@ -63,12 +70,28 @@ Image::Image(v8::Value* fileName): ObjectWrap() {
 Handle<Value>
 Image::GetWidth(Local<String>, const AccessorInfo &info) {
   HandleScope scope;
-  return scope.Close(Number::New(5));
+  Image *img = ObjectWrap::Unwrap<Image>(info.This());
+  return scope.Close(Number::New(img->image.size().width));
 }   
 
 Handle<Value>
 Image::GetHeight(Local<String>, const AccessorInfo &info) {
   HandleScope scope;
-  return scope.Close(Number::New(5));
+  Image *img = ObjectWrap::Unwrap<Image>(info.This());
+  return scope.Close(Number::New(img->image.size().height));
 }   
+
+
+Handle<Value>
+Image::Save(const v8::Arguments& args){
+  HandleScope scope;
+
+  if (!args[0]->IsString())
+    return ThrowException(Exception::TypeError(String::New("filename required")));
+ 
+  Image *self = ObjectWrap::Unwrap<Image>(args.This());
+  String::AsciiValue filename(args[0]);
+  int res = cv::imwrite(*filename, self->image);
+  return scope.Close(Number::New(res));
+}
 

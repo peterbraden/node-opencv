@@ -62,7 +62,7 @@ Point::Dot(const v8::Arguments& args){
   HandleScope scope;
   Point *p1 = ObjectWrap::Unwrap<Point>(args.This());
   Point *p2 = ObjectWrap::Unwrap<Point>(args[0]->ToObject());
-  
+
   // Since V 2.3 Native Dot no longer supported
   return scope.Close(Number::New(p1->point.x * p2->point.x + p1->point.y * p2->point.y));
 }
