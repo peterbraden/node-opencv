@@ -1,5 +1,6 @@
 #include "Image.h"
 #include "OpenCV.h"
+#include "Matrix.h"
 
 v8::Persistent<FunctionTemplate> Image::constructor;
 
@@ -11,6 +12,7 @@ Image::Init(Handle<Object> target) {
     constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Image::New));
     constructor->InstanceTemplate()->SetInternalFieldCount(1);
     constructor->SetClassName(String::NewSymbol("Image"));
+    constructor->Inherit(Matrix::constructor);
 
     // Prototype
     Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
@@ -63,7 +65,7 @@ Image::Image(int width, int height): ObjectWrap() {
 
 Image::Image(v8::Value* fileName): ObjectWrap() {
     filename = std::string(*v8::String::AsciiValue(fileName->ToString()));
-    image = cv::imread(filename, -1);
+    mat = cv::imread(filename, -1);
 };    
     
     
@@ -71,14 +73,14 @@ Handle<Value>
 Image::GetWidth(Local<String>, const AccessorInfo &info) {
   HandleScope scope;
   Image *img = ObjectWrap::Unwrap<Image>(info.This());
-  return scope.Close(Number::New(img->image.size().width));
+  return scope.Close(Number::New(img->mat.size().width));
 }   
 
 Handle<Value>
 Image::GetHeight(Local<String>, const AccessorInfo &info) {
   HandleScope scope;
   Image *img = ObjectWrap::Unwrap<Image>(info.This());
-  return scope.Close(Number::New(img->image.size().height));
+  return scope.Close(Number::New(img->mat.size().height));
 }   
 
 
@@ -91,7 +93,7 @@ Image::Save(const v8::Arguments& args){
  
   Image *self = ObjectWrap::Unwrap<Image>(args.This());
   String::AsciiValue filename(args[0]);
-  int res = cv::imwrite(*filename, self->image);
+  int res = cv::imwrite(*filename, self->mat);
   return scope.Close(Number::New(res));
 }
 

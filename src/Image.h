@@ -3,7 +3,7 @@
 class Image: public node::ObjectWrap {
   public:
       std::string filename;
-      cv::Mat image;
+      cv::Mat mat;
 
       static Persistent<FunctionTemplate> constructor;
       static void Init(Handle<Object> target);

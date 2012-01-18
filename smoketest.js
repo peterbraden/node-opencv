@@ -3,5 +3,6 @@ var opencv = require('./lib/opencv')
 
 console.log(opencv.version)
 
+console.log(new opencv.Matrix().empty())
 
-console.log(new opencv.Image('./examples/mona.jpg').save('t1.jpg'))
+console.log(new opencv.Image('./examples/mona.jpg').empty())

@@ -59,6 +59,21 @@ vows.describe('Smoke Tests OpenCV').addBatch({
   }
 
 
+  , "Matrix": {
+    topic : require('../lib/opencv')
+
+    , "constructor" : function(cv){
+      assert.ok(cv.Matrix);
+      assert.ok(new cv.Matrix);
+      assert.ok(new cv.Matrix(1,2,0));
+    }
+
+    , "empty": function(cv){
+      assert.equal(new cv.Matrix(1,2).empty(), true);
+    }
+
+  }
+
   , "Image" : {
     topic : require('../lib/opencv')
 
@@ -66,6 +81,10 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.ok(new cv.Image("./examples/mona.jpg"))
     }
     
+    , "inherits from matrix": function(cv){
+      assert.equal(new cv.Image("./examples/mona.jpg").empty(), false)
+    }
+
     , ".width / .height" : function(cv){
       assert.equal(new cv.Image("./examples/mona.jpg").width, 500)
       assert.equal(new cv.Image("./examples/mona.jpg").height, 756)
