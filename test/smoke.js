@@ -90,5 +90,30 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.equal(new cv.Image("./examples/mona.jpg").height, 756)
     }
 
+    , ".ellipse": function(cv){
+      assert.equal(new cv.Image("./examples/mona.jpg").ellipse(10, 10, 10, 10), undefined)  
+    }
+
   }
+
+  , "CascadeClassifier": {
+    topic : require('../lib/opencv')
+
+    , "constructor" : function(cv){
+      assert.ok(new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml"))
+    }
+
+    , "face detection": function(cv){
+      var im = new cv.Image("./examples/mona.jpg")
+      , face_cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml")
+      , faces = face_cascade.detectMultiScale(im, 1.1, 2, [30, 30])
+
+      assert.equal(faces.length, 1)
+
+    }
+
+
+  }
+
+
 }).run();

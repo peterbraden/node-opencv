@@ -1,5 +1,4 @@
 #include "Image.h"
-#include "OpenCV.h"
 #include "Matrix.h"
 
 v8::Persistent<FunctionTemplate> Image::constructor;
@@ -21,6 +20,7 @@ Image::Init(Handle<Object> target) {
     proto->SetAccessor(String::NewSymbol("height"), GetHeight);
     
     NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
 
 
     /*proto->SetAccessor(String::NewSymbol("source"), GetSource, SetSource);
@@ -57,8 +57,7 @@ Image::New(const Arguments &args) {
 
 
 
-Image::Image(int width, int height): ObjectWrap() {
-    
+Image::Image(int width, int height): ObjectWrap() {    
 };
 
 
@@ -68,6 +67,8 @@ Image::Image(v8::Value* fileName): ObjectWrap() {
     mat = cv::imread(filename, -1);
 };    
     
+Image::~Image() {   
+} 
     
 Handle<Value>
 Image::GetWidth(Local<String>, const AccessorInfo &info) {
@@ -97,3 +98,18 @@ Image::Save(const v8::Arguments& args){
   return scope.Close(Number::New(res));
 }
 
+
+      // ellipse(x, y, wid, height, angle, startangle, endangle, color, thickness, linetype, shift)
+Handle<Value> 
+Image::Ellipse(const v8::Arguments& args){
+  HandleScope scope;
+
+  Image *self = ObjectWrap::Unwrap<Image>(args.This());
+  int x = args[0]->Uint32Value();
+  int y = args[1]->Uint32Value();
+  int width = args[2]->Uint32Value();
+  int height = args[3]->Uint32Value();    
+
+  cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360, cv::Scalar( 255, 0, 255 ), 4, 8, 0);
+  return scope.Close(v8::Null());
+}

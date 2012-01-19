@@ -16,6 +16,11 @@ class Image: public node::ObjectWrap {
       static Handle<Value> GetWidth(Local<String> prop, const AccessorInfo &info);
       static Handle<Value> GetHeight(Local<String> prop, const AccessorInfo &info);
 
+      //static Handle<Value> Convert(const v8::Arguments&);
       static Handle<Value> Save(const v8::Arguments&);
+      static Handle<Value> Ellipse(const v8::Arguments&);
 
+
+  private:
+      ~Image();
 };

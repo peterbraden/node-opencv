@@ -1,8 +1,15 @@
-var opencv = require('./lib/opencv')
+var cv = require('./lib/opencv')
   , assert = require('assert')
 
-console.log(opencv.version)
+console.log(cv.version)
 
-console.log(new opencv.Matrix().empty())
+var im = new cv.Image("./examples/mona.jpg")
+, face_cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml")
 
-console.log(new opencv.Image('./examples/mona.jpg').empty())
+var faces = face_cascade.detectMultiScale(im, 1.1, 2, [30, 30])
+
+for (var i=0;i<faces.length; i++){
+	var x = faces[i]
+	im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
+}
+im.save('./out.jpg');

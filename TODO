@@ -1,2 +1,17 @@
-- src/OpenCV.c 
-  - Test to see if bindings are working
+[X] In C++ get Image to inherit Matrix, to mirror js inherit
+	- Don't think it's possible :(
+
+
+- CascadeClassifier::DetectMultiScale 
+  - pass in properties
+  - Make async
+
+
+== Image ==
+
+- make image from stream
+- make image from node file object
+
+- Image::Ellipse
+   - pass in color
+   - pass in thickness 

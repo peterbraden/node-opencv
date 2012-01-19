@@ -4,6 +4,7 @@
 #include "Image.h"
 #include "CascadeClassifierWrap.h"
 
+
 extern "C" void
 init(Handle<Object> target) {
     HandleScope scope;
@@ -12,4 +13,4 @@ init(Handle<Object> target) {
     Matrix::Init(target);
     Image::Init(target);
     CascadeClassifierWrap::Init(target);
-}
+};

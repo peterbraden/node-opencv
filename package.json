@@ -1,0 +1,16 @@
+{
+  "name": "opencv"
+  , "description": "Node Bindings to OpenCV"
+  , "author": "Peter Braden <peterbraden@peterbraden.co.uk>"
+  , "dependencies": {
+    }
+  , "version" : "0.0.1" 
+  , "devDependencies": {
+    "vows": "*"
+    }
+ , "engine": "node >= 0.4.1"
+ , "scripts": {
+   "preinstall": "node-waf configure build"
+ }
+ , "main": "./lib/opencv",
+}
