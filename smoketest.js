@@ -17,4 +17,4 @@ im.save('./out.jpg');
 
 var cam = new cv.VideoCapture(0);
 
-console.log(cam.getFrame());
+console.log(cam.getFrame().save("out.jpg"));

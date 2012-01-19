@@ -21,7 +21,6 @@ class Image: public node::ObjectWrap {
       static Handle<Value> Save(const v8::Arguments&);
       static Handle<Value> Ellipse(const v8::Arguments&);
 
-
   private:
       ~Image();
 };

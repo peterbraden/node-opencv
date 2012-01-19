@@ -116,13 +116,3 @@ Image::Ellipse(const v8::Arguments& args){
   cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360, cv::Scalar( 255, 0, 255 ), 4, 8, 0);
   return scope.Close(v8::Null());
 }
-
-
-v8::Handle
-Image::Wrap() {
-  v8::HandleScope scope;
-  v8::Handle cons = constructor->GetFunction();
-  v8::Handle external = v8::External::New(value);
-  v8::Handle result = cons->NewInstance(1, &external);
-  return scope.Close(result);
-}

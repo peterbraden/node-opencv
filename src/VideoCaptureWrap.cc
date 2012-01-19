@@ -43,9 +43,9 @@ VideoCaptureWrap::VideoCaptureWrap(int device){
 
   cv::VideoCapture cap(device);
 
-  if(!cap.isOpened())
+  if(!cap.isOpened()){
   	ThrowException(Exception::Error(String::New("Camera could not be opened")));
-
+  }
 }
 
 
@@ -56,11 +56,15 @@ VideoCaptureWrap::GetFrame(const Arguments &args) {
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
 	cv::Mat frame;
-    v->cap >> frame;
+    v->cap.retrieve(frame);
 
-    Handle<Value> im = Image::New();
-    	
-    return scope.Close(im);
+
+
+    Local<Object> im_h = Image::constructor->GetFunction()->NewInstance();
+    Image *im = ObjectWrap::Unwrap<Image>(im_h);
+    im->mat = frame;
+ 	printf("* %i * %i * %i : open %i", im->mat.empty(), frame.empty(), v->cap.get(CV_CAP_PROP_FPS), v->cap.isOpened()); 	
+    return scope.Close(im_h);
 }
 
   
