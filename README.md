@@ -7,10 +7,34 @@
 You'll need OpenCV installed. I'm using v2.2 because I couldn't get 2.3 to compile, but it should theoretically work with 2.3
 
 Then:
+
+
+        npm install opencv
+
+
+Or to build the repo:
+
+
         node-waf configure && node-waf build
 
 
-TODO: npm install opencv
+## Examples
+
+### Face Detection
+
+
+        var im = new cv.Image("./examples/mona.jpg")
+        , face_cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml")
+
+        var faces = face_cascade.detectMultiScale(im, 1.1, 2, [30, 30])
+
+        for (var i=0;i<faces.length; i++){
+          var x = faces[i]
+          im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
+        }
+        im.save('./out.jpg');
+
+Warning: API is likely to change! (I want to make it async)
 
 
 ## WIP

@@ -12,5 +12,5 @@
  , "scripts": {
    "preinstall": "node-waf configure build"
  }
- , "main": "./lib/opencv",
+ , "main": "./lib/opencv"
 }
