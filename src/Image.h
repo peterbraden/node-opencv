@@ -8,9 +8,10 @@ class Image: public node::ObjectWrap {
       static Persistent<FunctionTemplate> constructor;
       static void Init(Handle<Object> target);
       static Handle<Value> New(const Arguments &args);
-      
+
       Image(int width, int height);   
       Image(v8::Value* src);      
+      Image(cv::Mat m);      
          
 
       static Handle<Value> GetWidth(Local<String> prop, const AccessorInfo &info);

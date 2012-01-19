@@ -10,3 +10,5 @@ OpenCV::Init(Handle<Object> target) {
   int n = sprintf(out, "%i.%i", CV_MAJOR_VERSION, CV_MINOR_VERSION);
   target->Set(String::NewSymbol("version"), String::New(out, n));
 }  
+
+
