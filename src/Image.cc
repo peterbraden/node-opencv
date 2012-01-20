@@ -7,14 +7,19 @@ void
 Image::Init(Handle<Object> target) {
     HandleScope scope;
 
+    //Class
+    v8::Local<v8::FunctionTemplate> t = v8::FunctionTemplate::New(New);
+    t->SetClassName(v8::String::NewSymbol("Image"));
+
     // Constructor
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Image::New));
+    constructor = Persistent<FunctionTemplate>::New(t);
     constructor->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor->SetClassName(String::NewSymbol("Image"));
     constructor->Inherit(Matrix::constructor);
+
 
     // Prototype
     Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+
 
     proto->SetAccessor(String::NewSymbol("width"), GetWidth);
     proto->SetAccessor(String::NewSymbol("height"), GetHeight);
@@ -22,15 +27,16 @@ Image::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
     NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
 
+    target->Set(String::NewSymbol("Image"), t->GetFunction());
+
+ 
+
+
     /*proto->SetAccessor(String::NewSymbol("source"), GetSource, SetSource);
     proto->SetAccessor(String::NewSymbol("complete"), GetComplete);
 
     proto->SetAccessor(String::NewSymbol("onload"), GetOnload, SetOnload);
     proto->SetAccessor(String::NewSymbol("onerror"), GetOnerror, SetOnerror);*/
-    target->Set(String::NewSymbol("Image"), constructor->GetFunction());
-
-
-    
 
 };
 

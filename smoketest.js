@@ -3,7 +3,9 @@ var cv = require('./lib/opencv')
 
 console.log(cv.version)
  
+//console.log(cv.Image.prototype);
 
+/*
 var im = new cv.Image("./examples/test.jpg")
 , face_cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml")
 
@@ -15,4 +17,4 @@ var faces = face_cascade.detectMultiScale(im, function(err, faces){
   im.save('./out.jpg');   
   
          
-});
+});*/
