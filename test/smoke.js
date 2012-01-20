@@ -103,17 +103,23 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.ok(new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml"))
     }
 
-    , "face detection": function(cv){
-      var im = new cv.Image("./examples/mona.jpg")
-      , face_cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml")
-      , faces = face_cascade.detectMultiScale(im, 1.1, 2, [30, 30])
+    , "face detection": {
+      topic : function(){
+        var cv = require('../lib/opencv')
+          , im = new cv.Image("./examples/mona.jpg")
+          , cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml");
+        
+        cascade.detectMultiScale(im, this.callback, 1.1, 2, [30, 30]); 
+      }
 
-      assert.equal(faces.length, 1)
+      , "finds face": function(err, faces){
+          assert.isNull(err);
+          assert.isArray(faces);
+          assert.equal(faces.length, 1)
 
+      }
     }
 
-
   }
-
 
 }).run();
