@@ -26,6 +26,8 @@ Image::Init(Handle<Object> target) {
     
     NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
     NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
+
 
     target->Set(String::NewSymbol("Image"), t->GetFunction());
 
@@ -52,17 +54,18 @@ Image::New(const Arguments &args) {
       width = args[0]->Uint32Value();
       height = args[1]->Uint32Value();    
       img = new Image(width, height);
-    } else {
-      if (args[0]->IsString()) {
-        img = new Image(*args[0]);
-      } else {
-        if (Buffer::HasInstance(args[0])){
-          uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());
-          unsigned len = Buffer::Length(args[0]->ToObject());
-          img = new Image(buf, len);
-        }
-      } 
-    }    
+    } else if (args[0]->IsString()) {
+      img = new Image(*args[0]);
+    } else if (Buffer::HasInstance(args[0])){
+      uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());
+      unsigned len = Buffer::Length(args[0]->ToObject());
+      img = new Image(buf, len);
+    
+      if (img->mat.empty()){
+        return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Error loading file")));
+      }
+    }
+
   
     img->Wrap(args.This());
     return args.This();  
@@ -75,8 +78,7 @@ Image::Image(int width, int height): ObjectWrap() {
 
 
 Image::Image(uint8_t* buf, unsigned len): ObjectWrap() {  
-  cv::Mat *mbuf = new cv::Mat(len, 1, CV_8UC1);
-
+  cv::Mat *mbuf = new cv::Mat(len, 1, CV_8UC1, buf);
   mat = cv::imdecode(*mbuf, -1);
 };
 
@@ -117,6 +119,17 @@ Image::Save(const v8::Arguments& args){
   int res = cv::imwrite(*filename, self->mat);
   return scope.Close(Number::New(res));
 }
+
+
+Handle<Value>
+Image::ToBuffer(const v8::Arguments& args){
+  HandleScope scope;
+  //Buffer *buf = Buffer::New(mat->length);
+  //cv::imencode('.jpg', mat, vec, CV_IMWRITE_JPEG_QUALITY 90)
+
+  return scope.Close(Number::New(0));
+} 
+
 
 
       // ellipse(x, y, wid, height, angle, startangle, endangle, color, thickness, linetype, shift)

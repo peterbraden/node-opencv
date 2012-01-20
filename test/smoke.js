@@ -83,8 +83,13 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
     , "constructor(buffer)" : function(cv){
-      assert.ok(new cv.Image(fs.readFileSync('./examples/mona.jpg')));
+      var im = new cv.Image(fs.readFileSync('./examples/mona.jpg'))
+      assert.ok(im);
+      assert.equal(im.width, 500);
+      assert.equal(im.height, 756)
+      assert.equal(im.empty(), false)
     }
+
     
     , "inherits from matrix": function(cv){
       assert.equal(new cv.Image("./examples/mona.jpg").empty(), false)
