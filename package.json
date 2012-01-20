@@ -11,6 +11,7 @@
  , "engine": "node >= 0.4.1"
  , "scripts": {
    "preinstall": "node-waf configure build"
+   , "test": "node test/smoke.js"
  }
  , "main": "./lib/opencv"
 }
