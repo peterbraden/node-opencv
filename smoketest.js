@@ -2,7 +2,8 @@ var cv = require('./lib/opencv')
   , assert = require('assert')
 
 console.log(cv.version)
-/*
+
+
 var im = new cv.Image("./examples/mona.jpg")
 , face_cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml")
 
@@ -13,8 +14,3 @@ for (var i=0;i<faces.length; i++){
 	im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
 }
 im.save('./out.jpg');
-*/
-
-var cam = new cv.VideoCapture(0);
-
-console.log(cam.getFrame().save("out.jpg"));
