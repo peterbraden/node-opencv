@@ -5,6 +5,7 @@
 #include <node.h>
 #include <node_object_wrap.h>
 #include <node_version.h>
+#include <node_buffer.h>
 #include <cv.h>
 #include <highgui.h>
 #include <string.h>

@@ -22,7 +22,6 @@ Image::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
     NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
 
-
     /*proto->SetAccessor(String::NewSymbol("source"), GetSource, SetSource);
     proto->SetAccessor(String::NewSymbol("complete"), GetComplete);
 
@@ -48,7 +47,15 @@ Image::New(const Arguments &args) {
       height = args[1]->Uint32Value();    
       img = new Image(width, height);
     } else {
-      img = new Image(*args[0]);
+      if (args[0]->IsString()) {
+        img = new Image(*args[0]);
+      } else {
+        if (Buffer::HasInstance(args[0])){
+          uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());
+          unsigned len = Buffer::Length(args[0]->ToObject());
+          img = new Image(buf, len);
+        }
+      } 
     }    
   
     img->Wrap(args.This());
@@ -56,11 +63,15 @@ Image::New(const Arguments &args) {
 };    
 
 
+
 Image::Image(int width, int height): ObjectWrap() {    
 };
 
-Image::Image(cv::Mat m): ObjectWrap() {  
-  mat = m;
+
+Image::Image(uint8_t* buf, unsigned len): ObjectWrap() {  
+  cv::Mat *mbuf = new cv::Mat(len, 1, CV_8UC1);
+
+  mat = cv::imdecode(*mbuf, -1);
 };
 
 
