@@ -2,6 +2,6 @@ language: node_js
 node_js:
    - 0.6
 
-before install:
+before_install:
   - sudo apt-get install libavformat-dev ffmpeg libcv2.1 libcvaux2.1 libhighgui2.1 python-opencv opencv-doc libcv-dev libcvaux-dev libhighgui-dev
 
