@@ -1,5 +1,8 @@
 # node-opencv 
 
+[![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.png)](http://travis-ci.org/peterbraden/node-opencv)
+
+
 [OpenCV](http://opencv.willowgarage.com/wiki/) bindings for Node.js
 
 ## Install
