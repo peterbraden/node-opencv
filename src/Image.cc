@@ -83,7 +83,7 @@ Image::Image(uint8_t* buf, unsigned len): ObjectWrap() {
 
 
 Image::Image(v8::Value* fileName): ObjectWrap() {
-    filename = std::string(*v8::String::AsciiValue(fileName->ToString()));
+    std::string filename = std::string(*v8::String::AsciiValue(fileName->ToString()));
     mat = cv::imread(filename, -1);
 };    
     

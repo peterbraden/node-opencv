@@ -2,7 +2,6 @@
 
 class Image: public node::ObjectWrap {
   public:
-      std::string filename;
       cv::Mat mat;
 
       static Persistent<FunctionTemplate> constructor;
