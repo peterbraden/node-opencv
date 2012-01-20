@@ -1,5 +1,6 @@
 var vows = require('vows')
   , assert = require('assert')
+  , fs = require('fs');
 
 
 
@@ -77,8 +78,12 @@ vows.describe('Smoke Tests OpenCV').addBatch({
   , "Image" : {
     topic : require('../lib/opencv')
 
-    , "constructor": function(cv){
+    , "constructor(filename)": function(cv){
       assert.ok(new cv.Image("./examples/mona.jpg"))
+    }
+
+    , "constructor(buffer)" : function(cv){
+      assert.ok(new cv.Image(fs.readFileSync('./examples/mona.jpg')));
     }
     
     , "inherits from matrix": function(cv){
