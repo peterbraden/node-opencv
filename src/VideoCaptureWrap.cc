@@ -63,7 +63,6 @@ VideoCaptureWrap::GetFrame(const Arguments &args) {
     Local<Object> im_h = Image::constructor->GetFunction()->NewInstance();
     Image *im = ObjectWrap::Unwrap<Image>(im_h);
     im->mat = frame;
- 	printf("* %i * %i * %i : open %i", im->mat.empty(), frame.empty(), v->cap.get(CV_CAP_PROP_FPS), v->cap.isOpened()); 	
     return scope.Close(im_h);
 }
 

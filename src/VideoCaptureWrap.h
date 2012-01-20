@@ -8,7 +8,7 @@ class VideoCaptureWrap: public node::ObjectWrap {
       static void Init(Handle<Object> target);
       static Handle<Value> New(const Arguments &args);
       
-      VideoCaptureWrap(const string& filename);
+      VideoCaptureWrap(const std::string& filename);
       VideoCaptureWrap(int device); 
 
       static Handle<Value> GetFrame(const v8::Arguments&);
