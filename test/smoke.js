@@ -103,7 +103,15 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     , ".ellipse": function(cv){
       assert.equal(new cv.Image("./examples/mona.jpg").ellipse(10, 10, 10, 10), undefined)  
     }
-
+    
+    , "toBuffer": function(cv){
+        var buf = fs.readFileSync('./examples/mona.jpg')
+          , im = new cv.Image(buf.slice(0))
+          , buf0 = im.toBuffer()
+        assert.ok(buf0);
+        
+        //assert.equal(buf.toString('base64'), buf0.toString('base64'));
+    }
   }
 
   , "CascadeClassifier": {
