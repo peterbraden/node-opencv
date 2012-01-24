@@ -66,14 +66,36 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     , "constructor" : function(cv){
       assert.ok(cv.Matrix);
       assert.ok(new cv.Matrix);
-      assert.ok(new cv.Matrix(1,2,0));
+      assert.ok(new cv.Matrix(1,2));
+    }
+    , "get/set" : function(cv){
+       var mat = new cv.Matrix(1,2);
+       assert.equal(mat.set(0,0,3), undefined);
+       assert.equal(mat.get(0,0), 3);
+    }
+
+    , ".width" : function(cv){
+      var mat = new cv.Matrix(6,7);
+      assert.equal(mat.width(), 7);
+    }
+
+    , ".height" : function(cv){
+      var mat = new cv.Matrix(6,7);
+      assert.equal(mat.height(), 6);
+    }
+
+    , ".size" : function(cv){
+      var mat = new cv.Matrix(6,7);
+      assert.deepEqual(mat.size(), [6, 7]);
     }
 
     , "empty": function(cv){
-      assert.equal(new cv.Matrix(1,2).empty(), true);
+      assert.equal(new cv.Matrix().empty(), true);
     }
 
   }
+
+
 
   , "Image" : {
     topic : require('../lib/opencv')
@@ -85,8 +107,8 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     , "constructor(buffer)" : function(cv){
       var im = new cv.Image(fs.readFileSync('./examples/mona.jpg'))
       assert.ok(im);
-      assert.equal(im.width, 500);
-      assert.equal(im.height, 756)
+      assert.equal(im.width(), 500);
+      assert.equal(im.height(), 756)
       assert.equal(im.empty(), false)
     }
 
@@ -96,8 +118,8 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
     , ".width / .height" : function(cv){
-      assert.equal(new cv.Image("./examples/mona.jpg").width, 500)
-      assert.equal(new cv.Image("./examples/mona.jpg").height, 756)
+      assert.equal(new cv.Image("./examples/mona.jpg").width(), 500)
+      assert.equal(new cv.Image("./examples/mona.jpg").height(), 756)
     }
 
     , ".ellipse": function(cv){

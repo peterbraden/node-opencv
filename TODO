@@ -1,17 +1,32 @@
-[X] In C++ get Image to inherit Matrix, to mirror js inherit
-	- Don't think it's possible :(
+Get rid of Image
+  - Replace with operations on Matrix and cv helper js functions
 
 
-- CascadeClassifier::DetectMultiScale 
-  - pass in properties
-  - Make async
+ - Matrix doesn't need to be eventemitter:
+
+ instead create a cv.MatrixBuffer class that is an event emitter, and wraps matrix in js
 
 
-== Image ==
 
-- make image from stream
-- make image from node file object
+ ############ Ideas #####################
 
-- Image::Ellipse
-   - pass in color
-   - pass in thickness 
+ var mat = cv.readImage('foo.jpg');
+ 
+ //shortcut for cascade classifier
+ mat.detectFaces('data.xml', function(err, faces){
+ 	for (var i=0;i<faces.length; i++){
+	    var x = faces[i]
+	    mat.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
+	}
+ });
+
+
+
+
+var s = new opencv.ImageStream()
+
+s.on('load', function(mat){
+	cv.writeImage(mat, filename, function(err){});
+})
+
+request.get('foo').pipe(s);

@@ -19,10 +19,6 @@ Image::Init(Handle<Object> target) {
 
     // Prototype
     Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
-
-
-    proto->SetAccessor(String::NewSymbol("width"), GetWidth);
-    proto->SetAccessor(String::NewSymbol("height"), GetHeight);
     
     NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
     NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
@@ -92,19 +88,6 @@ Image::Image(v8::Value* fileName): ObjectWrap() {
 Image::~Image() {   
 } 
     
-Handle<Value>
-Image::GetWidth(Local<String>, const AccessorInfo &info) {
-  HandleScope scope;
-  Image *img = ObjectWrap::Unwrap<Image>(info.This());
-  return scope.Close(Number::New(img->mat.size().width));
-}   
-
-Handle<Value>
-Image::GetHeight(Local<String>, const AccessorInfo &info) {
-  HandleScope scope;
-  Image *img = ObjectWrap::Unwrap<Image>(info.This());
-  return scope.Close(Number::New(img->mat.size().height));
-}   
 
 
 Handle<Value>
@@ -127,8 +110,8 @@ Image::ToBuffer(const v8::Arguments& args){
   
   Image *self = ObjectWrap::Unwrap<Image>(args.This());
     
-  vector<uchar> vec(0);
-  vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
+  std::vector<uchar> vec(0);
+  std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
 
   cv::imencode(".jpg", self->mat, vec, params);
 
