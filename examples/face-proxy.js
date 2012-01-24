@@ -25,11 +25,10 @@ var http = require('http')
         
         request({uri:url, encoding:'binary'}, function(err, r, body){
 			if (err) throw err;
-			var im = new cv.Image(new Buffer(body, 'binary'));		
-
-			var faces = face_cascade.detectMultiScale(im, function(err, faces){
-
-	    	  
+			
+			var im = new cv.readImage(new Buffer(body, 'binary'));		
+			
+			im.faceDetect(im, {}, function(err, faces){ 	  
 	          for (var i=0;i<faces.length; i++){
 	            var x = faces[i]
 	            im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
@@ -39,7 +38,6 @@ var http = require('http')
 			  resp.writeHead(200, {'Content-Type': 'image/jpeg'});  
 	    	  resp.end(im.toBuffer());  	                
         	});
- 
 		})
     } else {
     	request({uri:url || 'http://google.com'}).pipe(resp)
