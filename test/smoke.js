@@ -102,6 +102,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         //assert.equal(buf.toString('base64'), buf0.toString('base64'));
     }
 
+
   }
 
 
@@ -127,7 +128,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
   }
 
-/*
+
   , "CascadeClassifier": {
     topic : require('../lib/opencv')
 
@@ -138,7 +139,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     , "face detection": {
       topic : function(){
         var cv = require('../lib/opencv')
-          , im = new cv.Image("./examples/mona.jpg")
+          , im = cv.readImage("./examples/mona.jpg")
           , cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml");
         
         cascade.detectMultiScale(im, this.callback, 1.1, 2, [30, 30]); 
@@ -153,5 +154,5 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
   }
-*/
+
 }).run();
