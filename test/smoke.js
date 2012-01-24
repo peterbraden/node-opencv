@@ -20,6 +20,10 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     	, '.Point imports': function(topic){
     		assert.ok(!!topic.Point)
     	} 
+      
+      , '.Matrix imports': function(topic){
+        assert.ok(!!topic.Matrix)
+      } 
     }
 
   , "Point" : {
