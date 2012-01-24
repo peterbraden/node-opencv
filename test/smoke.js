@@ -100,6 +100,23 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         assert.ok(buf0);
         //assert.equal(buf.toString('base64'), buf0.toString('base64'));
     }
+
+    , "faceDetect": {
+      
+     topic : function(){
+        var cv = require('../lib/opencv')
+          , im = cv.readImage("./examples/mona.jpg")
+          im.faceDetect("./examples/haarcascade_frontalface_alt.xml", {}, this.callback)
+      }
+
+      , "finds face": function(err, faces){
+          assert.isNull(err);
+          assert.isArray(faces);
+          assert.equal(faces.length, 1)
+      }
+    }
+
+    
   }
 
 
