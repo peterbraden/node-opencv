@@ -6,7 +6,7 @@ console.log(cv.version)
 //console.log(cv.readImage("./examples/t2.jpg").toBuffer());
 
 
-var im = new cv.Image("./examples/t2.jpg")
+var im = cv.readImage("./examples/t2.jpg")
 , face_cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml")
 
 var faces = face_cascade.detectMultiScale(im, function(err, faces){  

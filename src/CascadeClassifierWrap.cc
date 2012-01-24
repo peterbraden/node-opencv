@@ -1,6 +1,6 @@
 #include "CascadeClassifierWrap.h"
 #include "OpenCV.h"
-#include "Image.h"
+#include "Matrix.h"
 
 
 
@@ -54,7 +54,7 @@ CascadeClassifierWrap::CascadeClassifierWrap(v8::Value* fileName){
 struct classifier_baton_t {
   CascadeClassifierWrap *cc;
   Persistent<Function> cb;
-  Image *im;
+  Matrix *im;
   double scale;
   int neighbors;
   int minw;
@@ -74,7 +74,7 @@ CascadeClassifierWrap::DetectMultiScale(const v8::Arguments& args){
     v8::ThrowException(v8::Exception::TypeError(v8::String::New("detectMultiScale takes at least 2 args")));
   }
 
-  Image *im = ObjectWrap::Unwrap<Image>(args[0]->ToObject());
+  Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
   REQ_FUN_ARG(1, cb);
 
   double scale = 1.1;

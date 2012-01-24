@@ -61,8 +61,9 @@ class Matrix: public node::ObjectWrap {
 
     static Handle<Value> ToBuffer(const Arguments& args);
 
-
+    static Handle<Value> Ellipse(const Arguments& args);
     static Handle<Value> Empty(const Arguments& args);
+    static Handle<Value> Save(const Arguments& args);
 
 
 };

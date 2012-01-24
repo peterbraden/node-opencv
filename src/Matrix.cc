@@ -29,6 +29,8 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
 
     NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
 
     target->Set(String::NewSymbol("Matrix"), m->GetFunction());
 };    
@@ -149,4 +151,33 @@ Matrix::ToBuffer(const v8::Arguments& args){
   return scope.Close(actualBuffer);
 } 
 
+
+      // ellipse(x, y, wid, height, angle, startangle, endangle, color, thickness, linetype, shift)
+Handle<Value> 
+Matrix::Ellipse(const v8::Arguments& args){
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  int x = args[0]->Uint32Value();
+  int y = args[1]->Uint32Value();
+  int width = args[2]->Uint32Value();
+  int height = args[3]->Uint32Value();    
+
+  cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360, cv::Scalar( 255, 0, 255 ), 4, 8, 0);
+  return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::Save(const v8::Arguments& args){
+  HandleScope scope;
+
+  if (!args[0]->IsString())
+    return ThrowException(Exception::TypeError(String::New("filename required")));
+ 
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  String::AsciiValue filename(args[0]);
+  int res = cv::imwrite(*filename, self->mat);
+  return scope.Close(Number::New(res));
+}
 

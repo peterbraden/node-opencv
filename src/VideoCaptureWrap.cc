@@ -1,5 +1,5 @@
 #include "VideoCaptureWrap.h"
-#include "Image.h"
+#include "Matrix.h"
 #include "OpenCV.h"
 
 v8::Persistent<FunctionTemplate> VideoCaptureWrap::constructor;
@@ -60,8 +60,8 @@ VideoCaptureWrap::GetFrame(const Arguments &args) {
 
 
 
-    Local<Object> im_h = Image::constructor->GetFunction()->NewInstance();
-    Image *im = ObjectWrap::Unwrap<Image>(im_h);
+    Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+    Matrix *im = ObjectWrap::Unwrap<Matrix>(im_h);
     im->mat = frame;
     return scope.Close(im_h);
 }

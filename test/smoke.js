@@ -20,11 +20,6 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     	, '.Point imports': function(topic){
     		assert.ok(!!topic.Point)
     	} 
-
-      , '.Image imports' : function(topic){
-      	assert.ok(!!topic.Image)
-
-      }
     }
 
   , "Point" : {
@@ -101,8 +96,6 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         assert.ok(buf0);
         //assert.equal(buf.toString('base64'), buf0.toString('base64'));
     }
-
-
   }
 
 
