@@ -93,6 +93,15 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.equal(new cv.Matrix().empty(), true);
     }
 
+    , "toBuffer": function(cv){
+        var buf = fs.readFileSync('./examples/mona.jpg')
+          , im = cv.readImage(buf.slice(0))
+          , buf0 = im.toBuffer()
+        
+        assert.ok(buf0);
+        //assert.equal(buf.toString('base64'), buf0.toString('base64'));
+    }
+
   }
 
 
@@ -100,42 +109,25 @@ vows.describe('Smoke Tests OpenCV').addBatch({
   , "Image" : {
     topic : require('../lib/opencv')
 
-    , "constructor(filename)": function(cv){
-      assert.ok(new cv.Image("./examples/mona.jpg"))
+    , ".readImage from file": function(cv){
+      var im = cv.readImage("./examples/mona.jpg")
+      assert.ok(im)
+      assert.equal(im.width(), 500);
+      assert.equal(im.height(), 756)
+      assert.equal(im.empty(), false)
     }
 
-    , "constructor(buffer)" : function(cv){
-      var im = new cv.Image(fs.readFileSync('./examples/mona.jpg'))
+    , ".readImage from buffer" : function(cv){
+      var im = cv.readImage(fs.readFileSync('./examples/mona.jpg'))
       assert.ok(im);
       assert.equal(im.width(), 500);
       assert.equal(im.height(), 756)
       assert.equal(im.empty(), false)
     }
 
-    
-    , "inherits from matrix": function(cv){
-      assert.equal(new cv.Image("./examples/mona.jpg").empty(), false)
-    }
-
-    , ".width / .height" : function(cv){
-      assert.equal(new cv.Image("./examples/mona.jpg").width(), 500)
-      assert.equal(new cv.Image("./examples/mona.jpg").height(), 756)
-    }
-
-    , ".ellipse": function(cv){
-      assert.equal(new cv.Image("./examples/mona.jpg").ellipse(10, 10, 10, 10), undefined)  
-    }
-    
-    , "toBuffer": function(cv){
-        var buf = fs.readFileSync('./examples/mona.jpg')
-          , im = new cv.Image(buf.slice(0))
-          , buf0 = im.toBuffer()
-        assert.ok(buf0);
-        
-        //assert.equal(buf.toString('base64'), buf0.toString('base64'));
-    }
   }
 
+/*
   , "CascadeClassifier": {
     topic : require('../lib/opencv')
 
@@ -161,5 +153,5 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
   }
-
+*/
 }).run();

@@ -3,7 +3,7 @@ var cv = require('./lib/opencv')
 
 console.log(cv.version)
  
-//console.log(cv.Image.prototype);
+//console.log(cv.readImage("./examples/t2.jpg").toBuffer());
 
 
 var im = new cv.Image("./examples/t2.jpg")

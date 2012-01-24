@@ -28,6 +28,8 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "height", Height);
     NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
 
+    NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
+
     target->Set(String::NewSymbol("Matrix"), m->GetFunction());
 };    
 
@@ -121,4 +123,30 @@ Matrix::Height(const Arguments& args){
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   return scope.Close(Number::New(self->mat.size().height));
 }  
+
+
+
+Handle<Value>
+Matrix::ToBuffer(const v8::Arguments& args){
+  HandleScope scope;
+  
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+    
+  std::vector<uchar> vec(0);
+  std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
+
+  cv::imencode(".jpg", self->mat, vec, params);
+
+  node::Buffer *buf = node::Buffer::New(vec.size());
+  uchar* data = (uchar*) Buffer::Data(buf);
+  memcpy(data, &vec[0], vec.size());
+
+  v8::Local<v8::Object> globalObj = v8::Context::GetCurrent()->Global();
+  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(v8::String::New("Buffer")));
+  v8::Handle<v8::Value> constructorArgs[3] = {buf->handle_, v8::Integer::New(vec.size()), v8::Integer::New(0)};
+  v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+
+  return scope.Close(actualBuffer);
+} 
+
 

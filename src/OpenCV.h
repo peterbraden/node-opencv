@@ -24,6 +24,9 @@ using namespace node;
 class OpenCV: public node::ObjectWrap{
   public:
     static void Init(Handle<Object> target);
+
+    static Handle<Value> ReadImage(const v8::Arguments&);
+
 };
 
 
