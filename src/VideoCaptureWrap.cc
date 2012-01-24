@@ -51,19 +51,15 @@ VideoCaptureWrap::VideoCaptureWrap(int device){
 
 Handle<Value>
 VideoCaptureWrap::GetFrame(const Arguments &args) {
-	HandleScope scope;
-
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+	SETUP_FUNCTION(VideoCaptureWrap)
 
 	cv::Mat frame;
-    v->cap.retrieve(frame);
+  self->cap.retrieve(frame);
 
-
-
-    Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
-    Matrix *im = ObjectWrap::Unwrap<Matrix>(im_h);
-    im->mat = frame;
-    return scope.Close(im_h);
+  Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+  Matrix *im = ObjectWrap::Unwrap<Matrix>(im_h);
+  im->mat = frame;
+  return scope.Close(im_h);
 }
 
   

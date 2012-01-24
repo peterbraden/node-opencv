@@ -52,19 +52,15 @@ class Matrix: public node::ObjectWrap {
 */
 
 
-    static Handle<Value> Get(const Arguments& args); // at
-    static Handle<Value> Set(const Arguments& args);
-
-    static Handle<Value> Size(const Arguments& args);
-    static Handle<Value> Width(const Arguments& args);
-    static Handle<Value> Height(const Arguments& args);
-
-    static Handle<Value> ToBuffer(const Arguments& args);
-
-    static Handle<Value> Ellipse(const Arguments& args);
-    static Handle<Value> Empty(const Arguments& args);
-    static Handle<Value> Save(const Arguments& args);
-
+    JSFUNC(Get) // at
+    JSFUNC(Set)
+    JSFUNC(Size)
+    JSFUNC(Width)
+    JSFUNC(Height)
+    JSFUNC(ToBuffer)
+    JSFUNC(Ellipse)
+    JSFUNC(Empty)
+    JSFUNC(Save)
 
 };
 

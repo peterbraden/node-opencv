@@ -27,7 +27,6 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "width", Width);
     NODE_SET_PROTOTYPE_METHOD(constructor, "height", Height);
     NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
-
     NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
     NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
     NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
@@ -64,17 +63,15 @@ Matrix::Matrix(int w, int h): ObjectWrap() {
 
 Handle<Value> 
 Matrix::Empty(const Arguments& args){
-  HandleScope scope;
+  SETUP_FUNCTION(Matrix)
 
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   return scope.Close(Boolean::New(self->mat.empty()));
 }
 
 Handle<Value> 
 Matrix::Get(const Arguments& args){
-  HandleScope scope;
+  SETUP_FUNCTION(Matrix)
 
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   int i = args[0]->IntegerValue();
   int j = args[1]->IntegerValue();
 
@@ -84,9 +81,8 @@ Matrix::Get(const Arguments& args){
 
 Handle<Value> 
 Matrix::Set(const Arguments& args){
-  HandleScope scope;
+  SETUP_FUNCTION(Matrix)
 
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   int i = args[0]->IntegerValue();
   int j = args[1]->IntegerValue();
   double val = args[2]->NumberValue();
@@ -99,9 +95,8 @@ Matrix::Set(const Arguments& args){
 
 Handle<Value> 
 Matrix::Size(const Arguments& args){
-  HandleScope scope;
+  SETUP_FUNCTION(Matrix)
 
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   v8::Local<v8::Array> arr = v8::Array::New(2);
   arr->Set(0, Number::New(self->mat.size().height));
   arr->Set(1, Number::New(self->mat.size().width));
@@ -112,17 +107,15 @@ Matrix::Size(const Arguments& args){
 
 Handle<Value> 
 Matrix::Width(const Arguments& args){
-  HandleScope scope;
+  SETUP_FUNCTION(Matrix)
 
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   return scope.Close(Number::New(self->mat.size().width));
 }
 
 Handle<Value> 
 Matrix::Height(const Arguments& args){
-  HandleScope scope;
+  SETUP_FUNCTION(Matrix)
 
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   return scope.Close(Number::New(self->mat.size().height));
 }  
 
@@ -130,9 +123,7 @@ Matrix::Height(const Arguments& args){
 
 Handle<Value>
 Matrix::ToBuffer(const v8::Arguments& args){
-  HandleScope scope;
-  
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  SETUP_FUNCTION(Matrix)
     
   std::vector<uchar> vec(0);
   std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
@@ -155,9 +146,8 @@ Matrix::ToBuffer(const v8::Arguments& args){
       // ellipse(x, y, wid, height, angle, startangle, endangle, color, thickness, linetype, shift)
 Handle<Value> 
 Matrix::Ellipse(const v8::Arguments& args){
-  HandleScope scope;
+  SETUP_FUNCTION(Matrix)
 
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   int x = args[0]->Uint32Value();
   int y = args[1]->Uint32Value();
   int width = args[2]->Uint32Value();

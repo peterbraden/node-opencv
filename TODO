@@ -1,5 +1,3 @@
-Get rid of Image
-  - Replace with operations on Matrix and cv helper js functions
 
 
  - Matrix doesn't need to be eventemitter:
@@ -10,17 +8,9 @@ Get rid of Image
 
  ############ Ideas #####################
 
- var mat = cv.readImage('foo.jpg');
- 
- //shortcut for cascade classifier
- mat.detectFaces('data.xml', function(err, faces){
- 	for (var i=0;i<faces.length; i++){
-	    var x = faces[i]
-	    mat.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
-	}
- });
+var mat = cv.readImageSync('foo.jpg');
 
-
+cv.readImage('foo.jpg', function(err, mat){});
 
 
 var s = new opencv.ImageStream()

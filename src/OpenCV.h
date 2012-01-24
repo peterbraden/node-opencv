@@ -20,6 +20,14 @@ using namespace node;
   Local<Function> VAR = Local<Function>::Cast(args[I]);
 
 
+#define SETUP_FUNCTION(TYP)	\
+	HandleScope scope;		\
+	TYP *self = ObjectWrap::Unwrap<TYP>(args.This());
+
+#define JSFUNC(NAME) \
+	static Handle<Value> NAME(const Arguments& args); 
+
+
 
 class OpenCV: public node::ObjectWrap{
   public:
