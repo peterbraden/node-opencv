@@ -186,4 +186,28 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
   }
 
+
+  , "ImageStream" : {
+    topic : require('../lib/opencv')
+
+    , "pipe" : {
+      topic : function(cv){
+        console.log("!!!")
+        var s = new cv.ImageStream();
+        console.log("***");
+        s.on('load', this.callback) 
+        fs.open('./examples/mona.jpg').pipe(s);
+      }
+
+      , "loaded" : function(im){
+        assert.ok(im);
+        assert.equal(im.empty(), false);
+      }
+    }
+
+
+  }
+
+
+
 }).run();
