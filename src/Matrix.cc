@@ -21,6 +21,10 @@ Matrix::Init(Handle<Object> target) {
     Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 
+    NODE_SET_PROTOTYPE_METHOD(constructor, "row", Row);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "col", Col);
+
+
     NODE_SET_PROTOTYPE_METHOD(constructor, "empty", Empty);
     NODE_SET_PROTOTYPE_METHOD(constructor, "get", Get);
     NODE_SET_PROTOTYPE_METHOD(constructor, "set", Set);
@@ -30,6 +34,9 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
     NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
     NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
+
+    NODE_SET_METHOD(constructor, "Eye", Eye);
+
 
     target->Set(String::NewSymbol("Matrix"), m->GetFunction());
 };    
@@ -58,7 +65,7 @@ Matrix::Matrix(): ObjectWrap() {
 }
 
 Matrix::Matrix(int w, int h): ObjectWrap() {
-    mat = cv::Mat(w, h, CV_8UC1); 
+    mat = cv::Mat(w, h, CV_64FC1); 
 }
 
 Handle<Value> 
@@ -104,6 +111,33 @@ Matrix::Size(const Arguments& args){
   return scope.Close(arr);
 }
 
+Handle<Value> 
+Matrix::Row(const Arguments& args){
+  SETUP_FUNCTION(Matrix)
+
+  int width = self->mat.size().width;
+  int j = args[0]->IntegerValue();
+  v8::Local<v8::Array> arr = v8::Array::New(width);
+
+  for (int i=0; i<width; i++){
+    arr->Set(i, Number::New(self->mat.at<double>(i, j)));
+  }
+  return scope.Close(arr);
+}
+
+Handle<Value> 
+Matrix::Col(const Arguments& args){
+  SETUP_FUNCTION(Matrix)
+
+  int width = self->mat.size().width;
+  int j = args[0]->IntegerValue();
+  v8::Local<v8::Array> arr = v8::Array::New(width);
+
+  for (int i=0; i<width; i++){
+    arr->Set(i, Number::New(self->mat.at<double>(j, i)));
+  }
+  return scope.Close(arr);
+}
 
 Handle<Value> 
 Matrix::Width(const Arguments& args){
@@ -171,3 +205,17 @@ Matrix::Save(const v8::Arguments& args){
   return scope.Close(Number::New(res));
 }
 
+Handle<Value> 
+Matrix::Eye(const v8::Arguments& args){
+  HandleScope scope;
+
+  int w = args[0]->Uint32Value();
+  int h = args[1]->Uint32Value();
+
+  Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
+  cv::Mat mat = cv::Mat::eye(w, h, CV_64FC1);
+
+  img->mat = mat;
+  return scope.Close(im_h);
+}

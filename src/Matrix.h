@@ -12,12 +12,15 @@ class Matrix: public node::ObjectWrap {
     Matrix(int rows, int cols, int typ);
 
 
+    JSFUNC(Row)
+    JSFUNC(Col)
+    JSFUNC(Eye) // factory
+
 /*
 	static Handle<Value> Val(const Arguments& args);
 
 
-	static Handle<Value> Row(const Arguments& args);
-	static Handle<Value> Col(const Arguments& args);
+
 	static Handle<Value> RowRange(const Arguments& args);
 	static Handle<Value> ColRange(const Arguments& args);
 	static Handle<Value> Diag(const Arguments& args);

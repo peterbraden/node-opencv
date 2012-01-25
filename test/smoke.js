@@ -2,7 +2,12 @@ var vows = require('vows')
   , assert = require('assert')
   , fs = require('fs');
 
-
+assertDeepSimilar = function(res, exp){
+  for (var i = 0; i < res.length; i++){
+ //   res[i] = Math.round(res[i]/100)*100;  
+  }
+  assert.deepEqual(res, exp)
+}
 
 vows.describe('Smoke Tests OpenCV').addBatch({
 	  "Importing": {
@@ -86,6 +91,18 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     , ".size" : function(cv){
       var mat = new cv.Matrix(6,7);
       assert.deepEqual(mat.size(), [6, 7]);
+    }
+
+    , 'row' : function(cv){
+      var mat = new cv.Matrix.Eye(4,4)
+      assertDeepSimilar(mat.row(1), [0,1,0,0])
+      assertDeepSimilar(mat.row(2), [0,0,1,0])
+    }
+
+    , 'col' : function(cv){
+      var mat = new cv.Matrix.Eye(4,4);
+      assertDeepSimilar(mat.col(1), [0,1,0,0])
+      assertDeepSimilar(mat.col(2), [0,0,1,0])
     }
 
     , "empty": function(cv){
