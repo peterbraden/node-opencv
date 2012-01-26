@@ -172,8 +172,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         var cv = require('../lib/opencv')
           , im = cv.readImage("./examples/mona.jpg")
           , cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml");
-        
-        cascade.detectMultiScale(im, this.callback, 1.1, 2, [30, 30]); 
+        cascade.detectMultiScale(im, this.callback)//, 1.1, 2, [30, 30]); 
       }
 
       , "finds face": function(err, faces){
@@ -192,16 +191,19 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
     , "pipe" : {
       topic : function(cv){
-        console.log("!!!")
-        var s = new cv.ImageStream();
-        console.log("***");
-        s.on('load', this.callback) 
-        fs.open('./examples/mona.jpg').pipe(s);
+        var s = new cv.ImageStream()
+          , self = this
+        s.on('load', function(im){ 
+          assert.ok(im)
+          assert.equal(im.empty(), false);
+          self.callback()
+        }) 
+        fs.createReadStream('./examples/mona.jpg').pipe(s);
       }
 
       , "loaded" : function(im){
-        assert.ok(im);
-        assert.equal(im.empty(), false);
+        //assert.ok(im)
+        //assert.equal(im.empty(), false);
       }
     }
 

@@ -33,7 +33,7 @@ OpenCV::ReadImage(const Arguments &args) {
 
       width = args[0]->Uint32Value();
       height = args[1]->Uint32Value();    
-      mat = *(new cv::Mat(width, height, CV_8UC1));
+      mat = *(new cv::Mat(width, height, CV_64FC1));
 
     } else if (args[0]->IsString()) {
       
@@ -44,7 +44,7 @@ OpenCV::ReadImage(const Arguments &args) {
      	uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());
      	unsigned len = Buffer::Length(args[0]->ToObject());
       
-  	 	cv::Mat *mbuf = new cv::Mat(len, 1, CV_8UC1, buf);
+  	 	cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
       mat = cv::imdecode(*mbuf, -1);
             
       if (mat.empty()){
