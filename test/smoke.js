@@ -111,19 +111,25 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
     , "toBuffer": function(cv){
         var buf = fs.readFileSync('./examples/mona.jpg')
-          , im = cv.readImage(buf.slice(0))
-          , buf0 = im.toBuffer()
         
-        assert.ok(buf0);
+        cv.readImage(buf.slice(0), function(err, mat){
+          var buf0 = mat.toBuffer()
+        
+          assert.ok(buf0);
         //assert.equal(buf.toString('base64'), buf0.toString('base64'));
+        })
+
     }
 
     , "faceDetect": {
       
      topic : function(){
         var cv = require('../lib/opencv')
-          , im = cv.readImage("./examples/mona.jpg")
-          im.faceDetect("./examples/haarcascade_frontalface_alt.xml", {}, this.callback)
+          , cb = this.callback
+
+        cv.readImage("./examples/mona.jpg", function(err, im){
+          im.faceDetect("./examples/haarcascade_frontalface_alt.xml", {}, cb)
+        })  
       }
 
       , "finds face": function(err, faces){
@@ -142,19 +148,22 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     topic : require('../lib/opencv')
 
     , ".readImage from file": function(cv){
-      var im = cv.readImage("./examples/mona.jpg")
-      assert.ok(im)
-      assert.equal(im.width(), 500);
-      assert.equal(im.height(), 756)
-      assert.equal(im.empty(), false)
+      cv.readImage("./examples/mona.jpg", function(err, im){
+        assert.ok(im);
+        assert.equal(im.width(), 500);
+        assert.equal(im.height(), 756)
+        assert.equal(im.empty(), false)      
+      })
     }
 
     , ".readImage from buffer" : function(cv){
-      var im = cv.readImage(fs.readFileSync('./examples/mona.jpg'))
-      assert.ok(im);
-      assert.equal(im.width(), 500);
-      assert.equal(im.height(), 756)
-      assert.equal(im.empty(), false)
+      cv.readImage(fs.readFileSync('./examples/mona.jpg'), function(err, im){
+        assert.ok(im);
+        assert.equal(im.width(), 500);
+        assert.equal(im.height(), 756)
+        assert.equal(im.empty(), false)      
+      })
+
     }
 
   }
@@ -170,9 +179,13 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     , "face detection": {
       topic : function(){
         var cv = require('../lib/opencv')
-          , im = cv.readImage("./examples/mona.jpg")
-          , cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml");
-        cascade.detectMultiScale(im, this.callback)//, 1.1, 2, [30, 30]); 
+          , self = this
+        
+        cv.readImage("./examples/mona.jpg", function(err, im){
+          cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml");
+          cascade.detectMultiScale(im, self.callback)//, 1.1, 2, [30, 30]);          
+        })
+
       }
 
       , "finds face": function(err, faces){

@@ -39,6 +39,47 @@ Or to build the repo:
 
 
 
+## API Documentation
+
+### Matrix
+
+The [matrix](http://opencv.jp/opencv-2svn_org/cpp/core_basic_structures.html#mat) is the most useful
+base datastructure in OpenCV. Things like images are just matrices of pixels.
+
+#### Creation
+
+        new Matrix(width, height)
+
+Or you can use opencv to read in image files. Supported formats are in the OpenCV docs, but jpgs etc are supported.
+
+        cv.readImage(filename, function(mat){
+          ...
+        })
+
+        cv.readImage(buffer, function(mat){
+          ...
+        })
+
+If you need to pipe data into an image, you can use an imagestream:
+
+        var s = new cv.ImageStream()
+
+        s.on('load', function(matrix){ 
+          ...
+        }) 
+
+        fs.createReadStream('./examples/test.jpg').pipe(s);        
+
+#### Accessors
+
+#### Image Processing
+
+
+
+
+
+
+
 
 
 ## WIP

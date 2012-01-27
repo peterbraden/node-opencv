@@ -27,6 +27,7 @@ OpenCV::ReadImage(const Arguments &args) {
     Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
     cv::Mat mat;
 
+    REQ_FUN_ARG(1, cb);
     
     if (args[0]->IsNumber() && args[1]->IsNumber()){
       int width, height;
@@ -53,7 +54,21 @@ OpenCV::ReadImage(const Arguments &args) {
     }
 
     img->mat = mat;
-    return scope.Close(im_h);
+
+    Local<Value> argv[2];
+
+    argv[0] = Local<Value>::New(Null());
+    argv[1] = im_h;
+
+    TryCatch try_catch;
+
+    cb->Call(Context::GetCurrent()->Global(), 2, argv);
+
+    if (try_catch.HasCaught()) {
+      FatalException(try_catch);
+    }
+
+    return Undefined();
 
   } catch( cv::Exception& e ){
     const char* err_msg = e.what();
