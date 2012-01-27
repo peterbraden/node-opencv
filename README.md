@@ -71,6 +71,15 @@ If you need to pipe data into an image, you can use an imagestream:
         fs.createReadStream('./examples/test.jpg').pipe(s);        
 
 #### Accessors
+        
+        var mat = new cv.Matrix.Eye(4,4); // Create identity matrix
+
+        mat.get(0,0) // 1
+
+        mat.row(0)  // [1,0,0,0]
+        mat.col(4)  // [0,0,0,1]
+
+
 
 #### Image Processing
 

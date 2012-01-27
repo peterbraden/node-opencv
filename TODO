@@ -16,8 +16,7 @@ im.calcHistograms(mask, function(err, hist){})
 
 
 cv.loadImage('test.jpg', function(err, im){
-	im.detectObject("front-face.xml", {}, function(err, faces){          // <--- Rename faceDetect to detectObject - it's generic
-
+	im.detectObject("front-face.xml", {}, function(err, faces){       
 		_.each(faces, function(v){
 			
 			// TODO {
