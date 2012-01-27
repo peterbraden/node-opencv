@@ -27,7 +27,7 @@ Or to build the repo:
 
 
         cv.readImage("./examples/test.jpg", function(err, im){
-          im.detectObject("./examples/haarcascade_frontalface_alt.xml", {}, function(err, faces){  
+          im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, function(err, faces){  
             for (var i=0;i<faces.length; i++){
               var x = faces[i]
               im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);

@@ -7,7 +7,7 @@ Face recognition proxy
 var http = require('http')
   , request = require('request')
   , cv = require('../lib/opencv')
-  , face_cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml")
+  , face_cascade = new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml")
  
  
  

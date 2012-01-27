@@ -128,7 +128,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
           , cb = this.callback
 
         cv.readImage("./examples/mona.jpg", function(err, im){
-          im.detectObject("./examples/haarcascade_frontalface_alt.xml", {}, cb)
+          im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, cb)
         })  
       }
 
@@ -173,7 +173,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     topic : require('../lib/opencv')
 
     , "constructor" : function(cv){
-      assert.ok(new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml"))
+      assert.ok(new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml"))
     }
 
     , "face detection": {
@@ -182,7 +182,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
           , self = this
         
         cv.readImage("./examples/mona.jpg", function(err, im){
-          cascade = new cv.CascadeClassifier("./examples/haarcascade_frontalface_alt.xml");
+          cascade = new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml");
           cascade.detectMultiScale(im, self.callback)//, 1.1, 2, [30, 30]);          
         })
 
