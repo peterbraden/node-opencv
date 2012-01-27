@@ -121,14 +121,14 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
     }
 
-    , "faceDetect": {
+    , "detectObject": {
       
      topic : function(){
         var cv = require('../lib/opencv')
           , cb = this.callback
 
         cv.readImage("./examples/mona.jpg", function(err, im){
-          im.faceDetect("./examples/haarcascade_frontalface_alt.xml", {}, cb)
+          im.detectObject("./examples/haarcascade_frontalface_alt.xml", {}, cb)
         })  
       }
 
