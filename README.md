@@ -75,6 +75,11 @@ If you need to pipe data into an image, you can use an imagestream:
 #### Image Processing
 
 
+#### Object Detection
+
+There is a shortcut method for 
+[Viola-Jones Haar Cascade](http://www.cognotics.com/opencv/servo_2007_series/part_2/sidebar.html) object 
+detection. This can be used for face detection etc.
 
 
 

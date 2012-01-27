@@ -1,22 +1,46 @@
 
+im.calcHistograms(function(err, hist){})
 
- - Matrix doesn't need to be eventemitter:
-
- instead create a cv.MatrixBuffer class that is an event emitter, and wraps matrix in js
-
+im.calcHistograms(mask, function(err, hist){})
 
 
- ############ Ideas #####################
-
-var mat = cv.readImageSync('foo.jpg');
-
-cv.readImage('foo.jpg', function(err, mat){});
 
 
-var s = new opencv.ImageStream()
 
-s.on('load', function(mat){
-	cv.writeImage(mat, filename, function(err){});
+## Face recognition TODO
+
+
+// Load Database
+// TODO<
+
+
+
+cv.loadImage('test.jpg', function(err, im){
+	im.detectObject("front-face.xml", {}, function(err, faces){          // <--- Rename faceDetect to detectObject - it's generic
+
+		_.each(faces, function(v){
+			
+			// TODO {
+			
+			var section = im.slice(v.x, v.y, v.x + v.width, v.y + v.height);
+			section.convertGrayscale()
+			section.resize(WID, HEIGHT);
+			section.equaliseHistogram();
+
+			// } TODO
+
+		})	
+	})
 })
 
-request.get('foo').pipe(s);
+
+
+
+
+
+-----
+
+
+http://www.athile.net/library/wiki/index.php?title=Library/V8/Tutorial#Wrapping_a_Javascript_function_as_a_std::function.3C.3E
+
+https://www.cloudkick.com/blog/2010/aug/23/writing-nodejs-native-extensions/
