@@ -93,6 +93,15 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.deepEqual(mat.size(), [6, 7]);
     }
 
+
+    , "resize" : function(cv){
+      var mat = new cv.Matrix(6,7);
+      assert.equal(mat.width(), 7);
+      mat.resize(8,9);
+      assert.equal(mat.width(), 8);
+
+    }
+
     , 'row' : function(cv){
       var mat = new cv.Matrix.Eye(4,4)
       assertDeepSimilar(mat.row(1), [0,1,0,0])

@@ -39,7 +39,6 @@ class Matrix: public node::ObjectWrap {
     static Handle<Value> Ones(const Arguments& args);
     static Handle<Value> Eye(const Arguments& args);
 // create, increment, release
-    static Handle<Value> Resize(const Arguments& args);
     static Handle<Value> PushBack(const Arguments& args);
     static Handle<Value> PopBack(const Arguments& args);
     static Handle<Value> LocateROI(const Arguments& args);
@@ -64,6 +63,9 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Ellipse)
     JSFUNC(Empty)
     JSFUNC(Save)
+
+    JSFUNC(Resize)
+
 
 };
 

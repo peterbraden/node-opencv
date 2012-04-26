@@ -34,6 +34,7 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
     NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
     NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
 
     NODE_SET_METHOD(constructor, "Eye", Eye);
 
@@ -185,9 +186,11 @@ Matrix::Ellipse(const v8::Arguments& args){
   int x = args[0]->Uint32Value();
   int y = args[1]->Uint32Value();
   int width = args[2]->Uint32Value();
-  int height = args[3]->Uint32Value();    
+  int height = args[3]->Uint32Value();  
+  uint color = args[4]->Uint32Value();  
 
-  cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360, cv::Scalar( 255, 0, 255 ), 4, 8, 0);
+  cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360,
+    cv::Scalar( (color >> 16) & 0xff , (color >> 8) & 0xff, color & 0xff ), 4, 8, 0);
   return scope.Close(v8::Null());
 }
 
@@ -218,4 +221,23 @@ Matrix::Eye(const v8::Arguments& args){
 
   img->mat = mat;
   return scope.Close(im_h);
+}
+
+
+
+Handle<Value>
+Matrix::Resize(const v8::Arguments& args){
+  HandleScope scope;
+
+  int x = args[0]->Uint32Value();
+  int y = args[1]->Uint32Value();
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  cv::Mat res;
+  cv::resize(self->mat, res, cv::Size(x, y), 0, 0, cv::INTER_LINEAR);
+  ~self->mat;
+  self->mat = res;
+
+
+  return scope.Close(Undefined());
 }
