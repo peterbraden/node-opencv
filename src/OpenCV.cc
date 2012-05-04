@@ -39,7 +39,7 @@ OpenCV::ReadImage(const Arguments &args) {
     } else if (args[0]->IsString()) {
       
       std::string filename = std::string(*v8::String::AsciiValue(args[0]->ToString()));
-      mat = cv::imread(filename, -1);
+      mat = cv::imread(filename);
 
     } else if (Buffer::HasInstance(args[0])){
      	uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());

@@ -117,11 +117,15 @@ Matrix::Row(const Arguments& args){
   SETUP_FUNCTION(Matrix)
 
   int width = self->mat.size().width;
-  int j = args[0]->IntegerValue();
-  v8::Local<v8::Array> arr = v8::Array::New(width);
+  int y = args[0]->IntegerValue();
+  v8::Local<v8::Array> arr = v8::Array::New(width * 3);
 
-  for (int i=0; i<width; i++){
-    arr->Set(i, Number::New(self->mat.at<double>(i, j)));
+  for (int x=0; x<width; x++){
+    cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
+    int offset = x * 3;
+    arr->Set(offset    , Number::New((double)pixel.val[0]));
+    arr->Set(offset + 1, Number::New((double)pixel.val[1]));
+    arr->Set(offset + 2, Number::New((double)pixel.val[2]));
   }
   return scope.Close(arr);
 }
@@ -130,12 +134,16 @@ Handle<Value>
 Matrix::Col(const Arguments& args){
   SETUP_FUNCTION(Matrix)
 
-  int width = self->mat.size().width;
-  int j = args[0]->IntegerValue();
-  v8::Local<v8::Array> arr = v8::Array::New(width);
+  int height = self->mat.size().height;
+  int x = args[0]->IntegerValue();
+  v8::Local<v8::Array> arr = v8::Array::New(height * 3);
 
-  for (int i=0; i<width; i++){
-    arr->Set(i, Number::New(self->mat.at<double>(j, i)));
+  for (int y=0; y<height; y++){
+    cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
+    int offset = y * 3;
+    arr->Set(offset    , Number::New((double)pixel.val[0]));
+    arr->Set(offset + 1, Number::New((double)pixel.val[1]));
+    arr->Set(offset + 2, Number::New((double)pixel.val[2]));
   }
   return scope.Close(arr);
 }
