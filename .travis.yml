@@ -3,8 +3,6 @@ node_js:
    - 0.6
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get upgrade
   - sudo apt-get install libavformat-dev 
   - sudo apt-get install ffmpeg 
   - sudo apt-get install libcv2.1 
