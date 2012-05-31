@@ -1,3 +1,5 @@
+console.log("=== SMOKE TESTS ===")
+
 var vows = require('vows')
   , assert = require('assert')
   , fs = require('fs');
