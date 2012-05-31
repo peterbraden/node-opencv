@@ -66,7 +66,7 @@ Matrix::Matrix(): ObjectWrap() {
 }
 
 Matrix::Matrix(int w, int h): ObjectWrap() {
-    mat = cv::Mat(w, h, CV_64FC1); 
+    mat = cv::Mat(w, h, CV_32FC1); 
 }
 
 Handle<Value> 
@@ -225,7 +225,7 @@ Matrix::Eye(const v8::Arguments& args){
 
   Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
   Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
-  cv::Mat mat = cv::Mat::eye(w, h, CV_64FC1);
+  cv::Mat mat = cv::Mat::eye(w, h, CV_32FC1);
 
   img->mat = mat;
   return scope.Close(im_h);
@@ -241,7 +241,7 @@ Matrix::Resize(const v8::Arguments& args){
   int y = args[1]->Uint32Value();
 
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
-  cv::Mat res;
+  cv::Mat res = cv::Mat(x, y, CV_32FC1);
   cv::resize(self->mat, res, cv::Size(x, y), 0, 0, cv::INTER_LINEAR);
   ~self->mat;
   self->mat = res;
