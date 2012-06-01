@@ -24,6 +24,8 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "row", Row);
     NODE_SET_PROTOTYPE_METHOD(constructor, "col", Col);
 
+    NODE_SET_PROTOTYPE_METHOD(constructor, "pixelRow", PixelRow);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "pixelCol", PixelCol);
 
     NODE_SET_PROTOTYPE_METHOD(constructor, "empty", Empty);
     NODE_SET_PROTOTYPE_METHOD(constructor, "get", Get);
@@ -66,7 +68,7 @@ Matrix::Matrix(): ObjectWrap() {
 }
 
 Matrix::Matrix(int w, int h): ObjectWrap() {
-    mat = cv::Mat(w, h, CV_32FC1); 
+    mat = cv::Mat(w, h, CV_32FC3); 
 }
 
 Handle<Value> 
@@ -118,6 +120,33 @@ Matrix::Row(const Arguments& args){
 
   int width = self->mat.size().width;
   int y = args[0]->IntegerValue();
+  v8::Local<v8::Array> arr = v8::Array::New(width);
+
+  for (int x=0; x<width; x++){
+    double v = 0;
+    if (self->mat.channels() == 1){
+      v = self->mat.at<float>(y, x);
+    } else {
+      // Assume 3 channel RGB
+      unsigned int val = 0;
+      cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
+      val &= (uchar) pixel.val[2];
+      val &= ((uchar) pixel.val[1]) << 8;
+      val &= ((uchar) pixel.val[0]) << 16;  
+      v = (double) val;
+    }  
+    arr->Set(x, Number::New(v));
+  }
+  return scope.Close(arr);
+}
+
+
+Handle<Value> 
+Matrix::PixelRow(const Arguments& args){
+  SETUP_FUNCTION(Matrix)
+
+  int width = self->mat.size().width;
+  int y = args[0]->IntegerValue();
   v8::Local<v8::Array> arr = v8::Array::New(width * 3);
 
   for (int x=0; x<width; x++){
@@ -132,6 +161,33 @@ Matrix::Row(const Arguments& args){
 
 Handle<Value> 
 Matrix::Col(const Arguments& args){
+  SETUP_FUNCTION(Matrix)
+
+  int height = self->mat.size().height;
+  int x = args[0]->IntegerValue();
+  v8::Local<v8::Array> arr = v8::Array::New(height);
+
+  for (int y=0; y<height; y++){
+    double v = 0;
+    if (self->mat.channels() == 1){
+      v = self->mat.at<float>(y, x);
+    } else {
+      // Assume 3 channel RGB
+      unsigned int val = 0;
+      cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
+      val &= (uchar) pixel.val[2];
+      val &= ((uchar) pixel.val[1]) << 8;
+      val &= ((uchar) pixel.val[0]) << 16;  
+      v = (double) val;
+    }  
+    arr->Set(y, Number::New(v));
+  }
+  return scope.Close(arr);
+}
+
+
+Handle<Value> 
+Matrix::PixelCol(const Arguments& args){
   SETUP_FUNCTION(Matrix)
 
   int height = self->mat.size().height;
@@ -225,7 +281,7 @@ Matrix::Eye(const v8::Arguments& args){
 
   Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
   Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
-  cv::Mat mat = cv::Mat::eye(w, h, CV_32FC1);
+  cv::Mat mat = cv::Mat::eye(w, h, CV_32F);
 
   img->mat = mat;
   return scope.Close(im_h);
@@ -241,7 +297,7 @@ Matrix::Resize(const v8::Arguments& args){
   int y = args[1]->Uint32Value();
 
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
-  cv::Mat res = cv::Mat(x, y, CV_32FC1);
+  cv::Mat res = cv::Mat(x, y, CV_32FC3);
   cv::resize(self->mat, res, cv::Size(x, y), 0, 0, cv::INTER_LINEAR);
   ~self->mat;
   self->mat = res;

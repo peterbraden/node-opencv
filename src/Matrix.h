@@ -13,7 +13,9 @@ class Matrix: public node::ObjectWrap {
 
 
     JSFUNC(Row)
+    JSFUNC(PixelRow)
     JSFUNC(Col)
+    JSFUNC(PixelCol)
     JSFUNC(Eye) // factory
 
 /*
