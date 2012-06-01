@@ -1,5 +1,3 @@
-console.log("=== SMOKE TESTS ===")
-
 var vows = require('vows')
   , assert = require('assert')
   , fs = require('fs');
@@ -202,7 +200,6 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       , "finds face": function(err, faces){
           assert.isNull(err);
           assert.isArray(faces);
-          console.log(faces);
           assert.equal(faces.length, 1)
 
       }
