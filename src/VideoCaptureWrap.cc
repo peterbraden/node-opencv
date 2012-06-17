@@ -41,7 +41,7 @@ VideoCaptureWrap::New(const Arguments &args) {
 VideoCaptureWrap::VideoCaptureWrap(int device){
   HandleScope scope;
 
-  cv::VideoCapture cap(device);
+  cap =  cv::VideoCapture(device); //.......
 
   if(!cap.isOpened()){
   	ThrowException(Exception::Error(String::New("Camera could not be opened")));
@@ -53,13 +53,14 @@ Handle<Value>
 VideoCaptureWrap::GetFrame(const Arguments &args) {
 	SETUP_FUNCTION(VideoCaptureWrap)
 
-	cv::Mat frame;
-  self->cap.retrieve(frame);
-
+  cv::Mat frame;
+  self->cap >> frame;
   Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
   Matrix *im = ObjectWrap::Unwrap<Matrix>(im_h);
   im->mat = frame;
+
   return scope.Close(im_h);
+
 }
 
   
