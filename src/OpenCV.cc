@@ -45,7 +45,7 @@ OpenCV::ReadImage(const Arguments &args) {
      	uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());
      	unsigned len = Buffer::Length(args[0]->ToObject());
       
-  	 	cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
+  	cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
       mat = cv::imdecode(*mbuf, -1);
             
       if (mat.empty()){
