@@ -1,0 +1,45 @@
+
+im.calcHistograms(function(err, hist){})
+
+im.calcHistograms(mask, function(err, hist){})
+
+
+
+
+
+## Face recognition TODO
+
+
+// Load Database
+// TODO<
+
+
+
+cv.loadImage('test.jpg', function(err, im){
+	im.detectObject("front-face.xml", {}, function(err, faces){       
+		_.each(faces, function(v){
+			
+			// TODO {
+			
+			var section = im.slice(v.x, v.y, v.x + v.width, v.y + v.height);
+			section.convertGrayscale()
+			section.resize(WID, HEIGHT);
+			section.equaliseHistogram();
+
+			// } TODO
+
+		})	
+	})
+})
+
+
+
+
+
+
+-----
+
+
+http://www.athile.net/library/wiki/index.php?title=Library/V8/Tutorial#Wrapping_a_Javascript_function_as_a_std::function.3C.3E
+
+https://www.cloudkick.com/blog/2010/aug/23/writing-nodejs-native-extensions/
