@@ -61,6 +61,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Size)
     JSFUNC(Width)
     JSFUNC(Height)
+    JSFUNC(Channels)
     JSFUNC(ToBuffer)
     JSFUNC(Ellipse)
     JSFUNC(Empty)
@@ -68,6 +69,19 @@ class Matrix: public node::ObjectWrap {
 
     JSFUNC(Resize)
 
+	JSFUNC(ConvertGrayscale)
+	JSFUNC(ConvertHSVscale)
+	JSFUNC(Copy)
+	JSFUNC(Ptr)
+	JSFUNC(Bla)
+	JSFUNC(AddWeighted)
+	JSFUNC(Split)
+	JSFUNC(Canny)
+	JSFUNC(Dilate)
+
+	JSFUNC(FindContours)
+	JSFUNC(DrawContour)
+	JSFUNC(DrawAllContours)
 
 };
 
