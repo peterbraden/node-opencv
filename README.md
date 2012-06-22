@@ -7,7 +7,7 @@
 
 ## Install
 
-You'll need OpenCV installed. I'm using v2.2 because I couldn't get 2.3 to compile, but it should theoretically work with 2.3
+You'll need OpenCV 2.3.1 installed.
 
 Then:
 
