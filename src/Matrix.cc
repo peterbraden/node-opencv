@@ -50,7 +50,6 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ptr", Ptr);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "bla", Bla);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
 
@@ -132,7 +131,7 @@ Matrix::Set(const Arguments& args){
 		self->mat.at<cv::Vec3b>(i,j)[2] = val;
 
   } else {
-		return ThrowException(Exception::TypeError(String::New("Invalid number of arguments")));
+		return v8::ThrowException(v8::Exception::TypeError(String::New("Invalid number of arguments")));
   }
 
 	return scope.Close(Undefined());
@@ -340,7 +339,7 @@ Matrix::Save(const v8::Arguments& args){
 	HandleScope scope;
 
 	if (!args[0]->IsString())
-		return ThrowException(Exception::TypeError(String::New("filename required")));
+		return v8::ThrowException(v8::Exception::TypeError(String::New("filename required")));
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 	String::AsciiValue filename(args[0]);
@@ -371,7 +370,7 @@ Matrix::ConvertGrayscale(const v8::Arguments& args) {
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 	if(self->mat.channels() != 3)
-		return ThrowException(String::New("Image is no 3-channel"));
+		return v8::ThrowException(String::New("Image is no 3-channel"));
 
 	cv::Mat gray;
 
@@ -389,7 +388,7 @@ Matrix::ConvertHSVscale(const v8::Arguments& args) {
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 	if(self->mat.channels() != 3)
-		return ThrowException(String::New("Image is no 3-channel"));
+		return v8::ThrowException(String::New("Image is no 3-channel"));
 
 	cv::Mat hsv;
 

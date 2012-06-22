@@ -74,7 +74,6 @@ class Matrix: public node::ObjectWrap {
 	JSFUNC(ConvertHSVscale)
 	JSFUNC(Copy)
 	JSFUNC(Ptr)
-	JSFUNC(Bla)
 	JSFUNC(AddWeighted)
 	JSFUNC(Split)
 	JSFUNC(Canny)

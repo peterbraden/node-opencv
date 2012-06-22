@@ -60,7 +60,7 @@ VideoCaptureWrap::VideoCaptureWrap(int device){
 	cap.open(device);
 
 	if(!cap.isOpened()){
-		ThrowException(Exception::Error(String::New("Camera could not be opened")));
+    v8::ThrowException(v8::Exception::Error(String::New("Camera could not be opened")));
 	}
 }
 
