@@ -22,3 +22,4 @@ def build(bld):
     obj.target = "opencv"
     obj.source = bld.glob('src/*.cc')
     obj.uselib = ['OPENCV']
+
