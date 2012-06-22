@@ -3,6 +3,8 @@
 #include "Matrix.h"
 
 
+void AsyncDetectMultiScale(uv_work_t *req);
+void AfterAsyncDetectMultiScale(uv_work_t *req);
 
 Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
 
@@ -61,6 +63,8 @@ struct classifier_baton_t {
   int minh;
   int sleep_for;
   std::vector<cv::Rect> res;
+
+  uv_work_t request;
 };
 
 
@@ -102,42 +106,47 @@ CascadeClassifierWrap::DetectMultiScale(const v8::Arguments& args){
   baton->minw = minw;
   baton->minh = minh;
   baton->sleep_for = 1;
-  self->Ref();
+  baton->request.data = baton;
+//  self->Ref();
 
-  eio_custom(EIO_DetectMultiScale, EIO_PRI_DEFAULT, EIO_AfterDetectMultiScale, baton);
-  ev_ref(EV_DEFAULT_UC);
+//  eio_custom(EIO_DetectMultiScale, EIO_PRI_DEFAULT, EIO_AfterDetectMultiScale, baton);
+//  ev_ref(EV_DEFAULT_UC);
+
+  uv_queue_work(uv_default_loop(), &baton->request, AsyncDetectMultiScale, AfterAsyncDetectMultiScale);
 
   return Undefined();
 
 
 }
 
- 
-void 
-CascadeClassifierWrap::EIO_DetectMultiScale(eio_req *req){
+
+void AsyncDetectMultiScale(uv_work_t *req) {
   classifier_baton_t *baton = static_cast<classifier_baton_t *>(req->data);
 
-  sleep(baton->sleep_for);
-
+//  sleep(baton->sleep_for);
 
   std::vector<cv::Rect> objects;
 
   cv::Mat gray;
 
-  cvtColor( baton->im->mat, gray, CV_BGR2GRAY );
-  equalizeHist( gray, gray);
+  if(baton->im->mat.channels() != 1)
+		  cvtColor(baton->im->mat, gray, CV_BGR2GRAY);
 
+
+  equalizeHist( gray, gray);
   baton->cc->cc.detectMultiScale(gray, objects, baton->scale, baton->neighbors, 0, cv::Size(baton->minw, baton->minh));
   
   baton->res = objects;
+
+
 }
 
-int 
-CascadeClassifierWrap::EIO_AfterDetectMultiScale(eio_req *req){
+void AfterAsyncDetectMultiScale(uv_work_t *req) {
+
   HandleScope scope;
   classifier_baton_t *baton = static_cast<classifier_baton_t *>(req->data);
-  ev_unref(EV_DEFAULT_UC);
-  baton->cc->Unref();
+//  ev_unref(EV_DEFAULT_UC);
+//  baton->cc->Unref();
 
   Local<Value> argv[2];
 
@@ -169,6 +178,6 @@ CascadeClassifierWrap::EIO_AfterDetectMultiScale(eio_req *req){
 
   delete baton;
   
-  return 0;
+//  return 0;
 }
 
