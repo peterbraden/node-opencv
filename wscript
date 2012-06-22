@@ -5,10 +5,14 @@ def set_options(opt):
 def configure(conf):
     conf.check_tool('compiler_cxx')
     conf.check_tool('node_addon')
-    #conf.check(lib='opencv', libpath=[
-    #  '/lib', '/usr/lib', '/usr/local/lib','/usr/local/include'], uselib_store='OPENCV', mandatory=True)
-    conf.check_cfg(package='opencv', libpath=[
-      '/lib', '/usr/lib', '/usr/local/lib','/usr/local/include'], args='--cflags --libs', uselib_store='OPENCV')
+    conf.check_cfg(package='opencv',
+      atleast_version='2.3.1',
+      libpath=[
+        '/lib', '/usr/lib', '/usr/local/lib','/usr/local/include', 
+        '/opt/local/include', '/opt/local/lib'],
+      args='--cflags --libs',
+      uselib_store='OPENCV', 
+      mandatory=True)
 
 
 def build(bld):
