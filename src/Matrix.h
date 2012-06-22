@@ -64,6 +64,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Channels)
     JSFUNC(ToBuffer)
     JSFUNC(Ellipse)
+    JSFUNC(Rectangle)
     JSFUNC(Empty)
     JSFUNC(Save)
 

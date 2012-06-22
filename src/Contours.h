@@ -1,5 +1,7 @@
 #include "OpenCV.h"
 
+using namespace std;
+
 class Contour: public node::ObjectWrap {
 	public:
 

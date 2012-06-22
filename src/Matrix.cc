@@ -39,6 +39,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "rectangle", Rectangle);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
@@ -300,6 +301,39 @@ Matrix::Ellipse(const v8::Arguments& args){
   return scope.Close(v8::Null());
 	}
 
+
+Handle<Value>
+Matrix::Rectangle(const Arguments& args) {
+	SETUP_FUNCTION(Matrix)
+
+
+	if(args[0]->IsArray() && args[1]->IsArray()) {
+		Local<Object> xy = args[0]->ToObject();
+		Local<Object> width_height = args[1]->ToObject();
+
+		cv::Scalar color(0, 0, 255);
+
+		if(args[2]->IsArray()) {
+			Local<Object> objColor = args[2]->ToObject();
+			color = setColor(objColor);
+		}
+		
+		int x = xy->Get(0)->IntegerValue();
+		int y = xy->Get(1)->IntegerValue();
+
+		int width = width_height->Get(0)->IntegerValue();
+		int height = width_height->Get(1)->IntegerValue();
+
+		int thickness = 1;
+
+		if(args[3]->IntegerValue())
+			thickness = args[3]->IntegerValue();
+
+		cv::rectangle(self->mat, cv::Point(x, y), cv::Point(width, height), color, thickness);
+	}
+
+	return scope.Close(v8::Null());
+}
 
 Handle<Value>
 Matrix::Save(const v8::Arguments& args){
