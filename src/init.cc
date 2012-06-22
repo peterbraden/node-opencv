@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-  #import "opencv2/opencv.hpp"
-#endif
-
 #include "OpenCV.h"
 #include "Point.h"
 #include "Matrix.h"

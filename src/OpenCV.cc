@@ -71,7 +71,8 @@ OpenCV::ReadImage(const Arguments &args) {
     return Undefined();
 
   } catch( cv::Exception& e ){
-    return v8::ThrowException(v8::Exception::Error(v8::String::New("OpenCV Error")));
+      const char* err_msg = e.what();
+      return v8::ThrowException(v8::Exception::Error(v8::String::New(err_msg)));
   }
 };    
     
