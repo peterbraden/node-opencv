@@ -434,24 +434,6 @@ Matrix::Ptr(const v8::Arguments& args) {
 }
 
 Handle<Value>
-Matrix::Bla(const v8::Arguments& args) {
-	HandleScope scope;
-	int i = args[1]->Uint32Value();
-
-	int div = 64;
-
-	if (Buffer::HasInstance(args[0])){
-
-		char *buf = (char *) Buffer::Data(args[0]->ToObject());
-		unsigned len = Buffer::Length(args[0]->ToObject());
-
-	}
-	return Undefined();
-
-}
-
-
-Handle<Value>
 Matrix::AddWeighted(const v8::Arguments& args) {
 	HandleScope scope;
 
@@ -475,7 +457,7 @@ Handle<Value>
 Matrix::Split(const v8::Arguments& args) {
 	HandleScope scope;
 
-	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+	//Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 
 	return scope.Close(v8::Null());
 }
