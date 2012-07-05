@@ -18,7 +18,7 @@ Then:
 Or to build the repo:
 
 
-        node-waf configure && node-waf build
+        node-gyp rebuild
 
 
 ## Examples

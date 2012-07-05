@@ -15,7 +15,7 @@
     }
  , "engine": "node >= 0.4.1"
  , "scripts": {
-   "preinstall": "node-waf configure build"
+   "preinstall": "node-gyp rebuild"
    , "test": "node test/unit.js"
  }
  , "main": "./lib/opencv"

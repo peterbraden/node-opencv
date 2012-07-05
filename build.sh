@@ -1,6 +1,6 @@
 #!/bin/bash
 
-node-waf configure build &&
+node-gyp rebuild &&
 cd examples &&
 #node face_detection.js
 node $1

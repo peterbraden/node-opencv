@@ -1,10 +1,6 @@
 #ifndef __NODE_OPENCV_H__
 #define __NODE_OPENCV_H__
 
-#ifdef __cplusplus
-  #import "opencv2/opencv.hpp"
-#endif
-
 #include <v8.h>
 #include <node.h>
 #include <node_object_wrap.h>
