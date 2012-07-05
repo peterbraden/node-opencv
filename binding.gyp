@@ -6,6 +6,7 @@
         , "src/Matrix.cc"
         , "src/OpenCV.cc"
         , "src/CascadeClassifierWrap.cc"
+        , "src/Contours.cc"
         , "src/Point.cc"
         , "src/VideoCaptureWrap.cc"
         ]

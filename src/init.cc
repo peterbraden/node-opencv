@@ -16,3 +16,5 @@ init(Handle<Object> target) {
     VideoCaptureWrap::Init(target);
 	Contour::Init(target);
 };
+
+NODE_MODULE(binding, init)
