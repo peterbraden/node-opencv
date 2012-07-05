@@ -16,3 +16,4 @@ class Point: public node::ObjectWrap {
       static Handle<Value> Dot(const v8::Arguments&);
 
 };
+
