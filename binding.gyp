@@ -23,7 +23,7 @@
         }, {
           'cflags': [
             '<!@(pkg-config --cflags opencv)'
-            , 'Wall'
+            , '-Wall'
           ]
           , 'cflags!' : [ '-fno-exceptions']
           , 'cflags_cc!': [ '-fno-rtti',  '-fno-exceptions']
