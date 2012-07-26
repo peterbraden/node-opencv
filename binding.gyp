@@ -19,7 +19,10 @@
             ]
             , "GCC_ENABLE_CPP_RTTI": "YES"
             , "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
-          }
+          },
+          'libraries': [
+            '<!@(pkg-config --libs opencv)'
+          ]
         }, {
           'cflags': [
             '<!@(pkg-config --cflags opencv)'
