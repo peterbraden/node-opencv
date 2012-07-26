@@ -10,6 +10,9 @@
         , "src/Point.cc"
         , "src/VideoCaptureWrap.cc"
         ]
+      , 'libraries': [
+          '<!@(pkg-config --libs opencv)'
+        ]
       , "conditions": [
         ['OS=="mac"', {
           # cflags on OS X are stupid and have to be defined like this
@@ -20,9 +23,6 @@
             , "GCC_ENABLE_CPP_RTTI": "YES"
             , "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
           },
-          'libraries': [
-            '<!@(pkg-config --libs opencv)'
-          ]
         }, {
           'cflags': [
             '<!@(pkg-config --cflags opencv)'
