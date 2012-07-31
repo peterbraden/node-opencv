@@ -234,4 +234,4 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
 
 
-}).run();
+}).export(module);
