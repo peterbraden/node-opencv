@@ -119,7 +119,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
     , "toBuffer": function(cv){
-        var buf = fs.readFileSync('./examples/mona.jpg')
+        var buf = fs.readFileSync('./examples/mona.png')
         
         cv.readImage(buf.slice(0), function(err, mat){
           var buf0 = mat.toBuffer()
@@ -136,7 +136,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         var cv = require('../lib/opencv')
           , cb = this.callback
 
-        cv.readImage("./examples/mona.jpg", function(err, im){
+        cv.readImage("./examples/mona.png", function(err, im){
           im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, cb)
         })  
       }
@@ -157,7 +157,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     topic : require('../lib/opencv')
 
     , ".readImage from file": function(cv){
-      cv.readImage("./examples/mona.jpg", function(err, im){
+      cv.readImage("./examples/mona.png", function(err, im){
         assert.ok(im);
         assert.equal(im.width(), 500);
         assert.equal(im.height(), 756)
@@ -166,7 +166,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
     , ".readImage from buffer" : function(cv){
-      cv.readImage(fs.readFileSync('./examples/mona.jpg'), function(err, im){
+      cv.readImage(fs.readFileSync('./examples/mona.png'), function(err, im){
         assert.ok(im);
         assert.equal(im.width(), 500);
         assert.equal(im.height(), 756)
@@ -190,7 +190,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         var cv = require('../lib/opencv')
           , self = this
         
-        cv.readImage("./examples/mona.jpg", function(err, im){
+        cv.readImage("./examples/mona.png", function(err, im){
           cascade = new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml");
           cascade.detectMultiScale(im, self.callback)//, 1.1, 2, [30, 30]);          
         })
@@ -220,7 +220,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
           assert.equal(im.empty(), false);
           self.callback()
         }) 
-        fs.createReadStream('./examples/mona.jpg').pipe(s);
+        fs.createReadStream('./examples/mona.png').pipe(s);
       }
 
       , "loaded" : function(im){
