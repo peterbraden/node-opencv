@@ -3,10 +3,4 @@ node_js:
    - 0.6
 
 before_install:
-  - sudo apt-get install libcv2.3 
-  - sudo apt-get install libcvaux2.1 
-  - sudo apt-get install libhighgui2.1 
-  - sudo apt-get install libcv-dev 
-  - sudo apt-get install libcvaux-dev 
-  - sudo apt-get install libhighgui-dev
-
+  - sudo apt-get install libopencv-dev
