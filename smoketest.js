@@ -5,7 +5,7 @@ var cv = require('./lib/opencv')
 //console.log(cv.version)
  
 
- cv.readImage("./examples/mona.jpg", function(err, im){
+ cv.readImage("./examples/mona.png", function(err, im){
   im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, function(err, faces){  
     for (var i=0;i<faces.length; i++){
       var x = faces[i]
