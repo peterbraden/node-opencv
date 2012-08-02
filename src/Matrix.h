@@ -8,6 +8,7 @@ class Matrix: public node::ObjectWrap {
     static void Init(Handle<Object> target);
     static Handle<Value> New(const Arguments &args);
     Matrix();      
+    Matrix(cv::Mat other, cv::Rect roi);
     Matrix(int rows, int cols);
     Matrix(int rows, int cols, int typ);
 

@@ -77,7 +77,14 @@ Matrix::New(const Arguments &args) {
 		mat = new Matrix;
 	} else if (args.Length() == 2 && args[0]->IsInt32() && args[1]->IsInt32()){
 			mat = new Matrix(args[0]->IntegerValue(), args[1]->IntegerValue());
-	}
+	} else if (args.Length() == 5) {
+		Matrix *other = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+		int x = args[1]->IntegerValue();
+		int y = args[2]->IntegerValue();
+		int w = args[3]->IntegerValue();
+		int h = args[4]->IntegerValue();
+		mat = new Matrix(other->mat, cv::Rect(x, y, w, h));
+    }
 
 	mat->Wrap(args.Holder());
 	return scope.Close(args.Holder());
@@ -95,6 +102,9 @@ Matrix::Matrix(int w, int h): ObjectWrap() {
 	//mat = cv::Mat(h, w, CV_8UC3);
 }
 
+Matrix::Matrix(cv::Mat m, cv::Rect roi): ObjectWrap() {
+	mat = cv::Mat(m, roi);
+}
 
 Handle<Value>
 Matrix::Empty(const Arguments& args){
