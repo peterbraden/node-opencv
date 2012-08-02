@@ -84,7 +84,7 @@ Matrix::New(const Arguments &args) {
 		int w = args[3]->IntegerValue();
 		int h = args[4]->IntegerValue();
 		mat = new Matrix(other->mat, cv::Rect(x, y, w, h));
-    }
+	}
 
 	mat->Wrap(args.Holder());
 	return scope.Close(args.Holder());
