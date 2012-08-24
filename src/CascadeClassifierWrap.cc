@@ -134,7 +134,7 @@ void AsyncDetectMultiScale(uv_work_t *req) {
 
 
   equalizeHist( gray, gray);
-  baton->cc->cc.detectMultiScale(gray, objects, baton->scale, baton->neighbors, 0, cv::Size(baton->minw, baton->minh));
+  baton->cc->cc.detectMultiScale(gray, objects, baton->scale, baton->neighbors, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(baton->minw, baton->minh));
   
   baton->res = objects;
 

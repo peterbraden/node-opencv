@@ -1,17 +1,17 @@
 var cv = require('./lib/opencv')
-  , assert = require('assert')
-  , fs =require('fs')
 
-//console.log(cv.version)
- 
+new cv.VideoCapture(0).read(function(mat){
 
- cv.readImage("./examples/mona.png", function(err, im){
-  im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, function(err, faces){  
+  mat.resize(200,100)
+  mat.save('./out.jpg')
+
+  mat.detectObject("./data/haarcascade_frontalface_alt.xml", {min : [30,30]}, function(err, faces){  
     for (var i=0;i<faces.length; i++){
       var x = faces[i]
-      im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
+      mat.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
     }
-    im.save('./out.jpg');   
-           
-  });
+    console.log(faces.length ? (faces.length + " faces found") : "No faces")
+    mat.save('./out.jpg');   
+    
+  })
 })
