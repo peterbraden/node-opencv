@@ -66,6 +66,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(ToBuffer)
     JSFUNC(Ellipse)
     JSFUNC(Rectangle)
+    JSFUNC(Line)
     JSFUNC(Empty)
     JSFUNC(Save)
 
@@ -84,7 +85,9 @@ class Matrix: public node::ObjectWrap {
 	JSFUNC(DrawContour)
 	JSFUNC(DrawAllContours)
 
+  // Feature Detection
   JSFUNC(GoodFeaturesToTrack)
+  JSFUNC(HoughLinesP)
 
 };
 

@@ -18,11 +18,16 @@ new cv.VideoCapture(0).read(function(mat){
 */
 
 
-cv.readImage("./examples/mona.png", function(err, im){
-  var features = im.goodFeaturesToTrack();
+cv.readImage("./examples/stuff.png", function(err, im){
+  var i2 = im.copy()
+  i2.convertGrayscale()
+  i2.canny(5, 300)
+  var features = i2.houghLinesP();
   for (var i=0;i<features.length; i++){
       var x = features[i]
-      im.ellipse(x[0] - 5, x[1] -5, 10, 10);
+      im.line([x[0], x[1]], [x[2], x[3]]);
+      im.ellipse(x[0], x[1]);
+      im.ellipse(x[2], x[3]);
     }
   console.log(features)
     im.save('./out.jpg');   

@@ -40,6 +40,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "rectangle", Rectangle);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "line", Line);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
@@ -58,6 +59,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawAllContours", DrawAllContours);
 	
   NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
@@ -347,6 +349,39 @@ Matrix::Rectangle(const Arguments& args) {
 }
 
 Handle<Value>
+Matrix::Line(const Arguments& args) {
+	SETUP_FUNCTION(Matrix)
+
+
+	if(args[0]->IsArray() && args[1]->IsArray()) {
+		Local<Object> xy1 = args[0]->ToObject();
+		Local<Object> xy2 = args[1]->ToObject();
+
+		cv::Scalar color(0, 0, 255);
+
+		if(args[2]->IsArray()) {
+			Local<Object> objColor = args[2]->ToObject();
+			color = setColor(objColor);
+		}
+		
+		int x1 = xy1->Get(0)->IntegerValue();
+		int y1 = xy1->Get(1)->IntegerValue();
+
+		int x2 = xy2->Get(0)->IntegerValue();
+		int y2 = xy2->Get(1)->IntegerValue();
+
+		int thickness = 1;
+
+		if(args[3]->IntegerValue())
+			thickness = args[3]->IntegerValue();
+
+		cv::line(self->mat, cv::Point(x1, y1), cv::Point(x2, y2), color, thickness);
+	}
+
+	return scope.Close(v8::Null());
+}
+
+Handle<Value>
 Matrix::Save(const v8::Arguments& args){
 	HandleScope scope;
 
@@ -585,6 +620,35 @@ Matrix::GoodFeaturesToTrack(const v8::Arguments& args) {
 
 }
 
+Handle<Value>
+Matrix::HoughLinesP(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  std::vector<cv::Vec4i> lines;
+  
+  cv::Mat gray;
+
+
+  equalizeHist(self->mat, gray);
+ // cv::Canny(gray, gray, 50, 200, 3);
+  cv::HoughLinesP(gray, lines, 1, CV_PI/180, 80, 30, 10);
+  
+  v8::Local<v8::Array> arr = v8::Array::New(lines.size());
+
+
+  for (unsigned int i=0; i<lines.size(); i++){
+    v8::Local<v8::Array> pt = v8::Array::New(4);
+    pt->Set(0, Number::New((double) lines[i][0]));
+    pt->Set(1, Number::New((double) lines[i][1]));
+    pt->Set(2, Number::New((double) lines[i][2]));
+    pt->Set(3, Number::New((double) lines[i][3]));
+    arr->Set(i, pt);
+  }
+
+  return scope.Close(arr);
+
+}
 
 cv::Scalar setColor(Local<Object> objColor) {
 
