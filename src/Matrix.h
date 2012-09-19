@@ -84,5 +84,7 @@ class Matrix: public node::ObjectWrap {
 	JSFUNC(DrawContour)
 	JSFUNC(DrawAllContours)
 
+  JSFUNC(GoodFeaturesToTrack)
+
 };
 

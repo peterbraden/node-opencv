@@ -56,6 +56,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "findContours", FindContours);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawContour", DrawContour);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawAllContours", DrawAllContours);
+	
+  NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
@@ -553,6 +555,34 @@ Matrix::DrawAllContours(const v8::Arguments& args) {
 	cv::drawContours(self->mat, cont->contours, -1, color, 1);
 
 	return Undefined();
+}
+
+Handle<Value>
+Matrix::GoodFeaturesToTrack(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  std::vector<cv::Point2f> corners;
+  
+  cv::Mat gray;
+
+	cvtColor(self->mat, gray, CV_BGR2GRAY);
+  equalizeHist(gray, gray);
+
+  cv::goodFeaturesToTrack(gray, corners, 500, 0.01, 10);
+  
+  v8::Local<v8::Array> arr = v8::Array::New(corners.size());
+
+
+  for (unsigned int i=0; i<corners.size(); i++){
+    v8::Local<v8::Array> pt = v8::Array::New(2);
+    pt->Set(0, Number::New((double) corners[i].x));
+    pt->Set(1, Number::New((double) corners[i].y));
+    arr->Set(i, pt);
+  }
+
+  return scope.Close(arr);
+
 }
 
 

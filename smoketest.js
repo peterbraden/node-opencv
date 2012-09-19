@@ -1,5 +1,5 @@
 var cv = require('./lib/opencv')
-
+/*
 new cv.VideoCapture(0).read(function(mat){
 
   mat.resize(200,100)
@@ -15,3 +15,15 @@ new cv.VideoCapture(0).read(function(mat){
     
   })
 })
+*/
+
+
+cv.readImage("./examples/mona.png", function(err, im){
+  var features = im.goodFeaturesToTrack();
+  for (var i=0;i<features.length; i++){
+      var x = features[i]
+      im.ellipse(x[0] - 5, x[1] -5, 10, 10);
+    }
+  console.log(features)
+    im.save('./out.jpg');   
+});
