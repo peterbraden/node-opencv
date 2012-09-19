@@ -31,6 +31,6 @@ cv.readImage('./stuff.png', function(err, im) {
 	all.drawAllContours(contours, WHITE);
 
 
-	big.save('/tmp/big.png');
-	all.save('/tmp/all.png');
+	big.save('./big.png');
+	all.save('./all.png');
 });
