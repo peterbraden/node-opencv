@@ -31,6 +31,7 @@
           , 'cflags!' : [ '-fno-exceptions']
           , 'cflags_cc!': [ '-fno-rtti',  '-fno-exceptions']
         }]        
+      
       , ['OS=="linux"', {
         'cflags': ['-ldl', '-Wall', '<!@(pkg-config --cflags opencv)']
         , 'cflags!' : ['-fno-exceptions']
