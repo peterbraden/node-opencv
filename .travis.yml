@@ -3,7 +3,7 @@ node_js:
    - 0.6
 
 before_install:
-  - sudo apt-get install libcv-dev
+  - sudo apt-get install libopencv-dev
   - sudo apt-get install libhighgui-dev
   - pkg-config --libs opencv
   - pkg-config --cflags opencv
