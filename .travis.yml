@@ -4,3 +4,4 @@ node_js:
 
 before_install:
   - sudo apt-get install libcv-dev
+  - sudo apt-get install libhighgui-dev
