@@ -13,6 +13,12 @@
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'
         ]
+      , 'cflags': [
+            '<!@(pkg-config --cflags opencv)'
+            , '-Wall'
+          ]
+      , 'cflags!' : [ '-fno-exceptions']
+      , 'cflags_cc!': [ '-fno-rtti',  '-fno-exceptions']
       , "conditions": [
         ['OS=="mac"', {
           # cflags on OS X are stupid and have to be defined like this
@@ -22,22 +28,9 @@
             ]
             , "GCC_ENABLE_CPP_RTTI": "YES"
             , "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
-          },
-        }, {
-          'cflags': [
-            '<!@(pkg-config --cflags opencv)'
-            , '-Wall'
-          ]
-          , 'cflags!' : [ '-fno-exceptions']
-          , 'cflags_cc!': [ '-fno-rtti',  '-fno-exceptions']
+          }
         }]        
       
-      , ['OS=="linux"', {
-        'cflags': ['<!@(pkg-config --cflags opencv)']
-        , 'cflags!' : ['-fno-exceptions']
-        , 'cflags_cc!' : ['-fno-rtti',  '-fno-exceptions']
-
-      }]
     ]
   }]
 }
