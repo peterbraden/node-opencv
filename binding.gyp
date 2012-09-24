@@ -14,7 +14,7 @@
           '<!@(pkg-config --libs opencv)'
         ]
       , 'cflags': [
-            '<!@(pkg-config --cflags opencv)'
+            '<!@(pkg-config --cflags --libs opencv)'
             , '-Wall'
           ]
       , 'cflags!' : [ '-fno-exceptions']

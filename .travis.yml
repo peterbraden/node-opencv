@@ -8,3 +8,4 @@ before_install:
   - pkg-config --libs opencv
   - pkg-config --cflags opencv
   - ls /usr/include/opencv
+  - dpkg -L opencv
