@@ -123,8 +123,26 @@ Matrix::Get(const Arguments& args){
 
 	int i = args[0]->IntegerValue();
 	int j = args[1]->IntegerValue();
+  double val = 0;
 
-	return scope.Close(Number::New(self->mat.at<double>(i,j)));
+  cv::Vec3b pix; 
+  unsigned int pint = 0;
+
+  switch(self->mat.type()){
+    case CV_32FC3:
+      pix = self->mat.at<cv::Vec3b>(i, j);
+      pint &= (uchar) pix.val[2];
+      pint &= ((uchar) pix.val[1]) << 8;
+      pint &= ((uchar) pix.val[0]) << 16; 
+      val = (double) pint;
+      break;
+
+    default:
+	    val = self->mat.at<double>(i,j);
+      break;
+  }
+
+  return scope.Close(Number::New(val));
 }
 
 
@@ -140,9 +158,15 @@ Matrix::Set(const Arguments& args){
 		self->mat.at<cv::Vec3b>(i,j)[args[3]->NumberValue()] = val;
 
 	} else if(args.Length() == 3) {
-		self->mat.at<cv::Vec3b>(i,j)[0] = val;
-		self->mat.at<cv::Vec3b>(i,j)[1] = val;
-		self->mat.at<cv::Vec3b>(i,j)[2] = val;
+    switch(self->mat.type()){
+
+      case CV_32FC3:
+		    self->mat.at<cv::Vec3b>(i,j)[0] = static_cast<unsigned int> (val + 0.5) >> 16;
+		    self->mat.at<cv::Vec3b>(i,j)[1] = static_cast<unsigned int> (val + 0.5) >> 8;
+		    self->mat.at<cv::Vec3b>(i,j)[2] = static_cast<unsigned int> (val + 0.5);
+        break;
+    }
+
 
   } else {
 		return v8::ThrowException(v8::Exception::TypeError(String::New("Invalid number of arguments")));
