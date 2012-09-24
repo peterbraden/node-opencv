@@ -7,4 +7,4 @@ before_install:
   - sudo apt-get install libhighgui-dev
   - pkg-config --libs opencv
   - pkg-config --cflags opencv
-  - ls /usr/include
+  - ls /usr/include/opencv
