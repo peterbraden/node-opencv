@@ -72,12 +72,12 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.ok(new cv.Matrix);
       assert.ok(new cv.Matrix(1,2));
     }
-/*    , "get/set" : function(cv){
+    , "get/set" : function(cv){
        var mat = new cv.Matrix(1,2);
        assert.equal(mat.set(0,0,3), undefined);
        assert.equal(mat.get(0,0), 3);
     }
-*/
+
     , ".width" : function(cv){
       var mat = new cv.Matrix(6,7);
       assert.equal(mat.width(), 7);
@@ -101,7 +101,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.equal(mat.width(), 8);
 
     }
-/*
+
     , 'row' : function(cv){
       var mat = new cv.Matrix.Eye(4,4)
       assertDeepSimilar(mat.row(1), [0,1,0,0])
@@ -113,7 +113,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assertDeepSimilar(mat.col(1), [0,1,0,0])
       assertDeepSimilar(mat.col(2), [0,0,1,0])
     }
-*/
+
     , "empty": function(cv){
       assert.equal(new cv.Matrix().empty(), true);
     }
