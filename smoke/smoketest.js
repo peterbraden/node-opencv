@@ -1,4 +1,4 @@
-var cv = require('./lib/opencv')
+var cv = require('../lib/opencv')
 /*
 new cv.VideoCapture(0).read(function(mat){
 
