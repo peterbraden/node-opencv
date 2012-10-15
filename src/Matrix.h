@@ -12,6 +12,7 @@ class Matrix: public node::ObjectWrap {
     Matrix(int rows, int cols);
     Matrix(int rows, int cols, int typ);
 
+    static double DblGet(cv::Mat mat, int i, int j);
 
     JSFUNC(Row)
     JSFUNC(PixelRow)

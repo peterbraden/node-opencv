@@ -117,31 +117,44 @@ Matrix::Empty(const Arguments& args){
 	return scope.Close(Boolean::New(self->mat.empty()));
 }
 
+
+
+double
+Matrix::DblGet(cv::Mat mat, int i, int j){
+
+  double val = 0;
+  cv::Vec3b pix;
+  unsigned int pint = 0;
+
+  switch(mat.type()){
+    case CV_32FC3:
+      pix = mat.at<cv::Vec3b>(i, j);
+      pint &= (uchar) pix.val[2];
+      pint &= ((uchar) pix.val[1]) << 8;
+      pint &= ((uchar) pix.val[0]) << 16;
+      val = (double) pint;
+      break;
+
+    case CV_64FC1:
+      val = mat.at<double>(i, j);
+      break;
+
+    default:
+	    val = mat.at<double>(i,j);
+      break;
+  }
+
+  return val;
+}
+
 Handle<Value>
 Matrix::Get(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
 	int i = args[0]->IntegerValue();
 	int j = args[1]->IntegerValue();
-  double val = 0;
 
-  cv::Vec3b pix; 
-  unsigned int pint = 0;
-
-  switch(self->mat.type()){
-    case CV_32FC3:
-      pix = self->mat.at<cv::Vec3b>(i, j);
-      pint &= (uchar) pix.val[2];
-      pint &= ((uchar) pix.val[1]) << 8;
-      pint &= ((uchar) pix.val[0]) << 16; 
-      val = (double) pint;
-      break;
-
-    default:
-	    val = self->mat.at<double>(i,j);
-      break;
-  }
-
+  double val = Matrix::DblGet(self->mat, i, j);
   return scope.Close(Number::New(val));
 }
 
@@ -196,19 +209,8 @@ Matrix::Row(const Arguments& args){
 	v8::Local<v8::Array> arr = v8::Array::New(width);
 
 	for (int x=0; x<width; x++){
-		double v = 0;
-		if (self->mat.channels() == 1){
-			v = self->mat.at<float>(y, x);
-		} else {
-			// Assume 3 channel RGB
-			unsigned int val = 0;
-			cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
-			val &= (uchar) pixel.val[2];
-			val &= ((uchar) pixel.val[1]) << 8;
-			val &= ((uchar) pixel.val[0]) << 16;  
-			v = (double) val;
-		}  
-			arr->Set(x, Number::New(v));
+		double v = Matrix::DblGet(self->mat, y, x);
+		arr->Set(x, Number::New(v));
 	}
 
 	return scope.Close(arr);
@@ -243,18 +245,7 @@ Matrix::Col(const Arguments& args){
   v8::Local<v8::Array> arr = v8::Array::New(height);
 
   for (int y=0; y<height; y++){
-    double v = 0;
-    if (self->mat.channels() == 1){
-      v = self->mat.at<float>(y, x);
-    } else {
-      // Assume 3 channel RGB
-      unsigned int val = 0;
-      cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
-      val &= (uchar) pixel.val[2];
-      val &= ((uchar) pixel.val[1]) << 8;
-      val &= ((uchar) pixel.val[0]) << 16;  
-      v = (double) val;
-    }  
+    double v = Matrix::DblGet(self->mat, y, x);
     arr->Set(y, Number::New(v));
   }
   return scope.Close(arr);
