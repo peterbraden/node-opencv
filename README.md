@@ -3,7 +3,9 @@
 [![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.png)](http://travis-ci.org/peterbraden/node-opencv)
 
 
-[OpenCV](http://opencv.willowgarage.com/wiki/) bindings for Node.js
+[OpenCV](http://opencv.willowgarage.com/wiki/) bindings for Node.js. OpenCV is the defacto computer vision library - by interfacing with it natively in node, we get powerful real time vision in js.
+
+People are using node-opencv to fly control quadrocoptors, detect faces from webcam images and annotate video streams. If you're using it for something cool, I'd love to hear about it!
 
 ## Install
 
@@ -27,13 +29,12 @@ Or to build the repo:
 
 
         cv.readImage("./examples/test.jpg", function(err, im){
-          im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, function(err, faces){  
+          im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, function(err, faces){
             for (var i=0;i<faces.length; i++){
               var x = faces[i]
               im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
             }
-            im.save('./out.jpg');   
-                   
+            im.save('./out.jpg');
           });
         })
 
@@ -70,8 +71,8 @@ If you need to pipe data into an image, you can use an imagestream:
 
         fs.createReadStream('./examples/test.jpg').pipe(s);        
 
-#### Accessors
-        
+#### Accessing Data
+
         var mat = new cv.Matrix.Eye(4,4); // Create identity matrix
 
         mat.get(0,0) // 1
@@ -80,8 +81,27 @@ If you need to pipe data into an image, you can use an imagestream:
         mat.col(4)  // [0,0,0,1]
 
 
+##### Save
+
+        mat.save('./pic.jpg')
+
+or:
+
+        var buff = mat.toBuffer()
+
 
 #### Image Processing
+
+        im.convertGrayscale()
+        im.canny(5, 300)
+        im.houghLinesP()
+
+
+
+#### Simple Drawing
+
+        im.ellipse(x, y)
+        im.line([x1,y1], [x2, y2])
 
 
 #### Object Detection
@@ -94,9 +114,18 @@ detection. This can be used for face detection etc.
         mat.detectObject(haar_cascade_xml, opts, function(err, matches){})
 
 
+Also:
+
+        mat.goodFeaturesToTrack
 
 
-## WIP
+#### Contours
 
-This is a WIP. I've never written C++ before so the code may be _interesting_ - if 
-I'm doing stuff wrong please feel free to correct me.
+        mat.findCountours
+        mat.drawContour
+        mat.drawAllContours
+
+
+## MIT License
+The library is distributed under the MIT License - if for some reason that 
+doesn't work for you please get in touch.
