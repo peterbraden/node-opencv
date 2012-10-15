@@ -14,17 +14,50 @@ class Matrix: public node::ObjectWrap {
 
     static double DblGet(cv::Mat mat, int i, int j);
 
+    JSFUNC(Eye) // factory
+
+    JSFUNC(Get) // at
+    JSFUNC(Set)
+
     JSFUNC(Row)
     JSFUNC(PixelRow)
     JSFUNC(Col)
     JSFUNC(PixelCol)
-    JSFUNC(Eye) // factory
+
+    JSFUNC(Size)
+    JSFUNC(Width)
+    JSFUNC(Height)
+    JSFUNC(Channels)
+
+    JSFUNC(Ellipse)
+    JSFUNC(Rectangle)
+    JSFUNC(Line)
+    JSFUNC(Empty)
+
+    JSFUNC(Save)
+    JSFUNC(ToBuffer)
+
+    JSFUNC(Resize)
+
+    JSFUNC(ConvertGrayscale)
+    JSFUNC(ConvertHSVscale)
+    JSFUNC(Copy)
+    JSFUNC(Ptr)
+    JSFUNC(AddWeighted)
+    JSFUNC(Split)
+    JSFUNC(Canny)
+    JSFUNC(Dilate)
+
+    JSFUNC(FindContours)
+    JSFUNC(DrawContour)
+    JSFUNC(DrawAllContours)
+
+    // Feature Detection
+    JSFUNC(GoodFeaturesToTrack)
+    JSFUNC(HoughLinesP)
 
 /*
 	static Handle<Value> Val(const Arguments& args);
-
-
-
 	static Handle<Value> RowRange(const Arguments& args);
 	static Handle<Value> ColRange(const Arguments& args);
 	static Handle<Value> Diag(const Arguments& args);
@@ -41,7 +74,6 @@ class Matrix: public node::ObjectWrap {
     static Handle<Value> Dot(const Arguments& args);
     static Handle<Value> Zeroes(const Arguments& args);
     static Handle<Value> Ones(const Arguments& args);
-    static Handle<Value> Eye(const Arguments& args);
 // create, increment, release
     static Handle<Value> PushBack(const Arguments& args);
     static Handle<Value> PopBack(const Arguments& args);
@@ -56,39 +88,6 @@ class Matrix: public node::ObjectWrap {
     
     
 */
-
-
-    JSFUNC(Get) // at
-    JSFUNC(Set)
-    JSFUNC(Size)
-    JSFUNC(Width)
-    JSFUNC(Height)
-    JSFUNC(Channels)
-    JSFUNC(ToBuffer)
-    JSFUNC(Ellipse)
-    JSFUNC(Rectangle)
-    JSFUNC(Line)
-    JSFUNC(Empty)
-    JSFUNC(Save)
-
-    JSFUNC(Resize)
-
-	JSFUNC(ConvertGrayscale)
-	JSFUNC(ConvertHSVscale)
-	JSFUNC(Copy)
-	JSFUNC(Ptr)
-	JSFUNC(AddWeighted)
-	JSFUNC(Split)
-	JSFUNC(Canny)
-	JSFUNC(Dilate)
-
-	JSFUNC(FindContours)
-	JSFUNC(DrawContour)
-	JSFUNC(DrawAllContours)
-
-  // Feature Detection
-  JSFUNC(GoodFeaturesToTrack)
-  JSFUNC(HoughLinesP)
 
 };
 
