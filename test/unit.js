@@ -72,6 +72,14 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.ok(new cv.Matrix);
       assert.ok(new cv.Matrix(1,2));
     }
+
+    , "set/row" : function(cv){
+      var mat = new cv.Matrix(1, 2);
+      mat.set(0,0,3)
+      mat.set(0,1,5000)
+      assert.deepEqual(mat.row(0), [3,5000]);
+    }
+
     , "get/set" : function(cv){
        var mat = new cv.Matrix(1,2);
        assert.equal(mat.set(0,0,3), undefined);
