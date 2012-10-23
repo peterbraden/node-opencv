@@ -18,7 +18,7 @@ CascadeClassifierWrap::Init(Handle<Object> target) {
     constructor->SetClassName(String::NewSymbol("CascadeClassifier"));
 
     // Prototype
-    Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+    //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
     NODE_SET_PROTOTYPE_METHOD(constructor, "detectMultiScale", DetectMultiScale);
 

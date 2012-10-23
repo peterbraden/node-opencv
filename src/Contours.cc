@@ -20,7 +20,7 @@ Contour::Init(Handle<Object> target) {
 	constructor->SetClassName(String::NewSymbol("Contours"));
 
 	// Prototype
-	Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);

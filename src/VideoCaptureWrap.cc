@@ -28,7 +28,7 @@ VideoCaptureWrap::Init(Handle<Object> target) {
 	constructor->SetClassName(String::NewSymbol("VideoCapture"));
 
 	// Prototype
-	Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "read", Read);
 
