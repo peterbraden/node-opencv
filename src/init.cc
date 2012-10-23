@@ -17,4 +17,4 @@ init(Handle<Object> target) {
 	Contour::Init(target);
 };
 
-NODE_MODULE(binding, init)
+NODE_MODULE(opencv, init)
