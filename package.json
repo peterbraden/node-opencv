@@ -1,22 +1,18 @@
 {
-  "name": "opencv"
-  , "description": "Node Bindings to OpenCV"
-  , "author": "Peter Braden <peterbraden@peterbraden.co.uk>"
-  , "dependencies": {
-    }
-  , "version" : "0.0.7" 
-  
-  , "dependencies": {
-    "buffers" : "0.1.1"
-    }
-  
-  , "devDependencies": {
+  "name": "opencv",
+  "description": "Node Bindings to OpenCV",
+  "author": "Peter Braden <peterbraden@peterbraden.co.uk>",
+  "dependencies": {
+    "buffers": "0.1.1"
+  },
+  "version": "0.0.8",
+  "devDependencies": {
     "vows": "*"
-    }
- , "engine": "node >= 0.4.1"
- , "scripts": {
-   "preinstall": "node-gyp clean rebuild"
-   , "test": "vows test/unit.js"
- }
- , "main": "./lib/opencv"
+  },
+  "engine": "node >= 0.4.1",
+  "scripts": {
+    "preinstall": "node-gyp clean rebuild",
+    "test": "vows test/unit.js"
+  },
+  "main": "./lib/opencv"
 }
