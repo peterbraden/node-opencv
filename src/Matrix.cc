@@ -38,6 +38,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "height", Height);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "toBufferAsync", ToBufferAsync);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "rectangle", Rectangle);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "line", Line);
@@ -318,6 +319,87 @@ Matrix::ToBuffer(const v8::Arguments& args){
 	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
 	return scope.Close(actualBuffer);
+}
+
+
+
+struct matrixToBuffer_baton_t {
+  Matrix *mm;
+  Persistent<Function> cb;
+  Persistent<v8::Object> res;
+  int sleep_for;
+
+  uv_work_t request;
+};
+
+void AsyncToBufferAsync(uv_work_t *req);
+void AfterAsyncToBufferAsync(uv_work_t *req);
+
+Handle<Value>
+Matrix::ToBufferAsync(const v8::Arguments& args){
+	SETUP_FUNCTION(Matrix)
+
+  REQ_FUN_ARG(0, cb);
+
+  matrixToBuffer_baton_t *baton = new matrixToBuffer_baton_t();
+  baton->mm = self;
+  baton->cb = Persistent<Function>::New(cb);
+  baton->request.data = baton;
+  baton->sleep_for = 1;
+
+  uv_queue_work(uv_default_loop(), &baton->request, AsyncToBufferAsync, AfterAsyncToBufferAsync);
+
+  return Undefined();
+}
+
+void AsyncToBufferAsync(uv_work_t *req) {
+  matrixToBuffer_baton_t *baton = static_cast<matrixToBuffer_baton_t *>(req->data);
+
+  std::vector<uchar> vec(0);
+	std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
+
+	cv::imencode(".jpg", baton->mm->mat, vec, params);
+
+	node::Buffer *buf = node::Buffer::New(vec.size());
+	uchar* data = (uchar*) Buffer::Data(buf);
+	memcpy(data, &vec[0], vec.size());
+
+	v8::Local<v8::Object> globalObj = v8::Context::GetCurrent()->Global();
+	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(v8::String::New("Buffer")));
+	v8::Handle<v8::Value> constructorArgs[3] = {buf->handle_, v8::Integer::New(vec.size()), v8::Integer::New(0)};
+	v8::Persistent<v8::Object> actualBuffer = v8::Persistent<v8::Object>(bufferConstructor->NewInstance(3, constructorArgs));
+
+  baton->res = actualBuffer;
+}
+
+void AfterAsyncToBufferAsync(uv_work_t *req) {
+
+  HandleScope scope;
+  matrixToBuffer_baton_t *baton = static_cast<matrixToBuffer_baton_t *>(req->data);
+//  ev_unref(EV_DEFAULT_UC);
+//  baton->cc->Unref();
+
+  Local<Value> argv[2];
+
+  argv[0] = Local<Value>::New(Null());
+
+  v8::Local<v8::Object> res = v8::Local<v8::Object>(*baton->res);
+  argv[1] = res;
+  baton->res.Dispose();
+
+  TryCatch try_catch;
+
+  baton->cb->Call(Context::GetCurrent()->Global(), 2, argv);
+
+  if (try_catch.HasCaught()) {
+    FatalException(try_catch);
+  }
+
+  baton->cb.Dispose();
+
+  delete baton;
+  
+//  return 0;
 }
 
 
