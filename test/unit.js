@@ -137,6 +137,23 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         })
 
     }
+    
+    , "toBufferAsync": {
+      topic: function(cv){
+          var buf = fs.readFileSync('./examples/mona.png')
+            , cb = this.callback
+          cv.readImage(buf.slice(0), function(err, mat){
+            var buff = mat.toBufferAsync(function(){
+              cb.apply(this, arguments)
+            })
+          })
+        }
+    ,  'gives a buffer' : function(e, res){
+        assert.ok(!e)
+        assert.ok(res);
+        assert.ok(res.length > 100);
+      }
+    }
 
     , "detectObject": {
       

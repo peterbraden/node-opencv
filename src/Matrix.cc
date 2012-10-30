@@ -326,7 +326,8 @@ Matrix::ToBuffer(const v8::Arguments& args){
 struct matrixToBuffer_baton_t {
   Matrix *mm;
   Persistent<Function> cb;
-  Persistent<v8::Object> res;
+  std::vector<uchar>  res;
+  int resSize;
   int sleep_for;
 
   uv_work_t request;
@@ -360,16 +361,8 @@ void AsyncToBufferAsync(uv_work_t *req) {
 
 	cv::imencode(".jpg", baton->mm->mat, vec, params);
 
-	node::Buffer *buf = node::Buffer::New(vec.size());
-	uchar* data = (uchar*) Buffer::Data(buf);
-	memcpy(data, &vec[0], vec.size());
 
-	v8::Local<v8::Object> globalObj = v8::Context::GetCurrent()->Global();
-	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(v8::String::New("Buffer")));
-	v8::Handle<v8::Value> constructorArgs[3] = {buf->handle_, v8::Integer::New(vec.size()), v8::Integer::New(0)};
-	v8::Persistent<v8::Object> actualBuffer = v8::Persistent<v8::Object>(bufferConstructor->NewInstance(3, constructorArgs));
-
-  baton->res = actualBuffer;
+  baton->res = vec;
 }
 
 void AfterAsyncToBufferAsync(uv_work_t *req) {
@@ -383,9 +376,16 @@ void AfterAsyncToBufferAsync(uv_work_t *req) {
 
   argv[0] = Local<Value>::New(Null());
 
-  v8::Local<v8::Object> res = v8::Local<v8::Object>(*baton->res);
-  argv[1] = res;
-  baton->res.Dispose();
+	node::Buffer *buf = node::Buffer::New(baton->res.size());
+	uchar* data = (uchar*) Buffer::Data(buf);
+	memcpy(data, &baton->res[0], baton->res.size());
+	
+  v8::Local<v8::Object> globalObj = v8::Context::GetCurrent()->Global();
+	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(v8::String::New("Buffer")));
+	v8::Handle<v8::Value> constructorArgs[3] = {buf->handle_, v8::Integer::New(baton->res.size()), v8::Integer::New(0)};
+	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+
+  argv[1] = actualBuffer;
 
   TryCatch try_catch;
 
