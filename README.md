@@ -129,3 +129,10 @@ Also:
 ## MIT License
 The library is distributed under the MIT License - if for some reason that 
 doesn't work for you please get in touch.
+
+## Changelog
+
+
+#### 0.0.9
+
+- toBuffer can now take a callback and be run async (re #21)
