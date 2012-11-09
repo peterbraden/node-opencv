@@ -138,12 +138,12 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
     }
     
-    , "toBufferAsync": {
+    , "toBuffer Async": {
       topic: function(cv){
           var buf = fs.readFileSync('./examples/mona.png')
             , cb = this.callback
           cv.readImage(buf.slice(0), function(err, mat){
-            var buff = mat.toBufferAsync(function(){
+            var buff = mat.toBuffer(function(){
               cb.apply(this, arguments)
             })
           })

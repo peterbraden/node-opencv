@@ -304,6 +304,10 @@ Handle<Value>
 Matrix::ToBuffer(const v8::Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
+  if (args.Length() > 0){
+    return Matrix::ToBufferAsync(args);
+  }
+
 	std::vector<uchar> vec(0);
 	std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
 
