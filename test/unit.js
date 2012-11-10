@@ -257,6 +257,26 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
   }
 
+  , "CamShift" : {
+    topic : require('../lib/opencv')
+    
+    , "create TrackedObject" : function(cv){
+      var im = fs.readFileSync('./examples/mona.png')
+        , track = new cv.TrackedObject(im, [10,10, 50,50]);  
+
+      assert.ok(track);
+    }
+
+    , "use TrackedObject.track" : function(cv){
+      var im = fs.readFileSync('./examples/mona.png')
+        , im2 = fs.readFileSync('./examples/mona.png')
+        , tracked = new cv.TrackedObject(im, [10,10, 50,50]);  
+
+      assert.equal(tracked.track(im2), [10, 10, 50, 50]);
+    }
+  
+  }
+
 
 
 }).export(module);
