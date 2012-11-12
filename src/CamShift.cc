@@ -17,6 +17,7 @@ TrackedObject::Init(Handle<Object> target) {
     //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
     target->Set(String::NewSymbol("TrackedObject"), constructor->GetFunction());
+	  NODE_SET_PROTOTYPE_METHOD(constructor, "track", Track);
 };    
 
 
@@ -36,7 +37,6 @@ TrackedObject::New(const Arguments &args) {
 
 
 TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect){
-
  
   // Store HSV Hue Image
   cv::cvtColor(image, hsv, CV_BGR2HSV); // convert to HSV space
@@ -50,7 +50,20 @@ TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect){
   //extract the hue channel, split: src, dest channels
   int from_to[] = { 0,0,  1,-1,  2,-1,  3,-1};
   cv::mixChannels(&hsv, 1,  &hue, 1, from_to, 4);
+  
+  // Calculate Histogram
+  int hbins = 30, sbins = 32;
+  int histSizes[] = {hbins, sbins};
+  float hranges[] = { 0, 180 };
+  // saturation varies from 0 (black-gray-white) to
+  // 255 (pure spectrum color)
+  float sranges[] = { 0, 256 };
+  const float* ranges[] = { hranges, sranges };
+
+  cv::calcHist(&hue, 1, 0, mask, hist, 2, histSizes, ranges, true, false);
+
 }
+
 
 
 Handle<Value>
@@ -67,8 +80,17 @@ TrackedObject::Track(const v8::Arguments& args){
   cv::RotatedRect r;
 
   r = cv::CamShift(self->prob, self->prev_rect,
-      cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1));
+        cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1));
 
+	v8::Local<v8::Array> arr = v8::Array::New(4);
+	
+  cv::Point2f pts[4];
+  r.points(pts);
 
-  return Undefined();
+  for (int i=0; i<8; i+=2){
+    arr->Set(i, Number::New(pts[i].x));
+    arr->Set(i+1, Number::New(pts[i].y));
+  }
+	return scope.Close(arr);
+
 }

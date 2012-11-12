@@ -8,7 +8,7 @@ class TrackedObject: public node::ObjectWrap {
     cv::Mat mask;
     cv::Mat prob;
 
-    //cv::Histogram* hist;
+    cv::Mat hist;
     cv::Rect prev_rect;
  //   cv::Box2D curr_box;
 
