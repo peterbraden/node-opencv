@@ -181,20 +181,19 @@ vows.describe('Smoke Tests OpenCV').addBatch({
           , cb = this.callback
 
         var buf = fs.readFileSync('./examples/mona.png');
-        var frames = 0;
+        var count = 0;
         var done = function(){
-          return frames < 500;
+          return ++count >= 500;
         }
-        var run = function(callback) {
+
+        var run = function(done) {
           cv.readImage(buf, function(err, im){
-            im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, function(){
-              ++frames;
-              callback();
-            });
+            if (err) return callback(err);
+            im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, done);
           });
         }
 
-        async.until(done, run, cb);  
+        async.whilst(done, run, cb);  
       }
     }
     
