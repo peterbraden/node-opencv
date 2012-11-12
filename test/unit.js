@@ -1,5 +1,6 @@
 var vows = require('vows')
   , assert = require('assert')
+  , async = require('async')
   , fs = require('fs');
 
 assertDeepSimilar = function(res, exp){
@@ -173,6 +174,29 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       }
     }
 
+    , "detectObject repeated": {
+     topic : require('../lib/opencv')
+     , "doesn't blow up": function(){
+        var cv = require('../lib/opencv')
+          , cb = this.callback
+
+        var buf = fs.readFileSync('./examples/mona.png');
+        var frames = 0;
+        var done = function(){
+          return frames < 500;
+        }
+        var run = function(callback) {
+          cv.readImage(buf, function(err, im){
+            im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, function(){
+              ++frames;
+              callback();
+            });
+          });
+        }
+
+        async.until(done, run, cb);  
+      }
+    }
     
   }
 
@@ -191,7 +215,8 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
     , ".readImage from buffer" : function(cv){
-      cv.readImage(fs.readFileSync('./examples/mona.png'), function(err, im){
+      var buf = fs.readFileSync('./examples/mona.png');
+      cv.readImage(buf, function(err, im){
         assert.ok(im);
         assert.equal(im.width(), 500);
         assert.equal(im.height(), 756)
