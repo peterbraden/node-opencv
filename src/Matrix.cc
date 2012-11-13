@@ -409,18 +409,27 @@ void AfterAsyncToBufferAsync(uv_work_t *req) {
 
 Handle<Value> 
 Matrix::Ellipse(const v8::Arguments& args){
-	SETUP_FUNCTION(Matrix)
+  SETUP_FUNCTION(Matrix)
 
   int x = args[0]->Uint32Value();
   int y = args[1]->Uint32Value();
   int width = args[2]->Uint32Value();
   int height = args[3]->Uint32Value();  
-  uint color = args[4]->Uint32Value();  
+  cv::Scalar color(0, 0, 255);
 
-  cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360,
-    cv::Scalar( (color >> 16) & 0xff , (color >> 8) & 0xff, color & 0xff ), 4, 8, 0);
+  if(args[4]->IsArray()) {
+    Local<Object> objColor = args[4]->ToObject();
+    color = setColor(objColor);
+  }
+
+  int thickness = 1;
+
+  if(args[5]->IntegerValue())
+    thickness = args[5]->IntegerValue();
+
+  cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360, color, thickness, 8, 0);
   return scope.Close(v8::Null());
-	}
+}
 
 
 Handle<Value>
