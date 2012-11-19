@@ -29,6 +29,13 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       , '.Matrix imports': function(topic){
         assert.ok(!!topic.Matrix)
       } 
+
+      , 'importing library multiple times is ok' : function(){
+        var cv1 = require('../lib/opencv')
+          , cv2 = require('../lib/opencv')
+          cv1.readImage('./examples/mona.png', function(){});
+          cv2.readImage('./examples/mona.png', function(){});
+      }
     }
 
   , "Point" : {
