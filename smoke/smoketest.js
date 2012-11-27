@@ -1,4 +1,7 @@
 var cv = require('../lib/opencv')
+
+
+
 /*
 new cv.VideoCapture(0).read(function(mat){
 
@@ -33,15 +36,3 @@ cv.readImage("./examples/stuff.png", function(err, im){
     im.save('./out.jpg');   
 });
 */
-
-cv.readImage("./examples/stuff.png", function(err, im){
-  console.log("1")
-  var track = new cv.TrackedObject(im, [0,0,50,50]);
-  console.log("2")
-  console.log(track)
-  console.log("3")
-  console.log(track.track)
-  console.log("4")
-  console.log(track.track(im));
-  console.log("5")
-})

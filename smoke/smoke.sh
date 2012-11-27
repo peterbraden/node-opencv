@@ -1,6 +1,6 @@
 #!/bin/bash
-node-gyp rebuild && echo '-- Compiled OK -- 
+node-gyp build && echo '-- Compiled OK -- 
 
-' && node  smoke/smoketest.js && echo '-- Smoke Done, running tests --
+' && node examples/motion-track.js && 0 && node  smoke/smoketest.js && echo '-- Smoke Done, running tests --
 
 ' && npm test

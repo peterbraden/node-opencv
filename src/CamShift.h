@@ -10,7 +10,6 @@ class TrackedObject: public node::ObjectWrap {
 
     cv::Mat hist;
     cv::Rect prev_rect;
- //   cv::Box2D curr_box;
 
 	  static Persistent<FunctionTemplate> constructor;
 	  static void Init(Handle<Object> target);

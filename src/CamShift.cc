@@ -25,11 +25,24 @@ Handle<Value>
 TrackedObject::New(const Arguments &args) {
   HandleScope scope;
 
-  if (args.This()->InternalFieldCount() == 0)
-    return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Cannot Instantiate without new")));
-  
+  if (args.This()->InternalFieldCount() == 0){
+    JSTHROW_TYPE("Cannot Instantiate without new")
+  }
+
   Matrix* m = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
-  cv::Rect r = cv::Rect(0, 0, 50, 50);
+  cv::Rect r;
+
+  if (args[1]->IsArray()){
+    Local<Object> v8rec = args[1]->ToObject(); 
+    r = cv::Rect(
+        v8rec->Get(0)->IntegerValue(),
+        v8rec->Get(1)->IntegerValue(),
+        v8rec->Get(2)->IntegerValue() - v8rec->Get(0)->IntegerValue(), 
+        v8rec->Get(3)->IntegerValue() - v8rec->Get(1)->IntegerValue());
+  } else {
+        JSTHROW_TYPE("Must pass rectangle to track")
+  }
+
   TrackedObject *to = new TrackedObject(m->mat, r);  
   
   to->Wrap(args.This());
@@ -58,6 +71,7 @@ void update_hue_image(TrackedObject* t, cv::Mat image){
 TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect){
  
   update_hue_image(this, image);
+  prev_rect = rect;
   
   // Calculate Histogram
   int hbins = 30, sbins = 32;
@@ -67,11 +81,12 @@ TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect){
   // 255 (pure spectrum color)
   float sranges[] = { 0, 256 };
   const float* ranges[] = { sranges };
+  
+  cv::Mat hue_roi = hue(rect);
+  cv::Mat mask_roi = mask(rect);
 
-  cv::calcHist(&hue, 1, 0, mask, hist, 1, histSizes, ranges, true, false);
-
-
-  prev_rect = rect;
+  cv::calcHist(&hue_roi, 1, 0, mask_roi, hist, 1, histSizes, ranges, true, false);
+  
 }
 
 
@@ -88,8 +103,21 @@ TrackedObject::Track(const v8::Arguments& args){
 
   Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
   cv::RotatedRect r;
+  
+  if (self->prev_rect.x <0 ||
+      self->prev_rect.y <0 ||
+      self->prev_rect.width <= 1 ||
+      self->prev_rect.height <= 1){
+    return v8::ThrowException(v8::Exception::TypeError(v8::String::New("OPENCV ERROR: prev rectangle is illogical")));
+  }
 
   update_hue_image(self, im->mat);
+
+  cv::Rect backup_prev_rect = cv::Rect(
+      self->prev_rect.x,
+      self->prev_rect.y,
+      self->prev_rect.width,
+      self->prev_rect.height);
   
   float sranges[] = { 0, 256 };
   const float* ranges[] = { sranges };
@@ -99,8 +127,27 @@ TrackedObject::Track(const v8::Arguments& args){
   r = cv::CamShift(self->prob, self->prev_rect,
         cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1));
 
+  cv::Rect bounds = r.boundingRect(); 
+  if (bounds.x >=0 && bounds.y >=0 && bounds.width > 1 && bounds.height > 1){
+    self->prev_rect = bounds;
+  } else {
+    //printf("CRAP> %i %i %i %i ;", self->prev_rect.x, self->prev_rect.y, self->prev_rect.width, self->prev_rect.height);
+    
+    // We have encountered a bug in opencv. Somehow the prev_rect has got mangled, so we 
+    // must reset it to a good value.
+    self->prev_rect = backup_prev_rect;
+  }
+
+
 	v8::Local<v8::Array> arr = v8::Array::New(4);
-	
+
+
+  arr->Set(0, Number::New(bounds.x));
+  arr->Set(1, Number::New(bounds.y));
+  arr->Set(2, Number::New(bounds.x + bounds.width));
+  arr->Set(3, Number::New(bounds.y + bounds.height));
+
+  /*
   cv::Point2f pts[4];
   r.points(pts);
 
@@ -108,6 +155,8 @@ TrackedObject::Track(const v8::Arguments& args){
     arr->Set(i, Number::New(pts[i].x));
     arr->Set(i+1, Number::New(pts[i].y));
   }
+*/
+
 	return scope.Close(arr);
 
 }
