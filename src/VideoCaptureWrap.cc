@@ -67,7 +67,7 @@ VideoCaptureWrap::VideoCaptureWrap(int device){
 	}
 }
 
-VideoCaptureWrap::VideoCaptureWrap(const string& filename){
+VideoCaptureWrap::VideoCaptureWrap(const std::string& filename){
   HandleScope scope;
 	cap.open(filename);
   // TODO! At the moment this only takes a full path - do relative too.
