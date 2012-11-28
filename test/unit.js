@@ -9,6 +9,16 @@ assertDeepSimilar = function(res, exp){
   assert.deepEqual(res, exp)
 }
 
+assertWithinRange = function(res, exp, range){
+  assert.ok((res - exp) < range || (res - exp) > -range, "Not within range:" + res + " (" + exp + "+- " + range + ")")  
+}
+
+assertWithinRanges = function(res, exp, range){
+  for (var i =0; i<res.length; i++){
+    assertWithinRange(res[i], exp[i], range);
+  }
+}
+
 vows.describe('Smoke Tests OpenCV').addBatch({
 	  "Importing": {
 
@@ -262,6 +272,33 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
 
+  }
+
+  , "CamShift" : {
+
+     "Can Create and Track" : {
+      topic : function(){
+        var cv = require('../lib/opencv')
+          , self = this
+        
+        cv.readImage('./examples/coin1.jpg', function(e, im){
+          cv.readImage('./examples/coin2.jpg', function(e, im2){
+            self.callback(im, im2, cv)
+          })
+        })
+      }
+      
+      , "create TrackedObject" : function(im, im2, cv){
+        var tracked = new cv.TrackedObject(im, [420, 110, 490, 170]);
+        assert.ok(tracked);
+      }
+
+      , "use TrackedObject.track" : function(im, im2, cv){
+          var tracked = new cv.TrackedObject(im, [420, 110, 490, 170], {channel: 'v'});
+          assertWithinRanges(tracked.track(im2), [386, 112, 459, 166], 10);
+      }
+    }
+  
   }
 
 

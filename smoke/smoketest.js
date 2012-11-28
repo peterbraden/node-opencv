@@ -1,4 +1,7 @@
 var cv = require('../lib/opencv')
+
+
+
 /*
 new cv.VideoCapture(0).read(function(mat){
 
@@ -15,7 +18,7 @@ new cv.VideoCapture(0).read(function(mat){
     
   })
 })
-*/
+
 
 
 cv.readImage("./examples/stuff.png", function(err, im){
@@ -32,3 +35,4 @@ cv.readImage("./examples/stuff.png", function(err, im){
   console.log(features)
     im.save('./out.jpg');   
 });
+*/

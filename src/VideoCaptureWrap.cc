@@ -46,7 +46,10 @@ VideoCaptureWrap::New(const Arguments &args) {
 
 	if (args[0]->IsNumber()){
 		v = new VideoCaptureWrap(args[0]->NumberValue());
-	} else {}  
+	} else {
+    //TODO - assumes that we have string, verify
+    v = new VideoCaptureWrap(std::string(*v8::String::AsciiValue(args[0]->ToString())));
+  }
 
 
 	v->Wrap(args.This());
@@ -62,6 +65,16 @@ VideoCaptureWrap::VideoCaptureWrap(int device){
 	if(!cap.isOpened()){
     v8::ThrowException(v8::Exception::Error(String::New("Camera could not be opened")));
 	}
+}
+
+VideoCaptureWrap::VideoCaptureWrap(const std::string& filename){
+  HandleScope scope;
+	cap.open(filename);
+  // TODO! At the moment this only takes a full path - do relative too.
+	if(!cap.isOpened()){
+    v8::ThrowException(v8::Exception::Error(String::New("Video file could not be opened (opencv reqs. non relative paths)")));
+	}
+
 }
 
 

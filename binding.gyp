@@ -9,6 +9,7 @@
         , "src/Contours.cc"
         , "src/Point.cc"
         , "src/VideoCaptureWrap.cc"
+        , "src/CamShift.cc"
         ]
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'

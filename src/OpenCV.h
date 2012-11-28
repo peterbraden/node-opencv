@@ -27,6 +27,8 @@ using namespace node;
 #define JSFUNC(NAME) \
 	static Handle<Value> NAME(const Arguments& args); 
 
+#define JSTHROW_TYPE(ERR) \
+  return v8::ThrowException(v8::Exception::TypeError(v8::String::New(ERR)));
 
 
 class OpenCV: public node::ObjectWrap{
