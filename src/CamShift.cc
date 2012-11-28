@@ -90,7 +90,7 @@ void update_chann_image(TrackedObject* t, cv::Mat image){
         t->mask);                                    //destination 
 
   //extract the hue channel, split: src, dest channels
-  vector<cv::Mat> hsvplanes;
+  std::vector<cv::Mat> hsvplanes;
   cv::split(t->hsv, hsvplanes);
   t->hue = hsvplanes[t->channel];
   
