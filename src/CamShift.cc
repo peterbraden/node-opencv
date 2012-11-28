@@ -1,4 +1,4 @@
-#include "Camshift.h"
+#include "CamShift.h"
 #include "OpenCV.h"
 #include "Matrix.h"
 
