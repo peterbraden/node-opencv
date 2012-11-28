@@ -2,6 +2,12 @@
 #include "OpenCV.h"
 #include "Matrix.h"
 
+
+#define CHANNEL_HUE 0
+#define CHANNEL_SATURATION 1
+#define CHANNEL_VALUE 2
+
+
 Persistent<FunctionTemplate> TrackedObject::constructor;
 
 void
@@ -31,6 +37,7 @@ TrackedObject::New(const Arguments &args) {
 
   Matrix* m = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
   cv::Rect r;
+  int channel = CHANNEL_HUE;
 
   if (args[1]->IsArray()){
     Local<Object> v8rec = args[1]->ToObject(); 
@@ -42,15 +49,37 @@ TrackedObject::New(const Arguments &args) {
   } else {
         JSTHROW_TYPE("Must pass rectangle to track")
   }
+  
+  if (args[2]->IsObject()){
+    Local<Object> opts = args[2]->ToObject();
 
-  TrackedObject *to = new TrackedObject(m->mat, r);  
+    if (opts->Get(String::New("channel"))->IsString()){
+      v8::String::Utf8Value c(opts->Get(String::New("channel"))->ToString());
+      std::string cc = std::string(*c);
+
+      if (cc == "hue" || cc == "h"){
+          channel = CHANNEL_HUE;
+      }
+
+      if (cc == "saturation" || cc == "s"){
+          channel = CHANNEL_SATURATION;
+      }
+          
+      if (cc == "value" || cc == "v"){
+          channel = CHANNEL_VALUE;
+      }
+    }
+  }
+
+  TrackedObject *to = new TrackedObject(m->mat, r, channel);  
+  
   
   to->Wrap(args.This());
   return args.This();
 }
 
 
-void update_hue_image(TrackedObject* t, cv::Mat image){
+void update_chann_image(TrackedObject* t, cv::Mat image){
   // Store HSV Hue Image
   cv::cvtColor(image, t->hsv, CV_BGR2HSV); // convert to HSV space
   //mask out-of-range values
@@ -63,14 +92,14 @@ void update_hue_image(TrackedObject* t, cv::Mat image){
   //extract the hue channel, split: src, dest channels
   vector<cv::Mat> hsvplanes;
   cv::split(t->hsv, hsvplanes);
-  t->hue = hsvplanes[0];
+  t->hue = hsvplanes[t->channel];
   
 
 }
 
-TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect){
- 
-  update_hue_image(this, image);
+TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect, int chan){
+  channel = chan;
+  update_chann_image(this, image);
   prev_rect = rect;
   
   // Calculate Histogram
@@ -111,7 +140,7 @@ TrackedObject::Track(const v8::Arguments& args){
     return v8::ThrowException(v8::Exception::TypeError(v8::String::New("OPENCV ERROR: prev rectangle is illogical")));
   }
 
-  update_hue_image(self, im->mat);
+  update_chann_image(self, im->mat);
 
   cv::Rect backup_prev_rect = cv::Rect(
       self->prev_rect.x,
