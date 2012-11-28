@@ -1,6 +1,8 @@
 #!/bin/bash
 node-gyp build && echo '-- Compiled OK -- 
 
-' && node examples/motion-track.js && 0 && node  smoke/smoketest.js && echo '-- Smoke Done, running tests --
+' && node  smoke/smoketest.js && echo '-- Smoke Done, running tests --
 
-' && npm test
+' && npm test && echo '-- Tests Run, runnning examples --
+(building example data)
+' && ./examples/make-example-files.sh && node examples/motion-track.js 
