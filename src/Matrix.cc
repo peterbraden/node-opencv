@@ -53,12 +53,13 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "erode", Erode);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "findContours", FindContours);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawContour", DrawContour);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawAllContours", DrawAllContours);
-	
+
   NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
   NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
 
@@ -102,7 +103,7 @@ Matrix::Matrix(): ObjectWrap() {
 
 
 Matrix::Matrix(int w, int h): ObjectWrap() {
-    mat = cv::Mat(w, h, CV_32FC3); 
+    mat = cv::Mat(w, h, CV_32FC3);
 	//TODO:Parametrizar esto
 	//mat = cv::Mat(h, w, CV_8UC3);
 }
@@ -160,7 +161,7 @@ Matrix::Get(const Arguments& args){
 }
 
 
-Handle<Value> 
+Handle<Value>
 Matrix::Set(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
@@ -197,7 +198,7 @@ Matrix::Set(const Arguments& args){
 }
 
 
-Handle<Value> 
+Handle<Value>
 Matrix::Size(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
@@ -208,7 +209,7 @@ Matrix::Size(const Arguments& args){
 	return scope.Close(arr);
 }
 
-Handle<Value> 
+Handle<Value>
 Matrix::Row(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
@@ -225,7 +226,7 @@ Matrix::Row(const Arguments& args){
 }
 
 
-Handle<Value> 
+Handle<Value>
 	Matrix::PixelRow(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
@@ -244,7 +245,7 @@ Handle<Value>
 	return scope.Close(arr);
 }
 
-Handle<Value> 
+Handle<Value>
 Matrix::Col(const Arguments& args){
   SETUP_FUNCTION(Matrix)
 
@@ -260,7 +261,7 @@ Matrix::Col(const Arguments& args){
 }
 
 
-Handle<Value> 
+Handle<Value>
 Matrix::PixelCol(const Arguments& args){
   SETUP_FUNCTION(Matrix)
 
@@ -278,21 +279,21 @@ Matrix::PixelCol(const Arguments& args){
   return scope.Close(arr);
 }
 
-Handle<Value> 
+Handle<Value>
 Matrix::Width(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
 	return scope.Close(Number::New(self->mat.size().width));
 }
 
-Handle<Value> 
+Handle<Value>
 Matrix::Height(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
 	return scope.Close(Number::New(self->mat.size().height));
 }
 
-Handle<Value> 
+Handle<Value>
 Matrix::Channels(const Arguments& args){
 	 SETUP_FUNCTION(Matrix)
 
@@ -383,7 +384,7 @@ void AfterAsyncToBufferAsync(uv_work_t *req) {
 	node::Buffer *buf = node::Buffer::New(baton->res.size());
 	uchar* data = (uchar*) Buffer::Data(buf);
 	memcpy(data, &baton->res[0], baton->res.size());
-	
+
   v8::Local<v8::Object> globalObj = v8::Context::GetCurrent()->Global();
 	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(v8::String::New("Buffer")));
 	v8::Handle<v8::Value> constructorArgs[3] = {buf->handle_, v8::Integer::New(baton->res.size()), v8::Integer::New(0)};
@@ -402,19 +403,19 @@ void AfterAsyncToBufferAsync(uv_work_t *req) {
   baton->cb.Dispose();
 
   delete baton;
-  
+
 //  return 0;
 }
 
 
-Handle<Value> 
+Handle<Value>
 Matrix::Ellipse(const v8::Arguments& args){
   SETUP_FUNCTION(Matrix)
 
   int x = args[0]->Uint32Value();
   int y = args[1]->Uint32Value();
   int width = args[2]->Uint32Value();
-  int height = args[3]->Uint32Value();  
+  int height = args[3]->Uint32Value();
   cv::Scalar color(0, 0, 255);
 
   if(args[4]->IsArray()) {
@@ -447,7 +448,7 @@ Matrix::Rectangle(const Arguments& args) {
 			Local<Object> objColor = args[2]->ToObject();
 			color = setColor(objColor);
 		}
-		
+
 		int x = xy->Get(0)->IntegerValue();
 		int y = xy->Get(1)->IntegerValue();
 
@@ -480,7 +481,7 @@ Matrix::Line(const Arguments& args) {
 			Local<Object> objColor = args[2]->ToObject();
 			color = setColor(objColor);
 		}
-		
+
 		int x1 = xy1->Get(0)->IntegerValue();
 		int y1 = xy1->Get(1)->IntegerValue();
 
@@ -512,7 +513,7 @@ Matrix::Save(const v8::Arguments& args){
 }
 
 
-Handle<Value> 
+Handle<Value>
 Matrix::Eye(const v8::Arguments& args){
 	HandleScope scope;
 
@@ -610,7 +611,7 @@ Matrix::AddWeighted(const v8::Arguments& args) {
 	int gamma = 0;
 
 	cv::addWeighted(src1->mat, alpha, src2->mat, beta, gamma, self->mat);
-	
+
 
 	return scope.Close(v8::Null());
 }
@@ -650,6 +651,18 @@ Matrix::Dilate(const v8::Arguments& args) {
 	cv::dilate(self->mat, self->mat, cv::Mat(), cv::Point(-1, -1), niters);
 
 	return scope.Close(v8::Null());
+}
+
+Handle<Value>
+Matrix::Erode(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+    int niters = args[0]->NumberValue();
+
+    cv::erode(self->mat, self->mat, cv::Mat(), cv::Point(-1, -1), niters);
+
+    return scope.Close(v8::Null());
 }
 
 
@@ -715,14 +728,14 @@ Matrix::GoodFeaturesToTrack(const v8::Arguments& args) {
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   std::vector<cv::Point2f> corners;
-  
+
   cv::Mat gray;
 
 	cvtColor(self->mat, gray, CV_BGR2GRAY);
   equalizeHist(gray, gray);
 
   cv::goodFeaturesToTrack(gray, corners, 500, 0.01, 10);
-  
+
   v8::Local<v8::Array> arr = v8::Array::New(corners.size());
 
 
@@ -743,14 +756,14 @@ Matrix::HoughLinesP(const v8::Arguments& args) {
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   std::vector<cv::Vec4i> lines;
-  
+
   cv::Mat gray;
 
 
   equalizeHist(self->mat, gray);
  // cv::Canny(gray, gray, 50, 200, 3);
   cv::HoughLinesP(gray, lines, 1, CV_PI/180, 80, 30, 10);
-  
+
   v8::Local<v8::Array> arr = v8::Array::New(lines.size());
 
 
