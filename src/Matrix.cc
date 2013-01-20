@@ -47,7 +47,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ptr", Ptr);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
@@ -549,16 +550,50 @@ Matrix::ConvertGrayscale(const v8::Arguments& args) {
 
 Handle<Value>
 Matrix::ConvertHSVscale(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+    if(self->mat.channels() != 3)
+        return v8::ThrowException(String::New("Image is no 3-channel"));
+
+    cv::Mat hsv;
+
+    cv::cvtColor(self->mat, hsv, CV_BGR2HSV);
+    hsv.copyTo(self->mat);
+
+    return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::GaussianBlur(const v8::Arguments& args) {
 	HandleScope scope;
+    cv::Size ksize;
+	cv::Mat blurred;
 
-	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
-	if(self->mat.channels() != 3)
-		return v8::ThrowException(String::New("Image is no 3-channel"));
+    Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 
-	cv::Mat hsv;
+    if (args.Length() < 1) {
+        ksize = cv::Size(5, 5);
+    }
+    else {
+        if(!args[0]->IsArray()) {
+            return ThrowException(Exception::TypeError(String::New(
+                "'ksize' argument must be a 2 double array")));
+        }
+        Local<Object> array = args[0]->ToObject();
+        // TODO: Length check
+        Local<Value> x = array->Get(0);
+        Local<Value> y = array->Get(1);
+        if(!x->IsNumber() || !y->IsNumber()) {
+            return ThrowException(Exception::TypeError(String::New(
+                "'ksize' argument must be a 2 double array")));
+        }
+        ksize = cv::Size(x->NumberValue(), y->NumberValue());
+    }
 
-	cv::cvtColor(self->mat, hsv, CV_BGR2HSV);
-	hsv.copyTo(self->mat);
+	cv::GaussianBlur(self->mat, blurred, ksize, 0);
+	blurred.copyTo(self->mat);
 
 	return scope.Close(v8::Null());
 }
