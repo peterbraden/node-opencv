@@ -15,6 +15,7 @@ class Contour: public node::ObjectWrap {
 
 	//JSFUNC(Size)
 	static Handle<Value> Size(const v8::Arguments&);
+	static Handle<Value> CornerCount(const v8::Arguments&);
 	static Handle<Value> Area(const v8::Arguments&);
 	static Handle<Value> ArcLength(const v8::Arguments&);
 	static Handle<Value> ApproxPolyDP(const v8::Arguments&);

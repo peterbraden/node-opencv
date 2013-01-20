@@ -24,6 +24,7 @@ Contour::Init(Handle<Object> target) {
 
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "cornerCount", CornerCount);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "area", Area);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "arcLength", ArcLength);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "approxPolyDP", ApproxPolyDP);
@@ -51,6 +52,9 @@ Contour::Contour(): ObjectWrap() {
 }
 
 
+// FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
+// also, this would allow to use ``Size`` for the function returning the number of corners
+// in the contour for better consistency with OpenCV.
 Handle<Value>
 Contour::Size(const Arguments &args) {
 	HandleScope scope;
@@ -60,6 +64,15 @@ Contour::Size(const Arguments &args) {
 	return scope.Close(Number::New(self->contours.size()));
 }
 
+Handle<Value>
+Contour::CornerCount(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+
+	return scope.Close(Number::New(self->contours[pos].size()));
+}
 
 Handle<Value>
 Contour::Area(const Arguments &args) {
@@ -91,7 +104,7 @@ Contour::ApproxPolyDP(const Arguments &args) {
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
-	bool epsilon = args[1]->NumberValue();
+	double epsilon = args[1]->NumberValue();
 	bool isClosed = args[2]->BooleanValue();
 
 	cv::Mat approxed;
