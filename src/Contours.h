@@ -17,5 +17,6 @@ class Contour: public node::ObjectWrap {
 	static Handle<Value> Size(const v8::Arguments&);
 	static Handle<Value> Area(const v8::Arguments&);
 	static Handle<Value> ArcLength(const v8::Arguments&);
+	static Handle<Value> ApproxPolyDP(const v8::Arguments&);
 };
 
