@@ -27,6 +27,7 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "area", Area);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "arcLength", ArcLength);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "approxPolyDP", ApproxPolyDP);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
 };
 
@@ -98,4 +99,15 @@ Contour::ApproxPolyDP(const Arguments &args) {
 	approxed.copyTo(self->contours[pos]);
 
 	return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Contour::IsConvex(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+
+	return scope.Close(Boolean::New(isContourConvex(cv::Mat(self->contours[pos]))));
 }
