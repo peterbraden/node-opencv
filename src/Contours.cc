@@ -25,6 +25,7 @@ Contour::Init(Handle<Object> target) {
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "area", Area);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "arcLength", ArcLength);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
 };
 
@@ -55,7 +56,6 @@ Contour::Size(const Arguments &args) {
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 
 	return scope.Close(Number::New(self->contours.size()));
-
 }
 
 
@@ -68,6 +68,16 @@ Contour::Area(const Arguments &args) {
 
 	//return scope.Close(Number::New(contourArea(self->contours)));
 	return scope.Close(Number::New(contourArea(cv::Mat(self->contours[pos]))));
+}
 
 
+Handle<Value>
+Contour::ArcLength(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+	bool isClosed = args[1]->BooleanValue();
+
+	return scope.Close(Number::New(arcLength(cv::Mat(self->contours[pos]), isClosed)));
 }
