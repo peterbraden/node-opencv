@@ -28,6 +28,7 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "area", Area);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "arcLength", ArcLength);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "approxPolyDP", ApproxPolyDP);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "boundingRect", BoundingRect);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
 };
@@ -112,6 +113,25 @@ Contour::ApproxPolyDP(const Arguments &args) {
 	approxed.copyTo(self->contours[pos]);
 
 	return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Contour::BoundingRect(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+
+	cv::Rect bounding =	cv::boundingRect(cv::Mat(self->contours[pos]));
+	Local<Object> rect = Object::New();
+
+	rect->Set(String::NewSymbol("x"), Number::New(bounding.x));
+	rect->Set(String::NewSymbol("y"), Number::New(bounding.y));
+	rect->Set(String::NewSymbol("width"), Number::New(bounding.width));
+	rect->Set(String::NewSymbol("height"), Number::New(bounding.height));
+
+	return scope.Close(rect);
 }
 
 
