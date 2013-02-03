@@ -58,6 +58,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(GoodFeaturesToTrack)
     JSFUNC(HoughLinesP)
 
+    JSFUNC(inRange)
+
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);
