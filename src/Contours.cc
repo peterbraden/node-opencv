@@ -24,7 +24,12 @@ Contour::Init(Handle<Object> target) {
 
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "cornerCount", CornerCount);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "area", Area);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "arcLength", ArcLength);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "approxPolyDP", ApproxPolyDP);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "boundingRect", BoundingRect);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
 };
 
@@ -48,6 +53,9 @@ Contour::Contour(): ObjectWrap() {
 }
 
 
+// FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
+// also, this would allow to use ``Size`` for the function returning the number of corners
+// in the contour for better consistency with OpenCV.
 Handle<Value>
 Contour::Size(const Arguments &args) {
 	HandleScope scope;
@@ -55,9 +63,17 @@ Contour::Size(const Arguments &args) {
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 
 	return scope.Close(Number::New(self->contours.size()));
-
 }
 
+Handle<Value>
+Contour::CornerCount(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+
+	return scope.Close(Number::New(self->contours[pos].size()));
+}
 
 Handle<Value>
 Contour::Area(const Arguments &args) {
@@ -68,6 +84,63 @@ Contour::Area(const Arguments &args) {
 
 	//return scope.Close(Number::New(contourArea(self->contours)));
 	return scope.Close(Number::New(contourArea(cv::Mat(self->contours[pos]))));
+}
 
 
+Handle<Value>
+Contour::ArcLength(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+	bool isClosed = args[1]->BooleanValue();
+
+	return scope.Close(Number::New(arcLength(cv::Mat(self->contours[pos]), isClosed)));
+}
+
+
+Handle<Value>
+Contour::ApproxPolyDP(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+	double epsilon = args[1]->NumberValue();
+	bool isClosed = args[2]->BooleanValue();
+
+	cv::Mat approxed;
+	approxPolyDP(cv::Mat(self->contours[pos]), approxed, epsilon, isClosed);
+	approxed.copyTo(self->contours[pos]);
+
+	return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Contour::BoundingRect(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+
+	cv::Rect bounding =	cv::boundingRect(cv::Mat(self->contours[pos]));
+	Local<Object> rect = Object::New();
+
+	rect->Set(String::NewSymbol("x"), Number::New(bounding.x));
+	rect->Set(String::NewSymbol("y"), Number::New(bounding.y));
+	rect->Set(String::NewSymbol("width"), Number::New(bounding.width));
+	rect->Set(String::NewSymbol("height"), Number::New(bounding.height));
+
+	return scope.Close(rect);
+}
+
+
+Handle<Value>
+Contour::IsConvex(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+
+	return scope.Close(Boolean::New(isContourConvex(cv::Mat(self->contours[pos]))));
 }

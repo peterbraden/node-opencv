@@ -2,12 +2,12 @@
 
 class Matrix: public node::ObjectWrap {
   public:
-  	
+
   	cv::Mat mat;
     static Persistent<FunctionTemplate> constructor;
     static void Init(Handle<Object> target);
     static Handle<Value> New(const Arguments &args);
-    Matrix();      
+    Matrix();
     Matrix(cv::Mat other, cv::Rect roi);
     Matrix(int rows, int cols);
     Matrix(int rows, int cols, int typ);
@@ -36,19 +36,21 @@ class Matrix: public node::ObjectWrap {
 
     JSFUNC(Save)
     JSFUNC(ToBuffer)
-	  
+
     JSFUNC(ToBufferAsync)
 
     JSFUNC(Resize)
 
     JSFUNC(ConvertGrayscale)
     JSFUNC(ConvertHSVscale)
+    JSFUNC(GaussianBlur)
     JSFUNC(Copy)
     JSFUNC(Ptr)
     JSFUNC(AddWeighted)
     JSFUNC(Split)
     JSFUNC(Canny)
     JSFUNC(Dilate)
+    JSFUNC(Erode)
 
     JSFUNC(FindContours)
     JSFUNC(DrawContour)
@@ -89,8 +91,8 @@ class Matrix: public node::ObjectWrap {
     static Handle<Value> Depth(const Arguments& args);
     static Handle<Value> Channels(const Arguments& args);
     static Handle<Value> StepOne(const Arguments& args);
-    
-    
+
+
 */
 
 };
