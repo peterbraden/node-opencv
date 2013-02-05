@@ -62,6 +62,8 @@ Matrix::Init(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
   NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
 
+	NODE_SET_PROTOTYPE_METHOD(constructor, "inRange", inRange);
+
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
 
@@ -794,4 +796,32 @@ Matrix::Resize(const v8::Arguments& args){
 
 
   return scope.Close(Undefined());
+}
+
+
+Handle<Value>
+Matrix::inRange(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+	/*if(self->mat.channels() != 3)
+		return v8::ThrowException(String::New("Image is no 3-channel"));*/
+
+	if(args[0]->IsArray() && args[1]->IsArray()) {
+		Local<Object> args_lowerb = args[0]->ToObject();
+		Local<Object> args_upperb = args[1]->ToObject();
+
+		cv::Scalar lowerb(0, 0, 0);
+		cv::Scalar upperb(0, 0, 0);
+
+		lowerb = setColor(args_lowerb);
+		upperb = setColor(args_upperb);
+
+		cv::Mat mask;
+		cv::inRange(self->mat, lowerb, upperb, mask);
+		mask.copyTo(self->mat);
+	}
+
+
+	return scope.Close(v8::Null());
 }
