@@ -133,6 +133,16 @@ doesn't work for you please get in touch.
 ## Changelog
 
 
+#### 0.0.10
+
+- Bug Fixes
+- @Contra added code that allows thickness and color args for ellipse
+- Camshift Support
+- @jtlebi added bindings for erode, gaussianBlur, arcLength, approxPolyDP, isConvex, cornerCount
+- @gluxon added bindings for inRange
+
+Thanks everyone!
+
 #### 0.0.9
 
 - toBuffer can now take a callback and be run async (re #21)
