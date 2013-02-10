@@ -14,12 +14,15 @@ class Contour: public node::ObjectWrap {
 	Contour();
 
 	//JSFUNC(Size)
+	static Handle<Value> Point(const v8::Arguments&);
 	static Handle<Value> Size(const v8::Arguments&);
 	static Handle<Value> CornerCount(const v8::Arguments&);
 	static Handle<Value> Area(const v8::Arguments&);
 	static Handle<Value> ArcLength(const v8::Arguments&);
 	static Handle<Value> ApproxPolyDP(const v8::Arguments&);
+	static Handle<Value> ConvexHull(const v8::Arguments&);
 	static Handle<Value> BoundingRect(const v8::Arguments&);
+	static Handle<Value> MinAreaRect(const v8::Arguments&);
 	static Handle<Value> IsConvex(const v8::Arguments&);
 };
 
