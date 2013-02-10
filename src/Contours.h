@@ -20,6 +20,7 @@ class Contour: public node::ObjectWrap {
 	static Handle<Value> Area(const v8::Arguments&);
 	static Handle<Value> ArcLength(const v8::Arguments&);
 	static Handle<Value> ApproxPolyDP(const v8::Arguments&);
+	static Handle<Value> ConvexHull(const v8::Arguments&);
 	static Handle<Value> BoundingRect(const v8::Arguments&);
 	static Handle<Value> MinAreaRect(const v8::Arguments&);
 	static Handle<Value> IsConvex(const v8::Arguments&);
