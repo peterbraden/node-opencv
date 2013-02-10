@@ -23,6 +23,7 @@ Contour::Init(Handle<Object> target) {
 	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 
+	NODE_SET_PROTOTYPE_METHOD(constructor, "point", Point);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "cornerCount", CornerCount);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "area", Area);
@@ -52,6 +53,23 @@ Contour::New(const Arguments &args) {
 Contour::Contour(): ObjectWrap() {
 }
 
+
+Handle<Value>
+Contour::Point(const Arguments &args) {
+	HandleScope scope;
+
+		Contour *self = ObjectWap::Unwrap<Contour>(args.This());
+		int pos   = args[0]->NumberValue();
+		int index = args[1]->NumberValue();
+
+		cv::Point point = self->contours[pos][index];
+
+		Local<Object> data = Object::New();
+		data->Set(String::NewSymbol("x"), Number::New(point.x));
+		data->Set(String::NewSymbol("y"), Number::New(point.y));
+
+		return scope.Close(data);
+}
 
 // FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
 // also, this would allow to use ``Size`` for the function returning the number of corners
