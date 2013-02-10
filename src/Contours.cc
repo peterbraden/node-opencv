@@ -30,6 +30,7 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "arcLength", ArcLength);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "approxPolyDP", ApproxPolyDP);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "boundingRect", BoundingRect);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "minAreaRect", BoundingRect);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
 };
@@ -58,7 +59,7 @@ Handle<Value>
 Contour::Point(const Arguments &args) {
 	HandleScope scope;
 
-		Contour *self = ObjectWap::Unwrap<Contour>(args.This());
+		Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 		int pos   = args[0]->NumberValue();
 		int index = args[1]->NumberValue();
 
@@ -148,6 +149,45 @@ Contour::BoundingRect(const Arguments &args) {
 	rect->Set(String::NewSymbol("y"), Number::New(bounding.y));
 	rect->Set(String::NewSymbol("width"), Number::New(bounding.width));
 	rect->Set(String::NewSymbol("height"), Number::New(bounding.height));
+
+	return scope.Close(rect);
+}
+
+
+Handle<Value>
+Contour::MinAreaRect(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+
+	cv::RotatedRect minimum = cv::minAreaRect(cv::Mat(self->contours[pos]));
+
+	Local<Object> rect = Object::New();
+	rect->Set(String::NewSymbol("angle"), Number::New(minimum.angle));
+
+	Local<Object> size = Object::New();
+	size->Set(String::NewSymbol("height"), Number::New(minimum.size.height));
+	size->Set(String::NewSymbol("width"), Number::New(minimum.size.width));
+	rect->Set(String::NewSymbol("size"), size);
+
+	Local<Object> center = Object::New();
+	center->Set(String::NewSymbol("x"), Number::New(minimum.center.x));
+	center->Set(String::NewSymbol("y"), Number::New(minimum.center.y));
+
+	v8::Local<v8::Array> points = v8::Array::New(4);
+
+	cv::Point2f rect_points[4];
+	minimum.points(rect_points);
+
+	for (unsigned int i=0; i<4; i++){
+		Local<Object> point = Object::New();
+		point->Set(String::NewSymbol("x"), Number::New(rect_points[i].x));
+		point->Set(String::NewSymbol("y"), Number::New(rect_points[i].y));
+		points->Set(i, point);
+	}
+
+	rect->Set(String::NewSymbol("points"), points);
 
 	return scope.Close(rect);
 }
