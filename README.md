@@ -49,7 +49,11 @@ base datastructure in OpenCV. Things like images are just matrices of pixels.
 
 #### Creation
 
-        new Matrix(width, height)
+        new Matrix(cols, rows)
+
+Or if you're thinking of a Matrix as an image:
+
+        new Matrix(height, width)
 
 Or you can use opencv to read in image files. Supported formats are in the OpenCV docs, but jpgs etc are supported.
 
