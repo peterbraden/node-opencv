@@ -49,7 +49,7 @@ base datastructure in OpenCV. Things like images are just matrices of pixels.
 
 #### Creation
 
-        new Matrix(cols, rows)
+        new Matrix(rows, cols)
 
 Or if you're thinking of a Matrix as an image:
 

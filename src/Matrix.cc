@@ -105,8 +105,8 @@ Matrix::Matrix(): ObjectWrap() {
 }
 
 
-Matrix::Matrix(int cols, int rows): ObjectWrap() {
-    mat = cv::Mat(cols, rows, CV_32FC3);
+Matrix::Matrix(int rows, int cols): ObjectWrap() {
+    mat = cv::Mat(rows, cols, CV_32FC3);
 }
 
 Matrix::Matrix(cv::Mat m, cv::Rect roi): ObjectWrap() {
