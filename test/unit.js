@@ -250,12 +250,12 @@ vows.describe('Smoke Tests OpenCV').addBatch({
   }
 
 
-  , "ImageStream" : {
+  , "ImageDataStream" : {
     topic : require('../lib/opencv')
 
     , "pipe" : {
       topic : function(cv){
-        var s = new cv.ImageStream()
+        var s = new cv.ImageDataStream()
           , self = this
         s.on('load', function(im){ 
           assert.ok(im)

@@ -65,15 +65,30 @@ Or you can use opencv to read in image files. Supported formats are in the OpenC
           ...
         })
 
-If you need to pipe data into an image, you can use an imagestream:
+If you need to pipe data into an image, you can use an ImageDataStream:
+
+        var s = new cv.ImageDataStream()
+
+        s.on('load', function(matrix){
+          ...
+        })
+
+        fs.createReadStream('./examples/test.jpg').pipe(s);
+
+If however, you have a series of images, and you wish to stream them into a
+stream of Matrices, you can use an ImageStream. Thus:
 
         var s = new cv.ImageStream()
 
-        s.on('load', function(matrix){ 
-          ...
-        }) 
+        s.on('data', function(matrix){
+           ...
+        })
 
-        fs.createReadStream('./examples/test.jpg').pipe(s);        
+        ardrone.createPngStream().pipe(s);
+
+Note: Each 'data' event into the ImageStream should be a complete image buffer.
+
+
 
 #### Accessing Data
 
