@@ -29,7 +29,7 @@ Or to build the repo:
 
 
         cv.readImage("./examples/test.jpg", function(err, im){
-          im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, function(err, faces){
+          im.detectObject(cv.FACE_CASCADE, {}, function(err, faces){
             for (var i=0;i<faces.length; i++){
               var x = faces[i]
               im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
@@ -117,6 +117,7 @@ detection. This can be used for face detection etc.
 
         mat.detectObject(haar_cascade_xml, opts, function(err, matches){})
 
+For convenience in face recognition, cv.FACE_CASCADE is a cascade that can be used for frontal face recognition.
 
 Also:
 

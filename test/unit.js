@@ -179,7 +179,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
           , cb = this.callback
 
         cv.readImage("./examples/mona.png", function(err, im){
-          im.detectObject("./data/haarcascade_frontalface_alt.xml", {}, cb)
+          im.detectObject(cv.FACE_CASCADE, {}, cb)
         })  
       }
 
