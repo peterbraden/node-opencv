@@ -129,6 +129,39 @@ Also:
         mat.drawContour
         mat.drawAllContours
 
+### Using Contours
+
+`findContours` returns a `Contours` collection object, not a native array. This object provides
+functions for accessing, computing with, and altering the contours contained in it.
+See [relevant source code](src/Contours.cc) and [examples](examples/)
+
+        var contours = im.findContours;
+
+        # Count of contours in the Contours object
+        contours.size();
+
+        # Count of corners(verticies) of contour `index`
+        contours.cornerCount(index);
+
+        # Access vertex data of contours
+        for(var c = 0; c < contours.size(); ++c) {
+          console.log("Contour " + c);
+          for(var i = 0; i < contours.cornerCount(c); ++i) {
+            var point = contours.point(c, i);
+            console.log("(" + point.x + "," + point.y + ")");"
+          }
+        }
+
+        # Computations of contour `index`
+        contours.area(index);
+        contours.arcLength(index, isClosed);
+        contours.boundingRect(index);
+        contours.minAreaRect(index);
+        contours.isConvex(index);
+
+        # Destructively alter contour `index`
+        contours.approxPolyDP(index, epsilon, isClosed);
+        contours.convexHull(index, clockwise);
 
 ## MIT License
 The library is distributed under the MIT License - if for some reason that 
