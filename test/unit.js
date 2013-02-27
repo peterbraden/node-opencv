@@ -273,6 +273,29 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
 
   }
+  , "ImageStream" :{
+    topic : require('../lib/opencv')
+    , "write" : {
+      topic: function(cv){
+        var s = new cv.ImageStream()
+          , im = fs.readFileSync('./examples/mona.png')
+          , self = this;
+
+        s.on('data', function(m){
+          self.callback(null, m)
+        })
+        s.write(im);
+      }
+      , "receives data" : function(mat){
+        assert.deepEqual(mat.size(), [756,500])
+      }
+    }
+
+  }
+  , "ObjectDetectionStream" :{
+    topic : require('../lib/opencv')
+
+  }
 
   , "CamShift" : {
 
