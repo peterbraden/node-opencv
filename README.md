@@ -185,6 +185,16 @@ doesn't work for you please get in touch.
 
 ## Changelog
 
+#### 0.0.11
+
+- Bug Fixes
+- ImageStream becomes ImageDataStream, and new ImageStream allows multiple images to be
+streamed as matrices, for example, with an object detection stream.
+- @ryansouza improved documentation
+- Correcting matrix constructor (thanks @gluxon)
+- @Michael Smith expanded Contours functionality.
+
+Thanks all!
 
 #### 0.0.10
 
