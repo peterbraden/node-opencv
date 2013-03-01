@@ -14,5 +14,6 @@
     "preinstall": "node-gyp clean rebuild",
     "test": "vows test/unit.js"
   },
+  "keywords" : ["opencv", "computer", "vision", "quadrocopter"],
   "main": "./lib/opencv"
 }
