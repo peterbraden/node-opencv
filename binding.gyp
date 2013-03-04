@@ -10,6 +10,7 @@
         , "src/Point.cc"
         , "src/VideoCaptureWrap.cc"
         , "src/CamShift.cc"
+        , "src/HighGUI.cc"
         ]
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'

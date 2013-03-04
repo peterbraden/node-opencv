@@ -5,6 +5,7 @@
 #include "VideoCaptureWrap.h"
 #include "Contours.h"
 #include "CamShift.h"
+#include "HighGUI.h"
 
 
 extern "C" void
@@ -17,6 +18,8 @@ init(Handle<Object> target) {
     VideoCaptureWrap::Init(target);
     Contour::Init(target);
 	  TrackedObject::Init(target);
+	  
+    NamedWindow::Init(target);
 };
 
 NODE_MODULE(opencv, init)

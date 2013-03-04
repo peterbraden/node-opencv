@@ -1,5 +1,13 @@
 var cv = require('../lib/opencv')
 
+var win = new cv.NamedWindow("foo");
+cv.readImage('./examples/stuff.png', function(e, im){
+  win.show(im);
+  setTimeout(function(){
+    win.destroy();
+  }, 1000)
+})
+
 
 
 /*
