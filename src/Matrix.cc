@@ -37,6 +37,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "width", Width);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "height", Height);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "clone", Clone);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "toBufferAsync", ToBufferAsync);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
@@ -209,6 +210,18 @@ Matrix::Size(const Arguments& args){
 
 	return scope.Close(arr);
 }
+
+Handle<Value>
+Matrix::Clone(const Arguments& args){
+	SETUP_FUNCTION(Matrix)
+
+  Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+  Matrix *m = ObjectWrap::Unwrap<Matrix>(im_h);
+  m->mat = self->mat.clone();
+
+  return scope.Close(im_h);
+}
+
 
 Handle<Value>
 Matrix::Row(const Arguments& args){

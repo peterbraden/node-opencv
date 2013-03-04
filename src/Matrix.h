@@ -28,6 +28,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Width)
     JSFUNC(Height)
     JSFUNC(Channels)
+    JSFUNC(Clone)
 
     JSFUNC(Ellipse)
     JSFUNC(Rectangle)
