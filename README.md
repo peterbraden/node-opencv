@@ -185,6 +185,10 @@ doesn't work for you please get in touch.
 
 ## Changelog
 
+#### 0.0.12
+- Matrix clone()
+- NamedWindow Support
+
 #### 0.0.11
 
 - Bug Fixes
