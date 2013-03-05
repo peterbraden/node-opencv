@@ -41,6 +41,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(ToBufferAsync)
 
     JSFUNC(Resize)
+    JSFUNC(PyrDown)
+    JSFUNC(PyrUp)
 
     JSFUNC(ConvertGrayscale)
     JSFUNC(ConvertHSVscale)

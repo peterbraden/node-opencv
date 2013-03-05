@@ -45,6 +45,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "line", Line);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrDown", PyrDown);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrUp", PyrUp);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
@@ -857,6 +859,21 @@ Matrix::Resize(const v8::Arguments& args){
   return scope.Close(Undefined());
 }
 
+Handle<Value>
+Matrix::PyrDown(const v8::Arguments& args){
+	SETUP_FUNCTION(Matrix)
+
+  cv::pyrDown(self->mat, self->mat);
+  return scope.Close(v8::Undefined());
+}
+
+Handle<Value>
+Matrix::PyrUp(const v8::Arguments& args){
+	SETUP_FUNCTION(Matrix)
+
+  cv::pyrUp(self->mat, self->mat);
+  return scope.Close(v8::Undefined());
+}
 
 Handle<Value>
 Matrix::inRange(const v8::Arguments& args) {
