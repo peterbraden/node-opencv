@@ -9,6 +9,7 @@
         , "src/Contours.cc"
         , "src/Point.cc"
         , "src/VideoCaptureWrap.cc"
+        , "src/VideoWriter.cc"
         , "src/CamShift.cc"
         , "src/HighGUI.cc"
         ]

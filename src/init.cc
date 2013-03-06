@@ -3,6 +3,7 @@
 #include "Matrix.h"
 #include "CascadeClassifierWrap.h"
 #include "VideoCaptureWrap.h"
+#include "VideoWriter.h"
 #include "Contours.h"
 #include "CamShift.h"
 #include "HighGUI.h"
@@ -16,6 +17,7 @@ init(Handle<Object> target) {
     Matrix::Init(target);
     CascadeClassifierWrap::Init(target);
     VideoCaptureWrap::Init(target);
+    VideoWriterWrap::Init(target);
     Contour::Init(target);
 	  TrackedObject::Init(target);
 	  
