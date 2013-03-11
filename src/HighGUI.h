@@ -15,5 +15,6 @@ class NamedWindow: public node::ObjectWrap {
 
     JSFUNC(Show);
     JSFUNC(Destroy);
+    JSFUNC(BlockingWaitKey);
 
 };

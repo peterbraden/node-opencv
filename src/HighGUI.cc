@@ -19,6 +19,7 @@ NamedWindow::Init(Handle<Object> target) {
 
 	  NODE_SET_PROTOTYPE_METHOD(constructor, "show", Show);
 	  NODE_SET_PROTOTYPE_METHOD(constructor, "destroy", Destroy);
+	  NODE_SET_PROTOTYPE_METHOD(constructor, "blockingWaitKey", BlockingWaitKey);
     target->Set(String::NewSymbol("NamedWindow"), constructor->GetFunction());
 };
 
@@ -64,4 +65,16 @@ NamedWindow::Destroy(const v8::Arguments& args){
 	SETUP_FUNCTION(NamedWindow)
   cv::destroyWindow(self->winname);
 	return scope.Close(args.Holder());
+}
+
+
+Handle<Value>
+NamedWindow::BlockingWaitKey(const v8::Arguments& args){
+	SETUP_FUNCTION(NamedWindow)
+	int time = 0;
+  if (args.Length() > 0){
+    time = args[1]->IntegerValue();
+  }
+  int res = cv::waitKey(time);
+	return scope.Close(Number::New(res));
 }
