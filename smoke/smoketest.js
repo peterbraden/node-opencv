@@ -1,5 +1,10 @@
 var cv = require('../lib/opencv')
 
+
+
+var facerec = new cv.FaceRecognizer(); 
+
+/*
 var win = new cv.NamedWindow("foo");
 cv.readImage('./examples/stuff.png', function(e, im){
   im.pyrDown();
@@ -8,7 +13,7 @@ cv.readImage('./examples/stuff.png', function(e, im){
   win.destroy();
 
 })
-
+*/
 
 
 /*

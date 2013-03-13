@@ -11,6 +11,7 @@
         , "src/VideoCaptureWrap.cc"
         , "src/CamShift.cc"
         , "src/HighGUI.cc"
+        , "src/FaceRecognizer.cc"
         ]
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'
