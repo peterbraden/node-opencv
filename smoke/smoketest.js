@@ -1,13 +1,17 @@
 var cv = require('../lib/opencv')
 
+var trainingData = []
 
+for (var i = 1; i< 41; i++){
+  for (var j = 1; j<10; j++){
+    trainingData.push([i,"/Users/peterbraden/Downloads/orl_faces/s" + i + "/" + j + ".pgm" ])
+  }
+}
 
 var facerec = new cv.FaceRecognizer(); 
-facerec.train([
-   [0, '/Users/peterbraden/Downloads/orl_faces/s1/1.pgm']
- , [0, '/Users/peterbraden/Downloads/orl_faces/s1/2.pgm']
-])
+facerec.train(trainingData);
 
+console.log(facerec.predictSync('/Users/peterbraden/Downloads/orl_faces/s1/10.pgm'));
 
 
 /*

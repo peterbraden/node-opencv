@@ -5,6 +5,22 @@
 
 #include "Matrix.h"
 
+
+// Todo, move somewhere useful
+cv::Mat fromMatrixOrFilename(Local<Value> v){
+  cv::Mat im;
+  if (v->IsString()){
+    std::string filename = std::string(*v8::String::AsciiValue(v->ToString()));
+    im = cv::imread(filename);
+    //std::cout<< im.size();
+  } else {
+    Matrix *img = ObjectWrap::Unwrap<Matrix>(v->ToObject());
+    im = img->mat;
+  }
+  return im;
+}
+
+
 void AsyncPredict(uv_work_t *req);
 void AfterAsyncPredict(uv_work_t *req);
 
@@ -73,14 +89,7 @@ FaceRecognizerWrap::Train(const Arguments& args){
       }
 
 	   int label = valarr->Get(0)->Uint32Value();
-     cv::Mat im;
-     if (valarr->Get(1)->IsString()){
-      std::string filename = std::string(*v8::String::AsciiValue(valarr->Get(1)->ToString()));
-      im = cv::imread(filename);
-     } else {
-       Matrix *img = ObjectWrap::Unwrap<Matrix>(valarr->Get(1)->ToObject());
-       im = img->mat;
-     }
+     cv::Mat im = fromMatrixOrFilename(valarr->Get(1));
      labels.push_back(label);
      images.push_back(im);
   }
@@ -94,9 +103,16 @@ FaceRecognizerWrap::Train(const Arguments& args){
 Handle<Value>
 FaceRecognizerWrap::PredictSync(const Arguments& args){
 	SETUP_FUNCTION(FaceRecognizerWrap)
-
+ 
+  cv::Mat im = fromMatrixOrFilename(args[0]);//TODO CHECK!
+  cv::cvtColor(im, im, CV_RGB2GRAY);
+ // int predictedLabel = self->rec->predict(im);
+  
+  int predictedLabel = -1;
+  double confidence = 0.0;
+  self->rec->predict(im, predictedLabel, confidence);
+//  std::cout << confidence;
+  return scope.Close(Number::New(predictedLabel));
   
 }
-
-
 #endif // End version > 2.4
