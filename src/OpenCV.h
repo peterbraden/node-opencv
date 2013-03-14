@@ -30,6 +30,8 @@ using namespace node;
 #define JSTHROW_TYPE(ERR) \
   return v8::ThrowException(v8::Exception::TypeError(v8::String::New(ERR)));
 
+#define JSTHROW(ERR) \
+  return v8::ThrowException(v8::Exception::Error(v8::String::New(ERR)));
 
 class OpenCV: public node::ObjectWrap{
   public:

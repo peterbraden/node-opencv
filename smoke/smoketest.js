@@ -3,6 +3,12 @@ var cv = require('../lib/opencv')
 
 
 var facerec = new cv.FaceRecognizer(); 
+facerec.train([
+   [0, '/Users/peterbraden/Downloads/orl_faces/s1/1.pgm']
+ , [0, '/Users/peterbraden/Downloads/orl_faces/s1/2.pgm']
+])
+
+
 
 /*
 var win = new cv.NamedWindow("foo");
