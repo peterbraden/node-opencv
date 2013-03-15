@@ -7,21 +7,25 @@
 class FaceRecognizerWrap: public node::ObjectWrap {
   public:
     cv::Ptr<cv::FaceRecognizer> rec;
+    int typ;
 
     static Persistent<FunctionTemplate> constructor;
     static void Init(Handle<Object> target);
     static Handle<Value> New(const Arguments &args);
 
-    FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f);
+    FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f, int type);
 
     JSFUNC(CreateLBPH)
     JSFUNC(CreateEigen)
     JSFUNC(CreateFisher)
     
-    JSFUNC(Train)
-    JSFUNC(Update)
+    JSFUNC(TrainSync)
+    //JSFUNC(Train)
+    JSFUNC(UpdateSync)
+    //JSFUNC(Update)
     
     JSFUNC(PredictSync)
+    // JSFUNC(Predict)
     //static void EIO_Predict(eio_req *req);
     //static int EIO_AfterPredict(eio_req *req);
 

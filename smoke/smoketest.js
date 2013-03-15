@@ -11,7 +11,7 @@ for (var i = 1; i< 41; i++){
 cv.readImage("/Users/peterbraden/Downloads/orl_faces/s6/10.pgm", function(e, im){
 
   var facerec = cv.FaceRecognizer.createFisherFaceRecognizer(); 
-  facerec.train(trainingData);
+  facerec.trainSync(trainingData);
 
   console.log(facerec.predictSync(im));
 

@@ -5,6 +5,9 @@
 
 #include "Matrix.h"
 
+#define EIGEN 0
+#define LBPH 1
+#define FISHER 2
 
 // Todo, move somewhere useful
 cv::Mat fromMatrixOrFilename(Local<Value> v){
@@ -39,7 +42,7 @@ FaceRecognizerWrap::Init(Handle<Object> target) {
     NODE_SET_METHOD(constructor, "createEigenFaceRecognizer", CreateEigen);
     NODE_SET_METHOD(constructor, "createFisherFaceRecognizer", CreateFisher);
 
-    NODE_SET_PROTOTYPE_METHOD(constructor, "train", Train);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "trainSync", TrainSync);
     NODE_SET_PROTOTYPE_METHOD(constructor, "predictSync", PredictSync);
 
 
@@ -55,7 +58,7 @@ FaceRecognizerWrap::New(const Arguments &args) {
 
   // By default initialize LBPH
   cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(1, 8, 8, 8, 80.0);
-  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f);
+  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
 
   pt->Wrap(args.This());
   return args.This();
@@ -82,7 +85,7 @@ FaceRecognizerWrap::CreateLBPH(const Arguments &args) {
   cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(
       radius, neighbors, grid_x, grid_y, threshold
   );
-  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f);
+  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
 
   pt->Wrap(n);
   return n;
@@ -103,7 +106,7 @@ FaceRecognizerWrap::CreateEigen(const Arguments &args) {
   cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer(
       components, threshold
   );
-  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f);
+  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, EIGEN);
 
   pt->Wrap(n);
   return n;
@@ -124,23 +127,21 @@ FaceRecognizerWrap::CreateFisher(const Arguments &args) {
   cv::Ptr<cv::FaceRecognizer> f = cv::createFisherFaceRecognizer(
       components, threshold
   );
-  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f);
+  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, FISHER);
 
   pt->Wrap(n);
   return n;
 }
 
 
-FaceRecognizerWrap::FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f){
-  rec = f; 
+FaceRecognizerWrap::FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f, int type){
+  rec = f;
+  typ = type;
 }
 
-Handle<Value>
-FaceRecognizerWrap::Train(const Arguments& args){
-	SETUP_FUNCTION(FaceRecognizerWrap)
 
-  cv::vector<cv::Mat> images;
-  cv::vector<int> labels;
+Handle<Value> UnwrapTrainingData(const Arguments& args, cv::vector<cv::Mat>* images, cv::vector<int>* labels){
+
 
   if (args.Length() < 1 || !args[0]->IsArray()){
     JSTHROW("FaceRecognizer.train takes a list of [<int> label, image] tuples")
@@ -166,11 +167,51 @@ FaceRecognizerWrap::Train(const Arguments& args){
      cv::Mat im = fromMatrixOrFilename(valarr->Get(1));
      im = im.clone();
      cv::cvtColor(im, im, CV_RGB2GRAY);
-     labels.push_back(label);
-     images.push_back(im);
+     labels->push_back(label);
+     images->push_back(im);
+  }
+  return v8::Undefined();
+}
+
+Handle<Value>
+FaceRecognizerWrap::TrainSync(const Arguments& args){
+	SETUP_FUNCTION(FaceRecognizerWrap)
+
+  cv::vector<cv::Mat> images;
+  cv::vector<int> labels;
+
+  Handle<Value> exception = UnwrapTrainingData(args, &images, &labels);
+  if (!exception->IsUndefined()){
+    return exception;
   }
 
   self->rec->train(images, labels);
+
+  return scope.Close(v8::Undefined());
+}
+
+Handle<Value>
+FaceRecognizerWrap::UpdateSync(const Arguments& args){
+	SETUP_FUNCTION(FaceRecognizerWrap)
+
+
+  if (self->typ == EIGEN){
+    JSTHROW("Eigen Recognizer does not support update")
+  }
+  if (self->typ == FISHER){
+    JSTHROW("Fisher Recognizer does not support update")
+  }
+
+  cv::vector<cv::Mat> images;
+  cv::vector<int> labels;
+
+
+  Handle<Value> exception = UnwrapTrainingData(args, &images, &labels);
+  if (!exception->IsUndefined()){
+    return exception;
+  }
+
+  self->rec->update(images, labels);
 
   return scope.Close(v8::Undefined());
 }
@@ -194,4 +235,9 @@ FaceRecognizerWrap::PredictSync(const Arguments& args){
 
   return scope.Close(res);
 }
+
+
+
+
+
 #endif // End version > 2.4
