@@ -11,7 +11,7 @@ for (var i = 1; i< 41; i++){
 var facerec = new cv.FaceRecognizer(); 
 facerec.train(trainingData);
 
-console.log(facerec.predictSync('/Users/peterbraden/Downloads/orl_faces/s1/10.pgm'));
+console.log(facerec.predictSync('/Users/peterbraden/Downloads/orl_faces/s6/10.pgm'));
 
 
 /*

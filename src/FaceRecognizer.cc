@@ -49,8 +49,8 @@ FaceRecognizerWrap::New(const Arguments &args) {
   if (args.This()->InternalFieldCount() == 0)
     JSTHROW_TYPE("Cannot Instantiate without new")
 
-  // By default initialize eigenface
-  cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer();  
+  // By default initialize LBPH
+  cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(1, 8, 8, 8, 80.0);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f);
 
   pt->Wrap(args.This());
@@ -90,6 +90,8 @@ FaceRecognizerWrap::Train(const Arguments& args){
 
 	   int label = valarr->Get(0)->Uint32Value();
      cv::Mat im = fromMatrixOrFilename(valarr->Get(1));
+     im = im.clone();
+     cv::cvtColor(im, im, CV_RGB2GRAY);
      labels.push_back(label);
      images.push_back(im);
   }
@@ -103,16 +105,19 @@ FaceRecognizerWrap::Train(const Arguments& args){
 Handle<Value>
 FaceRecognizerWrap::PredictSync(const Arguments& args){
 	SETUP_FUNCTION(FaceRecognizerWrap)
- 
+
   cv::Mat im = fromMatrixOrFilename(args[0]);//TODO CHECK!
   cv::cvtColor(im, im, CV_RGB2GRAY);
  // int predictedLabel = self->rec->predict(im);
-  
+
   int predictedLabel = -1;
   double confidence = 0.0;
   self->rec->predict(im, predictedLabel, confidence);
-//  std::cout << confidence;
-  return scope.Close(Number::New(predictedLabel));
-  
+
+  v8::Local<v8::Object> res = v8::Object::New();
+  res->Set(v8::String::New("id"), v8::Number::New(predictedLabel));
+  res->Set(v8::String::New("confidence"), v8::Number::New(confidence));
+
+  return scope.Close(res);
 }
 #endif // End version > 2.4
