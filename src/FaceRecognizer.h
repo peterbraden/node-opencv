@@ -14,6 +14,10 @@ class FaceRecognizerWrap: public node::ObjectWrap {
 
     FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f);
 
+    JSFUNC(CreateLBPH)
+    JSFUNC(CreateEigen)
+    JSFUNC(CreateFisher)
+    
     JSFUNC(Train)
     JSFUNC(Update)
     

@@ -34,13 +34,17 @@ FaceRecognizerWrap::Init(Handle<Object> target) {
       constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(FaceRecognizerWrap::New));
       constructor->InstanceTemplate()->SetInternalFieldCount(1);
       constructor->SetClassName(String::NewSymbol("FaceRecognizer"));
- 
+
+    NODE_SET_METHOD(constructor, "createLBPHFaceRecognizer", CreateLBPH);
+    NODE_SET_METHOD(constructor, "createEigenFaceRecognizer", CreateEigen);
+    NODE_SET_METHOD(constructor, "createFisherFaceRecognizer", CreateFisher);
+
     NODE_SET_PROTOTYPE_METHOD(constructor, "train", Train);
     NODE_SET_PROTOTYPE_METHOD(constructor, "predictSync", PredictSync);
 
 
     target->Set(String::NewSymbol("FaceRecognizer"), constructor->GetFunction());
-};    
+};
 
 Handle<Value>
 FaceRecognizerWrap::New(const Arguments &args) {
@@ -56,6 +60,76 @@ FaceRecognizerWrap::New(const Arguments &args) {
   pt->Wrap(args.This());
   return args.This();
 }
+
+Handle<Value>
+FaceRecognizerWrap::CreateLBPH(const Arguments &args) {
+  HandleScope scope;
+
+  int radius = 1;
+  int neighbors = 8;
+  int grid_x = 8;
+  int grid_y = 8;
+  double threshold = 80;
+
+  INT_FROM_ARGS(radius, 0)
+  INT_FROM_ARGS(neighbors, 1)
+  INT_FROM_ARGS(grid_x, 2)
+  INT_FROM_ARGS(grid_y, 3)
+  DOUBLE_FROM_ARGS(threshold, 4)
+
+  Local<Object> n = FaceRecognizerWrap::constructor->GetFunction()->NewInstance();
+
+  cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(
+      radius, neighbors, grid_x, grid_y, threshold
+  );
+  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f);
+
+  pt->Wrap(n);
+  return n;
+}
+
+Handle<Value>
+FaceRecognizerWrap::CreateEigen(const Arguments &args) {
+  HandleScope scope;
+
+  int components = 0;
+  double threshold = DBL_MAX;
+
+  INT_FROM_ARGS(components, 0)
+  DOUBLE_FROM_ARGS(threshold, 1)
+
+  Local<Object> n = FaceRecognizerWrap::constructor->GetFunction()->NewInstance();
+
+  cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer(
+      components, threshold
+  );
+  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f);
+
+  pt->Wrap(n);
+  return n;
+}
+
+Handle<Value>
+FaceRecognizerWrap::CreateFisher(const Arguments &args) {
+  HandleScope scope;
+
+  int components = 0;
+  double threshold = DBL_MAX;
+
+  INT_FROM_ARGS(components, 0)
+  DOUBLE_FROM_ARGS(threshold, 1)
+
+  Local<Object> n = FaceRecognizerWrap::constructor->GetFunction()->NewInstance();
+
+  cv::Ptr<cv::FaceRecognizer> f = cv::createFisherFaceRecognizer(
+      components, threshold
+  );
+  FaceRecognizerWrap *pt = new FaceRecognizerWrap(f);
+
+  pt->Wrap(n);
+  return n;
+}
+
 
 FaceRecognizerWrap::FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f){
   rec = f; 

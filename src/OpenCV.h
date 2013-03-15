@@ -33,6 +33,17 @@ using namespace node;
 #define JSTHROW(ERR) \
   return v8::ThrowException(v8::Exception::Error(v8::String::New(ERR)));
 
+
+#define INT_FROM_ARGS(NAME, IND) \
+  if (args[IND]->IsInt32()){ \
+    NAME = args[IND]->Uint32Value(); \
+  }
+
+#define DOUBLE_FROM_ARGS(NAME, IND) \
+  if (args[IND]->IsInt32()){ \
+    NAME = args[IND]->NumberValue(); \
+  }
+
 class OpenCV: public node::ObjectWrap{
   public:
     static void Init(Handle<Object> target);
