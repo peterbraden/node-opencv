@@ -43,8 +43,12 @@ FaceRecognizerWrap::Init(Handle<Object> target) {
     NODE_SET_METHOD(constructor, "createFisherFaceRecognizer", CreateFisher);
 
     NODE_SET_PROTOTYPE_METHOD(constructor, "trainSync", TrainSync);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "updateSync", UpdateSync);
     NODE_SET_PROTOTYPE_METHOD(constructor, "predictSync", PredictSync);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "saveSync", SaveSync);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "loadSync", LoadSync);
 
+    NODE_SET_PROTOTYPE_METHOD(constructor, "getMat", GetMat);
 
     target->Set(String::NewSymbol("FaceRecognizer"), constructor->GetFunction());
 };
@@ -237,7 +241,43 @@ FaceRecognizerWrap::PredictSync(const Arguments& args){
 }
 
 
+Handle<Value>
+FaceRecognizerWrap::SaveSync(const Arguments& args){
+	SETUP_FUNCTION(FaceRecognizerWrap)
+  if (!args[0]->IsString()){
+    JSTHROW("Save takes a filename")
+  }
+  std::string filename = std::string(*v8::String::AsciiValue(args[0]->ToString()));
+  self->rec->save(filename);
+  return v8::Undefined();
+}
 
+Handle<Value>
+FaceRecognizerWrap::LoadSync(const Arguments& args){
+	SETUP_FUNCTION(FaceRecognizerWrap)
+  if (!args[0]->IsString()){
+    JSTHROW("Load takes a filename")
+  }
+  std::string filename = std::string(*v8::String::AsciiValue(args[0]->ToString()));
+  self->rec->load(filename);
+  return v8::Undefined();
+}
+
+Handle<Value>
+FaceRecognizerWrap::GetMat(const Arguments& args){
+	SETUP_FUNCTION(FaceRecognizerWrap)
+  if (!args[0]->IsString()){
+    JSTHROW("getMat takes a key")
+  }
+  std::string key = std::string(*v8::String::AsciiValue(args[0]->ToString()));
+  cv::Mat m = self->rec->getMat(key);
+
+  Local<Object> im = Matrix::constructor->GetFunction()->NewInstance();
+  Matrix *img = ObjectWrap::Unwrap<Matrix>(im);
+  img->mat = m;
+
+  return im;
+}
 
 
 #endif // End version > 2.4

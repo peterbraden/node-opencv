@@ -10,15 +10,12 @@ for (var i = 1; i< 41; i++){
 
 cv.readImage("/Users/peterbraden/Downloads/orl_faces/s6/10.pgm", function(e, im){
 
-  var facerec = cv.FaceRecognizer.createFisherFaceRecognizer(); 
-  facerec.trainSync(trainingData);
+  var facerec = cv.FaceRecognizer.createEigenFaceRecognizer(); 
+  //facerec.trainSync(trainingData);
+  facerec.loadSync("/Users/peterbraden/Desktop/ORL")
 
   console.log(facerec.predictSync(im));
 
-  var x = new cv.NamedWindow("out")
-  x.show(im);
-  x.blockingWaitKey();
-  x.destroy()
 })
 
 

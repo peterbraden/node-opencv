@@ -30,8 +30,10 @@ class FaceRecognizerWrap: public node::ObjectWrap {
     //static int EIO_AfterPredict(eio_req *req);
 
 
-    // TODO Save
-    // TODO Load
+    JSFUNC(SaveSync)
+    JSFUNC(LoadSync)
+    
+    JSFUNC(GetMat)
 };
 
 
