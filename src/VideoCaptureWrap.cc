@@ -92,7 +92,7 @@ VideoCaptureWrap::Read(const Arguments &args) {
 	baton->im = new Matrix();
 	baton->request.data = baton;
 
-	uv_queue_work(uv_default_loop(), &baton->request, AsyncRead, AfterAsyncRead);
+	uv_queue_work(uv_default_loop(), &baton->request, AsyncRead,  (uv_after_work_cb)AfterAsyncRead);
 	return Undefined();
 
 }

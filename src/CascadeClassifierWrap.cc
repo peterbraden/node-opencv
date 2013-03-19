@@ -112,7 +112,7 @@ CascadeClassifierWrap::DetectMultiScale(const v8::Arguments& args){
 //  eio_custom(EIO_DetectMultiScale, EIO_PRI_DEFAULT, EIO_AfterDetectMultiScale, baton);
 //  ev_ref(EV_DEFAULT_UC);
 
-  uv_queue_work(uv_default_loop(), &baton->request, AsyncDetectMultiScale, AfterAsyncDetectMultiScale);
+  uv_queue_work(uv_default_loop(), &baton->request, AsyncDetectMultiScale,  (uv_after_work_cb)AfterAsyncDetectMultiScale);
 
   return Undefined();
 

@@ -369,7 +369,7 @@ Matrix::ToBufferAsync(const v8::Arguments& args){
   baton->request.data = baton;
   baton->sleep_for = 1;
 
-  uv_queue_work(uv_default_loop(), &baton->request, AsyncToBufferAsync, AfterAsyncToBufferAsync);
+  uv_queue_work(uv_default_loop(), &baton->request, AsyncToBufferAsync, (uv_after_work_cb)AfterAsyncToBufferAsync);
 
   return Undefined();
 }
