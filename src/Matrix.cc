@@ -68,6 +68,8 @@ Matrix::Init(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "inRange", inRange);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "adjustROI", AdjustROI);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "locateROI", LocateROI);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
@@ -900,4 +902,36 @@ Matrix::inRange(const v8::Arguments& args) {
 
 
 	return scope.Close(v8::Null());
+}
+
+Handle<Value>
+Matrix::AdjustROI(const v8::Arguments& args) {
+	SETUP_FUNCTION(Matrix)
+  int dtop = args[0]->Uint32Value();
+  int dbottom = args[1]->Uint32Value();
+  int dleft = args[2]->Uint32Value();
+  int dright = args[3]->Uint32Value();
+
+  self->mat.adjustROI(dtop, dbottom, dleft, dright);
+
+  return scope.Close(v8::Null());
+
+}
+
+Handle<Value>
+Matrix::LocateROI(const v8::Arguments& args) {
+	SETUP_FUNCTION(Matrix)
+ 
+  cv::Size wholeSize;
+  cv::Point ofs;
+
+  self->mat.locateROI(wholeSize, ofs);
+
+	v8::Local<v8::Array> arr = v8::Array::New(4);
+	arr->Set(0, Number::New(wholeSize.width));
+	arr->Set(1, Number::New(wholeSize.height));
+	arr->Set(2, Number::New(ofs.x));
+	arr->Set(3, Number::New(ofs.y));
+
+	return scope.Close(arr);
 }

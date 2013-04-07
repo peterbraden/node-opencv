@@ -65,6 +65,8 @@ class Matrix: public node::ObjectWrap {
 
     JSFUNC(inRange)
 
+    JSFUNC(LocateROI)
+    JSFUNC(AdjustROI)
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);
@@ -86,8 +88,6 @@ class Matrix: public node::ObjectWrap {
 // create, increment, release
     static Handle<Value> PushBack(const Arguments& args);
     static Handle<Value> PopBack(const Arguments& args);
-    static Handle<Value> LocateROI(const Arguments& args);
-    static Handle<Value> AdjustROI(const Arguments& args);
     static Handle<Value> Total(const Arguments& args);
     static Handle<Value> IsContinous(const Arguments& args);
     static Handle<Value> Type(const Arguments& args);

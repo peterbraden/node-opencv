@@ -70,7 +70,8 @@ NamedWindow::Destroy(const v8::Arguments& args){
 
 Handle<Value>
 NamedWindow::BlockingWaitKey(const v8::Arguments& args){
-	SETUP_FUNCTION(NamedWindow)
+  HandleScope scope;
+	//SETUP_FUNCTION(NamedWindow)
 	int time = 0;
   if (args.Length() > 0){
     time = args[1]->IntegerValue();
