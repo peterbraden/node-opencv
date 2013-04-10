@@ -116,11 +116,12 @@ void AfterAsyncRead(uv_work_t *req) {
 	mat = baton->im->mat;
 
 	img->mat = mat;
-	Local<Value> argv[1];
+	Local<Value> argv[2];
 
-	argv[0] = im_to_return;
+  argv[0] = Local<Value>::New(Null());
+	argv[1] = im_to_return;
 
-	baton->cb->Call(Context::GetCurrent()->Global(), 1, argv);
+	baton->cb->Call(Context::GetCurrent()->Global(), 2, argv);
 	baton->cb.Dispose();
 
 		delete baton;

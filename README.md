@@ -185,6 +185,11 @@ doesn't work for you please get in touch.
 
 ## Changelog
 
+#### 0.0.13
+
+- V Early support for face recognition - API is _likely_ to change. Have fun!
+- *API Change*: VideoCapture.read now calls callback(err, im) instead of callback(im)
+
 #### 0.0.12
 - Matrix clone()
 - NamedWindow Support
