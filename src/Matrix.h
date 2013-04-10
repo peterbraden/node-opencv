@@ -36,8 +36,9 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Empty)
 
     JSFUNC(Save)
-    JSFUNC(ToBuffer)
+    JSFUNC(SaveAsync)
 
+    JSFUNC(ToBuffer)
     JSFUNC(ToBufferAsync)
 
     JSFUNC(Resize)

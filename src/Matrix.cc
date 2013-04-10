@@ -44,6 +44,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "rectangle", Rectangle);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "line", Line);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "saveAsync", SaveAsync);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrDown", PyrDown);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrUp", PyrUp);
@@ -350,9 +351,6 @@ struct matrixToBuffer_baton_t {
   Matrix *mm;
   Persistent<Function> cb;
   std::vector<uchar>  res;
-  int resSize;
-  int sleep_for;
-
   uv_work_t request;
 };
 
@@ -369,7 +367,6 @@ Matrix::ToBufferAsync(const v8::Arguments& args){
   baton->mm = self;
   baton->cb = Persistent<Function>::New(cb);
   baton->request.data = baton;
-  baton->sleep_for = 1;
 
   uv_queue_work(uv_default_loop(), &baton->request, AsyncToBufferAsync, (uv_after_work_cb)AfterAsyncToBufferAsync);
 
@@ -518,16 +515,83 @@ Matrix::Line(const Arguments& args) {
 }
 
 Handle<Value>
-Matrix::Save(const v8::Arguments& args){
-	HandleScope scope;
+Matrix::Save(const v8::Arguments& args) {
+  SETUP_FUNCTION(Matrix)
 
-	if (!args[0]->IsString())
-		return v8::ThrowException(v8::Exception::TypeError(String::New("filename required")));
+  if (args.Length() > 1) {
+    return SaveAsync(args);
+  }
+  
+  if (!args[0]->IsString())
+    return v8::ThrowException(v8::Exception::TypeError(String::New("filename required")));
 
-	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
-	String::AsciiValue filename(args[0]);
-	int res = cv::imwrite(*filename, self->mat);
-	return scope.Close(Number::New(res));
+  String::AsciiValue filename(args[0]);
+  int res = cv::imwrite(*filename, self->mat);
+  return scope.Close(Number::New(res));
+}
+
+
+struct save_baton_t {
+  Matrix *mm;
+  Persistent<Function> cb;
+  std::string filename;
+  int res;
+  uv_work_t request;
+};
+
+void DoSaveAsync(uv_work_t *req);
+void AfterSaveAsync(uv_work_t *req);
+
+Handle<Value>
+Matrix::SaveAsync(const v8::Arguments& args){
+  SETUP_FUNCTION(Matrix)
+
+  if (!args[0]->IsString())
+    return v8::ThrowException(v8::Exception::TypeError(String::New("filename required")));
+
+  String::AsciiValue filename(args[0]);
+
+  REQ_FUN_ARG(1, cb);
+
+  save_baton_t *baton = new save_baton_t();
+  baton->mm = self;
+  baton->cb = Persistent<Function>::New(cb);
+  baton->filename = *filename;
+  baton->request.data = baton;
+
+  uv_queue_work(uv_default_loop(), &baton->request, DoSaveAsync, (uv_after_work_cb)AfterSaveAsync);
+
+  return Undefined();
+}
+
+
+void DoSaveAsync(uv_work_t *req) {
+  save_baton_t *baton = static_cast<save_baton_t *>(req->data);
+
+  int res = cv::imwrite(baton->filename.c_str(), baton->mm->mat);
+  baton->res = res;
+}
+
+void AfterSaveAsync(uv_work_t *req) {
+  HandleScope scope;
+  save_baton_t *baton = static_cast<save_baton_t *>(req->data);
+
+  Local<Value> argv[2];  // (err, result)
+
+  argv[0] = Local<Value>::New(Null());
+  argv[1] = Number::New(baton->res);
+
+  TryCatch try_catch;
+
+  baton->cb->Call(Context::GetCurrent()->Global(), 2, argv);
+
+  if (try_catch.HasCaught()) {
+    FatalException(try_catch);
+  }
+
+  baton->cb.Dispose();
+
+  delete baton;
 }
 
 
