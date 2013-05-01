@@ -700,7 +700,8 @@ Matrix::Flip(const v8::Arguments& args) {
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 
 	if ( args.Length() < 1 || !args[0]->IsInt32() ) {
-		return v8::ThrowException(String::New("Flip requires an integer flipCode argument (0 = X axis, positive = Y axis, negative = both axis"));
+		return v8::ThrowException(Exception::TypeError(String::New(
+			"Flip requires an integer flipCode argument (0 = X axis, positive = Y axis, negative = both axis)")));
 	}
 
 	int flipCode = args[0]->ToInt32()->Value();
