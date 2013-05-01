@@ -50,6 +50,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(GaussianBlur)
     JSFUNC(Copy)
     JSFUNC(Flip)
+    JSFUNC(ROI)
     JSFUNC(Ptr)
     JSFUNC(AddWeighted)
     JSFUNC(Split)

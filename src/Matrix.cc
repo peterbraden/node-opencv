@@ -55,6 +55,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "roi", ROI);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ptr", Ptr);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
@@ -709,6 +710,33 @@ Matrix::Flip(const v8::Arguments& args) {
 	Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
 	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
 	cv::flip(self->mat, img->mat, flipCode);
+
+	return scope.Close(img_to_return);
+}
+
+
+Handle<Value>
+Matrix::ROI(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	if ( args.Length() != 4 ) {
+		return v8::ThrowException(Exception::TypeError(String::New(
+			"ROI requires x,y,w,h arguments")));
+	}
+
+	// although it's an image to return, it is in fact a pointer to ROI of parent matrix
+	Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
+	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
+
+	int x = args[0]->IntegerValue();
+	int y = args[1]->IntegerValue();
+	int w = args[2]->IntegerValue();
+	int h = args[3]->IntegerValue();
+
+	cv::Mat roi(self->mat, cv::Rect(x,y,w,h));
+	img->mat = roi;
 
 	return scope.Close(img_to_return);
 }
