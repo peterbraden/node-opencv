@@ -42,6 +42,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(ToBufferAsync)
 
     JSFUNC(Resize)
+    JSFUNC(Rotate)
     JSFUNC(PyrDown)
     JSFUNC(PyrUp)
 

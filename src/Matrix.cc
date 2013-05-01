@@ -46,6 +46,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "saveAsync", SaveAsync);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "rotate", Rotate);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrDown", PyrDown);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrUp", PyrUp);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
@@ -969,6 +970,30 @@ Matrix::Resize(const v8::Arguments& args){
   ~self->mat;
   self->mat = res;
 
+
+  return scope.Close(Undefined());
+}
+
+
+Handle<Value>
+Matrix::Rotate(const v8::Arguments& args){
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  cv::Mat rotMatrix(2, 3, CV_32FC1);
+  cv::Mat res;
+
+  float angle = args[0]->ToNumber()->Value();
+  int x = args[1]->IsUndefined() ? round(self->mat.size().width / 2) : args[1]->Uint32Value();
+  int y = args[1]->IsUndefined() ? round(self->mat.size().height / 2) : args[2]->Uint32Value();
+
+  cv::Point center = cv::Point(x,y);
+
+  rotMatrix = getRotationMatrix2D(center, angle, 1.0);
+
+  cv::warpAffine(self->mat, res, rotMatrix, self->mat.size());
+  ~self->mat;
+  self->mat = res;
 
   return scope.Close(Undefined());
 }
