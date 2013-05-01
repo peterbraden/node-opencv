@@ -49,6 +49,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(ConvertHSVscale)
     JSFUNC(GaussianBlur)
     JSFUNC(Copy)
+    JSFUNC(Flip)
     JSFUNC(Ptr)
     JSFUNC(AddWeighted)
     JSFUNC(Split)

@@ -54,6 +54,7 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ptr", Ptr);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
@@ -687,6 +688,26 @@ Matrix::Copy(const v8::Arguments& args) {
 	Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
 	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
 	self->mat.copyTo(img->mat);
+
+	return scope.Close(img_to_return);
+}
+
+
+Handle<Value>
+Matrix::Flip(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	if ( args.Length() < 1 || !args[0]->IsInt32() ) {
+		return v8::ThrowException(String::New("Flip requires an integer flipCode argument (0 = X axis, positive = Y axis, negative = both axis"));
+	}
+
+	int flipCode = args[0]->ToInt32()->Value();
+
+	Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
+	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
+	cv::flip(self->mat, img->mat, flipCode);
 
 	return scope.Close(img_to_return);
 }
