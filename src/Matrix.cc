@@ -75,6 +75,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "adjustROI", AdjustROI);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "locateROI", LocateROI);
 
+	NODE_SET_PROTOTYPE_METHOD(constructor, "meanStdDev", MeanStdDev);
+
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
 
@@ -1073,4 +1075,23 @@ Matrix::LocateROI(const v8::Arguments& args) {
 	arr->Set(3, Number::New(ofs.y));
 
 	return scope.Close(arr);
+}
+
+Handle<Value>
+Matrix::MeanStdDev(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	Local<Object> mean = Matrix::constructor->GetFunction()->NewInstance();
+	Matrix *m_mean = ObjectWrap::Unwrap<Matrix>(mean);
+	Local<Object> stddev = Matrix::constructor->GetFunction()->NewInstance();
+	Matrix *m_stddev = ObjectWrap::Unwrap<Matrix>(stddev);
+
+	cv::meanStdDev(self->mat, m_mean->mat, m_stddev->mat);
+
+	Local<Object> data = Object::New();
+	data->Set(String::NewSymbol("mean"), mean);
+	data->Set(String::NewSymbol("stddev"), stddev);
+	return scope.Close(data);
 }

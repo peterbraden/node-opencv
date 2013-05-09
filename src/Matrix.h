@@ -71,6 +71,8 @@ class Matrix: public node::ObjectWrap {
 
     JSFUNC(LocateROI)
     JSFUNC(AdjustROI)
+
+    JSFUNC(MeanStdDev)
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);
