@@ -72,6 +72,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "adjustROI", AdjustROI);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "locateROI", LocateROI);
 
+	NODE_SET_PROTOTYPE_METHOD(constructor, "threshold", Threshold);
+
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
 
@@ -998,4 +1000,20 @@ Matrix::LocateROI(const v8::Arguments& args) {
 	arr->Set(3, Number::New(ofs.y));
 
 	return scope.Close(arr);
+}
+
+Handle<Value>
+Matrix::Threshold(const v8::Arguments& args) {
+	SETUP_FUNCTION(Matrix)
+
+	double threshold = args[0]->NumberValue();
+	double maxVal = args[1]->NumberValue();
+
+	Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
+	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
+	self->mat.copyTo(img->mat);
+
+  cv::threshold(self->mat, img->mat, threshold, maxVal, cv::THRESH_BINARY);
+
+	return scope.Close(img_to_return);
 }
