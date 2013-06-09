@@ -4,7 +4,7 @@ var vid = new cv.VideoCapture(0)
 
 
 var snap = function(){
-  vid.read(function(im){
+  vid.read(function(err, im){
     im.detectObject(cv.FACE_CASCADE, {}, function(err, faces){
       if (!faces){
         console.log("No Faces")
