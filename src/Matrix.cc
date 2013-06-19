@@ -1009,11 +1009,34 @@ Matrix::Threshold(const v8::Arguments& args) {
 	double threshold = args[0]->NumberValue();
 	double maxVal = args[1]->NumberValue();
 
+  int typ = cv::THRESH_BINARY;
+	if (args.Length() == 3){
+//    typ = args[2]->IntegerValue();
+    String::AsciiValue typstr(args[2]);
+    if (strcmp(*typstr, "Binary") == 0){
+      typ=0;
+    }
+    if (strcmp(*typstr, "Binary Inverted") == 0){
+      typ=1;
+    }
+    if (strcmp(*typstr, "Threshold Truncated") == 0){
+      typ=2;
+    }
+    if (strcmp(*typstr, "Threshold to Zero") == 0){
+      typ=3;
+    }
+    if (strcmp(*typstr, "Threshold to Zero Inverted") == 0){
+      typ=4;
+    }
+  }
+
+
+
 	Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
 	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
 	self->mat.copyTo(img->mat);
 
-  cv::threshold(self->mat, img->mat, threshold, maxVal, cv::THRESH_BINARY);
+  cv::threshold(self->mat, img->mat, threshold, maxVal, typ);
 
 	return scope.Close(img_to_return);
 }

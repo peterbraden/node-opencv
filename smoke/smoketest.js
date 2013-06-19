@@ -21,7 +21,7 @@ cv.readImage("/Users/peterbraden/Downloads/orl_faces/s6/10.pgm", function(e, im)
 
 */
 cv.readImage("/Users/peterbraden/Desktop/repos/node-opencv/examples/mona.png", function(e, mat){
-  var th = mat.threshold(20, 200);
+  var th = mat.threshold(200, 200, "Threshold to Zero Inverted");
   th.save('out.png')
 
 })
