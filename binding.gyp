@@ -17,7 +17,7 @@
           '<!@(pkg-config --libs opencv)'
         ]
       , 'cflags': [
-            '<!@(pkg-config --cflags --libs "opencv >= 2.3.1" )'
+            '<!@(pkg-config --cflags "opencv >= 2.3.1" )'
             , '-Wall'
           ]
       , 'cflags!' : [ '-fno-exceptions']
