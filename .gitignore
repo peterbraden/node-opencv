@@ -4,4 +4,5 @@ build
 node_modules
 npm-debug.log
 out*.jpg
+out*.png
 examples/*.avi
