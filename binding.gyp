@@ -16,6 +16,12 @@
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'
         ]
+        
+      # For windows
+      ,'include_dirs': [
+          '<!@(pkg-config --cflags opencv)'
+          ]
+          
       , 'cflags': [
             '<!@(pkg-config --cflags "opencv >= 2.3.1" )'
             , '-Wall'
