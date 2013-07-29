@@ -190,17 +190,19 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       }
     }
 
-    , ".absDiff" : function(cv){
-      var mat1 = new cv.Matrix(1,1);
-      mat1.set(0,0, 0);
+    , ".absDiff" : function(cv) {
+      cv.readImage("./examples/mona.png", function(err, im) {
+        cv.readImage("./examples/mona.png", function(err, im2){
+          assert.ok(im);
+          assert.ok(im2);
 
-      var mat2 = new cv.Matrix(1,1);
-      mat2.set(0,0, 1);
+          var diff = new cv.Matrix(im.width(), im.height());
+          diff.absDiff(im, im2);
 
-      var diff = new cv.Matrix(1,1);
-      diff.absDiff(mat1, mat2);
-
-      assert.equal(diff.get(0,0), 1);
+          diff.convertGrayscale();
+          assert.equal(diff.countNonZero(), 0);
+        });
+      });
     }
 
     , ".bitwiseXor" : function(cv) {
@@ -214,15 +216,6 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       xored.bitwiseXor(mat1, mat2);
 
       assert.equal(xored.get(0,0), 0);
-    }
-
-    , ".countNonZero": function(cv) {
-      cv.readImage("./examples/mona.png", function(err, im) {
-          assert.ok(im);
-  
-          im.convertGrayscale();
-          assert.equal(im.countNonZero(), 378000);
-      });
     }
 
   }
