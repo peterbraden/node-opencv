@@ -216,6 +216,15 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       assert.equal(xored.get(0,0), 0);
     }
 
+    , ".countNonZero": function(cv) {
+      cv.readImage("./examples/mona.png", function(err, im) {
+          assert.ok(im);
+  
+          im.convertGrayscale();
+          assert.equal(im.countNonZero(), 378000);
+      });
+    }
+
   }
 
 
