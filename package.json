@@ -9,7 +9,10 @@
   "devDependencies": {
     "vows": "*"
   },
-  "engine": "node >= 0.4.1",
+  "engines": {
+    "node": ">=0.4.1"
+  },
+  "license": "MIT",
   "scripts": {
     "preinstall": "node-gyp clean rebuild",
     "test": "vows test/unit.js"
@@ -20,5 +23,9 @@
     "vision",
     "quadrocopter"
   ],
-  "main": "./lib/opencv"
+  "main": "./lib/opencv",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peterbraden/node-opencv.git"
+  }
 }
