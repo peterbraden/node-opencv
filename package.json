@@ -23,5 +23,9 @@
     "vision",
     "quadrocopter"
   ],
-  "main": "./lib/opencv"
+  "main": "./lib/opencv",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peterbraden/node-opencv.git"
+  }
 }
