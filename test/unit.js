@@ -190,7 +190,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       }
     }
 
-    , ".absDiff" : function(cv) {
+    , ".absDiff and .countNonZero" : function(cv) {
       cv.readImage("./examples/mona.png", function(err, im) {
         cv.readImage("./examples/mona.png", function(err, im2){
           assert.ok(im);
