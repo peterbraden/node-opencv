@@ -190,7 +190,34 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       }
     }
 
-    
+    , ".absDiff and .countNonZero" : function(cv) {
+      cv.readImage("./examples/mona.png", function(err, im) {
+        cv.readImage("./examples/mona.png", function(err, im2){
+          assert.ok(im);
+          assert.ok(im2);
+
+          var diff = new cv.Matrix(im.width(), im.height());
+          diff.absDiff(im, im2);
+
+          diff.convertGrayscale();
+          assert.equal(diff.countNonZero(), 0);
+        });
+      });
+    }
+
+    , ".bitwiseXor" : function(cv) {
+      var mat1 = new cv.Matrix(1,1);
+      mat1.set(0,0, 1);
+
+      var mat2 = new cv.Matrix(1,1);
+      mat2.set(0,0, 1);
+
+      var xored = new cv.Matrix(1,1);
+      xored.bitwiseXor(mat1, mat2);
+
+      assert.equal(xored.get(0,0), 0);
+    }
+
   }
 
 
