@@ -58,7 +58,10 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "roi", ROI);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "ptr", Ptr);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "absDiff", AbsDiff);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
     NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
@@ -768,6 +771,20 @@ Matrix::Ptr(const v8::Arguments& args) {
 }
 
 Handle<Value>
+Matrix::AbsDiff(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+	Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+	cv::absdiff(src1->mat, src2->mat, self->mat);
+
+	return scope.Close(v8::Null());
+}
+
+Handle<Value>
 Matrix::AddWeighted(const v8::Arguments& args) {
 	HandleScope scope;
 
@@ -786,6 +803,29 @@ Matrix::AddWeighted(const v8::Arguments& args) {
 	return scope.Close(v8::Null());
 }
 
+Handle<Value>
+Matrix::BitwiseXor(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+	Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+	cv::bitwise_xor(src1->mat, src2->mat, self->mat);
+
+	return scope.Close(v8::Null());
+}
+
+Handle<Value>
+Matrix::CountNonZero(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	double count = (double)cv::countNonZero(self->mat);
+	return scope.Close(v8::Number::New(count));
+}
 
 Handle<Value>
 Matrix::Split(const v8::Arguments& args) {
