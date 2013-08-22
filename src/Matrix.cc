@@ -334,14 +334,47 @@ Handle<Value>
 Matrix::ToBuffer(const v8::Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
-  if (args.Length() > 0){
-    return Matrix::ToBufferAsync(args);
-  }
+    if ((args.Length() > 0) && (args[args.Length() - 1]->IsFunction())) {
+        return Matrix::ToBufferAsync(args);
+    }
+  
+    // SergeMv changes
+    // img.toBuffer({ext: ".png", pngCompression: 9}); // default png compression is 3
+    // img.toBuffer({ext: ".jpg", jpegQuality: 80});
+    // img.toBuffer(); // creates Jpeg with quality of 95 (Opencv default quality)
+    // via the ext you can do other image formats too (like tiff), see
+    // http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#imencode
+    //---------------------------
+    // Provide default value
+    const char *ext = ".jpg";
+    std::vector<int> params;
+    // See if the options argument is passed
+    if ((args.Length() > 0) && (args[0]->IsObject())) {
+        // Get this options argument
+        v8::Handle<v8::Object> options = v8::Handle<v8::Object>::Cast(args[0]);
+        // If the extension (image format) is provided
+        if (options->Has(v8::String::New("ext"))) {
+            v8::String::Utf8Value str ( options->Get(v8::String::New("ext"))->ToString() );
+            std::string str2 = std::string(*str);
+            ext = (const char *) str2.c_str();
+        }
+        if (options->Has(v8::String::New("jpegQuality"))) {
+            int compression = options->Get(v8::String::New("jpegQuality"))->IntegerValue();
+            params.push_back(CV_IMWRITE_JPEG_QUALITY);
+            params.push_back(compression);
+        }
+        if (options->Has(v8::String::New("pngCompression"))) {
+            int compression = options->Get(v8::String::New("pngCompression"))->IntegerValue();
+            params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+            params.push_back(compression);
+        }        
+    }
+    //---------------------------
 
 	std::vector<uchar> vec(0);
-	std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
 
-	cv::imencode(".jpg", self->mat, vec, params);
+    // We use operator * before the "ext" variable, because it converts v8::String::AsciiValue to char *
+	cv::imencode(ext, self->mat, vec, params);
 
 	node::Buffer *buf = node::Buffer::New(vec.size());
 	uchar* data = (uchar*) Buffer::Data(buf);
@@ -1038,7 +1071,7 @@ Matrix::Rotate(const v8::Arguments& args){
   bool rightOrStraight = (ceil(angle) == angle) && (!((int)angle % 90))
       && args[1]->IsUndefined();
   if (rightOrStraight) {
-	int angle2 = ((int)angle) % 360;
+    int angle2 = ((int)angle) % 360;
     if (!angle2) { return scope.Close(Undefined()); }
     if (angle2 < 0) { angle2 += 360; }
 	// See if we do right angle rotation, we transpose the matrix:
