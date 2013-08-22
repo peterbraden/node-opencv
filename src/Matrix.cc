@@ -1042,10 +1042,18 @@ Matrix::Resize(const v8::Arguments& args){
 
   int x = args[0]->Uint32Value();
   int y = args[1]->Uint32Value();
-
+  /*
+    CV_INTER_NN        =0,
+    CV_INTER_LINEAR    =1,
+    CV_INTER_CUBIC     =2,
+    CV_INTER_AREA      =3,
+    CV_INTER_LANCZOS4  =4
+  */
+  int interpolation = (args.Length() < 3) ? cv::INTER_LINEAR : args[2]->Uint32Value();
+  
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   cv::Mat res = cv::Mat(x, y, CV_32FC3);
-  cv::resize(self->mat, res, cv::Size(x, y), 0, 0, cv::INTER_LINEAR);
+  cv::resize(self->mat, res, cv::Size(x, y), 0, 0, interpolation);
   ~self->mat;
   self->mat = res;
 
@@ -1069,7 +1077,7 @@ Matrix::Rotate(const v8::Arguments& args){
   // If you provide only the angle argument and the angle is multiple of 90, then
   // we do a fast thing
   bool rightOrStraight = (ceil(angle) == angle) && (!((int)angle % 90))
-      && args[1]->IsUndefined();
+      && (args.Length() == 1);
   if (rightOrStraight) {
     int angle2 = ((int)angle) % 360;
     if (!angle2) { return scope.Close(Undefined()); }
