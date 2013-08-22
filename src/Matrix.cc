@@ -1030,11 +1030,39 @@ Matrix::Rotate(const v8::Arguments& args){
   cv::Mat res;
 
   float angle = args[0]->ToNumber()->Value();
+
+  // Modification by SergeMv
+  //-------------
+  // If you provide only the angle argument and the angle is multiple of 90, then
+  // we do a fast thing
+  bool rightOrStraight = (ceil(angle) == angle) && (!((int)angle % 90))
+      && args[1]->IsUndefined();
+  if (rightOrStraight) {
+	int angle2 = ((int)angle) % 360;
+    if (!angle2) { return scope.Close(Undefined()); }
+    if (angle2 < 0) { angle2 += 360; }
+	// See if we do right angle rotation, we transpose the matrix:
+    if (angle2 % 180) {
+        cv::transpose(self->mat, res);
+        ~self->mat;
+	    self->mat = res;
+    }
+    // Now flip the image
+    int mode = -1; // flip around both axes
+    // If counterclockwise, flip around the x-axis
+    if (angle2 == 90) { mode = 0; } 
+    // If clockwise, flip around the y-axis
+    if (angle2 == 270) { mode = 1; } 
+    cv::flip(self->mat, self->mat, mode);
+    
+    return scope.Close(Undefined());
+  }
+  //-------------
+
   int x = args[1]->IsUndefined() ? round(self->mat.size().width / 2) : args[1]->Uint32Value();
   int y = args[1]->IsUndefined() ? round(self->mat.size().height / 2) : args[2]->Uint32Value();
-
+  
   cv::Point center = cv::Point(x,y);
-
   rotMatrix = getRotationMatrix2D(center, angle, 1.0);
 
   cv::warpAffine(self->mat, res, rotMatrix, self->mat.size());
