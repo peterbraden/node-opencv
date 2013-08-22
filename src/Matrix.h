@@ -77,6 +77,9 @@ class Matrix: public node::ObjectWrap {
 
     JSFUNC(Threshold)
     JSFUNC(MeanStdDev)
+
+    JSFUNC(CopyTo)
+    
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);

@@ -47,6 +47,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "saveAsync", SaveAsync);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "rotate", Rotate);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "copyTo", CopyTo);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrDown", PyrDown);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrUp", PyrUp);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
@@ -1174,4 +1175,35 @@ Matrix::MeanStdDev(const v8::Arguments& args) {
 	data->Set(String::NewSymbol("mean"), mean);
 	data->Set(String::NewSymbol("stddev"), stddev);
 	return scope.Close(data);
+}
+
+
+// @author SergeMv
+// Copies our (small) image into a ROI of another (big) image
+// @param Object another image (destination)
+// @param Number Destination x (where our image is to be copied)
+// @param Number Destination y (where our image is to be copied)
+// Example: smallImg.copyTo(bigImg, 50, 50);
+// Note, x,y and width and height of our image must be so that
+// our.width + x <= destination.width (and the same for y and height)
+// both x and y must be >= 0
+Handle<Value>
+Matrix::CopyTo(const v8::Arguments& args){
+    HandleScope scope;
+
+    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+    int width = self->mat.size().width;
+    int height = self->mat.size().height;
+    
+    // param 0 - destination image:
+    Matrix *dest = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+    // param 1 - x coord of the destination
+    int x = args[1]->IntegerValue();
+    // param 2 - y coord of the destination
+    int y = args[2]->IntegerValue();
+
+    cv::Mat dstROI = cv::Mat(dest->mat, cv::Rect(x, y, width, height));
+    self->mat.copyTo(dstROI);
+
+    return scope.Close(Undefined());
 }
