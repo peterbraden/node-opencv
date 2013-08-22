@@ -134,9 +134,6 @@ Matrix::Matrix(cv::Mat m, cv::Rect roi): ObjectWrap() {
 	mat = cv::Mat(m, roi);
 }
 
-Matrix::Matrix(cv::Mat m): ObjectWrap() {
-	mat = cv::Mat(m);
-}
 
 Handle<Value>
 Matrix::Empty(const Arguments& args){
