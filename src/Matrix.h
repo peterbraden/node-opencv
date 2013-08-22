@@ -9,6 +9,7 @@ class Matrix: public node::ObjectWrap {
     static Handle<Value> New(const Arguments &args);
     Matrix();
     Matrix(cv::Mat other, cv::Rect roi);
+    Matrix(cv::Mat other);
     Matrix(int rows, int cols);
     Matrix(int rows, int cols, int typ);
 
@@ -29,7 +30,6 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Height)
     JSFUNC(Channels)
     JSFUNC(Clone)
-
     JSFUNC(Ellipse)
     JSFUNC(Rectangle)
     JSFUNC(Line)
@@ -57,7 +57,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(AddWeighted)
     JSFUNC(BitwiseXor)
     JSFUNC(CountNonZero)
-    JSFUNC(Split)
+    //JSFUNC(Split)
     JSFUNC(Canny)
     JSFUNC(Dilate)
     JSFUNC(Erode)
@@ -79,6 +79,10 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(MeanStdDev)
 
     JSFUNC(CopyTo)
+    JSFUNC(CvtColor)
+    JSFUNC(Split)
+    JSFUNC(Merge)
+    JSFUNC(EqualizeHist)
     
 /*
 	static Handle<Value> Val(const Arguments& args);
