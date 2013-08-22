@@ -47,6 +47,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "saveAsync", SaveAsync);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "rotate", Rotate);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "copyTo", CopyTo);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrDown", PyrDown);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrUp", PyrUp);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
@@ -62,7 +63,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
+	//NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
     NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "erode", Erode);
@@ -80,6 +81,11 @@ Matrix::Init(Handle<Object> target) {
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "threshold", Threshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "meanStdDev", MeanStdDev);
+    
+    NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
@@ -127,6 +133,7 @@ Matrix::Matrix(int rows, int cols): ObjectWrap() {
 Matrix::Matrix(cv::Mat m, cv::Rect roi): ObjectWrap() {
 	mat = cv::Mat(m, roi);
 }
+
 
 Handle<Value>
 Matrix::Empty(const Arguments& args){
@@ -333,14 +340,47 @@ Handle<Value>
 Matrix::ToBuffer(const v8::Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
-  if (args.Length() > 0){
-    return Matrix::ToBufferAsync(args);
-  }
+    if ((args.Length() > 0) && (args[args.Length() - 1]->IsFunction())) {
+        return Matrix::ToBufferAsync(args);
+    }
+  
+    // SergeMv changes
+    // img.toBuffer({ext: ".png", pngCompression: 9}); // default png compression is 3
+    // img.toBuffer({ext: ".jpg", jpegQuality: 80});
+    // img.toBuffer(); // creates Jpeg with quality of 95 (Opencv default quality)
+    // via the ext you can do other image formats too (like tiff), see
+    // http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#imencode
+    //---------------------------
+    // Provide default value
+    const char *ext = ".jpg";
+    std::vector<int> params;
+    // See if the options argument is passed
+    if ((args.Length() > 0) && (args[0]->IsObject())) {
+        // Get this options argument
+        v8::Handle<v8::Object> options = v8::Handle<v8::Object>::Cast(args[0]);
+        // If the extension (image format) is provided
+        if (options->Has(v8::String::New("ext"))) {
+            v8::String::Utf8Value str ( options->Get(v8::String::New("ext"))->ToString() );
+            std::string str2 = std::string(*str);
+            ext = (const char *) str2.c_str();
+        }
+        if (options->Has(v8::String::New("jpegQuality"))) {
+            int compression = options->Get(v8::String::New("jpegQuality"))->IntegerValue();
+            params.push_back(CV_IMWRITE_JPEG_QUALITY);
+            params.push_back(compression);
+        }
+        if (options->Has(v8::String::New("pngCompression"))) {
+            int compression = options->Get(v8::String::New("pngCompression"))->IntegerValue();
+            params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+            params.push_back(compression);
+        }        
+    }
+    //---------------------------
 
 	std::vector<uchar> vec(0);
-	std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
 
-	cv::imencode(".jpg", self->mat, vec, params);
+    // We use operator * before the "ext" variable, because it converts v8::String::AsciiValue to char *
+	cv::imencode(ext, self->mat, vec, params);
 
 	node::Buffer *buf = node::Buffer::New(vec.size());
 	uchar* data = (uchar*) Buffer::Data(buf);
@@ -827,14 +867,14 @@ Matrix::CountNonZero(const v8::Arguments& args) {
 	return scope.Close(v8::Number::New(count));
 }
 
-Handle<Value>
+/*Handle<Value>
 Matrix::Split(const v8::Arguments& args) {
 	HandleScope scope;
 
 	//Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 
 	return scope.Close(v8::Null());
-}
+}*/
 
 
 Handle<Value>
@@ -1008,10 +1048,18 @@ Matrix::Resize(const v8::Arguments& args){
 
   int x = args[0]->Uint32Value();
   int y = args[1]->Uint32Value();
-
+  /*
+    CV_INTER_NN        =0,
+    CV_INTER_LINEAR    =1,
+    CV_INTER_CUBIC     =2,
+    CV_INTER_AREA      =3,
+    CV_INTER_LANCZOS4  =4
+  */
+  int interpolation = (args.Length() < 3) ? (int)cv::INTER_LINEAR : args[2]->Uint32Value();
+  
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
   cv::Mat res = cv::Mat(x, y, CV_32FC3);
-  cv::resize(self->mat, res, cv::Size(x, y), 0, 0, cv::INTER_LINEAR);
+  cv::resize(self->mat, res, cv::Size(x, y), 0, 0, interpolation);
   ~self->mat;
   self->mat = res;
 
@@ -1029,11 +1077,39 @@ Matrix::Rotate(const v8::Arguments& args){
   cv::Mat res;
 
   float angle = args[0]->ToNumber()->Value();
+
+  // Modification by SergeMv
+  //-------------
+  // If you provide only the angle argument and the angle is multiple of 90, then
+  // we do a fast thing
+  bool rightOrStraight = (ceil(angle) == angle) && (!((int)angle % 90))
+      && (args.Length() == 1);
+  if (rightOrStraight) {
+    int angle2 = ((int)angle) % 360;
+    if (!angle2) { return scope.Close(Undefined()); }
+    if (angle2 < 0) { angle2 += 360; }
+	// See if we do right angle rotation, we transpose the matrix:
+    if (angle2 % 180) {
+        cv::transpose(self->mat, res);
+        ~self->mat;
+	    self->mat = res;
+    }
+    // Now flip the image
+    int mode = -1; // flip around both axes
+    // If counterclockwise, flip around the x-axis
+    if (angle2 == 90) { mode = 0; } 
+    // If clockwise, flip around the y-axis
+    if (angle2 == 270) { mode = 1; } 
+    cv::flip(self->mat, self->mat, mode);
+    
+    return scope.Close(Undefined());
+  }
+  //-------------
+
   int x = args[1]->IsUndefined() ? round(self->mat.size().width / 2) : args[1]->Uint32Value();
   int y = args[1]->IsUndefined() ? round(self->mat.size().height / 2) : args[2]->Uint32Value();
-
+  
   cv::Point center = cv::Point(x,y);
-
   rotMatrix = getRotationMatrix2D(center, angle, 1.0);
 
   cv::warpAffine(self->mat, res, rotMatrix, self->mat.size());
@@ -1174,4 +1250,151 @@ Matrix::MeanStdDev(const v8::Arguments& args) {
 	data->Set(String::NewSymbol("mean"), mean);
 	data->Set(String::NewSymbol("stddev"), stddev);
 	return scope.Close(data);
+}
+
+
+// @author SergeMv
+// Copies our (small) image into a ROI of another (big) image
+// @param Object another image (destination)
+// @param Number Destination x (where our image is to be copied)
+// @param Number Destination y (where our image is to be copied)
+// Example: smallImg.copyTo(bigImg, 50, 50);
+// Note, x,y and width and height of our image must be so that
+// our.width + x <= destination.width (and the same for y and height)
+// both x and y must be >= 0
+Handle<Value>
+Matrix::CopyTo(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+    int width = self->mat.size().width;
+    int height = self->mat.size().height;
+    
+    // param 0 - destination image:
+    Matrix *dest = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+    // param 1 - x coord of the destination
+    int x = args[1]->IntegerValue();
+    // param 2 - y coord of the destination
+    int y = args[2]->IntegerValue();
+
+    cv::Mat dstROI = cv::Mat(dest->mat, cv::Rect(x, y, width, height));
+    self->mat.copyTo(dstROI);
+
+    return scope.Close(Undefined());
+}
+
+
+
+// @author SergeMv
+// Does in-place color transformation
+// img.cvtColor('CV_BGR2YCrCb');
+Handle<Value>
+Matrix::CvtColor(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+    v8::String::Utf8Value str (args[0]->ToString());
+    std::string str2 = std::string(*str);
+    const char * sTransform = (const char *) str2.c_str();
+    int iTransform;
+    //
+    if (!strcmp(sTransform, "CV_BGR2GRAY")) { iTransform = CV_BGR2GRAY; }
+    else if (!strcmp(sTransform, "CV_GRAY2BGR")) { iTransform = CV_GRAY2BGR; }
+    // 
+    else if (!strcmp(sTransform, "CV_BGR2XYZ")) { iTransform = CV_BGR2XYZ; }
+    else if (!strcmp(sTransform, "CV_XYZ2BGR")) { iTransform = CV_XYZ2BGR; }
+    //
+    else if (!strcmp(sTransform, "CV_BGR2YCrCb")) { iTransform = CV_BGR2YCrCb; }
+    else if (!strcmp(sTransform, "CV_YCrCb2BGR")) { iTransform = CV_YCrCb2BGR; }
+    //
+    else if (!strcmp(sTransform, "CV_BGR2HSV")) { iTransform = CV_BGR2HSV; }
+    else if (!strcmp(sTransform, "CV_HSV2BGR")) { iTransform = CV_HSV2BGR; }
+    //
+    else if (!strcmp(sTransform, "CV_BGR2HLS")) { iTransform = CV_BGR2HLS; }
+    else if (!strcmp(sTransform, "CV_HLS2BGR")) { iTransform = CV_HLS2BGR; }
+    //
+    else if (!strcmp(sTransform, "CV_BGR2Lab")) { iTransform = CV_BGR2Lab; }
+    else if (!strcmp(sTransform, "CV_Lab2BGR")) { iTransform = CV_Lab2BGR; }
+    //
+    else if (!strcmp(sTransform, "CV_BGR2Luv")) { iTransform = CV_BGR2Luv; }
+    else if (!strcmp(sTransform, "CV_Luv2BGR")) { iTransform = CV_Luv2BGR; }
+    //
+    else if (!strcmp(sTransform, "CV_BayerBG2BGR")) { iTransform = CV_BayerBG2BGR; }
+    else if (!strcmp(sTransform, "CV_BayerGB2BGR")) { iTransform = CV_BayerGB2BGR; }
+    else if (!strcmp(sTransform, "CV_BayerRG2BGR")) { iTransform = CV_BayerRG2BGR; }
+    else if (!strcmp(sTransform, "CV_BayerGR2BGR")) { iTransform = CV_BayerGR2BGR; }
+    else { 
+        iTransform = 0; // to avoid compiler warning
+        return v8::ThrowException(Exception::TypeError(String::New(
+			"Conversion code is unsupported")));
+    }
+
+    cv::cvtColor(self->mat, self->mat, iTransform);
+
+    return scope.Close(Undefined());
+}
+
+
+// @author SergeMv
+// arrChannels = img.split();
+Handle<Value>
+Matrix::Split(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+    vector<cv::Mat> channels;
+    cv::split(self->mat, channels);
+    unsigned int size = channels.size();
+    v8::Local<v8::Array> arrChannels = v8::Array::New(size);
+    for (unsigned int i = 0; i < size; i++) {
+        Local<Object> matObject = Matrix::constructor->GetFunction()->NewInstance();
+        Matrix * m = ObjectWrap::Unwrap<Matrix>(matObject);
+        m->mat = channels[i];
+        arrChannels->Set(i, matObject);
+    }
+
+    return scope.Close(arrChannels);
+}
+
+
+// @author SergeMv
+// img.merge(arrChannels);
+Handle<Value>
+Matrix::Merge(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+    if (!args[0]->IsArray()) {
+        return v8::ThrowException(Exception::TypeError(String::New(
+			"The argument must be an array")));
+    }
+    v8::Handle<v8::Array> jsChannels = v8::Handle<v8::Array>::Cast(args[0]);
+
+    unsigned int L = jsChannels->Length();
+    vector<cv::Mat> vChannels(L);
+    for (unsigned int i = 0; i < L; i++) {
+         Matrix * matObject = ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
+         vChannels[i] = matObject->mat;
+    }
+    cv::merge(vChannels, self->mat);
+
+    return scope.Close(Undefined());
+}
+
+
+// @author SergeMv
+// Equalizes histogram
+// img.equalizeHist()
+Handle<Value>
+Matrix::EqualizeHist(const v8::Arguments& args) {
+    HandleScope scope;
+    
+    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+    cv::equalizeHist(self->mat, self->mat);
+
+    return scope.Close(Undefined());
 }
