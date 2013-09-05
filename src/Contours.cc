@@ -33,6 +33,7 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "boundingRect", BoundingRect);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "minAreaRect", BoundingRect);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "moments", Moments);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
 };
 
@@ -220,3 +221,24 @@ Contour::IsConvex(const Arguments &args) {
 
 	return scope.Close(Boolean::New(isContourConvex(cv::Mat(self->contours[pos]))));
 }
+
+Handle<Value>
+Contour::Moments(const Arguments &args) {
+	HandleScope scope;
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+
+	/// Get the moments
+	cv::Moments mu = moments( self->contours[pos], false );
+    
+	Local<Object> res = Object::New();
+
+	res->Set(String::NewSymbol("m00"), Number::New(mu.m00));
+	res->Set(String::NewSymbol("m10"), Number::New(mu.m10));
+	res->Set(String::NewSymbol("m01"), Number::New(mu.m01));
+	res->Set(String::NewSymbol("m11"), Number::New(mu.m11));
+
+	return scope.Close(res);
+}
+
