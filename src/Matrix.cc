@@ -5,6 +5,8 @@
 v8::Persistent<FunctionTemplate> Matrix::constructor;
 
 cv::Scalar setColor(Local<Object> objColor);
+cv::Point setPoint(Local<Object> objPoint);
+cv::Rect* setRect(Local<Object> objRect);
 
 //
 
@@ -34,6 +36,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "empty", Empty);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "get", Get);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "set", Set);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "pixel", Pixel);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "width", Width);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "height", Height);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
@@ -77,6 +80,8 @@ Matrix::Init(Handle<Object> target) {
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "threshold", Threshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "meanStdDev", MeanStdDev);
+
+	NODE_SET_PROTOTYPE_METHOD(constructor, "floodFill", FloodFill);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
@@ -162,6 +167,43 @@ Matrix::DblGet(cv::Mat mat, int i, int j){
   return val;
 }
 
+
+
+Handle<Value>
+Matrix::Pixel(const Arguments& args){
+	SETUP_FUNCTION(Matrix)
+
+	int y = args[0]->IntegerValue();
+	int x = args[1]->IntegerValue();
+
+	//cv::Scalar scal = self->mat.at<uchar>(y, x);
+
+
+	if(args.Length() == 3){
+
+		Local<Object> objColor = args[2]->ToObject();
+
+		self->mat.at<cv::Vec3b>(y, x)[0] =  (uchar) objColor->Get(0)->IntegerValue();
+		self->mat.at<cv::Vec3b>(y, x)[1] =  (uchar) objColor->Get(1)->IntegerValue();
+		self->mat.at<cv::Vec3b>(y, x)[2] =  (uchar) objColor->Get(2)->IntegerValue();
+		return scope.Close(args[2]->ToObject());
+	}else{
+		cv::Vec3b intensity = self->mat.at<cv::Vec3b>(y, x);
+
+		v8::Local<v8::Array> arr = v8::Array::New(3);
+		arr->Set(0, Number::New( intensity[0] ));
+		arr->Set(1, Number::New( intensity[1] ));
+		arr->Set(2, Number::New( intensity[2] ));
+		return scope.Close(arr);
+
+	}
+
+	return scope.Close(Undefined());
+	//double val = Matrix::DblGet(t, i, j);
+	//return scope.Close(Number::New(val));
+}
+
+
 Handle<Value>
 Matrix::Get(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
@@ -221,6 +263,7 @@ Matrix::Size(const Arguments& args){
 
 	return scope.Close(arr);
 }
+
 
 Handle<Value>
 Matrix::Clone(const Arguments& args){
@@ -959,6 +1002,30 @@ cv::Scalar setColor(Local<Object> objColor) {
 	cv::Scalar color = cv::Scalar(valB->IntegerValue(), valG->IntegerValue(), valR->IntegerValue());
 	return color;
 
+
+}
+
+cv::Point setPoint(Local<Object> objPoint) {
+	return  cv::Point( objPoint->Get(0)->IntegerValue(),  objPoint->Get(1)->IntegerValue() );
+}
+
+cv::Rect* setRect(Local<Object> objRect) {
+
+	if(!objRect->IsArray() || !objRect->Get(0)->IsArray() || !objRect->Get(0)->IsArray() ){
+		printf("error");
+		return  0;
+	};
+
+	Local<Object> point = objRect->Get(0)->ToObject();
+	Local<Object> size = objRect->Get(1)->ToObject();
+	cv::Rect ret;
+
+	ret.x = point->Get(0)->IntegerValue();
+	ret.y = point->Get(1)->IntegerValue();
+	ret.width = size->Get(0)->IntegerValue();
+	ret.height = size->Get(1)->IntegerValue();
+
+	return (cv::Rect*) &ret;
 }
 
 
@@ -1135,3 +1202,38 @@ Matrix::MeanStdDev(const v8::Arguments& args) {
 	data->Set(String::NewSymbol("stddev"), stddev);
 	return scope.Close(data);
 }
+
+Handle<Value>
+Matrix::FloodFill(const Arguments& args){
+	SETUP_FUNCTION(Matrix)
+	//obj->Get(v8::String::NewSymbol("x"))
+	//int cv::floodFill(cv::InputOutputArray, cv::Point, cv::Scalar, cv::Rect*, cv::Scalar, cv::Scalar, int)
+
+
+	/*	mat.floodFill( { seedPoint: [1,1]   ,
+		      newColor: [255,0,0] ,
+		      rect:[[0,2],[30,40]] ,
+		      loDiff : [8,90,60],
+		      upDiff:[10,100,70]
+	} );*/
+
+
+	if(args.Length() < 1 || !args[0]->IsObject()) {
+		//error
+	}
+
+
+	Local<Object> obj = args[0]->ToObject();
+
+	int  ret = cv::floodFill(self->mat, setPoint(obj->Get(v8::String::NewSymbol("seedPoint"))->ToObject())
+			, setColor(obj->Get(v8::String::NewSymbol("newColor"))->ToObject())
+			, obj->Get(v8::String::NewSymbol("rect"))->IsUndefined() ? 0 : setRect(obj->Get(v8::String::NewSymbol("rect"))->ToObject())
+			, setColor(obj->Get(v8::String::NewSymbol("loDiff"))->ToObject())
+			, setColor(obj->Get(v8::String::NewSymbol("upDiff"))->ToObject())
+			, 4 );
+
+
+	return scope.Close(Number::New( ret ));
+}
+
+
