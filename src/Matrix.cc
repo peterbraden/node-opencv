@@ -340,7 +340,7 @@ Handle<Value>
 Matrix::ToBuffer(const v8::Arguments& args){
 	SETUP_FUNCTION(Matrix)
 
-    if ((args.Length() > 0) && (args[args.Length() - 1]->IsFunction())) {
+    if ((args.Length() > 0) && (args[0]->IsFunction())) {
         return Matrix::ToBufferAsync(args);
     }
   
@@ -401,7 +401,7 @@ struct matrixToBuffer_baton_t {
   Persistent<Function> cb;
   std::vector<uchar>  res;
   std::vector<int> params;
-  const char *ext;
+  std::string ext;
   uv_work_t request;
 };
 
@@ -414,10 +414,11 @@ Matrix::ToBufferAsync(const v8::Arguments& args){
 
   REQ_FUN_ARG(0, cb);
 
+
   matrixToBuffer_baton_t *baton = new matrixToBuffer_baton_t();
 
 
-  const char *ext = ".jpg";
+  std::string ext = std::string(".jpg");
   // See if the options argument is passed
   if ((args.Length() > 1) && (args[1]->IsObject())) {
       // Get this options argument
@@ -426,7 +427,7 @@ Matrix::ToBufferAsync(const v8::Arguments& args){
       if (options->Has(v8::String::New("ext"))) {
           v8::String::Utf8Value str ( options->Get(v8::String::New("ext"))->ToString() );
           std::string str2 = std::string(*str);
-          ext = (const char *) str2.c_str();
+          ext = str2;
       }
       if (options->Has(v8::String::New("jpegQuality"))) {
           int compression = options->Get(v8::String::New("jpegQuality"))->IntegerValue();
@@ -456,7 +457,8 @@ void AsyncToBufferAsync(uv_work_t *req) {
   std::vector<uchar> vec(0);
 	//std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
 
-	cv::imencode(baton->ext, baton->mm->mat, vec, baton->params);
+  const char * ext = (const char *) baton->ext.c_str();
+	cv::imencode(ext, baton->mm->mat, vec, baton->params);
 
 
   baton->res = vec;
