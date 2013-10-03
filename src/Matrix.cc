@@ -400,6 +400,8 @@ struct matrixToBuffer_baton_t {
   Matrix *mm;
   Persistent<Function> cb;
   std::vector<uchar>  res;
+  std::vector<int> params;
+  const char *ext;
   uv_work_t request;
 };
 
@@ -413,6 +415,32 @@ Matrix::ToBufferAsync(const v8::Arguments& args){
   REQ_FUN_ARG(0, cb);
 
   matrixToBuffer_baton_t *baton = new matrixToBuffer_baton_t();
+
+
+  const char *ext = ".jpg";
+  // See if the options argument is passed
+  if ((args.Length() > 1) && (args[1]->IsObject())) {
+      // Get this options argument
+      v8::Handle<v8::Object> options = v8::Handle<v8::Object>::Cast(args[1]);
+      // If the extension (image format) is provided
+      if (options->Has(v8::String::New("ext"))) {
+          v8::String::Utf8Value str ( options->Get(v8::String::New("ext"))->ToString() );
+          std::string str2 = std::string(*str);
+          ext = (const char *) str2.c_str();
+      }
+      if (options->Has(v8::String::New("jpegQuality"))) {
+          int compression = options->Get(v8::String::New("jpegQuality"))->IntegerValue();
+          baton->params.push_back(CV_IMWRITE_JPEG_QUALITY);
+          baton->params.push_back(compression);
+      }
+      if (options->Has(v8::String::New("pngCompression"))) {
+          int compression = options->Get(v8::String::New("pngCompression"))->IntegerValue();
+          baton->params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+          baton->params.push_back(compression);
+      }        
+  }
+
+  baton->ext = ext;
   baton->mm = self;
   baton->cb = Persistent<Function>::New(cb);
   baton->request.data = baton;
@@ -426,9 +454,9 @@ void AsyncToBufferAsync(uv_work_t *req) {
   matrixToBuffer_baton_t *baton = static_cast<matrixToBuffer_baton_t *>(req->data);
 
   std::vector<uchar> vec(0);
-	std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
+	//std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
 
-	cv::imencode(".jpg", baton->mm->mat, vec, params);
+	cv::imencode(baton->ext, baton->mm->mat, vec, baton->params);
 
 
   baton->res = vec;
