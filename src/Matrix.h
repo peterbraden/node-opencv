@@ -82,7 +82,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Split)
     JSFUNC(Merge)
     JSFUNC(EqualizeHist)
-    
+    JSFUNC(Pixel)
+    JSFUNC(FloodFill)
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);
