@@ -73,9 +73,14 @@ NamedWindow::BlockingWaitKey(const v8::Arguments& args){
   HandleScope scope;
 	//SETUP_FUNCTION(NamedWindow)
 	int time = 0;
+
   if (args.Length() > 0){
     time = args[1]->IntegerValue();
+  }else{
+    time = args[0]->IntegerValue();
   }
+
   int res = cv::waitKey(time);
+
 	return scope.Close(Number::New(res));
 }
