@@ -12,12 +12,12 @@ namedWindow = new cv.NamedWindow('Video',1)
 # stop the program from the video feed window.
 intervalId = setInterval(()->
 
-  # camera.read allows us to retriebe the current
+  # camera.read allows us to retrieve the current
   # frame to be displayed in the video window.
   camera.read((err, im) ->
     # We can check for errors and even break the
     # program execution if an error is detected here.
-    console.lof "The err ==>#{ err }" if err
+    console.log "The err ==>#{ err }" if err
 
     # There is no need to display the image width or Height
     # but I leave this here in case anyone needs to check them.
