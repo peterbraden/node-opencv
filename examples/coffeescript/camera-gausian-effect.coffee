@@ -24,11 +24,28 @@ intervalId = setInterval(()->
     #console.log("Width: #{im.width()}")
     #console.log("height: #{im.height()}")
 
-    # We use the previously created namedWindow to display the
-    # video feed frame, we need to check the image is already
-    # available and has a width and height greater than 0,
-    # otherwise namedWindow.show() will fail if any of those is 0.
-    namedWindow.show(im) if im.width() > 0 and im.height() > 0
+    # Before working with the frame we need to check the image
+    # is already available and has a width and height greater than 0,
+    # otherwise it will fail when trying to do namedWindow.show()
+    # and the image has width or height equal or less than 0.
+    if im.width() > 0 and im.height() > 0
+      # We apply filters and effects to the frame we got from the
+      # camera to manipulate the video that we'll display.
+      # First we convert to grayscale.
+      im.convertGrayscale()
+      # We then apply GaussianBlur.
+      # It takes an array of type double and size 2
+      # that indicates how strong the gaussian blur should be.
+      im.gaussianBlur([7,7])
+      # We then apply canny edge filtering.
+      # Params are lower and higher threshold and aperture size,
+      # although nodejs-opencv overwrite the aperture size param
+      # with 0. An update to consider it is needed.
+      im.canny(0, 30, 3)
+
+      # We use the previously created namedWindow to display the
+      # video frame to wich we applied the blur and filter.
+      namedWindow.show(im)
 
     # Finally we get the key pressed on the window to terminate
     # execution of the program.
@@ -38,4 +55,4 @@ intervalId = setInterval(()->
     # In this case I terminate the program if any key is pressed.
     if res >= 0 then clearInterval(intervalId)
   )
-, 500)
+, 50)
