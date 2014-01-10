@@ -41,9 +41,9 @@ intervalId = setInterval(()->
 
     # Finally we get the key pressed on the window to terminate
     # execution of the program.
-    res = namedWindow.blockingWaitKey(0, 20)
+    res = namedWindow.blockingWaitKey(0, 50)
 
     # In this case I terminate the program if any key is pressed.
     if res >= 0 then clearInterval(intervalId)
   )
-, 50)
+, 150)
