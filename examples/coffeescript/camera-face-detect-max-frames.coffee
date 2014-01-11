@@ -5,14 +5,10 @@ cv = require 'opencv'
 camera = new cv.VideoCapture(1)
 
 # we create a window to display the Video frames
-namedWindow = new cv.NamedWindow('Video',1)
+namedWindow = new cv.NamedWindow('Video', 0)
 color = [255,0,0]
 
-# We set an interval to retrieve frames from the
-# video source and we get the intervalId so we can
-# stop the program from the video feed window.
-intervalId = setInterval(()->
-
+frameRead = () ->
   # camera.read allows us to retrieve the current
   # frame to be displayed in the video window.
   camera.read((err, im) ->
@@ -30,6 +26,9 @@ intervalId = setInterval(()->
     # otherwise it will fail when trying to do namedWindow.show()
     # and the image has width or height equal or less than 0.
     if im.width() > 0 and im.height() > 0
+      #console.log("Interval ID => #{ intervalId }")
+      #console.log(intervalId)
+      clearInterval(intervalId) if intervalId?
       im.detectObject('./haarcascades/haarcascade_frontalface_alt.xml', {}, (err, faces) ->
         for face in faces
           im.rectangle([face.x, face.y], [face.x + face.width, face.y + face.height], [0,255,0], 2)
@@ -37,13 +36,21 @@ intervalId = setInterval(()->
         # We use the previously created namedWindow to display the
         # video frame to wich we applied the blur and filter.
         namedWindow.show(im)
+
+        # Finally we get the key pressed on the window to terminate
+        # execution of the program.
+        res = namedWindow.blockingWaitKey(0, 20)
+
+        # In this case we terminate the program if any key is pressed.
+        #if res >= 0 then do not set a new timeout to get a new frame.
+        setTimeout(frameRead, 5) if res < 0
       )
 
-    # Finally we get the key pressed on the window to terminate
-    # execution of the program.
-    res = namedWindow.blockingWaitKey(0, 50)
-
-    # In this case I terminate the program if any key is pressed.
-    if res >= 0 then clearInterval(intervalId)
   )
-, 150)
+
+# We set an interval to retrieve frames from the
+# video source and we get the intervalId so we can
+# stop the program by pressing any key on the video feed window.
+intervalId = setInterval(() ->
+  frameRead(intervalId)
+, 100)
