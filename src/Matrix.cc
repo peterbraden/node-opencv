@@ -92,6 +92,9 @@ Matrix::Init(Handle<Object> target) {
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "floodFill", FloodFill);
 
+  NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
+
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
 
@@ -1530,3 +1533,79 @@ Matrix::FloodFill(const Arguments& args){
 }
 
 
+// @author ytham
+// Match Template filter
+// Usage: output = input.matchTemplate("templateFileString", method);
+Handle<Value>
+Matrix::MatchTemplate(const v8::Arguments& args) {
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  v8::String::Utf8Value args0(args[0]->ToString());
+  std::string filename = std::string(*args0);
+  cv::Mat templ;
+  templ = cv::imread(filename, CV_8S);
+
+  Local<Object> out = Matrix::constructor->GetFunction()->NewInstance();
+  Matrix *m_out = ObjectWrap::Unwrap<Matrix>(out);
+  int cols = self->mat.cols - templ.cols + 1;
+  int rows = self->mat.rows - templ.rows + 1;
+  m_out->mat.create(cols, rows, CV_32FC1);
+
+  /*
+    TM_SQDIFF        =0
+    TM_SQDIFF_NORMED =1
+    TM_CCORR         =2
+    TM_CCORR_NORMED  =3
+    TM_CCOEFF        =4
+    TM_CCOEFF_NORMED =5
+  */
+  int method = (args.Length() < 2) ? (int)cv::TM_CCORR_NORMED : args[1]->Uint32Value();
+
+  cv::matchTemplate(self->mat, templ, m_out->mat, method);
+
+  double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+  cv::minMaxLoc(m_out->mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+
+  return scope.Close(out);
+}
+
+
+// @author ytham
+// Min/Max location
+Handle<Value>
+Matrix::MinMaxLoc(const v8::Arguments& args) {
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+
+  cv::minMaxLoc(self->mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+
+  Local<Value> v_minVal = v8::Number::New(minVal);
+  Local<Value> v_maxVal = v8::Number::New(maxVal);
+  Local<Value> v_minLoc_x = v8::Number::New(minLoc.x);
+  Local<Value> v_minLoc_y = v8::Number::New(minLoc.y);
+  Local<Value> v_maxLoc_x = v8::Number::New(maxLoc.x);
+  Local<Value> v_maxLoc_y = v8::Number::New(maxLoc.y);
+
+  Local<Object> o_minLoc = Object::New();
+  o_minLoc->Set(String::NewSymbol("x"), v_minLoc_x);
+  o_minLoc->Set(String::NewSymbol("y"), v_minLoc_y);
+
+  Local<Object> o_maxLoc = Object::New();
+  o_maxLoc->Set(String::NewSymbol("x"), v_maxLoc_x);
+  o_maxLoc->Set(String::NewSymbol("y"), v_maxLoc_y);
+
+  // Output result object
+  Local<Object> result = Object::New();
+  result->Set(String::NewSymbol("minVal"), v_minVal);
+  result->Set(String::NewSymbol("maxVal"), v_maxVal);
+  result->Set(String::NewSymbol("minLoc"), o_minLoc);
+  result->Set(String::NewSymbol("maxLoc"), o_maxLoc);=
+
+  
+  return scope.Close(result);
+}
