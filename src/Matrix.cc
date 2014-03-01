@@ -1604,8 +1604,7 @@ Matrix::MinMaxLoc(const v8::Arguments& args) {
   result->Set(String::NewSymbol("minVal"), v_minVal);
   result->Set(String::NewSymbol("maxVal"), v_maxVal);
   result->Set(String::NewSymbol("minLoc"), o_minLoc);
-  result->Set(String::NewSymbol("maxLoc"), o_maxLoc);=
+  result->Set(String::NewSymbol("maxLoc"), o_maxLoc);
 
-  
   return scope.Close(result);
 }
