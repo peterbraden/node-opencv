@@ -1081,6 +1081,11 @@ Matrix::HoughLinesP(const v8::Arguments& args) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  double rho = args.Length() < 1 ? 1 : args[0]->NumberValue();
+  double theta = args.Length() < 2 ? CV_PI/180 : args[1]->NumberValue();
+  int threshold = args.Length() < 3 ? 80 : args[2]->Uint32Value();
+  double minLineLength = args.Length() < 4 ? 30 : args[3]->NumberValue();
+  double maxLineGap = args.Length() < 5 ? 10 : args[4]->NumberValue();
   std::vector<cv::Vec4i> lines;
 
   cv::Mat gray;
@@ -1088,7 +1093,7 @@ Matrix::HoughLinesP(const v8::Arguments& args) {
 
   equalizeHist(self->mat, gray);
  // cv::Canny(gray, gray, 50, 200, 3);
-  cv::HoughLinesP(gray, lines, 1, CV_PI/180, 80, 30, 10);
+  cv::HoughLinesP(gray, lines, rho, theta, threshold, minLineLength, maxLineGap);
 
   v8::Local<v8::Array> arr = v8::Array::New(lines.size());
 
