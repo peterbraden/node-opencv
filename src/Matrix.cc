@@ -83,6 +83,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "locateROI", LocateROI);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "threshold", Threshold);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "adaptiveThreshold", AdaptiveThreshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "meanStdDev", MeanStdDev);
     
     NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
@@ -1334,6 +1335,25 @@ Matrix::Threshold(const v8::Arguments& args) {
 	self->mat.copyTo(img->mat);
 
   cv::threshold(self->mat, img->mat, threshold, maxVal, typ);
+
+	return scope.Close(img_to_return);
+}
+
+Handle<Value>
+Matrix::AdaptiveThreshold(const v8::Arguments& args) {
+	SETUP_FUNCTION(Matrix)
+
+	double maxVal = args[0]->NumberValue();
+  double adaptiveMethod = args[1]->NumberValue();
+  double thresholdType = args[2]->NumberValue();
+  double blockSize = args[3]->NumberValue();
+  double C = args[4]->NumberValue();
+
+	Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
+	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
+	self->mat.copyTo(img->mat);
+
+  cv::adaptiveThreshold(self->mat, img->mat, maxVal, adaptiveMethod, thresholdType, blockSize, C);
 
 	return scope.Close(img_to_return);
 }
