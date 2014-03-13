@@ -1349,13 +1349,13 @@ Matrix::AdaptiveThreshold(const v8::Arguments& args) {
   double blockSize = args[3]->NumberValue();
   double C = args[4]->NumberValue();
 
-	Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
-	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
-	self->mat.copyTo(img->mat);
+  Local<Object> img_to_return = Matrix::constructor->GetFunction()->NewInstance();
+  Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
+  self->mat.copyTo(img->mat);
 
   cv::adaptiveThreshold(self->mat, img->mat, maxVal, adaptiveMethod, thresholdType, blockSize, C);
 
-	return scope.Close(img_to_return);
+  return scope.Close(img_to_return);
 }
 
 Handle<Value>
