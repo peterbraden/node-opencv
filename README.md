@@ -207,6 +207,20 @@ doesn't work for you please get in touch.
 
 ## Changelog
 
+#### 0.5.0
+
+Lots more opencv functions added, and bugfixes from a large number of
+contributors. Thanks to all of them!
+
+- Allow args for `HoughLinesP` by @clkao in #112
+- `matchTemplate` and `minMaxLoc` by @ytham in #108
+- updated `blockingWaitKey` by @hybridgroup in #98
+
+
+#### 0.0.13 -> 0.4.0
+
+( missing description... )
+
 #### 0.0.13
 
 - V Early support for face recognition - API is _likely_ to change. Have fun!
