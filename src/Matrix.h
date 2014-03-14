@@ -75,6 +75,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(AdjustROI)
 
     JSFUNC(Threshold)
+    JSFUNC(AdaptiveThreshold)
     JSFUNC(MeanStdDev)
 
     JSFUNC(CopyTo)
