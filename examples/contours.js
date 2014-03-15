@@ -11,8 +11,8 @@ var RED   = [0, 0, 255]; //B, G, R
 
 cv.readImage('./stuff.png', function(err, im) {
 
-	var big = new cv.Matrix(im.width(), im.height()); 
-	var all = new cv.Matrix(im.width(), im.height()); 
+	var big = new cv.Matrix(im.height(), im.width()); 
+	var all = new cv.Matrix(im.height(), im.width()); 
 
 	im.convertGrayscale();
 	im_canny = im.copy();
