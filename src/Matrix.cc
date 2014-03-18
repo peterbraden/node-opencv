@@ -96,6 +96,8 @@ Matrix::Init(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
   NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
 
+  NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
+
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
 
@@ -1632,4 +1634,20 @@ Matrix::MinMaxLoc(const v8::Arguments& args) {
   result->Set(String::NewSymbol("maxLoc"), o_maxLoc);
 
   return scope.Close(result);
+}
+
+
+// @author ytham
+// Pushes some matrix (argument) the back of a matrix (self)
+Handle<Value>
+Matrix::PushBack(const v8::Arguments& args) {
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  Matrix *m_input = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+  self->mat.push_back(m_input->mat);
+
+  return scope.Close(args.This());
 }

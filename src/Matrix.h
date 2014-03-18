@@ -88,6 +88,8 @@ class Matrix: public node::ObjectWrap {
 
     JSFUNC(MatchTemplate)
     JSFUNC(MinMaxLoc)
+
+    JSFUNC(PushBack)
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);
