@@ -56,7 +56,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
@@ -66,17 +66,16 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
-	//NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "erode", Erode);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "findContours", FindContours);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawContour", DrawContour);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawAllContours", DrawAllContours);
 
-  NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "inRange", inRange);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "adjustROI", AdjustROI);
@@ -85,18 +84,18 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "threshold", Threshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "adaptiveThreshold", AdaptiveThreshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "meanStdDev", MeanStdDev);
-    
-    NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
+
+	NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "floodFill", FloodFill);
 
-  NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
 
-  NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
