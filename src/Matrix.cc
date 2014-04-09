@@ -58,6 +58,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
     NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "medianBlur", MedianBlur);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "bilateralFilter", BilateralFilter);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "roi", ROI);
@@ -805,6 +807,63 @@ Matrix::GaussianBlur(const v8::Arguments& args) {
 	blurred.copyTo(self->mat);
 
 	return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::MedianBlur(const v8::Arguments &args) {
+  HandleScope scope;
+  cv::Mat blurred;
+  int ksize = 3;
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  if (args[0]->IsNumber()) {
+    ksize = args[0]->IntegerValue();
+    if ((ksize % 2) == 0) {
+      return ThrowException(Exception::TypeError(String::New(
+        "'ksize' argument must be a positive odd integer")));
+    }
+  } else {
+    return ThrowException(Exception::TypeError(String::New(
+      "'ksize' argument must be a positive odd integer")));
+  }
+
+  cv::medianBlur(self->mat, blurred, ksize);
+  blurred.copyTo(self->mat);
+
+  return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::BilateralFilter(const v8::Arguments &args) {
+  HandleScope scope;
+  cv::Mat filtered;
+  int d = 15;
+  double sigmaColor = 80;
+  double sigmaSpace = 80;
+  int borderType = cv::BORDER_DEFAULT;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  if (args.Length() != 0) {
+    if (args.Length() < 3 || args.Length() > 4) {
+      return ThrowException(Exception::TypeError(String::New(
+        "BilateralFilter takes 0, 3, or 4 arguments")));
+    } else {
+      d = args[0]->IntegerValue();
+      sigmaColor = args[1]->NumberValue();
+      sigmaSpace = args[2]->NumberValue();
+      if (args.Length() == 4) {
+        borderType = args[3]->IntegerValue();
+      }
+    }
+  }
+  
+  cv::bilateralFilter(self->mat, filtered, d, sigmaColor, sigmaSpace, borderType);
+  filtered.copyTo(self->mat);
+
+  return scope.Close(v8::Null());
 }
 
 

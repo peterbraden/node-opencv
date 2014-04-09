@@ -48,6 +48,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(ConvertGrayscale)
     JSFUNC(ConvertHSVscale)
     JSFUNC(GaussianBlur)
+    JSFUNC(MedianBlur)
+    JSFUNC(BilateralFilter)
     JSFUNC(Copy)
     JSFUNC(Flip)
     JSFUNC(ROI)
