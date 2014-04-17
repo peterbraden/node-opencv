@@ -97,6 +97,8 @@ Matrix::Init(Handle<Object> target) {
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
 
+	NODE_SET_PROTOTYPE_METHOD(constructor, "putText", PutText);
+
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
 
@@ -1649,4 +1651,44 @@ Matrix::PushBack(const v8::Arguments& args) {
   self->mat.push_back(m_input->mat);
 
   return scope.Close(args.This());
+}
+
+Handle<Value>
+Matrix::PutText(const v8::Arguments& args) {
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  
+  v8::String::AsciiValue textString(args[0]);
+  char *text = (char *) malloc(textString.length() + 1);
+  strcpy(text, *textString);
+
+  int x = args[1]->IntegerValue();
+  int y = args[2]->IntegerValue();
+
+  v8::String::AsciiValue fontString(args[3]);
+  char *font = (char *) malloc(fontString.length() + 1);
+  strcpy(font, *fontString);
+  int constFont = cv::FONT_HERSHEY_SIMPLEX;
+
+  if (!strcmp(font, "HERSEY_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SIMPLEX; }
+  else if (!strcmp(font, "HERSEY_PLAIN")) { constFont = cv::FONT_HERSHEY_PLAIN; }
+  else if (!strcmp(font, "HERSEY_DUPLEX")) { constFont = cv::FONT_HERSHEY_DUPLEX; }
+  else if (!strcmp(font, "HERSEY_COMPLEX")) { constFont = cv::FONT_HERSHEY_COMPLEX; }
+  else if (!strcmp(font, "HERSEY_TRIPLEX")) { constFont = cv::FONT_HERSHEY_TRIPLEX; }
+  else if (!strcmp(font, "HERSEY_COMPLEX_SMALL")) { constFont = cv::FONT_HERSHEY_COMPLEX_SMALL; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_SIMPLEX; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_COMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_COMPLEX; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_SIMPLEX; }
+
+  cv::Scalar color(0, 0, 255);
+
+  if(args[4]->IsArray()) {
+    Local<Object> objColor = args[4]->ToObject();
+    color = setColor(objColor);
+  }
+
+  cv::putText(self->mat, text, cv::Point(x, y), constFont, 1, color, 2);
+
+  return scope.Close(Undefined());
 }

@@ -90,6 +90,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(MinMaxLoc)
 
     JSFUNC(PushBack)
+
+    JSFUNC(PutText)
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);
