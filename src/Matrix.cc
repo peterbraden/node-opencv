@@ -1026,7 +1026,9 @@ Matrix::DrawContour(const v8::Arguments& args) {
 		color = setColor(objColor);
 	}
 
-	cv::drawContours(self->mat, cont->contours, pos, color, 1);
+    int thickness = args.Length() < 4 ? 1 : args[3]->NumberValue();
+
+    cv::drawContours(self->mat, cont->contours, pos, color, thickness);
 
 	return Undefined();
 }
@@ -1046,7 +1048,10 @@ Matrix::DrawAllContours(const v8::Arguments& args) {
 		color = setColor(objColor);
 	}
 
-	cv::drawContours(self->mat, cont->contours, -1, color, 1);
+    int thickness = args.Length() < 3 ? 1 : args[2]->NumberValue();
+
+    cv::drawContours(self->mat, cont->contours, -1, color, thickness);
+
 
 	return Undefined();
 }
