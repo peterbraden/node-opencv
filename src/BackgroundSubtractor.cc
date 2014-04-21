@@ -2,6 +2,8 @@
 #include "Matrix.h"
 #include <iostream>
 
+#if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
+
 Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
 
 void
@@ -133,3 +135,5 @@ BackgroundSubtractorWrap::ApplyMOG(const Arguments &args) {
 BackgroundSubtractorWrap::BackgroundSubtractorWrap(cv::Ptr<cv::BackgroundSubtractor> _subtractor){
   subtractor = _subtractor;
 };
+
+#endif
