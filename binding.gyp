@@ -12,7 +12,6 @@
         , "src/CamShift.cc"
         , "src/HighGUI.cc"
         , "src/FaceRecognizer.cc"
-        , "src/BackgroundSubtractor.cc"
         ]
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'
