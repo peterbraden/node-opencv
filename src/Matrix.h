@@ -94,6 +94,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(PushBack)
 
     JSFUNC(PutText)
+    JSFUNC(GetPerspectiveTransform) 
+    JSFUNC(WarpPerspective)
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);
@@ -121,7 +123,8 @@ class Matrix: public node::ObjectWrap {
     static Handle<Value> Depth(const Arguments& args);
     static Handle<Value> Channels(const Arguments& args);
     static Handle<Value> StepOne(const Arguments& args);
-
+    static Handle<Value> GetPerspectiveTransform(const Arguments& args);
+    static Handle<Value> WarpPerspective(const Arguments& args);
 
 */
 
