@@ -2,6 +2,9 @@
 #include "Matrix.h"
 #include "OpenCV.h"
 
+#include  <iostream>
+using namespace std;
+
 
 void AsyncRead(uv_work_t *req);
 void AfterAsyncRead(uv_work_t *req);
@@ -31,6 +34,8 @@ VideoCaptureWrap::Init(Handle<Object> target) {
 	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "read", Read);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "setWidth", SetWidth);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "setHeight", SetHeight);
 
 	target->Set(String::NewSymbol("VideoCapture"), constructor->GetFunction());
 };    
@@ -77,6 +82,28 @@ VideoCaptureWrap::VideoCaptureWrap(const std::string& filename){
 
 }
 
+Handle<Value>
+VideoCaptureWrap::SetWidth(const Arguments &args){
+
+	HandleScope scope;
+	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+
+	if(v->cap.isOpened())
+		v->cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+
+	return Undefined();
+}
+
+Handle<Value>
+VideoCaptureWrap::SetHeight(const Arguments &args){
+
+	HandleScope scope;
+	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+
+	v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+
+	return Undefined();
+}
 
 Handle<Value>
 VideoCaptureWrap::Read(const Arguments &args) {
