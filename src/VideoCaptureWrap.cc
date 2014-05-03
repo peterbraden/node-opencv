@@ -88,10 +88,15 @@ VideoCaptureWrap::SetWidth(const Arguments &args){
 	HandleScope scope;
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
-	if(v->cap.isOpened())
-		v->cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+	if(args.Length() != 1)
+		return scope.Close(Undefined());
+	
+	int w = args[0]->IntegerValue();
 
-	return Undefined();
+	if(v->cap.isOpened())
+		v->cap.set(CV_CAP_PROP_FRAME_WIDTH, w);
+
+	return scope.Close(Undefined());
 }
 
 Handle<Value>
@@ -100,7 +105,12 @@ VideoCaptureWrap::SetHeight(const Arguments &args){
 	HandleScope scope;
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
-	v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+	if(args.Length() != 1)
+		return scope.Close(Undefined());
+	
+	int h = args[0]->IntegerValue();
+
+	v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, h);
 
 	return Undefined();
 }
