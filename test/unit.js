@@ -351,6 +351,39 @@ vows.describe('Smoke Tests OpenCV').addBatch({
   
   }
 
+  , "putText": {
+    topic: function() {
+      var cv = require('../lib/opencv')
+        , self = this
+      
+      cv.readImage('./examples/coin1.jpg', function(e, im){
+        self.callback(null, im);
+      });
+    },
+    "fonts": function(im) {
+      function rnd() {
+        return Math.round(Math.random() * 255);
+      };
+
+      var y = 0;
+
+      ([
+        "HERSEY_SIMPLEX",
+        "HERSEY_PLAIN",
+        "HERSEY_DUPLEX",
+        "HERSEY_COMPLEX",
+        "HERSEY_TRIPLEX",
+        "HERSEY_COMPLEX_SMALL",
+        "HERSEY_SCRIPT_SIMPLEX",
+        "HERSEY_SCRIPT_COMPLEX",
+        "HERSEY_SCRIPT_SIMPLEX"
+      ]).forEach(function(font) {
+        im.putText("Some text", 0, y += 20, font, [rnd(), rnd(), rnd()]);
+      });
+
+      im.save("./examples/coin1-with-text.jpg");
+    }
+  }
 
 
 }).export(module);

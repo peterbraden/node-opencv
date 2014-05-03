@@ -48,6 +48,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(ConvertGrayscale)
     JSFUNC(ConvertHSVscale)
     JSFUNC(GaussianBlur)
+    JSFUNC(MedianBlur)
+    JSFUNC(BilateralFilter)
     JSFUNC(Copy)
     JSFUNC(Flip)
     JSFUNC(ROI)
@@ -90,6 +92,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(MinMaxLoc)
 
     JSFUNC(PushBack)
+
+    JSFUNC(PutText)
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);

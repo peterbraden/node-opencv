@@ -56,8 +56,10 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "medianBlur", MedianBlur);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "bilateralFilter", BilateralFilter);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "roi", ROI);
@@ -66,17 +68,16 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
-	//NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "erode", Erode);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "findContours", FindContours);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawContour", DrawContour);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawAllContours", DrawAllContours);
 
-  NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "inRange", inRange);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "adjustROI", AdjustROI);
@@ -85,18 +86,20 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "threshold", Threshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "adaptiveThreshold", AdaptiveThreshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "meanStdDev", MeanStdDev);
-    
-    NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
+
+	NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "floodFill", FloodFill);
 
-  NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
 
-  NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
+
+	NODE_SET_PROTOTYPE_METHOD(constructor, "putText", PutText);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
@@ -809,6 +812,63 @@ Matrix::GaussianBlur(const v8::Arguments& args) {
 
 
 Handle<Value>
+Matrix::MedianBlur(const v8::Arguments &args) {
+  HandleScope scope;
+  cv::Mat blurred;
+  int ksize = 3;
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  if (args[0]->IsNumber()) {
+    ksize = args[0]->IntegerValue();
+    if ((ksize % 2) == 0) {
+      return ThrowException(Exception::TypeError(String::New(
+        "'ksize' argument must be a positive odd integer")));
+    }
+  } else {
+    return ThrowException(Exception::TypeError(String::New(
+      "'ksize' argument must be a positive odd integer")));
+  }
+
+  cv::medianBlur(self->mat, blurred, ksize);
+  blurred.copyTo(self->mat);
+
+  return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::BilateralFilter(const v8::Arguments &args) {
+  HandleScope scope;
+  cv::Mat filtered;
+  int d = 15;
+  double sigmaColor = 80;
+  double sigmaSpace = 80;
+  int borderType = cv::BORDER_DEFAULT;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  if (args.Length() != 0) {
+    if (args.Length() < 3 || args.Length() > 4) {
+      return ThrowException(Exception::TypeError(String::New(
+        "BilateralFilter takes 0, 3, or 4 arguments")));
+    } else {
+      d = args[0]->IntegerValue();
+      sigmaColor = args[1]->NumberValue();
+      sigmaSpace = args[2]->NumberValue();
+      if (args.Length() == 4) {
+        borderType = args[3]->IntegerValue();
+      }
+    }
+  }
+  
+  cv::bilateralFilter(self->mat, filtered, d, sigmaColor, sigmaSpace, borderType);
+  filtered.copyTo(self->mat);
+
+  return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
 Matrix::Copy(const v8::Arguments& args) {
 	HandleScope scope;
 
@@ -1026,7 +1086,9 @@ Matrix::DrawContour(const v8::Arguments& args) {
 		color = setColor(objColor);
 	}
 
-	cv::drawContours(self->mat, cont->contours, pos, color, 1);
+    int thickness = args.Length() < 4 ? 1 : args[3]->NumberValue();
+
+    cv::drawContours(self->mat, cont->contours, pos, color, thickness);
 
 	return Undefined();
 }
@@ -1046,7 +1108,10 @@ Matrix::DrawAllContours(const v8::Arguments& args) {
 		color = setColor(objColor);
 	}
 
-	cv::drawContours(self->mat, cont->contours, -1, color, 1);
+    int thickness = args.Length() < 3 ? 1 : args[2]->NumberValue();
+
+    cv::drawContours(self->mat, cont->contours, -1, color, thickness);
+
 
 	return Undefined();
 }
@@ -1650,4 +1715,44 @@ Matrix::PushBack(const v8::Arguments& args) {
   self->mat.push_back(m_input->mat);
 
   return scope.Close(args.This());
+}
+
+Handle<Value>
+Matrix::PutText(const v8::Arguments& args) {
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  
+  v8::String::AsciiValue textString(args[0]);
+  char *text = (char *) malloc(textString.length() + 1);
+  strcpy(text, *textString);
+
+  int x = args[1]->IntegerValue();
+  int y = args[2]->IntegerValue();
+
+  v8::String::AsciiValue fontString(args[3]);
+  char *font = (char *) malloc(fontString.length() + 1);
+  strcpy(font, *fontString);
+  int constFont = cv::FONT_HERSHEY_SIMPLEX;
+
+  if (!strcmp(font, "HERSEY_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SIMPLEX; }
+  else if (!strcmp(font, "HERSEY_PLAIN")) { constFont = cv::FONT_HERSHEY_PLAIN; }
+  else if (!strcmp(font, "HERSEY_DUPLEX")) { constFont = cv::FONT_HERSHEY_DUPLEX; }
+  else if (!strcmp(font, "HERSEY_COMPLEX")) { constFont = cv::FONT_HERSHEY_COMPLEX; }
+  else if (!strcmp(font, "HERSEY_TRIPLEX")) { constFont = cv::FONT_HERSHEY_TRIPLEX; }
+  else if (!strcmp(font, "HERSEY_COMPLEX_SMALL")) { constFont = cv::FONT_HERSHEY_COMPLEX_SMALL; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_SIMPLEX; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_COMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_COMPLEX; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_SIMPLEX; }
+
+  cv::Scalar color(0, 0, 255);
+
+  if(args[4]->IsArray()) {
+    Local<Object> objColor = args[4]->ToObject();
+    color = setColor(objColor);
+  }
+
+  cv::putText(self->mat, text, cv::Point(x, y), constFont, 1, color, 2);
+
+  return scope.Close(Undefined());
 }
