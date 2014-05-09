@@ -29,7 +29,7 @@ BackgroundSubtractorWrap::New(const Arguments &args) {
     JSTHROW_TYPE("Cannot Instantiate without new")
 
   //Create MOG by default
-  cv::Ptr<cv::BackgroundSubtractor> bg = cv::createBackgroundSubtractorMOG(200, 5, 0.7, 0);
+  cv::Ptr<cv::BackgroundSubtractor> bg;
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(args.This());
@@ -55,9 +55,7 @@ BackgroundSubtractorWrap::CreateMOG(const Arguments &args) {
 
   Local<Object> n = BackgroundSubtractorWrap::constructor->GetFunction()->NewInstance();
 
-  cv::Ptr<cv::BackgroundSubtractor> bg = cv::createBackgroundSubtractorMOG(
-      history, nmixtures, backgroundRatio, noiseSigma
-  );
+  cv::Ptr<cv::BackgroundSubtractor> bg;
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
@@ -106,7 +104,7 @@ BackgroundSubtractorWrap::ApplyMOG(const Arguments &args) {
     }
 
     cv::Mat _fgMask;
-    self->subtractor->apply(mat, _fgMask);
+    self->subtractor->operator()(mat, _fgMask);
 
     img->mat = _fgMask;
 
