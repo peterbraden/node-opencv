@@ -1762,7 +1762,7 @@ Matrix::PutText(const v8::Arguments& args) {
 
 Handle<Value>
 Matrix::GetPerspectiveTransform(const v8::Arguments& args) {
-    SETUP_FUNCTION(Matrix)
+    HandleScope scope;
 
     // extract quad args
     Local<Object> srcArray = args[0]->ToObject();
