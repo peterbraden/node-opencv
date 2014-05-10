@@ -100,6 +100,9 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "putText", PutText);
+    
+    NODE_SET_PROTOTYPE_METHOD(constructor, "getPerspectiveTransform", GetPerspectiveTransform); 
+    NODE_SET_PROTOTYPE_METHOD(constructor, "warpPerspective", WarpPerspective);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
@@ -1755,4 +1758,55 @@ Matrix::PutText(const v8::Arguments& args) {
   cv::putText(self->mat, text, cv::Point(x, y), constFont, 1, color, 2);
 
   return scope.Close(Undefined());
+}
+
+Handle<Value>
+Matrix::GetPerspectiveTransform(const v8::Arguments& args) {
+    HandleScope scope;
+
+    // extract quad args
+    Local<Object> srcArray = args[0]->ToObject();
+    Local<Object> tgtArray = args[1]->ToObject();
+
+    std::vector<cv::Point2f> src_corners(4);
+    std::vector<cv::Point2f> tgt_corners(4);
+    for (unsigned int i = 0; i < 4; i++) {
+        src_corners[i] = cvPoint(srcArray->Get(i*2)->IntegerValue(),srcArray->Get(i*2+1)->IntegerValue());
+        tgt_corners[i] = cvPoint(tgtArray->Get(i*2)->IntegerValue(),tgtArray->Get(i*2+1)->IntegerValue());
+    }
+
+    Local<Object> xfrm = Matrix::constructor->GetFunction()->NewInstance();
+    Matrix *xfrmmat = ObjectWrap::Unwrap<Matrix>(xfrm);
+    xfrmmat->mat = cv::getPerspectiveTransform(src_corners, tgt_corners);
+
+    return scope.Close(xfrm);
+}
+
+Handle<Value>
+Matrix::WarpPerspective(const v8::Arguments& args) {
+    SETUP_FUNCTION(Matrix)
+
+    Matrix *xfrm = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+    int width = args[1]->IntegerValue();
+    int height = args[2]->IntegerValue();
+
+    int flags = cv::INTER_LINEAR;
+    int borderMode = cv::BORDER_REPLICATE;
+
+    cv::Scalar borderColor(0, 0, 255);
+
+    if(args[3]->IsArray()) {
+        Local<Object> objColor = args[3]->ToObject();
+        borderColor = setColor(objColor);
+    }
+
+    cv::Mat res = cv::Mat(width, height, CV_32FC3);
+
+    cv::warpPerspective(self->mat, res, xfrm->mat, cv::Size(width, height), flags, borderMode, borderColor);
+
+    ~self->mat;
+    self->mat = res;
+
+    return scope.Close(v8::Null());
 }
