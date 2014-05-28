@@ -67,6 +67,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "absDiff", AbsDiff);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseNot", BitwiseNot);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseAnd", BitwiseAnd);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
@@ -997,6 +999,33 @@ Matrix::BitwiseXor(const v8::Arguments& args) {
 	cv::bitwise_xor(src1->mat, src2->mat, self->mat);
 
 	return scope.Close(v8::Null());
+}
+
+Handle<Value>
+Matrix::BitwiseNot(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+    Matrix *dst = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+    cv::bitwise_not(self->mat, dst->mat);
+
+    return scope.Close(v8::Null());
+}
+
+Handle<Value>
+Matrix::BitwiseAnd(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+    Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+    Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+    cv::bitwise_and(src1->mat, src2->mat, self->mat);
+
+    return scope.Close(v8::Null());
 }
 
 Handle<Value>

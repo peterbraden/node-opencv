@@ -57,6 +57,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(AbsDiff)
     JSFUNC(AddWeighted)
     JSFUNC(BitwiseXor)
+    JSFUNC(BitwiseNot)
+    JSFUNC(BitwiseAnd)
     JSFUNC(CountNonZero)
     //JSFUNC(Split)
     JSFUNC(Canny)
