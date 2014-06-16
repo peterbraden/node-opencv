@@ -614,7 +614,7 @@ Matrix::Rectangle(const Arguments& args) {
 		if(args[3]->IntegerValue())
 			thickness = args[3]->IntegerValue();
 
-		cv::rectangle(self->mat, cv::Point(x, y), cv::Point(width, height), color, thickness);
+		cv::rectangle(self->mat, cv::Point(x, y), cv::Point(x+width, y+height), color, thickness);
 	}
 
 	return scope.Close(v8::Null());
