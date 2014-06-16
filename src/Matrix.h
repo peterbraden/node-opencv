@@ -3,7 +3,7 @@
 class Matrix: public node::ObjectWrap {
   public:
 
-  	cv::Mat mat;
+    cv::Mat mat;
     static Persistent<FunctionTemplate> constructor;
     static void Init(Handle<Object> target);
     static Handle<Value> New(const Arguments &args);
@@ -57,6 +57,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(AbsDiff)
     JSFUNC(AddWeighted)
     JSFUNC(BitwiseXor)
+    JSFUNC(BitwiseNot)
     JSFUNC(CountNonZero)
     //JSFUNC(Split)
     JSFUNC(Canny)
@@ -97,13 +98,13 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(GetPerspectiveTransform) 
     JSFUNC(WarpPerspective)
 /*
-	static Handle<Value> Val(const Arguments& args);
-	static Handle<Value> RowRange(const Arguments& args);
-	static Handle<Value> ColRange(const Arguments& args);
-	static Handle<Value> Diag(const Arguments& args);
-	static Handle<Value> Clone(const Arguments& args);
-	static Handle<Value> CopyTo(const Arguments& args);
-	static Handle<Value> ConvertTo(const Arguments& args);
+    static Handle<Value> Val(const Arguments& args);
+    static Handle<Value> RowRange(const Arguments& args);
+    static Handle<Value> ColRange(const Arguments& args);
+    static Handle<Value> Diag(const Arguments& args);
+    static Handle<Value> Clone(const Arguments& args);
+    static Handle<Value> CopyTo(const Arguments& args);
+    static Handle<Value> ConvertTo(const Arguments& args);
     static Handle<Value> AssignTo(const Arguments& args);
     static Handle<Value> SetTo(const Arguments& args);
     static Handle<Value> Reshape(const Arguments& args);
