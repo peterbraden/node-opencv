@@ -107,6 +107,10 @@ Matrix::Init(Handle<Object> target) {
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
+    NODE_SET_PROTOTYPE_METHOD(constructor, "copyWithMask", CopyWithMask);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "setWithMask", SetWithMask);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "meanWithMask", MeanWithMask);
+
 
 	target->Set(String::NewSymbol("Matrix"), m->GetFunction());
 };
@@ -1824,4 +1828,54 @@ Matrix::WarpPerspective(const v8::Arguments& args) {
     self->mat = res;
 
     return scope.Close(v8::Null());
+}
+
+Handle<Value>
+Matrix::CopyWithMask(const v8::Arguments& args) {
+    SETUP_FUNCTION(Matrix)
+    
+    // param 0 - destination image:
+    Matrix *dest = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+    // param 1 - mask. same size as src and dest
+    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+    self->mat.copyTo(dest->mat,mask->mat);
+
+    return scope.Close(Undefined());
+}
+
+
+Handle<Value>
+Matrix::SetWithMask(const v8::Arguments& args) {
+    SETUP_FUNCTION(Matrix)
+    
+    // param 0 - target value:
+    Local<Object> valArray = args[0]->ToObject();
+    cv::Scalar newvals;
+    newvals.val[0] = valArray->Get(0)->NumberValue();
+    newvals.val[1] = valArray->Get(1)->NumberValue();
+    newvals.val[2] = valArray->Get(2)->NumberValue();
+
+    // param 1 - mask. same size as src and dest
+    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+    self->mat.setTo(newvals,mask->mat);
+
+    return scope.Close(Undefined());
+}
+
+Handle<Value>
+Matrix::MeanWithMask(const v8::Arguments& args) {
+    SETUP_FUNCTION(Matrix)
+    
+    // param 0 - mask. same size as src and dest
+    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+    cv::Scalar means = cv::mean(self->mat, mask->mat);
+    v8::Local<v8::Array> arr = v8::Array::New(3);
+    arr->Set(0, Number::New( means[0] ));
+    arr->Set(1, Number::New( means[1] ));
+    arr->Set(2, Number::New( means[2] ));
+
+    return scope.Close(arr);
 }

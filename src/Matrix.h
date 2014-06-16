@@ -97,6 +97,10 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(PutText)
     JSFUNC(GetPerspectiveTransform) 
     JSFUNC(WarpPerspective)
+
+    JSFUNC(CopyWithMask)
+    JSFUNC(SetWithMask)
+    JSFUNC(MeanWithMask)
 /*
     static Handle<Value> Val(const Arguments& args);
     static Handle<Value> RowRange(const Arguments& args);
