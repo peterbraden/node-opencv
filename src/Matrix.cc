@@ -67,6 +67,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "absDiff", AbsDiff);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseNot", BitwiseNot);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
@@ -1000,6 +1001,18 @@ Matrix::BitwiseXor(const v8::Arguments& args) {
 }
 
 Handle<Value>
+Matrix::BitwiseNot(const v8::Arguments& args) {
+	HandleScope scope;
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+	cv::bitwise_not(src1->mat, self->mat);
+
+	return scope.Close(v8::Null());
+}
+
+Handle<Value>
 Matrix::CountNonZero(const v8::Arguments& args) {
 	HandleScope scope;
 
@@ -1755,7 +1768,9 @@ Matrix::PutText(const v8::Arguments& args) {
     color = setColor(objColor);
   }
 
-  cv::putText(self->mat, text, cv::Point(x, y), constFont, 1, color, 2);
+  double scale = args.Length() < 6 ? 1 : args[5]->NumberValue();
+
+  cv::putText(self->mat, text, cv::Point(x, y), constFont, scale, color, 2);
 
   return scope.Close(Undefined());
 }
