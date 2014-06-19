@@ -564,27 +564,73 @@ void AfterAsyncToBufferAsync(uv_work_t *req) {
 
 Handle<Value>
 Matrix::Ellipse(const v8::Arguments& args){
-  SETUP_FUNCTION(Matrix)
+	SETUP_FUNCTION(Matrix)
 
-  int x = args[0]->Uint32Value();
-  int y = args[1]->Uint32Value();
-  int width = args[2]->Uint32Value();
-  int height = args[3]->Uint32Value();
-  cv::Scalar color(0, 0, 255);
+	int x = 0;
+	int y = 0;
+	int width = 0;
+	int height = 0;
+	cv::Scalar color(0, 0, 255);
+	int thickness = 1;
+	double angle = 0;
+	double startAngle = 0;
+	double endAngle = 360;
+	int lineType = 8;
+	int shift = 0;
 
-  if(args[4]->IsArray()) {
-    Local<Object> objColor = args[4]->ToObject();
-    color = setColor(objColor);
-  }
+	if(args[0]->IsObject()) {
+		v8::Handle<v8::Object> options = v8::Handle<v8::Object>::Cast(args[0]);
+		if (options->Has(v8::String::New("center"))) {
+		  Local<Object> center = options->Get(v8::String::NewSymbol("center"))->ToObject();
+		  x = center->Get(v8::String::NewSymbol("x"))->Uint32Value();
+		  y = center->Get(v8::String::NewSymbol("y"))->Uint32Value();
+		}
+		if (options->Has(v8::String::New("axes"))) {
+		  Local<Object> axes = options->Get(v8::String::NewSymbol("axes"))->ToObject();
+		  width = axes->Get(v8::String::NewSymbol("width"))->Uint32Value();
+		  height = axes->Get(v8::String::NewSymbol("height"))->Uint32Value();
+		}
+		if (options->Has(v8::String::New("thickness"))) {
+			thickness = options->Get(v8::String::NewSymbol("thickness"))->Uint32Value();
+		}
+		if (options->Has(v8::String::New("angle"))) {
+			angle = options->Get(v8::String::NewSymbol("angle"))->NumberValue();
+		}
+		if (options->Has(v8::String::New("startAngle"))) {
+			startAngle = options->Get(v8::String::NewSymbol("startAngle"))->NumberValue();
+		}
+		if (options->Has(v8::String::New("endAngle"))) {
+			endAngle = options->Get(v8::String::NewSymbol("endAngle"))->NumberValue();
+		}
+		if (options->Has(v8::String::New("lineType"))) {
+			lineType = options->Get(v8::String::NewSymbol("lineType"))->Uint32Value();
+		}
+		if (options->Has(v8::String::New("shift"))) {
+			shift = options->Get(v8::String::NewSymbol("shift"))->Uint32Value();
+		}
+		if (options->Has(v8::String::New("color"))) {
+			Local<Object> objColor = options->Get(v8::String::NewSymbol("color"))->ToObject();
+			color = setColor(objColor);
+		}
+	} else {
+		x = args[0]->Uint32Value();
+		y = args[1]->Uint32Value();
+		width = args[2]->Uint32Value();
+		height = args[3]->Uint32Value();
+	
+		if(args[4]->IsArray()) {
+			Local<Object> objColor = args[4]->ToObject();
+			color = setColor(objColor);
+		}  
 
-  int thickness = 1;
+		if(args[5]->IntegerValue())
+			thickness = args[5]->IntegerValue();
+	}
 
-  if(args[5]->IntegerValue())
-    thickness = args[5]->IntegerValue();
-
-  cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360, color, thickness, 8, 0);
-  return scope.Close(v8::Null());
+	cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), angle, startAngle, endAngle, color, thickness, lineType, shift);
+	return scope.Close(v8::Null());
 }
+
 
 
 Handle<Value>
