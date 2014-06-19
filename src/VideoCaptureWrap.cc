@@ -36,6 +36,7 @@ VideoCaptureWrap::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "read", Read);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "setWidth", SetWidth);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "setHeight", SetHeight);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "setPosition", SetPosition);
 
 	target->Set(String::NewSymbol("VideoCapture"), constructor->GetFunction());
 };    
@@ -111,6 +112,22 @@ VideoCaptureWrap::SetHeight(const Arguments &args){
 	int h = args[0]->IntegerValue();
 
 	v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, h);
+
+	return Undefined();
+}
+
+Handle<Value>
+VideoCaptureWrap::SetPosition(const Arguments &args){
+
+	HandleScope scope;
+	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+
+	if(args.Length() != 1)
+		return scope.Close(Undefined());
+	
+	int pos = args[0]->IntegerValue();
+
+	v->cap.set(CV_CAP_PROP_POS_FRAMES, pos);
 
 	return Undefined();
 }
