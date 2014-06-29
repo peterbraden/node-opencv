@@ -111,6 +111,7 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "copyWithMask", CopyWithMask);
     NODE_SET_PROTOTYPE_METHOD(constructor, "setWithMask", SetWithMask);
     NODE_SET_PROTOTYPE_METHOD(constructor, "meanWithMask", MeanWithMask);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "shift", Shift);
 
 
 	target->Set(String::NewSymbol("Matrix"), m->GetFunction());
@@ -1940,4 +1941,38 @@ Matrix::MeanWithMask(const v8::Arguments& args) {
     arr->Set(2, Number::New( means[2] ));
 
     return scope.Close(arr);
+}
+
+Handle<Value>
+Matrix::Shift(const v8::Arguments& args){
+  SETUP_FUNCTION(Matrix)
+
+  cv::Mat res;
+
+  double tx = args[0]->NumberValue();
+  double ty = args[1]->NumberValue();
+
+  // get the integer values of args
+  cv::Point2i deltai(ceil(tx), ceil(ty));
+
+  int fill=cv::BORDER_REPLICATE;
+  cv::Scalar value=cv::Scalar(0,0,0,0);
+
+  // INTEGER SHIFT
+  // first create a border around the parts of the Mat that will be exposed
+  int t = 0, b = 0, l = 0, r = 0;
+  if (deltai.x > 0) l =  deltai.x;
+  if (deltai.x < 0) r = -deltai.x;
+  if (deltai.y > 0) t =  deltai.y;
+  if (deltai.y < 0) b = -deltai.y;
+  cv::Mat padded;
+  cv::copyMakeBorder(self->mat, padded, t, b, l, r, fill, value);
+
+  // construct the region of interest around the new matrix
+  cv::Rect roi = cv::Rect(std::max(-deltai.x,0),std::max(-deltai.y,0),0,0) + self->mat.size();
+  res = padded(roi);
+  ~self->mat;
+  self->mat = res;
+
+  return scope.Close(Undefined());
 }
