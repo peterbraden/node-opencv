@@ -62,11 +62,11 @@ new Matrix(height, width)
 Or you can use opencv to read in image files. Supported formats are in the OpenCV docs, but jpgs etc are supported.
 
 ```javascript
-cv.readImage(filename, function(mat){
+cv.readImage(filename, function(err, mat){
   ...
 })
 
-cv.readImage(buffer, function(mat){
+cv.readImage(buffer, function(err, mat){
   ...
 })
 ```
