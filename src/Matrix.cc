@@ -92,7 +92,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "adaptiveEqualizeHist", AdaptiveEqualizeHist);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "floodFill", FloodFill);
 
@@ -1670,6 +1671,27 @@ Matrix::EqualizeHist(const v8::Arguments& args) {
     Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
 
     cv::equalizeHist(self->mat, self->mat);
+
+    return scope.Close(Undefined());
+}
+
+// @author dbousamra
+// Equalizes histogram using CLAHE
+// img.adaptiveEqualizeHist()
+Handle<Value>
+Matrix::AdaptiveEqualizeHist(const v8::Arguments& args) {
+    HandleScope scope;
+    
+    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+    int clipLimit = args[0]->IntegerValue();
+    Local<Object> tileGridSize = args[1]->ToObject();
+    int width  = tileGridSize->Get(0)->IntegerValue();
+    int height = tileGridSize->Get(1)->IntegerValue();
+    
+    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+    clahe->setClipLimit(clipLimit);
+    clahe->setTilesGridSize(cv::Size(width, 5));
+    clahe->apply(self->mat, self->mat);
 
     return scope.Close(Undefined());
 }
