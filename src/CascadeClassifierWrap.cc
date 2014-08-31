@@ -50,9 +50,6 @@ CascadeClassifierWrap::CascadeClassifierWrap(v8::Value* fileName){
   }  
 }
 
-
-
-
 struct classifier_baton_t {
   CascadeClassifierWrap *cc;
   Persistent<Function> cb;
