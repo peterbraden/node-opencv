@@ -12,7 +12,14 @@
         , "src/CamShift.cc"
         , "src/HighGUI.cc"
         , "src/FaceRecognizer.cc"
-        , "src/BackgroundSubtractor.cc"
+        , "src/Algorithm.cc"
+        , "src/KeyPoint.cc"
+        , "src/DMatch.cc"
+        , "src/DescriptorExtractor.cc"
+        , "src/DescriptorMatcher.cc"
+        , "src/FeatureDetector.cc"
+        , "src/Feature2D.cc"
+
         ]
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'

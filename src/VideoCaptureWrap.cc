@@ -2,9 +2,6 @@
 #include "Matrix.h"
 #include "OpenCV.h"
 
-#include  <iostream>
-using namespace std;
-
 
 void AsyncRead(uv_work_t *req);
 void AfterAsyncRead(uv_work_t *req);
@@ -34,9 +31,6 @@ VideoCaptureWrap::Init(Handle<Object> target) {
 	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "read", Read);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "setWidth", SetWidth);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "setHeight", SetHeight);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "setPosition", SetPosition);
 
 	target->Set(String::NewSymbol("VideoCapture"), constructor->GetFunction());
 };    
@@ -83,54 +77,6 @@ VideoCaptureWrap::VideoCaptureWrap(const std::string& filename){
 
 }
 
-Handle<Value>
-VideoCaptureWrap::SetWidth(const Arguments &args){
-
-	HandleScope scope;
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
-
-	if(args.Length() != 1)
-		return scope.Close(Undefined());
-	
-	int w = args[0]->IntegerValue();
-
-	if(v->cap.isOpened())
-		v->cap.set(CV_CAP_PROP_FRAME_WIDTH, w);
-
-	return scope.Close(Undefined());
-}
-
-Handle<Value>
-VideoCaptureWrap::SetHeight(const Arguments &args){
-
-	HandleScope scope;
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
-
-	if(args.Length() != 1)
-		return scope.Close(Undefined());
-	
-	int h = args[0]->IntegerValue();
-
-	v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, h);
-
-	return Undefined();
-}
-
-Handle<Value>
-VideoCaptureWrap::SetPosition(const Arguments &args){
-
-	HandleScope scope;
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
-
-	if(args.Length() != 1)
-		return scope.Close(Undefined());
-	
-	int pos = args[0]->IntegerValue();
-
-	v->cap.set(CV_CAP_PROP_POS_FRAMES, pos);
-
-	return Undefined();
-}
 
 Handle<Value>
 VideoCaptureWrap::Read(const Arguments &args) {
