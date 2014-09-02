@@ -82,8 +82,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawContour", DrawContour);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "drawAllContours", DrawAllContours);
 
-  NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "inRange", inRange);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "adjustROI", AdjustROI);

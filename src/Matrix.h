@@ -49,6 +49,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(ConvertGrayscale)
     JSFUNC(ConvertHSVscale)
     JSFUNC(GaussianBlur)
+    JSFUNC(MedianBlur)
+    JSFUNC(BilateralFilter)
     JSFUNC(BoxFilter)
     JSFUNC(Copy)
     JSFUNC(Flip)
@@ -57,6 +59,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(AbsDiff)
     JSFUNC(AddWeighted)
     JSFUNC(BitwiseXor)
+    JSFUNC(BitwiseNot)
+    JSFUNC(BitwiseAnd)
     JSFUNC(CountNonZero)
     //JSFUNC(Split)
     JSFUNC(Canny)
@@ -91,6 +95,19 @@ class Matrix: public node::ObjectWrap {
 
     JSFUNC(MatchTemplate)
     JSFUNC(MinMaxLoc)
+
+    JSFUNC(PushBack)
+
+    JSFUNC(PutText)
+
+    JSFUNC(GetPerspectiveTransform)
+    JSFUNC(WarpPerspective)
+
+    JSFUNC(CopyWithMask)
+    JSFUNC(SetWithMask)
+    JSFUNC(MeanWithMask)
+    JSFUNC(Shift)
+
 /*
 	static Handle<Value> Val(const Arguments& args);
 	static Handle<Value> RowRange(const Arguments& args);
@@ -110,7 +127,6 @@ class Matrix: public node::ObjectWrap {
     static Handle<Value> Zeroes(const Arguments& args);
     static Handle<Value> Ones(const Arguments& args);
 // create, increment, release
-    static Handle<Value> PushBack(const Arguments& args);
     static Handle<Value> PopBack(const Arguments& args);
     static Handle<Value> Total(const Arguments& args);
     static Handle<Value> IsContinous(const Arguments& args);
