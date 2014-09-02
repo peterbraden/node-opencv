@@ -60,6 +60,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
     NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "medianBlur", MedianBlur);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "bilateralFilter", BilateralFilter);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "boxFilter", BoxFilter);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
@@ -68,6 +70,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "absDiff", AbsDiff);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseNot", BitwiseNot);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseAnd", BitwiseAnd);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
 	//NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
@@ -96,10 +100,22 @@ Matrix::Init(Handle<Object> target) {
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "floodFill", FloodFill);
 
-  NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
+
+	NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
+
+	NODE_SET_PROTOTYPE_METHOD(constructor, "putText", PutText);
+    
+    NODE_SET_PROTOTYPE_METHOD(constructor, "getPerspectiveTransform", GetPerspectiveTransform); 
+    NODE_SET_PROTOTYPE_METHOD(constructor, "warpPerspective", WarpPerspective);
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
+
+	NODE_SET_PROTOTYPE_METHOD(constructor, "copyWithMask", CopyWithMask);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "setWithMask", SetWithMask);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "meanWithMask", MeanWithMask);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "shift", Shift);
 
 
 	target->Set(String::NewSymbol("Matrix"), m->GetFunction());
@@ -816,6 +832,63 @@ Matrix::GaussianBlur(const v8::Arguments& args) {
 
 
 Handle<Value>
+Matrix::MedianBlur(const v8::Arguments &args) {
+  HandleScope scope;
+  cv::Mat blurred;
+  int ksize = 3;
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  if (args[0]->IsNumber()) {
+    ksize = args[0]->IntegerValue();
+    if ((ksize % 2) == 0) {
+      return ThrowException(Exception::TypeError(String::New(
+        "'ksize' argument must be a positive odd integer")));
+    }
+  } else {
+    return ThrowException(Exception::TypeError(String::New(
+      "'ksize' argument must be a positive odd integer")));
+  }
+
+  cv::medianBlur(self->mat, blurred, ksize);
+  blurred.copyTo(self->mat);
+
+  return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::BilateralFilter(const v8::Arguments &args) {
+  HandleScope scope;
+  cv::Mat filtered;
+  int d = 15;
+  double sigmaColor = 80;
+  double sigmaSpace = 80;
+  int borderType = cv::BORDER_DEFAULT;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  if (args.Length() != 0) {
+    if (args.Length() < 3 || args.Length() > 4) {
+      return ThrowException(Exception::TypeError(String::New(
+        "BilateralFilter takes 0, 3, or 4 arguments")));
+    } else {
+      d = args[0]->IntegerValue();
+      sigmaColor = args[1]->NumberValue();
+      sigmaSpace = args[2]->NumberValue();
+      if (args.Length() == 4) {
+        borderType = args[3]->IntegerValue();
+      }
+    }
+  }
+  
+  cv::bilateralFilter(self->mat, filtered, d, sigmaColor, sigmaSpace, borderType);
+  filtered.copyTo(self->mat);
+
+  return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
 Matrix::BoxFilter(const v8::Arguments& args) {
 	HandleScope scope;
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -975,6 +1048,35 @@ Matrix::BitwiseXor(const v8::Arguments& args) {
 	cv::bitwise_xor(src1->mat, src2->mat, self->mat);
 
 	return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::BitwiseNot(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+    Matrix *dst = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+    cv::bitwise_not(self->mat, dst->mat);
+
+    return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::BitwiseAnd(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+    Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+    Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+    cv::bitwise_and(src1->mat, src2->mat, self->mat);
+
+    return scope.Close(v8::Null());
 }
 
 Handle<Value>
@@ -1743,4 +1845,198 @@ Matrix::MinMaxLoc(const v8::Arguments& args) {
   result->Set(String::NewSymbol("maxLoc"), o_maxLoc);
 
   return scope.Close(result);
+}
+
+
+// @author ytham
+// Pushes some matrix (argument) the back of a matrix (self)
+Handle<Value>
+Matrix::PushBack(const v8::Arguments& args) {
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  Matrix *m_input = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+  self->mat.push_back(m_input->mat);
+
+  return scope.Close(args.This());
+}
+
+Handle<Value>
+Matrix::PutText(const v8::Arguments& args) {
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  
+  v8::String::AsciiValue textString(args[0]);
+  char *text = (char *) malloc(textString.length() + 1);
+  strcpy(text, *textString);
+
+  int x = args[1]->IntegerValue();
+  int y = args[2]->IntegerValue();
+
+  v8::String::AsciiValue fontString(args[3]);
+  char *font = (char *) malloc(fontString.length() + 1);
+  strcpy(font, *fontString);
+  int constFont = cv::FONT_HERSHEY_SIMPLEX;
+
+  if (!strcmp(font, "HERSEY_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SIMPLEX; }
+  else if (!strcmp(font, "HERSEY_PLAIN")) { constFont = cv::FONT_HERSHEY_PLAIN; }
+  else if (!strcmp(font, "HERSEY_DUPLEX")) { constFont = cv::FONT_HERSHEY_DUPLEX; }
+  else if (!strcmp(font, "HERSEY_COMPLEX")) { constFont = cv::FONT_HERSHEY_COMPLEX; }
+  else if (!strcmp(font, "HERSEY_TRIPLEX")) { constFont = cv::FONT_HERSHEY_TRIPLEX; }
+  else if (!strcmp(font, "HERSEY_COMPLEX_SMALL")) { constFont = cv::FONT_HERSHEY_COMPLEX_SMALL; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_SIMPLEX; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_COMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_COMPLEX; }
+  else if (!strcmp(font, "HERSEY_SCRIPT_SIMPLEX")) { constFont = cv::FONT_HERSHEY_SCRIPT_SIMPLEX; }
+
+  cv::Scalar color(0, 0, 255);
+
+  if(args[4]->IsArray()) {
+    Local<Object> objColor = args[4]->ToObject();
+    color = setColor(objColor);
+  }
+
+  double scale = args.Length() < 6 ? 1 : args[5]->NumberValue();
+
+  cv::putText(self->mat, text, cv::Point(x, y), constFont, scale, color, 2);
+
+  return scope.Close(Undefined());
+}
+
+Handle<Value>
+Matrix::GetPerspectiveTransform(const v8::Arguments& args) {
+    HandleScope scope;
+
+    // extract quad args
+    Local<Object> srcArray = args[0]->ToObject();
+    Local<Object> tgtArray = args[1]->ToObject();
+
+    std::vector<cv::Point2f> src_corners(4);
+    std::vector<cv::Point2f> tgt_corners(4);
+    for (unsigned int i = 0; i < 4; i++) {
+        src_corners[i] = cvPoint(srcArray->Get(i*2)->IntegerValue(),srcArray->Get(i*2+1)->IntegerValue());
+        tgt_corners[i] = cvPoint(tgtArray->Get(i*2)->IntegerValue(),tgtArray->Get(i*2+1)->IntegerValue());
+    }
+
+    Local<Object> xfrm = Matrix::constructor->GetFunction()->NewInstance();
+    Matrix *xfrmmat = ObjectWrap::Unwrap<Matrix>(xfrm);
+    xfrmmat->mat = cv::getPerspectiveTransform(src_corners, tgt_corners);
+
+    return scope.Close(xfrm);
+}
+
+Handle<Value>
+Matrix::WarpPerspective(const v8::Arguments& args) {
+    SETUP_FUNCTION(Matrix)
+
+    Matrix *xfrm = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+    int width = args[1]->IntegerValue();
+    int height = args[2]->IntegerValue();
+
+    int flags = cv::INTER_LINEAR;
+    int borderMode = cv::BORDER_REPLICATE;
+
+    cv::Scalar borderColor(0, 0, 255);
+
+    if(args[3]->IsArray()) {
+        Local<Object> objColor = args[3]->ToObject();
+        borderColor = setColor(objColor);
+    }
+
+    cv::Mat res = cv::Mat(width, height, CV_32FC3);
+
+    cv::warpPerspective(self->mat, res, xfrm->mat, cv::Size(width, height), flags, borderMode, borderColor);
+
+    ~self->mat;
+    self->mat = res;
+
+    return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
+Matrix::CopyWithMask(const v8::Arguments& args) {
+    SETUP_FUNCTION(Matrix)
+    
+    // param 0 - destination image:
+    Matrix *dest = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+    // param 1 - mask. same size as src and dest
+    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+    self->mat.copyTo(dest->mat,mask->mat);
+
+    return scope.Close(Undefined());
+}
+
+
+Handle<Value>
+Matrix::SetWithMask(const v8::Arguments& args) {
+    SETUP_FUNCTION(Matrix)
+    
+    // param 0 - target value:
+    Local<Object> valArray = args[0]->ToObject();
+    cv::Scalar newvals;
+    newvals.val[0] = valArray->Get(0)->NumberValue();
+    newvals.val[1] = valArray->Get(1)->NumberValue();
+    newvals.val[2] = valArray->Get(2)->NumberValue();
+
+    // param 1 - mask. same size as src and dest
+    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+    self->mat.setTo(newvals,mask->mat);
+
+    return scope.Close(Undefined());
+}
+
+Handle<Value>
+Matrix::MeanWithMask(const v8::Arguments& args) {
+    SETUP_FUNCTION(Matrix)
+    
+    // param 0 - mask. same size as src and dest
+    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+    cv::Scalar means = cv::mean(self->mat, mask->mat);
+    v8::Local<v8::Array> arr = v8::Array::New(3);
+    arr->Set(0, Number::New( means[0] ));
+    arr->Set(1, Number::New( means[1] ));
+    arr->Set(2, Number::New( means[2] ));
+
+    return scope.Close(arr);
+}
+
+Handle<Value>
+Matrix::Shift(const v8::Arguments& args){
+  SETUP_FUNCTION(Matrix)
+
+  cv::Mat res;
+
+  double tx = args[0]->NumberValue();
+  double ty = args[1]->NumberValue();
+
+  // get the integer values of args
+  cv::Point2i deltai(ceil(tx), ceil(ty));
+
+  int fill=cv::BORDER_REPLICATE;
+  cv::Scalar value=cv::Scalar(0,0,0,0);
+
+  // INTEGER SHIFT
+  // first create a border around the parts of the Mat that will be exposed
+  int t = 0, b = 0, l = 0, r = 0;
+  if (deltai.x > 0) l =  deltai.x;
+  if (deltai.x < 0) r = -deltai.x;
+  if (deltai.y > 0) t =  deltai.y;
+  if (deltai.y < 0) b = -deltai.y;
+  cv::Mat padded;
+  cv::copyMakeBorder(self->mat, padded, t, b, l, r, fill, value);
+
+  // construct the region of interest around the new matrix
+  cv::Rect roi = cv::Rect(std::max(-deltai.x,0),std::max(-deltai.y,0),0,0) + self->mat.size();
+  res = padded(roi);
+  ~self->mat;
+  self->mat = res;
+
+  return scope.Close(Undefined());
 }
