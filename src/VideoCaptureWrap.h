@@ -23,5 +23,10 @@ class VideoCaptureWrap: public node::ObjectWrap {
 
       static Handle<Value> GetFrameAt(const v8::Arguments&);
 
+      //close the stream
+      static Handle<Value> Close(const v8::Arguments&);
+
+      //experimental
+      static Handle<Value> ReadSync(const v8::Arguments&);
 };
 

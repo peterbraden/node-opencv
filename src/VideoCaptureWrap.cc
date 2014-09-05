@@ -37,6 +37,8 @@ VideoCaptureWrap::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "setWidth", SetWidth);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "setHeight", SetHeight);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "setPosition", SetPosition);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "close", Close);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "ReadSync", ReadSync);
 
 	target->Set(String::NewSymbol("VideoCapture"), constructor->GetFunction());
 };    
@@ -133,6 +135,17 @@ VideoCaptureWrap::SetPosition(const Arguments &args){
 }
 
 Handle<Value>
+VideoCaptureWrap::Close(const Arguments &args){
+
+	HandleScope scope;
+	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+
+	v->cap.release();
+
+	return Undefined();
+}
+
+Handle<Value>
 VideoCaptureWrap::Read(const Arguments &args) {
 
 	HandleScope scope;
@@ -179,5 +192,22 @@ void AfterAsyncRead(uv_work_t *req) {
 	baton->cb.Dispose();
 
 		delete baton;
+
+}
+
+
+
+Handle<Value>
+VideoCaptureWrap::ReadSync(const Arguments &args) {
+
+	HandleScope scope;
+	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+
+  Local<Object> im_to_return= Matrix::constructor->GetFunction()->NewInstance();
+  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_to_return);
+
+  v->cap.read(img->mat);
+
+	return scope.Close(im_to_return);
 
 }
