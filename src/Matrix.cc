@@ -1073,9 +1073,17 @@ Matrix::BitwiseAnd(const v8::Arguments& args) {
 
     Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
     Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+    Matrix *mask = NULL;
+	if (args.Length()>2 && !(args[2]->IsNull()) && args[2]->IsObject()){
+		mask = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+	}
 
-    cv::bitwise_and(src1->mat, src2->mat, self->mat);
-
+	if (mask!=NULL) {
+		cv::bitwise_and(src1->mat, src2->mat, self->mat, mask->mat);
+	}else{
+		cv::bitwise_and(src1->mat, src2->mat, self->mat);
+	}
+    
     return scope.Close(v8::Null());
 }
 
