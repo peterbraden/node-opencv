@@ -55,6 +55,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrUp", PyrUp);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
 
+	NODE_SET_PROTOTYPE_METHOD(constructor, "crop", Crop);
+
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
@@ -305,6 +307,31 @@ Matrix::Clone(const Arguments& args){
   return scope.Close(im_h);
 }
 
+
+Handle<Value>
+Matrix::Crop(const Arguments& args){
+
+	SETUP_FUNCTION(Matrix)
+
+  	if ((args.Length() == 4) && (args[0]->IsNumber()) && (args[1]->IsNumber()) && (args[2]->IsNumber()) && (args[3]->IsNumber())){
+
+  		int x = args[0]->IntegerValue();
+  		int y = args[1]->IntegerValue();
+  		int width = args[2]->IntegerValue();
+  		int height = args[3]->IntegerValue();
+
+		cv::Rect roi(x, y, width, height);
+
+		Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+		Matrix *m = ObjectWrap::Unwrap<Matrix>(im_h);
+		m->mat = self->mat(roi);
+
+		return scope.Close(im_h);
+	}
+	else{
+		return scope.Close(v8::String::New("Insufficient or wrong arguments"));
+	}
+}
 
 Handle<Value>
 Matrix::Row(const Arguments& args){
