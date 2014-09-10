@@ -9,6 +9,7 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <string.h>
+#include <nan.h>
 
 using namespace v8;
 using namespace node;
@@ -25,7 +26,8 @@ using namespace node;
 	TYP *self = ObjectWrap::Unwrap<TYP>(args.This());
 
 #define JSFUNC(NAME) \
-	static Handle<Value> NAME(const Arguments& args); 
+  NAN_METHOD(NAME);
+	//static Handle<Value> NAME(const Arguments& args); 
 
 #define JSTHROW_TYPE(ERR) \
   return v8::ThrowException(v8::Exception::TypeError(v8::String::New(ERR)));
@@ -48,9 +50,10 @@ class OpenCV: public node::ObjectWrap{
   public:
     static void Init(Handle<Object> target);
 
-    static Handle<Value> ReadImage(const v8::Arguments&);
-
+    static NAN_METHOD(ReadImage);
+    //static Handle<Value> ReadImage(const v8::Arguments&);
 };
+
 
 
 #endif

@@ -11,7 +11,8 @@
 
 extern "C" void
 init(Handle<Object> target) {
-    HandleScope scope;
+    //HandleScope scope;
+    NanScope();
     OpenCV::Init(target);
     Point::Init(target);
     Matrix::Init(target);

@@ -9,12 +9,24 @@ class Contour: public node::ObjectWrap {
 	vector<vector<cv::Point> > contours;
 	static Persistent<FunctionTemplate> constructor;
 	static void Init(Handle<Object> target);
-	static Handle<Value> New(const Arguments &args);
+	//static Handle<Value> New(const Arguments &args);
+  static NAN_METHOD(New);
 
 	Contour();
 
-	//JSFUNC(Size)
-	static Handle<Value> Point(const v8::Arguments&);
+	JSFUNC(Point)
+  JSFUNC(Size)
+  JSFUNC(CornerCount)
+  JSFUNC(Area)
+  JSFUNC(ArcLength)
+  JSFUNC(ApproxPolyDP)
+  JSFUNC(ConvexHull)
+  JSFUNC(BoundingRect)
+  JSFUNC(MinAreaRect)
+  JSFUNC(IsConvex)
+  JSFUNC(Moments)
+
+	/*static Handle<Value> Point(const v8::Arguments&);
 	static Handle<Value> Size(const v8::Arguments&);
 	static Handle<Value> CornerCount(const v8::Arguments&);
 	static Handle<Value> Area(const v8::Arguments&);
@@ -24,6 +36,6 @@ class Contour: public node::ObjectWrap {
 	static Handle<Value> BoundingRect(const v8::Arguments&);
 	static Handle<Value> MinAreaRect(const v8::Arguments&);
 	static Handle<Value> IsConvex(const v8::Arguments&);
-	static Handle<Value> Moments(const v8::Arguments&);
+	static Handle<Value> Moments(const v8::Arguments&);*/
 };
 
