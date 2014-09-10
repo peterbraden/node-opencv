@@ -38,8 +38,7 @@ Contour::Init(Handle<Object> target) {
 };
 
 
-Handle<Value>
-Contour::New(const Arguments &args) {
+NAN_METHOD(Contour::New() {
 	HandleScope scope;
 
 	if (args.This()->InternalFieldCount() == 0)
@@ -57,8 +56,7 @@ Contour::Contour(): ObjectWrap() {
 }
 
 
-Handle<Value>
-Contour::Point(const Arguments &args) {
+NAN_METHOD(Contour::Point() {
 	HandleScope scope;
 
 		Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -77,8 +75,7 @@ Contour::Point(const Arguments &args) {
 // FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
 // also, this would allow to use ``Size`` for the function returning the number of corners
 // in the contour for better consistency with OpenCV.
-Handle<Value>
-Contour::Size(const Arguments &args) {
+NAN_METHOD(Contour::Size() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -86,8 +83,7 @@ Contour::Size(const Arguments &args) {
 	return scope.Close(Number::New(self->contours.size()));
 }
 
-Handle<Value>
-Contour::CornerCount(const Arguments &args) {
+NAN_METHOD(Contour::CornerCount() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -96,8 +92,7 @@ Contour::CornerCount(const Arguments &args) {
 	return scope.Close(Number::New(self->contours[pos].size()));
 }
 
-Handle<Value>
-Contour::Area(const Arguments &args) {
+NAN_METHOD(Contour::Area() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -108,8 +103,7 @@ Contour::Area(const Arguments &args) {
 }
 
 
-Handle<Value>
-Contour::ArcLength(const Arguments &args) {
+NAN_METHOD(Contour::ArcLength() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -120,8 +114,7 @@ Contour::ArcLength(const Arguments &args) {
 }
 
 
-Handle<Value>
-Contour::ApproxPolyDP(const Arguments &args) {
+NAN_METHOD(Contour::ApproxPolyDP() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -137,8 +130,7 @@ Contour::ApproxPolyDP(const Arguments &args) {
 }
 
 
-Handle<Value>
-Contour::ConvexHull(const Arguments &args) {
+NAN_METHOD(Contour::ConvexHull() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -154,8 +146,7 @@ Contour::ConvexHull(const Arguments &args) {
 }
 
 
-Handle<Value>
-Contour::BoundingRect(const Arguments &args) {
+NAN_METHOD(Contour::BoundingRect() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -173,8 +164,7 @@ Contour::BoundingRect(const Arguments &args) {
 }
 
 
-Handle<Value>
-Contour::MinAreaRect(const Arguments &args) {
+NAN_METHOD(Contour::MinAreaRect() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -212,8 +202,7 @@ Contour::MinAreaRect(const Arguments &args) {
 }
 
 
-Handle<Value>
-Contour::IsConvex(const Arguments &args) {
+NAN_METHOD(Contour::IsConvex() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -222,8 +211,7 @@ Contour::IsConvex(const Arguments &args) {
 	return scope.Close(Boolean::New(isContourConvex(cv::Mat(self->contours[pos]))));
 }
 
-Handle<Value>
-Contour::Moments(const Arguments &args) {
+NAN_METHOD(Contour::Moments() {
 	HandleScope scope;
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());

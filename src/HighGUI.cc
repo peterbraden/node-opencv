@@ -24,8 +24,7 @@ NamedWindow::Init(Handle<Object> target) {
 };
 
 
-Handle<Value>
-NamedWindow::New(const Arguments &args) {
+NAN_METHOD(NamedWindow::New() {
   HandleScope scope;
 
   if (args.This()->InternalFieldCount() == 0){
@@ -51,8 +50,7 @@ NamedWindow::NamedWindow(const std::string& name, int f){
 }
 
 
-Handle<Value>
-NamedWindow::Show(const v8::Arguments& args){
+NAN_METHOD(NamedWindow::Show(const v8::Arguments& args){
 	SETUP_FUNCTION(NamedWindow)
   Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
   cv::imshow(self->winname, im->mat);
@@ -60,16 +58,14 @@ NamedWindow::Show(const v8::Arguments& args){
 	return scope.Close(args.Holder());
 }
 
-Handle<Value>
-NamedWindow::Destroy(const v8::Arguments& args){
+NAN_METHOD(NamedWindow::Destroy(const v8::Arguments& args){
 	SETUP_FUNCTION(NamedWindow)
   cv::destroyWindow(self->winname);
 	return scope.Close(args.Holder());
 }
 
 
-Handle<Value>
-NamedWindow::BlockingWaitKey(const v8::Arguments& args){
+NAN_METHOD(NamedWindow::BlockingWaitKey(const v8::Arguments& args){
   HandleScope scope;
 	//SETUP_FUNCTION(NamedWindow)
 	int time = 0;

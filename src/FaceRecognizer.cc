@@ -53,8 +53,7 @@ FaceRecognizerWrap::Init(Handle<Object> target) {
     target->Set(String::NewSymbol("FaceRecognizer"), constructor->GetFunction());
 };
 
-Handle<Value>
-FaceRecognizerWrap::New(const Arguments &args) {
+NAN_METHOD(FaceRecognizerWrap::New() {
   HandleScope scope;
 
   if (args.This()->InternalFieldCount() == 0)
@@ -68,8 +67,7 @@ FaceRecognizerWrap::New(const Arguments &args) {
   return args.This();
 }
 
-Handle<Value>
-FaceRecognizerWrap::CreateLBPH(const Arguments &args) {
+NAN_METHOD(FaceRecognizerWrap::CreateLBPH() {
   HandleScope scope;
 
   int radius = 1;
@@ -95,8 +93,7 @@ FaceRecognizerWrap::CreateLBPH(const Arguments &args) {
   return n;
 }
 
-Handle<Value>
-FaceRecognizerWrap::CreateEigen(const Arguments &args) {
+NAN_METHOD(FaceRecognizerWrap::CreateEigen() {
   HandleScope scope;
 
   int components = 0;
@@ -116,8 +113,7 @@ FaceRecognizerWrap::CreateEigen(const Arguments &args) {
   return n;
 }
 
-Handle<Value>
-FaceRecognizerWrap::CreateFisher(const Arguments &args) {
+NAN_METHOD(FaceRecognizerWrap::CreateFisher() {
   HandleScope scope;
 
   int components = 0;
@@ -177,8 +173,7 @@ Handle<Value> UnwrapTrainingData(const Arguments& args, cv::vector<cv::Mat>* ima
   return v8::Undefined();
 }
 
-Handle<Value>
-FaceRecognizerWrap::TrainSync(const Arguments& args){
+NAN_METHOD(FaceRecognizerWrap::TrainSync(const Arguments& args){
 	SETUP_FUNCTION(FaceRecognizerWrap)
 
   cv::vector<cv::Mat> images;
@@ -194,8 +189,7 @@ FaceRecognizerWrap::TrainSync(const Arguments& args){
   return scope.Close(v8::Undefined());
 }
 
-Handle<Value>
-FaceRecognizerWrap::UpdateSync(const Arguments& args){
+NAN_METHOD(FaceRecognizerWrap::UpdateSync(const Arguments& args){
 	SETUP_FUNCTION(FaceRecognizerWrap)
 
 
@@ -221,8 +215,7 @@ FaceRecognizerWrap::UpdateSync(const Arguments& args){
 }
 
 
-Handle<Value>
-FaceRecognizerWrap::PredictSync(const Arguments& args){
+NAN_METHOD(FaceRecognizerWrap::PredictSync(const Arguments& args){
 	SETUP_FUNCTION(FaceRecognizerWrap)
 
   cv::Mat im = fromMatrixOrFilename(args[0]);//TODO CHECK!
@@ -241,8 +234,7 @@ FaceRecognizerWrap::PredictSync(const Arguments& args){
 }
 
 
-Handle<Value>
-FaceRecognizerWrap::SaveSync(const Arguments& args){
+NAN_METHOD(FaceRecognizerWrap::SaveSync(const Arguments& args){
 	SETUP_FUNCTION(FaceRecognizerWrap)
   if (!args[0]->IsString()){
     JSTHROW("Save takes a filename")
@@ -252,8 +244,7 @@ FaceRecognizerWrap::SaveSync(const Arguments& args){
   return v8::Undefined();
 }
 
-Handle<Value>
-FaceRecognizerWrap::LoadSync(const Arguments& args){
+NAN_METHOD(FaceRecognizerWrap::LoadSync(const Arguments& args){
 	SETUP_FUNCTION(FaceRecognizerWrap)
   if (!args[0]->IsString()){
     JSTHROW("Load takes a filename")
@@ -263,8 +254,7 @@ FaceRecognizerWrap::LoadSync(const Arguments& args){
   return v8::Undefined();
 }
 
-Handle<Value>
-FaceRecognizerWrap::GetMat(const Arguments& args){
+NAN_METHOD(FaceRecognizerWrap::GetMat(const Arguments& args){
 	SETUP_FUNCTION(FaceRecognizerWrap)
   if (!args[0]->IsString()){
     JSTHROW("getMat takes a key")

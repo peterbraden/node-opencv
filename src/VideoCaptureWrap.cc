@@ -43,8 +43,7 @@ VideoCaptureWrap::Init(Handle<Object> target) {
 	target->Set(String::NewSymbol("VideoCapture"), constructor->GetFunction());
 };    
 
-Handle<Value>
-VideoCaptureWrap::New(const Arguments &args) {
+NAN_METHOD(VideoCaptureWrap::New() {
 	HandleScope scope;
 
   if (args.This()->InternalFieldCount() == 0)
@@ -85,8 +84,7 @@ VideoCaptureWrap::VideoCaptureWrap(const std::string& filename){
 
 }
 
-Handle<Value>
-VideoCaptureWrap::SetWidth(const Arguments &args){
+NAN_METHOD(VideoCaptureWrap::SetWidth(){
 
 	HandleScope scope;
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
@@ -102,8 +100,7 @@ VideoCaptureWrap::SetWidth(const Arguments &args){
 	return scope.Close(Undefined());
 }
 
-Handle<Value>
-VideoCaptureWrap::SetHeight(const Arguments &args){
+NAN_METHOD(VideoCaptureWrap::SetHeight(){
 
 	HandleScope scope;
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
@@ -118,8 +115,7 @@ VideoCaptureWrap::SetHeight(const Arguments &args){
 	return Undefined();
 }
 
-Handle<Value>
-VideoCaptureWrap::SetPosition(const Arguments &args){
+NAN_METHOD(VideoCaptureWrap::SetPosition(){
 
 	HandleScope scope;
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
@@ -134,8 +130,7 @@ VideoCaptureWrap::SetPosition(const Arguments &args){
 	return Undefined();
 }
 
-Handle<Value>
-VideoCaptureWrap::Close(const Arguments &args){
+NAN_METHOD(VideoCaptureWrap::Close(){
 
 	HandleScope scope;
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
@@ -145,8 +140,7 @@ VideoCaptureWrap::Close(const Arguments &args){
 	return Undefined();
 }
 
-Handle<Value>
-VideoCaptureWrap::Read(const Arguments &args) {
+NAN_METHOD(VideoCaptureWrap::Read() {
 
 	HandleScope scope;
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
@@ -197,8 +191,7 @@ void AfterAsyncRead(uv_work_t *req) {
 
 
 
-Handle<Value>
-VideoCaptureWrap::ReadSync(const Arguments &args) {
+NAN_METHOD(VideoCaptureWrap::ReadSync() {
 
 	HandleScope scope;
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());

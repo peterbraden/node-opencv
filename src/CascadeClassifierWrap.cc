@@ -27,8 +27,7 @@ CascadeClassifierWrap::Init(Handle<Object> target) {
     target->Set(String::NewSymbol("CascadeClassifier"), constructor->GetFunction());
 };    
 
-Handle<Value>
-CascadeClassifierWrap::New(const Arguments &args) {
+NAN_METHOD(CascadeClassifierWrap::New() {
   HandleScope scope;
 
   if (args.This()->InternalFieldCount() == 0)
@@ -65,8 +64,7 @@ struct classifier_baton_t {
 };
 
 
-Handle<Value>
-CascadeClassifierWrap::DetectMultiScale(const v8::Arguments& args){
+NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
   HandleScope scope;
 
   CascadeClassifierWrap *self =  ObjectWrap::Unwrap<CascadeClassifierWrap>(args.This());

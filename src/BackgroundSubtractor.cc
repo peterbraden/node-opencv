@@ -21,8 +21,7 @@ BackgroundSubtractorWrap::Init(Handle<Object> target) {
     target->Set(String::NewSymbol("BackgroundSubtractor"), constructor->GetFunction());
 };
 
-Handle<Value>
-BackgroundSubtractorWrap::New(const Arguments &args) {
+NAN_METHOD(BackgroundSubtractorWrap::New() {
   HandleScope scope;
 
   if (args.This()->InternalFieldCount() == 0)
@@ -37,8 +36,7 @@ BackgroundSubtractorWrap::New(const Arguments &args) {
   return args.This();
 }
 
-Handle<Value>
-BackgroundSubtractorWrap::CreateMOG(const Arguments &args) {
+NAN_METHOD(BackgroundSubtractorWrap::CreateMOG() {
   HandleScope scope;
 
   int history = 200;
@@ -63,8 +61,7 @@ BackgroundSubtractorWrap::CreateMOG(const Arguments &args) {
 };
 
 //Fetch foreground mask
-Handle<Value>
-BackgroundSubtractorWrap::ApplyMOG(const Arguments &args) {
+NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG() {
 
   SETUP_FUNCTION(BackgroundSubtractorWrap)
 

@@ -18,7 +18,7 @@ OpenCV::Init(Handle<Object> target) {
 
 
 Handle<Value>
-OpenCV::ReadImage(const Arguments &args) {
+OpenCV::ReadImage() {
   HandleScope scope;
 
   try{

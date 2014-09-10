@@ -1,6 +1,7 @@
 #include "Contours.h"
 #include "Matrix.h"
 #include "OpenCV.h"
+#include <nan.h>
 
 v8::Persistent<FunctionTemplate> Matrix::constructor;
 
@@ -12,118 +13,131 @@ cv::Rect* setRect(Local<Object> objRect);
 
 void
 Matrix::Init(Handle<Object> target) {
-	HandleScope scope;
+	//HandleScope scope;
+  //NanScope();
 
 	//Class
-	v8::Local<v8::FunctionTemplate> m = v8::FunctionTemplate::New(New);
-	m->SetClassName(v8::String::NewSymbol("Matrix"));
+	/*//v8::Local<v8::FunctionTemplate> m = v8::FunctionTemplate::New(New);
+  v8::Local<v8::FunctionTemplate> m = NanNew<v8::FunctionTemplate>(Matrix::New);
+
+	//m->SetClassName(v8::String::NewSymbol("Matrix"));
+  m->SetClassName(NanNew("Matrix"));
 
 	// Constructor
-	constructor = Persistent<FunctionTemplate>::New(m);
+	constructor = Persistent<FunctionTemplate>:NanNew((m);
+  NanAssignPersistent(Matrix::constructor, constructor);
 	constructor->InstanceTemplate()->SetInternalFieldCount(1);
-	constructor->SetClassName(String::NewSymbol("Matrix"));
+	//constructor->SetClassName(String::NewSymbol("Matrix"));*/
 
+  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Matrix::New);
+  //Local<FunctionTemplate> tpl = FunctionTemplate::New( New );
+  tpl->SetClassName(NanNew("Matrix"));
+  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+  //target->Set( NanNew<String>("Matrix"), tpl->GetFunction());
+
+  //contructor
 	// Prototype
 	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+  //constructor = tpl;
+  NanAssignPersistent(Matrix::constructor, tpl);
 
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "row", Row);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "col", Col);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "row", Row);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "col", Col);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "pixelRow", PixelRow);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "pixelCol", PixelCol);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "pixelRow", PixelRow);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "pixelCol", PixelCol);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "empty", Empty);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "get", Get);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "set", Set);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "pixel", Pixel);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "width", Width);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "height", Height);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "clone", Clone);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "toBuffer", ToBuffer);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "toBufferAsync", ToBufferAsync);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "ellipse", Ellipse);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "rectangle", Rectangle);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "line", Line);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "save", Save);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "saveAsync", SaveAsync);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "rotate", Rotate);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "copyTo", CopyTo);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrDown", PyrDown);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrUp", PyrUp);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "empty", Empty);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "get", Get);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "set", Set);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "pixel", Pixel);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "width", Width);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "height", Height);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "size", Size);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "clone", Clone);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "toBuffer", ToBuffer);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "toBufferAsync", ToBufferAsync);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "ellipse", Ellipse);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "rectangle", Rectangle);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "line", Line);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "save", Save);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "saveAsync", SaveAsync);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "resize", Resize);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "rotate", Rotate);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "copyTo", CopyTo);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "pyrDown", PyrDown);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "pyrUp", PyrUp);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "channels", Channels);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "medianBlur", MedianBlur);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "bilateralFilter", BilateralFilter);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "roi", ROI);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "ptr", Ptr);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "absDiff", AbsDiff);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseNot", BitwiseNot);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseAnd", BitwiseAnd);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "erode", Erode);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "convertGrayscale", ConvertGrayscale);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "convertHSVscale", ConvertHSVscale);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "gaussianBlur", GaussianBlur);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "medianBlur", MedianBlur);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "bilateralFilter", BilateralFilter);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "copy", Copy);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "flip", Flip);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "roi", ROI);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "ptr", Ptr);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "absDiff", AbsDiff);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "addWeighted", AddWeighted);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "bitwiseXor", BitwiseXor);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "bitwiseNot", BitwiseNot);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "bitwiseAnd", BitwiseAnd);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "countNonZero", CountNonZero);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "canny", Canny);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "dilate", Dilate);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "erode", Erode);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "findContours", FindContours);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "drawContour", DrawContour);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "drawAllContours", DrawAllContours);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "findContours", FindContours);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "drawContour", DrawContour);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "drawAllContours", DrawAllContours);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "goodFeaturesToTrack", GoodFeaturesToTrack);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "houghLinesP", HoughLinesP);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "goodFeaturesToTrack", GoodFeaturesToTrack);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "houghLinesP", HoughLinesP);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "inRange", inRange);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "adjustROI", AdjustROI);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "locateROI", LocateROI);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "inRange", inRange);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "adjustROI", AdjustROI);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "locateROI", LocateROI);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "threshold", Threshold);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "adaptiveThreshold", AdaptiveThreshold);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "meanStdDev", MeanStdDev);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "threshold", Threshold);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "adaptiveThreshold", AdaptiveThreshold);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "meanStdDev", MeanStdDev);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "cvtColor", CvtColor);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "split", Split);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "merge", Merge);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "equalizeHist", EqualizeHist);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "floodFill", FloodFill);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "floodFill", FloodFill);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "matchTemplate", MatchTemplate);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "minMaxLoc", MinMaxLoc);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "matchTemplate", MatchTemplate);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "minMaxLoc", MinMaxLoc);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "pushBack", PushBack);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "pushBack", PushBack);
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "putText", PutText);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "putText", PutText);
     
-    NODE_SET_PROTOTYPE_METHOD(constructor, "getPerspectiveTransform", GetPerspectiveTransform); 
-    NODE_SET_PROTOTYPE_METHOD(constructor, "warpPerspective", WarpPerspective);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getPerspectiveTransform", GetPerspectiveTransform); 
+  NODE_SET_PROTOTYPE_METHOD(tpl, "warpPerspective", WarpPerspective);
 
-	NODE_SET_METHOD(constructor, "Eye", Eye);
+	NODE_SET_METHOD(tpl, "Eye", Eye);
 
-    NODE_SET_PROTOTYPE_METHOD(constructor, "copyWithMask", CopyWithMask);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "setWithMask", SetWithMask);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "meanWithMask", MeanWithMask);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "shift", Shift);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "copyWithMask", CopyWithMask);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setWithMask", SetWithMask);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "meanWithMask", MeanWithMask);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "shift", Shift);
 
-
-	target->Set(String::NewSymbol("Matrix"), m->GetFunction());
+	//target->Set(String::NewSymbol("Matrix"), m->GetFunction());
+  target->Set( NanNew<String>("Matrix"), tpl->GetFunction() );
 };
 
-
-Handle<Value>
-Matrix::New(const Arguments &args) {
-	HandleScope scope;
-
+NAN_METHOD(Matrix::New) {
+	//HandleScope scope;
+  NanScope();
 	if (args.This()->InternalFieldCount() == 0)
-		return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Cannot instantiate without new")));
+    return NanThrowTypeError("Cannot instantiate without new");
 
 	Matrix *mat;
 
@@ -141,7 +155,8 @@ Matrix::New(const Arguments &args) {
 	}
 
 	mat->Wrap(args.Holder());
-	return scope.Close(args.Holder());
+  NanReturnValue(args.Holder());
+	//NanReturnValue(args.Holder());
 }
 
 
@@ -159,11 +174,11 @@ Matrix::Matrix(cv::Mat m, cv::Rect roi): ObjectWrap() {
 }
 
 
-Handle<Value>
-Matrix::Empty(const Arguments& args){
-	SETUP_FUNCTION(Matrix)
 
-	return scope.Close(Boolean::New(self->mat.empty()));
+NAN_METHOD(Matrix::Empty){
+	SETUP_FUNCTION(Matrix)
+  NanReturnValue(NanNew<Boolean>(self->mat.empty()));
+	//NanReturnValue(Boolean::New(self->mat.empty()));
 }
 
 
@@ -198,8 +213,8 @@ Matrix::DblGet(cv::Mat mat, int i, int j){
 
 
 
-Handle<Value>
-Matrix::Pixel(const Arguments& args){
+
+NAN_METHOD(Matrix::Pixel){
 	SETUP_FUNCTION(Matrix)
 
 	int y = args[0]->IntegerValue();
@@ -215,38 +230,37 @@ Matrix::Pixel(const Arguments& args){
 		self->mat.at<cv::Vec3b>(y, x)[0] =  (uchar) objColor->Get(0)->IntegerValue();
 		self->mat.at<cv::Vec3b>(y, x)[1] =  (uchar) objColor->Get(1)->IntegerValue();
 		self->mat.at<cv::Vec3b>(y, x)[2] =  (uchar) objColor->Get(2)->IntegerValue();
-		return scope.Close(args[2]->ToObject());
-	}else{
-		cv::Vec3b intensity = self->mat.at<cv::Vec3b>(y, x);
-
-		v8::Local<v8::Array> arr = v8::Array::New(3);
-		arr->Set(0, Number::New( intensity[0] ));
-		arr->Set(1, Number::New( intensity[1] ));
-		arr->Set(2, Number::New( intensity[2] ));
-		return scope.Close(arr);
+    NanReturnValue( args[2]->ToObject() );
 
 	}
+  else{
+		cv::Vec3b intensity = self->mat.at<cv::Vec3b>(y, x);
 
-	return scope.Close(Undefined());
+		v8::Local<v8::Array> arr = NanNew<Array>(3);
+		arr->Set(0, NanNew<Number>( intensity[0] ));
+		arr->Set(1, NanNew<Number>( intensity[1] ));
+		arr->Set(2, NanNew<Number>( intensity[2] ));
+    NanReturnValue( arr );
+	}
+  NanReturnUndefined();
 	//double val = Matrix::DblGet(t, i, j);
-	//return scope.Close(Number::New(val));
+	//NanReturnValue(Number::New(val));
 }
 
 
-Handle<Value>
-Matrix::Get(const Arguments& args){
+NAN_METHOD(Matrix::Get){
 	SETUP_FUNCTION(Matrix)
 
 	int i = args[0]->IntegerValue();
 	int j = args[1]->IntegerValue();
 
   double val = Matrix::DblGet(self->mat, i, j);
-  return scope.Close(Number::New(val));
+  NanReturnValue( NanNew<Number>(val) );
 }
 
 
-Handle<Value>
-Matrix::Set(const Arguments& args){
+
+NAN_METHOD(Matrix::Set){
 	SETUP_FUNCTION(Matrix)
 
 	int i = args[0]->IntegerValue();
@@ -275,39 +289,39 @@ Matrix::Set(const Arguments& args){
 
 
   } else {
-		return v8::ThrowException(v8::Exception::TypeError(String::New("Invalid number of arguments")));
+      NanTypeError( "Invalid number of arguments" );
+    //return v8::ThrowException(v8::Exception::TypeError(String::New("Invalid number of arguments")));
   }
-
-	return scope.Close(Undefined());
+  
+	NanReturnUndefined();
 }
 
 
-Handle<Value>
-Matrix::Size(const Arguments& args){
+
+NAN_METHOD(Matrix::Size){
 	SETUP_FUNCTION(Matrix)
 
 	v8::Local<v8::Array> arr = v8::Array::New(2);
 	arr->Set(0, Number::New(self->mat.size().height));
 	arr->Set(1, Number::New(self->mat.size().width));
 
-	return scope.Close(arr);
+	NanReturnValue(arr);
 }
 
 
-Handle<Value>
-Matrix::Clone(const Arguments& args){
+
+NAN_METHOD(Matrix::Clone){
 	SETUP_FUNCTION(Matrix)
 
   Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
   Matrix *m = ObjectWrap::Unwrap<Matrix>(im_h);
   m->mat = self->mat.clone();
 
-  return scope.Close(im_h);
+  NanReturnValue(im_h);
 }
 
 
-Handle<Value>
-Matrix::Row(const Arguments& args){
+NAN_METHOD(Matrix::Row){
 	SETUP_FUNCTION(Matrix)
 
 	int width = self->mat.size().width;
@@ -319,12 +333,11 @@ Matrix::Row(const Arguments& args){
 		arr->Set(x, Number::New(v));
 	}
 
-	return scope.Close(arr);
+	NanReturnValue(arr);
 }
 
 
-Handle<Value>
-	Matrix::PixelRow(const Arguments& args){
+NAN_METHOD(Matrix::PixelRow){
 	SETUP_FUNCTION(Matrix)
 
 	int width = self->mat.size().width;
@@ -339,11 +352,11 @@ Handle<Value>
 		arr->Set(offset + 2, Number::New((double)pixel.val[2]));
 }
 
-	return scope.Close(arr);
+	NanReturnValue(arr);
 }
 
-Handle<Value>
-Matrix::Col(const Arguments& args){
+
+NAN_METHOD(Matrix::Col){
   SETUP_FUNCTION(Matrix)
 
   int height = self->mat.size().height;
@@ -354,12 +367,11 @@ Matrix::Col(const Arguments& args){
     double v = Matrix::DblGet(self->mat, y, x);
     arr->Set(y, Number::New(v));
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
 }
 
 
-Handle<Value>
-Matrix::PixelCol(const Arguments& args){
+NAN_METHOD(Matrix::PixelCol){
   SETUP_FUNCTION(Matrix)
 
   int height = self->mat.size().height;
@@ -373,33 +385,30 @@ Matrix::PixelCol(const Arguments& args){
     arr->Set(offset + 1, Number::New((double)pixel.val[1]));
     arr->Set(offset + 2, Number::New((double)pixel.val[2]));
   }
-  return scope.Close(arr);
+  NanReturnValue(arr);
 }
 
-Handle<Value>
-Matrix::Width(const Arguments& args){
+
+NAN_METHOD(Matrix::Width){
 	SETUP_FUNCTION(Matrix)
 
-	return scope.Close(Number::New(self->mat.size().width));
+	NanReturnValue(Number::New(self->mat.size().width));
 }
 
-Handle<Value>
-Matrix::Height(const Arguments& args){
+NAN_METHOD(Matrix::Height){
 	SETUP_FUNCTION(Matrix)
 
-	return scope.Close(Number::New(self->mat.size().height));
+	NanReturnValue(Number::New(self->mat.size().height));
 }
 
-Handle<Value>
-Matrix::Channels(const Arguments& args){
+NAN_METHOD(Matrix::Channels){
 	 SETUP_FUNCTION(Matrix)
 
-	return scope.Close(Number::New(self->mat.channels()));
+	NanReturnValue(Number::New(self->mat.channels()));
 }
 
 
-Handle<Value>
-Matrix::ToBuffer(const v8::Arguments& args){
+NAN_METHOD(Matrix::ToBuffer){
 	SETUP_FUNCTION(Matrix)
 
     if ((args.Length() > 0) && (args[0]->IsFunction())) {
@@ -453,7 +462,7 @@ Matrix::ToBuffer(const v8::Arguments& args){
 	v8::Handle<v8::Value> constructorArgs[3] = {buf->handle_, v8::Integer::New(vec.size()), v8::Integer::New(0)};
 	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
-	return scope.Close(actualBuffer);
+	NanReturnValue(actualBuffer);
 }
 
 
@@ -470,8 +479,7 @@ struct matrixToBuffer_baton_t {
 void AsyncToBufferAsync(uv_work_t *req);
 void AfterAsyncToBufferAsync(uv_work_t *req);
 
-Handle<Value>
-Matrix::ToBufferAsync(const v8::Arguments& args){
+NAN_METHOD(Matrix::ToBufferAsync){
 	SETUP_FUNCTION(Matrix)
 
   REQ_FUN_ARG(0, cb);
@@ -564,8 +572,7 @@ void AfterAsyncToBufferAsync(uv_work_t *req) {
 }
 
 
-Handle<Value>
-Matrix::Ellipse(const v8::Arguments& args){
+NAN_METHOD(Matrix::Ellipse){
 	SETUP_FUNCTION(Matrix)
 
 	int x = 0;
@@ -630,13 +637,12 @@ Matrix::Ellipse(const v8::Arguments& args){
 	}
 
 	cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), angle, startAngle, endAngle, color, thickness, lineType, shift);
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
 
 
-Handle<Value>
-Matrix::Rectangle(const Arguments& args) {
+NAN_METHOD(Matrix::Rectangle) {
 	SETUP_FUNCTION(Matrix)
 
 
@@ -665,11 +671,10 @@ Matrix::Rectangle(const Arguments& args) {
 		cv::rectangle(self->mat, cv::Point(x, y), cv::Point(x+width, y+height), color, thickness);
 	}
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::Line(const Arguments& args) {
+NAN_METHOD(Matrix::Line) {
 	SETUP_FUNCTION(Matrix)
 
 
@@ -698,11 +703,10 @@ Matrix::Line(const Arguments& args) {
 		cv::line(self->mat, cv::Point(x1, y1), cv::Point(x2, y2), color, thickness);
 	}
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::Save(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Save) {
   SETUP_FUNCTION(Matrix)
 
   if (args.Length() > 1) {
@@ -714,7 +718,7 @@ Matrix::Save(const v8::Arguments& args) {
 
   String::AsciiValue filename(args[0]);
   int res = cv::imwrite(*filename, self->mat);
-  return scope.Close(Number::New(res));
+  NanReturnValue(Number::New(res));
 }
 
 
@@ -729,8 +733,7 @@ struct save_baton_t {
 void DoSaveAsync(uv_work_t *req);
 void AfterSaveAsync(uv_work_t *req);
 
-Handle<Value>
-Matrix::SaveAsync(const v8::Arguments& args){
+NAN_METHOD(Matrix::SaveAsync){
   SETUP_FUNCTION(Matrix)
 
   if (!args[0]->IsString())
@@ -782,8 +785,7 @@ void AfterSaveAsync(uv_work_t *req) {
 }
 
 
-Handle<Value>
-Matrix::Eye(const v8::Arguments& args){
+NAN_METHOD(Matrix::Eye){
 	HandleScope scope;
 
 	int w = args[0]->Uint32Value();
@@ -794,12 +796,11 @@ Matrix::Eye(const v8::Arguments& args){
 	cv::Mat mat = cv::Mat::eye(w, h, CV_64FC1);
 
 	img->mat = mat;
-	return scope.Close(im_h);
+	NanReturnValue(im_h);
 }
 
 
-Handle<Value>
-Matrix::ConvertGrayscale(const v8::Arguments& args) {
+NAN_METHOD(Matrix::ConvertGrayscale) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -812,12 +813,11 @@ Matrix::ConvertGrayscale(const v8::Arguments& args) {
 	gray.copyTo(self->mat);
 
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
 
-Handle<Value>
-Matrix::ConvertHSVscale(const v8::Arguments& args) {
+NAN_METHOD(Matrix::ConvertHSVscale) {
     HandleScope scope;
 
     Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -829,12 +829,11 @@ Matrix::ConvertHSVscale(const v8::Arguments& args) {
     cv::cvtColor(self->mat, hsv, CV_BGR2HSV);
     hsv.copyTo(self->mat);
 
-    return scope.Close(v8::Null());
+    NanReturnValue(v8::Null());
 }
 
 
-Handle<Value>
-Matrix::GaussianBlur(const v8::Arguments& args) {
+NAN_METHOD(Matrix::GaussianBlur) {
 	HandleScope scope;
     cv::Size ksize;
 	cv::Mat blurred;
@@ -863,12 +862,11 @@ Matrix::GaussianBlur(const v8::Arguments& args) {
 	cv::GaussianBlur(self->mat, blurred, ksize, 0);
 	blurred.copyTo(self->mat);
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
 
-Handle<Value>
-Matrix::MedianBlur(const v8::Arguments &args) {
+NAN_METHOD(Matrix::MedianBlur(const v8::Arguments &args) {
   HandleScope scope;
   cv::Mat blurred;
   int ksize = 3;
@@ -888,12 +886,11 @@ Matrix::MedianBlur(const v8::Arguments &args) {
   cv::medianBlur(self->mat, blurred, ksize);
   blurred.copyTo(self->mat);
 
-  return scope.Close(v8::Null());
+  NanReturnValue(v8::Null());
 }
 
 
-Handle<Value>
-Matrix::BilateralFilter(const v8::Arguments &args) {
+NAN_METHOD(Matrix::BilateralFilter(const v8::Arguments &args) {
   HandleScope scope;
   cv::Mat filtered;
   int d = 15;
@@ -920,12 +917,11 @@ Matrix::BilateralFilter(const v8::Arguments &args) {
   cv::bilateralFilter(self->mat, filtered, d, sigmaColor, sigmaSpace, borderType);
   filtered.copyTo(self->mat);
 
-  return scope.Close(v8::Null());
+  NanReturnValue(v8::Null());
 }
 
 
-Handle<Value>
-Matrix::Copy(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Copy) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -934,12 +930,11 @@ Matrix::Copy(const v8::Arguments& args) {
 	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
 	self->mat.copyTo(img->mat);
 
-	return scope.Close(img_to_return);
+	NanReturnValue(img_to_return);
 }
 
 
-Handle<Value>
-Matrix::Flip(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Flip) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -955,12 +950,11 @@ Matrix::Flip(const v8::Arguments& args) {
 	Matrix *img = ObjectWrap::Unwrap<Matrix>(img_to_return);
 	cv::flip(self->mat, img->mat, flipCode);
 
-	return scope.Close(img_to_return);
+	NanReturnValue(img_to_return);
 }
 
 
-Handle<Value>
-Matrix::ROI(const v8::Arguments& args) {
+NAN_METHOD(Matrix::ROI) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -982,12 +976,11 @@ Matrix::ROI(const v8::Arguments& args) {
 	cv::Mat roi(self->mat, cv::Rect(x,y,w,h));
 	img->mat = roi;
 
-	return scope.Close(img_to_return);
+	NanReturnValue(img_to_return);
 }
 
 
-Handle<Value>
-Matrix::Ptr(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Ptr) {
 	HandleScope scope;
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 	int line = args[0]->Uint32Value();
@@ -1000,13 +993,12 @@ Matrix::Ptr(const v8::Arguments& args) {
   char *mydata = "Random raw data\0";
 */
 	node::Buffer *return_buffer = Buffer::New((char *)data, self->mat.step);
-	return scope.Close( return_buffer->handle_ );
+	NanReturnValue( return_buffer->handle_ );
 
 //  return Undefined();
 }
 
-Handle<Value>
-Matrix::AbsDiff(const v8::Arguments& args) {
+NAN_METHOD(Matrix::AbsDiff) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1016,11 +1008,10 @@ Matrix::AbsDiff(const v8::Arguments& args) {
 
 	cv::absdiff(src1->mat, src2->mat, self->mat);
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::AddWeighted(const v8::Arguments& args) {
+NAN_METHOD(Matrix::AddWeighted) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1035,11 +1026,10 @@ Matrix::AddWeighted(const v8::Arguments& args) {
 	cv::addWeighted(src1->mat, alpha, src2->mat, beta, gamma, self->mat);
 
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::BitwiseXor(const v8::Arguments& args) {
+NAN_METHOD(Matrix::BitwiseXor) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1049,11 +1039,10 @@ Matrix::BitwiseXor(const v8::Arguments& args) {
 
 	cv::bitwise_xor(src1->mat, src2->mat, self->mat);
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::BitwiseNot(const v8::Arguments& args) {
+NAN_METHOD(Matrix::BitwiseNot) {
     HandleScope scope;
 
     Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1062,11 +1051,10 @@ Matrix::BitwiseNot(const v8::Arguments& args) {
 
     cv::bitwise_not(self->mat, dst->mat);
 
-    return scope.Close(v8::Null());
+    NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::BitwiseAnd(const v8::Arguments& args) {
+NAN_METHOD(Matrix::BitwiseAnd) {
     HandleScope scope;
 
     Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1076,31 +1064,28 @@ Matrix::BitwiseAnd(const v8::Arguments& args) {
 
     cv::bitwise_and(src1->mat, src2->mat, self->mat);
 
-    return scope.Close(v8::Null());
+    NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::CountNonZero(const v8::Arguments& args) {
+NAN_METHOD(Matrix::CountNonZero) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 
 	double count = (double)cv::countNonZero(self->mat);
-	return scope.Close(v8::Number::New(count));
+	NanReturnValue(v8::Number::New(count));
 }
 
-/*Handle<Value>
-Matrix::Split(const v8::Arguments& args) {
+/*NAN_METHOD(Matrix::Split) {
 	HandleScope scope;
 
 	//Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }*/
 
 
-Handle<Value>
-Matrix::Canny(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Canny) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1109,12 +1094,11 @@ Matrix::Canny(const v8::Arguments& args) {
 
 	cv::Canny(self->mat, self->mat, lowThresh, highThresh);
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
 
-Handle<Value>
-Matrix::Dilate(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Dilate) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1122,11 +1106,10 @@ Matrix::Dilate(const v8::Arguments& args) {
 
 	cv::dilate(self->mat, self->mat, cv::Mat(), cv::Point(-1, -1), niters);
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::Erode(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Erode) {
     HandleScope scope;
 
     Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1134,12 +1117,11 @@ Matrix::Erode(const v8::Arguments& args) {
 
     cv::erode(self->mat, self->mat, cv::Mat(), cv::Point(-1, -1), niters);
 
-    return scope.Close(v8::Null());
+    NanReturnValue(v8::Null());
 }
 
 
-Handle<Value>
-Matrix::FindContours(const v8::Arguments& args) {
+NAN_METHOD(Matrix::FindContours) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1149,13 +1131,12 @@ Matrix::FindContours(const v8::Arguments& args) {
 
 	cv::findContours(self->mat, contours->contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-	return scope.Close(conts_to_return);
+	NanReturnValue(conts_to_return);
 
 }
 
 
-Handle<Value>
-Matrix::DrawContour(const v8::Arguments& args) {
+NAN_METHOD(Matrix::DrawContour) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1177,8 +1158,7 @@ Matrix::DrawContour(const v8::Arguments& args) {
 }
 
 
-Handle<Value>
-Matrix::DrawAllContours(const v8::Arguments& args) {
+NAN_METHOD(Matrix::DrawAllContours) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1199,8 +1179,7 @@ Matrix::DrawAllContours(const v8::Arguments& args) {
 	return Undefined();
 }
 
-Handle<Value>
-Matrix::GoodFeaturesToTrack(const v8::Arguments& args) {
+NAN_METHOD(Matrix::GoodFeaturesToTrack) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1223,12 +1202,11 @@ Matrix::GoodFeaturesToTrack(const v8::Arguments& args) {
     arr->Set(i, pt);
   }
 
-  return scope.Close(arr);
+  NanReturnValue(arr);
 
 }
 
-Handle<Value>
-Matrix::HoughLinesP(const v8::Arguments& args) {
+NAN_METHOD(Matrix::HoughLinesP) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1258,7 +1236,7 @@ Matrix::HoughLinesP(const v8::Arguments& args) {
     arr->Set(i, pt);
   }
 
-  return scope.Close(arr);
+  NanReturnValue(arr);
 
 }
 
@@ -1298,8 +1276,7 @@ cv::Rect* setRect(Local<Object> objRect) {
 }
 
 
-Handle<Value>
-Matrix::Resize(const v8::Arguments& args){
+NAN_METHOD(Matrix::Resize){
   HandleScope scope;
 
   int x = args[0]->Uint32Value();
@@ -1320,12 +1297,11 @@ Matrix::Resize(const v8::Arguments& args){
   self->mat = res;
 
 
-  return scope.Close(Undefined());
+  NanReturnUndefined();
 }
 
 
-Handle<Value>
-Matrix::Rotate(const v8::Arguments& args){
+NAN_METHOD(Matrix::Rotate){
   HandleScope scope;
 
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1342,7 +1318,7 @@ Matrix::Rotate(const v8::Arguments& args){
       && (args.Length() == 1);
   if (rightOrStraight) {
     int angle2 = ((int)angle) % 360;
-    if (!angle2) { return scope.Close(Undefined()); }
+    if (!angle2) { NanReturnUndefined(); }
     if (angle2 < 0) { angle2 += 360; }
 	// See if we do right angle rotation, we transpose the matrix:
     if (angle2 % 180) {
@@ -1358,7 +1334,7 @@ Matrix::Rotate(const v8::Arguments& args){
     if (angle2 == 270) { mode = 1; } 
     cv::flip(self->mat, self->mat, mode);
     
-    return scope.Close(Undefined());
+    NanReturnUndefined();
   }
   //-------------
 
@@ -1372,27 +1348,24 @@ Matrix::Rotate(const v8::Arguments& args){
   ~self->mat;
   self->mat = res;
 
-  return scope.Close(Undefined());
+  NanReturnUndefined();
 }
 
-Handle<Value>
-Matrix::PyrDown(const v8::Arguments& args){
+NAN_METHOD(Matrix::PyrDown){
 	SETUP_FUNCTION(Matrix)
 
   cv::pyrDown(self->mat, self->mat);
-  return scope.Close(v8::Undefined());
+  NanReturnValue(v8::Undefined());
 }
 
-Handle<Value>
-Matrix::PyrUp(const v8::Arguments& args){
+NAN_METHOD(Matrix::PyrUp){
 	SETUP_FUNCTION(Matrix)
 
   cv::pyrUp(self->mat, self->mat);
-  return scope.Close(v8::Undefined());
+  NanReturnValue(v8::Undefined());
 }
 
-Handle<Value>
-Matrix::inRange(const v8::Arguments& args) {
+NAN_METHOD(Matrix::inRange) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1415,11 +1388,10 @@ Matrix::inRange(const v8::Arguments& args) {
 	}
 
 
-	return scope.Close(v8::Null());
+	NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::AdjustROI(const v8::Arguments& args) {
+NAN_METHOD(Matrix::AdjustROI) {
 	SETUP_FUNCTION(Matrix)
   int dtop = args[0]->Uint32Value();
   int dbottom = args[1]->Uint32Value();
@@ -1428,12 +1400,11 @@ Matrix::AdjustROI(const v8::Arguments& args) {
 
   self->mat.adjustROI(dtop, dbottom, dleft, dright);
 
-  return scope.Close(v8::Null());
+  NanReturnValue(v8::Null());
 
 }
 
-Handle<Value>
-Matrix::LocateROI(const v8::Arguments& args) {
+NAN_METHOD(Matrix::LocateROI) {
 	SETUP_FUNCTION(Matrix)
  
   cv::Size wholeSize;
@@ -1447,11 +1418,10 @@ Matrix::LocateROI(const v8::Arguments& args) {
 	arr->Set(2, Number::New(ofs.x));
 	arr->Set(3, Number::New(ofs.y));
 
-	return scope.Close(arr);
+	NanReturnValue(arr);
 }
 
-Handle<Value>
-Matrix::Threshold(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Threshold) {
 	SETUP_FUNCTION(Matrix)
 
 	double threshold = args[0]->NumberValue();
@@ -1486,11 +1456,10 @@ Matrix::Threshold(const v8::Arguments& args) {
 
   cv::threshold(self->mat, img->mat, threshold, maxVal, typ);
 
-	return scope.Close(img_to_return);
+	NanReturnValue(img_to_return);
 }
 
-Handle<Value>
-Matrix::AdaptiveThreshold(const v8::Arguments& args) {
+NAN_METHOD(Matrix::AdaptiveThreshold) {
 	SETUP_FUNCTION(Matrix)
 
 	double maxVal = args[0]->NumberValue();
@@ -1505,11 +1474,10 @@ Matrix::AdaptiveThreshold(const v8::Arguments& args) {
 
   cv::adaptiveThreshold(self->mat, img->mat, maxVal, adaptiveMethod, thresholdType, blockSize, C);
 
-  return scope.Close(img_to_return);
+  NanReturnValue(img_to_return);
 }
 
-Handle<Value>
-Matrix::MeanStdDev(const v8::Arguments& args) {
+NAN_METHOD(Matrix::MeanStdDev) {
 	HandleScope scope;
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1524,7 +1492,7 @@ Matrix::MeanStdDev(const v8::Arguments& args) {
 	Local<Object> data = Object::New();
 	data->Set(String::NewSymbol("mean"), mean);
 	data->Set(String::NewSymbol("stddev"), stddev);
-	return scope.Close(data);
+	NanReturnValue(data);
 }
 
 
@@ -1537,8 +1505,7 @@ Matrix::MeanStdDev(const v8::Arguments& args) {
 // Note, x,y and width and height of our image must be so that
 // our.width + x <= destination.width (and the same for y and height)
 // both x and y must be >= 0
-Handle<Value>
-Matrix::CopyTo(const v8::Arguments& args) {
+NAN_METHOD(Matrix::CopyTo) {
     HandleScope scope;
 
     Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1555,7 +1522,7 @@ Matrix::CopyTo(const v8::Arguments& args) {
     cv::Mat dstROI = cv::Mat(dest->mat, cv::Rect(x, y, width, height));
     self->mat.copyTo(dstROI);
 
-    return scope.Close(Undefined());
+    NanReturnUndefined();
 }
 
 
@@ -1563,8 +1530,7 @@ Matrix::CopyTo(const v8::Arguments& args) {
 // @author SergeMv
 // Does in-place color transformation
 // img.cvtColor('CV_BGR2YCrCb');
-Handle<Value>
-Matrix::CvtColor(const v8::Arguments& args) {
+NAN_METHOD(Matrix::CvtColor) {
     HandleScope scope;
 
     Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1607,14 +1573,13 @@ Matrix::CvtColor(const v8::Arguments& args) {
 
     cv::cvtColor(self->mat, self->mat, iTransform);
 
-    return scope.Close(Undefined());
+    NanReturnUndefined();
 }
 
 
 // @author SergeMv
 // arrChannels = img.split();
-Handle<Value>
-Matrix::Split(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Split) {
     HandleScope scope;
 
     Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1630,14 +1595,13 @@ Matrix::Split(const v8::Arguments& args) {
         arrChannels->Set(i, matObject);
     }
 
-    return scope.Close(arrChannels);
+    NanReturnValue(arrChannels);
 }
 
 
 // @author SergeMv
 // img.merge(arrChannels);
-Handle<Value>
-Matrix::Merge(const v8::Arguments& args) {
+NAN_METHOD(Matrix::Merge) {
     HandleScope scope;
 
     Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1656,26 +1620,24 @@ Matrix::Merge(const v8::Arguments& args) {
     }
     cv::merge(vChannels, self->mat);
 
-    return scope.Close(Undefined());
+    NanReturnUndefined();
 }
 
 
 // @author SergeMv
 // Equalizes histogram
 // img.equalizeHist()
-Handle<Value>
-Matrix::EqualizeHist(const v8::Arguments& args) {
+NAN_METHOD(Matrix::EqualizeHist) {
     HandleScope scope;
     
     Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
 
     cv::equalizeHist(self->mat, self->mat);
 
-    return scope.Close(Undefined());
+    NanReturnUndefined();
 }
 
-Handle<Value>
-Matrix::FloodFill(const Arguments& args){
+NAN_METHOD(Matrix::FloodFill(const Arguments& args){
 	SETUP_FUNCTION(Matrix)
 	//obj->Get(v8::String::NewSymbol("x"))
 	//int cv::floodFill(cv::InputOutputArray, cv::Point, cv::Scalar, cv::Rect*, cv::Scalar, cv::Scalar, int)
@@ -1704,15 +1666,14 @@ Matrix::FloodFill(const Arguments& args){
 			, 4 );
 
 
-	return scope.Close(Number::New( ret ));
+	NanReturnValue(Number::New( ret ));
 }
 
 
 // @author ytham
 // Match Template filter
 // Usage: output = input.matchTemplate("templateFileString", method);
-Handle<Value>
-Matrix::MatchTemplate(const v8::Arguments& args) {
+NAN_METHOD(Matrix::MatchTemplate) {
   HandleScope scope;
 
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1743,14 +1704,13 @@ Matrix::MatchTemplate(const v8::Arguments& args) {
   double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
   cv::minMaxLoc(m_out->mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
 
-  return scope.Close(out);
+  NanReturnValue(out);
 }
 
 
 // @author ytham
 // Min/Max location
-Handle<Value>
-Matrix::MinMaxLoc(const v8::Arguments& args) {
+NAN_METHOD(Matrix::MinMaxLoc) {
   HandleScope scope;
 
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1781,14 +1741,13 @@ Matrix::MinMaxLoc(const v8::Arguments& args) {
   result->Set(String::NewSymbol("minLoc"), o_minLoc);
   result->Set(String::NewSymbol("maxLoc"), o_maxLoc);
 
-  return scope.Close(result);
+  NanReturnValue(result);
 }
 
 
 // @author ytham
 // Pushes some matrix (argument) the back of a matrix (self)
-Handle<Value>
-Matrix::PushBack(const v8::Arguments& args) {
+NAN_METHOD(Matrix::PushBack) {
   HandleScope scope;
 
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1797,11 +1756,10 @@ Matrix::PushBack(const v8::Arguments& args) {
 
   self->mat.push_back(m_input->mat);
 
-  return scope.Close(args.This());
+  NanReturnValue(args.This());
 }
 
-Handle<Value>
-Matrix::PutText(const v8::Arguments& args) {
+NAN_METHOD(Matrix::PutText) {
   HandleScope scope;
 
   Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
@@ -1839,11 +1797,10 @@ Matrix::PutText(const v8::Arguments& args) {
 
   cv::putText(self->mat, text, cv::Point(x, y), constFont, scale, color, 2);
 
-  return scope.Close(Undefined());
+  NanReturnUndefined();
 }
 
-Handle<Value>
-Matrix::GetPerspectiveTransform(const v8::Arguments& args) {
+NAN_METHOD(Matrix::GetPerspectiveTransform) {
     HandleScope scope;
 
     // extract quad args
@@ -1861,11 +1818,10 @@ Matrix::GetPerspectiveTransform(const v8::Arguments& args) {
     Matrix *xfrmmat = ObjectWrap::Unwrap<Matrix>(xfrm);
     xfrmmat->mat = cv::getPerspectiveTransform(src_corners, tgt_corners);
 
-    return scope.Close(xfrm);
+    NanReturnValue(xfrm);
 }
 
-Handle<Value>
-Matrix::WarpPerspective(const v8::Arguments& args) {
+NAN_METHOD(Matrix::WarpPerspective) {
     SETUP_FUNCTION(Matrix)
 
     Matrix *xfrm = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
@@ -1890,11 +1846,10 @@ Matrix::WarpPerspective(const v8::Arguments& args) {
     ~self->mat;
     self->mat = res;
 
-    return scope.Close(v8::Null());
+    NanReturnValue(v8::Null());
 }
 
-Handle<Value>
-Matrix::CopyWithMask(const v8::Arguments& args) {
+NAN_METHOD(Matrix::CopyWithMask) {
     SETUP_FUNCTION(Matrix)
     
     // param 0 - destination image:
@@ -1904,12 +1859,11 @@ Matrix::CopyWithMask(const v8::Arguments& args) {
 
     self->mat.copyTo(dest->mat,mask->mat);
 
-    return scope.Close(Undefined());
+    NanReturnUndefined();
 }
 
 
-Handle<Value>
-Matrix::SetWithMask(const v8::Arguments& args) {
+NAN_METHOD(Matrix::SetWithMask) {
     SETUP_FUNCTION(Matrix)
     
     // param 0 - target value:
@@ -1924,11 +1878,10 @@ Matrix::SetWithMask(const v8::Arguments& args) {
 
     self->mat.setTo(newvals,mask->mat);
 
-    return scope.Close(Undefined());
+    NanReturnUndefined();
 }
 
-Handle<Value>
-Matrix::MeanWithMask(const v8::Arguments& args) {
+NAN_METHOD(Matrix::MeanWithMask) {
     SETUP_FUNCTION(Matrix)
     
     // param 0 - mask. same size as src and dest
@@ -1940,11 +1893,10 @@ Matrix::MeanWithMask(const v8::Arguments& args) {
     arr->Set(1, Number::New( means[1] ));
     arr->Set(2, Number::New( means[2] ));
 
-    return scope.Close(arr);
+    NanReturnValue(arr);
 }
 
-Handle<Value>
-Matrix::Shift(const v8::Arguments& args){
+NAN_METHOD(Matrix::Shift){
   SETUP_FUNCTION(Matrix)
 
   cv::Mat res;
@@ -1974,5 +1926,5 @@ Matrix::Shift(const v8::Arguments& args){
   ~self->mat;
   self->mat = res;
 
-  return scope.Close(Undefined());
+  NanReturnUndefined();
 }

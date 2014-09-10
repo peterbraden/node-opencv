@@ -22,11 +22,11 @@ using namespace node;
 
 
 #define SETUP_FUNCTION(TYP)	\
-	HandleScope scope;		\
+	NanScope();		\
 	TYP *self = ObjectWrap::Unwrap<TYP>(args.This());
 
 #define JSFUNC(NAME) \
-  NAN_METHOD(NAME);
+  static NAN_METHOD(NAME);
 	//static Handle<Value> NAME(const Arguments& args); 
 
 #define JSTHROW_TYPE(ERR) \

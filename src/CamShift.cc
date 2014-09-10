@@ -27,8 +27,7 @@ TrackedObject::Init(Handle<Object> target) {
 };    
 
 
-Handle<Value>
-TrackedObject::New(const Arguments &args) {
+NAN_METHOD(TrackedObject::New() {
   HandleScope scope;
 
   if (args.This()->InternalFieldCount() == 0){
@@ -120,8 +119,7 @@ TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect, int chan){
 
 
 
-Handle<Value>
-TrackedObject::Track(const v8::Arguments& args){
+NAN_METHOD(TrackedObject::Track(const v8::Arguments& args){
 	SETUP_FUNCTION(TrackedObject)
  
   if (args.Length() != 1){

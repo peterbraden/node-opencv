@@ -23,8 +23,7 @@ Point::Init(Handle<Object> target) {
     target->Set(String::NewSymbol("Point"), constructor->GetFunction());
 };    
 
-Handle<Value>
-Point::New(const Arguments &args) {
+NAN_METHOD(Point::New() {
   HandleScope scope;
 
   if (args.This()->InternalFieldCount() == 0)
@@ -38,15 +37,13 @@ Point::New(const Arguments &args) {
   return args.This();
 }
 
-Handle<Value>
-Point::GetX(Local<String> prop, const AccessorInfo &info) {
+NAN_METHOD(Point::GetX(Local<String> prop, const AccessorInfo &info) {
   HandleScope scope;
   Point *pt = ObjectWrap::Unwrap<Point>(info.This());
   return scope.Close(Number::New(pt->point.x));
 }
 
-Handle<Value>
-Point::GetY(Local<String> prop, const AccessorInfo &info) {
+NAN_METHOD(Point::GetY(Local<String> prop, const AccessorInfo &info) {
   HandleScope scope;
   Point *pt = ObjectWrap::Unwrap<Point>(info.This());
   return scope.Close(Number::New(pt->point.y));
@@ -57,8 +54,7 @@ Point::RaiseImmutable(Local<String> property, Local<Value> value, const Accessor
   v8::ThrowException(v8::Exception::TypeError(v8::String::New("Point is immutable")));
 }  
 
-Handle<Value>
-Point::Dot(const v8::Arguments& args){
+NAN_METHOD(Point::Dot(const v8::Arguments& args){
   HandleScope scope;
   Point *p1 = ObjectWrap::Unwrap<Point>(args.This());
   Point *p2 = ObjectWrap::Unwrap<Point>(args[0]->ToObject());
