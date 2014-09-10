@@ -178,6 +178,7 @@ void AfterAsyncRead(uv_work_t *req) {
 	baton->cb->Call(Context::GetCurrent()->Global(), 2, argv);
 	baton->cb.Dispose();
 
+		delete baton->im;
 		delete baton;
 
 }
