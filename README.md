@@ -207,6 +207,15 @@ doesn't work for you please get in touch.
 
 ## Changelog
 
+
+#### 0.6.0
+
+Many updates from the community, thank you to all.
+
+Especially: @oskardahlberg, @salmanulhaq, @jcao75, @psayre23, @jhludwig
+ , @coolblade, @ytham, @morganrallen and anyone I inadvertantly missed.
+
+
 #### 0.5.0
 
 Lots more opencv functions added, and bugfixes from a large number of
