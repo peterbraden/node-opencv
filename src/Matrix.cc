@@ -1746,26 +1746,11 @@ Matrix::FloodFill(const Arguments& args){
 	return scope.Close(Number::New( ret ));
 }
 
-
 // @author ytham
 // Match Template filter
-// Usage: output = input.matchTemplate("templateFileString", method);
+// Usage: output = input.matchTemplate(templateMatrix, method);
 Handle<Value>
 Matrix::MatchTemplate(const v8::Arguments& args) {
-  HandleScope scope;
-
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
-
-  v8::String::Utf8Value args0(args[0]->ToString());
-  std::string filename = std::string(*args0);
-  cv::Mat templ;
-  templ = cv::imread(filename, CV_8S);
-
-  Local<Object> out = Matrix::constructor->GetFunction()->NewInstance();
-  Matrix *m_out = ObjectWrap::Unwrap<Matrix>(out);
-  int cols = self->mat.cols - templ.cols + 1;
-  int rows = self->mat.rows - templ.rows + 1;
-  m_out->mat.create(cols, rows, CV_32FC1);
 
   /*
     TM_SQDIFF        =0
@@ -1775,16 +1760,24 @@ Matrix::MatchTemplate(const v8::Arguments& args) {
     TM_CCOEFF        =4
     TM_CCOEFF_NORMED =5
   */
+   
+  HandleScope scope;
+
+  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  Matrix *templ = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+
+  Local<Object> out = Matrix::constructor->GetFunction()->NewInstance();
+  Matrix *m_out = ObjectWrap::Unwrap<Matrix>(out);
+  int cols = self->mat.cols - templ->mat.cols + 1;
+  int rows = self->mat.rows - templ->mat.rows + 1;
+  m_out->mat.create(cols, rows, CV_32FC1);
+
   int method = (args.Length() < 2) ? (int)cv::TM_CCORR_NORMED : args[1]->Uint32Value();
 
-  cv::matchTemplate(self->mat, templ, m_out->mat, method);
-
-  double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
-  cv::minMaxLoc(m_out->mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+  cv::matchTemplate(self->mat, templ->mat, m_out->mat, method);
 
   return scope.Close(out);
 }
-
 
 // @author ytham
 // Min/Max location
