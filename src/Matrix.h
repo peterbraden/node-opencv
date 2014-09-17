@@ -73,6 +73,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(GoodFeaturesToTrack)
     JSFUNC(HoughLinesP)
 
+    JSFUNC(Crop)
+
     JSFUNC(inRange)
 
     JSFUNC(LocateROI)
