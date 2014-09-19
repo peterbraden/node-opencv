@@ -51,17 +51,20 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "resize", Resize);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "rotate", Rotate);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copyTo", CopyTo);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "convertTo", ConvertTo);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrDown", PyrDown);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "pyrUp", PyrUp);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "channels", Channels);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "type", Type);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "crop", Crop);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convertGrayscale", ConvertGrayscale);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "convertHSVscale", ConvertHSVscale);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "gaussianBlur", GaussianBlur);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "medianBlur", MedianBlur);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "bilateralFilter", BilateralFilter);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "medianBlur", MedianBlur);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "bilateralFilter", BilateralFilter);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "boxFilter", BoxFilter);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "copy", Copy);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "flip", Flip);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "roi", ROI);
@@ -70,10 +73,11 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "addWeighted", AddWeighted);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseXor", BitwiseXor);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseNot", BitwiseNot);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseAnd", BitwiseAnd);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "bitwiseAnd", BitwiseAnd);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "countNonZero", CountNonZero);
+	//NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "canny", Canny);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "dilate", Dilate);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "erode", Erode);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "findContours", FindContours);
@@ -90,11 +94,11 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "threshold", Threshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "adaptiveThreshold", AdaptiveThreshold);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "meanStdDev", MeanStdDev);
-
-	NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
+    
+    NODE_SET_PROTOTYPE_METHOD(constructor, "cvtColor", CvtColor);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "split", Split);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "merge", Merge);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "equalizeHist", EqualizeHist);
 
 	NODE_SET_PROTOTYPE_METHOD(constructor, "floodFill", FloodFill);
 
@@ -110,7 +114,7 @@ Matrix::Init(Handle<Object> target) {
 
 	NODE_SET_METHOD(constructor, "Eye", Eye);
 
-    NODE_SET_PROTOTYPE_METHOD(constructor, "copyWithMask", CopyWithMask);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "copyWithMask", CopyWithMask);
     NODE_SET_PROTOTYPE_METHOD(constructor, "setWithMask", SetWithMask);
     NODE_SET_PROTOTYPE_METHOD(constructor, "meanWithMask", MeanWithMask);
     NODE_SET_PROTOTYPE_METHOD(constructor, "shift", Shift);
@@ -436,6 +440,12 @@ Matrix::Channels(const Arguments& args){
 	return scope.Close(Number::New(self->mat.channels()));
 }
 
+Handle<Value>
+Matrix::Type(const Arguments& args){
+	 SETUP_FUNCTION(Matrix)
+
+	return scope.Close(Number::New(self->mat.type()));
+}
 
 Handle<Value>
 Matrix::ToBuffer(const v8::Arguments& args){
@@ -605,73 +615,27 @@ void AfterAsyncToBufferAsync(uv_work_t *req) {
 
 Handle<Value>
 Matrix::Ellipse(const v8::Arguments& args){
-	SETUP_FUNCTION(Matrix)
+  SETUP_FUNCTION(Matrix)
 
-	int x = 0;
-	int y = 0;
-	int width = 0;
-	int height = 0;
-	cv::Scalar color(0, 0, 255);
-	int thickness = 1;
-	double angle = 0;
-	double startAngle = 0;
-	double endAngle = 360;
-	int lineType = 8;
-	int shift = 0;
+  int x = args[0]->Uint32Value();
+  int y = args[1]->Uint32Value();
+  int width = args[2]->Uint32Value();
+  int height = args[3]->Uint32Value();
+  cv::Scalar color(0, 0, 255);
 
-	if(args[0]->IsObject()) {
-		v8::Handle<v8::Object> options = v8::Handle<v8::Object>::Cast(args[0]);
-		if (options->Has(v8::String::New("center"))) {
-		  Local<Object> center = options->Get(v8::String::NewSymbol("center"))->ToObject();
-		  x = center->Get(v8::String::NewSymbol("x"))->Uint32Value();
-		  y = center->Get(v8::String::NewSymbol("y"))->Uint32Value();
-		}
-		if (options->Has(v8::String::New("axes"))) {
-		  Local<Object> axes = options->Get(v8::String::NewSymbol("axes"))->ToObject();
-		  width = axes->Get(v8::String::NewSymbol("width"))->Uint32Value();
-		  height = axes->Get(v8::String::NewSymbol("height"))->Uint32Value();
-		}
-		if (options->Has(v8::String::New("thickness"))) {
-			thickness = options->Get(v8::String::NewSymbol("thickness"))->Uint32Value();
-		}
-		if (options->Has(v8::String::New("angle"))) {
-			angle = options->Get(v8::String::NewSymbol("angle"))->NumberValue();
-		}
-		if (options->Has(v8::String::New("startAngle"))) {
-			startAngle = options->Get(v8::String::NewSymbol("startAngle"))->NumberValue();
-		}
-		if (options->Has(v8::String::New("endAngle"))) {
-			endAngle = options->Get(v8::String::NewSymbol("endAngle"))->NumberValue();
-		}
-		if (options->Has(v8::String::New("lineType"))) {
-			lineType = options->Get(v8::String::NewSymbol("lineType"))->Uint32Value();
-		}
-		if (options->Has(v8::String::New("shift"))) {
-			shift = options->Get(v8::String::NewSymbol("shift"))->Uint32Value();
-		}
-		if (options->Has(v8::String::New("color"))) {
-			Local<Object> objColor = options->Get(v8::String::NewSymbol("color"))->ToObject();
-			color = setColor(objColor);
-		}
-	} else {
-		x = args[0]->Uint32Value();
-		y = args[1]->Uint32Value();
-		width = args[2]->Uint32Value();
-		height = args[3]->Uint32Value();
-	
-		if(args[4]->IsArray()) {
-			Local<Object> objColor = args[4]->ToObject();
-			color = setColor(objColor);
-		}  
+  if(args[4]->IsArray()) {
+    Local<Object> objColor = args[4]->ToObject();
+    color = setColor(objColor);
+  }
 
-		if(args[5]->IntegerValue())
-			thickness = args[5]->IntegerValue();
-	}
+  int thickness = 1;
 
-	cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), angle, startAngle, endAngle, color, thickness, lineType, shift);
-	return scope.Close(v8::Null());
+  if(args[5]->IntegerValue())
+    thickness = args[5]->IntegerValue();
+
+  cv::ellipse(self->mat, cv::Point(x, y), cv::Size(width, height), 0, 0, 360, color, thickness, 8, 0);
+  return scope.Close(v8::Null());
 }
-
 
 
 Handle<Value>
@@ -701,7 +665,7 @@ Matrix::Rectangle(const Arguments& args) {
 		if(args[3]->IntegerValue())
 			thickness = args[3]->IntegerValue();
 
-		cv::rectangle(self->mat, cv::Point(x, y), cv::Point(x+width, y+height), color, thickness);
+		cv::rectangle(self->mat, cv::Point(x, y), cv::Point(width, height), color, thickness);
 	}
 
 	return scope.Close(v8::Null());
@@ -964,6 +928,40 @@ Matrix::BilateralFilter(const v8::Arguments &args) {
 
 
 Handle<Value>
+Matrix::BoxFilter(const v8::Arguments& args) {
+	HandleScope scope;
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	cv::Mat boxFiltered;
+    cv::Size ksize;
+    if (args.Length() < 1) {
+		ksize = cv::Size(5, 5);
+    }
+    else {
+        if(!args[0]->IsArray()) {
+            return ThrowException(Exception::TypeError(String::New(
+                "'ksize' argument must be a 2 double array")));
+        }
+        Local<Object> array = args[0]->ToObject();
+        // TODO: Length check
+        Local<Value> x = array->Get(0);
+        Local<Value> y = array->Get(1);
+        if(!x->IsNumber() || !y->IsNumber()) {
+            return ThrowException(Exception::TypeError(String::New(
+                "'ksize' argument must be a 2 double array")));
+        }
+        ksize = cv::Size(x->NumberValue(), y->NumberValue());
+    }
+    int ddepth = args[1]->NumberValue();
+
+	cv::boxFilter(self->mat, boxFiltered, ddepth, ksize);
+	boxFiltered.copyTo(self->mat);
+
+	return scope.Close(v8::Null());
+}
+
+
+Handle<Value>
 Matrix::Copy(const v8::Arguments& args) {
 	HandleScope scope;
 
@@ -1091,6 +1089,7 @@ Matrix::BitwiseXor(const v8::Arguments& args) {
 	return scope.Close(v8::Null());
 }
 
+
 Handle<Value>
 Matrix::BitwiseNot(const v8::Arguments& args) {
     HandleScope scope;
@@ -1104,6 +1103,7 @@ Matrix::BitwiseNot(const v8::Arguments& args) {
     return scope.Close(v8::Null());
 }
 
+
 Handle<Value>
 Matrix::BitwiseAnd(const v8::Arguments& args) {
     HandleScope scope;
@@ -1112,9 +1112,17 @@ Matrix::BitwiseAnd(const v8::Arguments& args) {
 
     Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
     Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+    Matrix *mask = NULL;
+	if (args.Length()>2 && !(args[2]->IsNull()) && args[2]->IsObject()){
+		mask = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+	}
 
-    cv::bitwise_and(src1->mat, src2->mat, self->mat);
-
+	if (mask!=NULL) {
+		cv::bitwise_and(src1->mat, src2->mat, self->mat, mask->mat);
+	}else{
+		cv::bitwise_and(src1->mat, src2->mat, self->mat);
+	}
+    
     return scope.Close(v8::Null());
 }
 
@@ -1208,9 +1216,7 @@ Matrix::DrawContour(const v8::Arguments& args) {
 		color = setColor(objColor);
 	}
 
-    int thickness = args.Length() < 4 ? 1 : args[3]->NumberValue();
-
-    cv::drawContours(self->mat, cont->contours, pos, color, thickness);
+	cv::drawContours(self->mat, cont->contours, pos, color, 1);
 
 	return Undefined();
 }
@@ -1230,10 +1236,7 @@ Matrix::DrawAllContours(const v8::Arguments& args) {
 		color = setColor(objColor);
 	}
 
-    int thickness = args.Length() < 3 ? 1 : args[2]->NumberValue();
-
-    cv::drawContours(self->mat, cont->contours, -1, color, thickness);
-
+	cv::drawContours(self->mat, cont->contours, -1, color, 1);
 
 	return Undefined();
 }
@@ -1598,6 +1601,74 @@ Matrix::CopyTo(const v8::Arguments& args) {
 }
 
 
+Handle<Value>
+Matrix::ConvertTo(const v8::Arguments& args) {
+    HandleScope scope;
+
+    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+    v8::String::Utf8Value str (args[0]->ToString());
+    std::string str2 = std::string(*str);
+    const char * toTypeStr = (const char *) str2.c_str();
+
+    int toTypeInt;
+    double toAlpha = 1.0;
+	double toBeta = 0.0;
+    //types_c.h
+	if (!strcmp(toTypeStr, "CV_8U")) { toTypeInt = CV_8U; }
+	else if (!strcmp(toTypeStr, "CV_8S")) { toTypeInt = CV_8S; }
+	else if (!strcmp(toTypeStr, "CV_16U")) { toTypeInt = CV_16U; }
+	else if (!strcmp(toTypeStr, "CV_16S")) { toTypeInt = CV_16S; }
+	else if (!strcmp(toTypeStr, "CV_32S")) { toTypeInt = CV_32S; }
+	else if (!strcmp(toTypeStr, "CV_32F")) { toTypeInt = CV_32F; }
+	else if (!strcmp(toTypeStr, "CV_64F")) { toTypeInt = CV_64F; }
+	else if (!strcmp(toTypeStr, "CV_USRTYPE1")) { toTypeInt = CV_USRTYPE1; }
+	else if (!strcmp(toTypeStr, "CV_8UC1")) { toTypeInt = CV_8UC1; }
+	else if (!strcmp(toTypeStr, "CV_8UC2")) { toTypeInt = CV_8UC2; }
+	else if (!strcmp(toTypeStr, "CV_8UC3")) { toTypeInt = CV_8UC3; }
+	else if (!strcmp(toTypeStr, "CV_8UC4")) { toTypeInt = CV_8UC4; }
+	//else if (!strcmp(toTypeStr, "CV_8UC")) { toTypeInt = CV_8UC; }
+	else if (!strcmp(toTypeStr, "CV_8SC1")) { toTypeInt = CV_8SC1; }
+	else if (!strcmp(toTypeStr, "CV_8SC2")) { toTypeInt = CV_8SC2; }
+	else if (!strcmp(toTypeStr, "CV_8SC3")) { toTypeInt = CV_8SC3; }
+	else if (!strcmp(toTypeStr, "CV_8SC4")) { toTypeInt = CV_8SC4; }
+	//else if (!strcmp(toTypeStr, "CV_8SC")) { toTypeInt = CV_8SC; }
+	else if (!strcmp(toTypeStr, "CV_16UC1")) { toTypeInt = CV_16UC1; }
+	else if (!strcmp(toTypeStr, "CV_16UC2")) { toTypeInt = CV_16UC2; }
+	else if (!strcmp(toTypeStr, "CV_16UC3")) { toTypeInt = CV_16UC3; }
+	else if (!strcmp(toTypeStr, "CV_16UC4")) { toTypeInt = CV_16UC4; }
+	//else if (!strcmp(toTypeStr, "CV_16UC")) { toTypeInt = CV_16UC; }
+	else if (!strcmp(toTypeStr, "CV_16SC1")) { toTypeInt = CV_16SC1; }
+	else if (!strcmp(toTypeStr, "CV_16SC2")) { toTypeInt = CV_16SC2; }
+	else if (!strcmp(toTypeStr, "CV_16SC3")) { toTypeInt = CV_16SC3; }
+	else if (!strcmp(toTypeStr, "CV_16SC4")) { toTypeInt = CV_16SC4; }
+	//else if (!strcmp(toTypeStr, "CV_16SC")) { toTypeInt = CV_16SC; }
+	else if (!strcmp(toTypeStr, "CV_32SC1")) { toTypeInt = CV_32SC1; }
+	else if (!strcmp(toTypeStr, "CV_32SC2")) { toTypeInt = CV_32SC2; }
+	else if (!strcmp(toTypeStr, "CV_32SC3")) { toTypeInt = CV_32SC3; }
+	else if (!strcmp(toTypeStr, "CV_32SC4")) { toTypeInt = CV_32SC4; }
+	//else if (!strcmp(toTypeStr, "CV_32SC")) { toTypeInt = CV_32SC; }
+	else if (!strcmp(toTypeStr, "CV_32FC1")) { toTypeInt = CV_32FC1; }
+	else if (!strcmp(toTypeStr, "CV_32FC2")) { toTypeInt = CV_32FC2; }
+	else if (!strcmp(toTypeStr, "CV_32FC3")) { toTypeInt = CV_32FC3; }
+	else if (!strcmp(toTypeStr, "CV_32FC4")) { toTypeInt = CV_32FC4; }
+	//else if (!strcmp(toTypeStr, "CV_32FC")) { toTypeInt = CV_32FC; }
+	else if (!strcmp(toTypeStr, "CV_64FC1")) { toTypeInt = CV_64FC1; }
+	else if (!strcmp(toTypeStr, "CV_64FC2")) { toTypeInt = CV_64FC2; }
+	else if (!strcmp(toTypeStr, "CV_64FC3")) { toTypeInt = CV_64FC3; }
+	else if (!strcmp(toTypeStr, "CV_64FC4")) { toTypeInt = CV_64FC4; }
+	//else if (!strcmp(toTypeStr, "CV_64FC")) { toTypeInt = CV_64FC; }
+	else{ 
+        toTypeInt = 0; // to avoid compiler warning
+        return v8::ThrowException(Exception::TypeError(String::New(
+			"Conversion type code is unsupported")));
+    }
+	//cv::Mat::convertTo(self->mat, toTypeInt, toAlpha, toBeta);
+	self->mat.convertTo(self->mat, toTypeInt, toAlpha, toBeta);
+	
+	//return scope.Close(v8::Null());
+    return scope.Close(Undefined());
+}
+
 
 // @author SergeMv
 // Does in-place color transformation
@@ -1924,6 +1995,7 @@ Matrix::WarpPerspective(const v8::Arguments& args) {
 
     return scope.Close(v8::Null());
 }
+
 
 Handle<Value>
 Matrix::CopyWithMask(const v8::Arguments& args) {

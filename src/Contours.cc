@@ -31,7 +31,7 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "approxPolyDP", ApproxPolyDP);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "convexHull", ConvexHull);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "boundingRect", BoundingRect);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "minAreaRect", MinAreaRect);
+	NODE_SET_PROTOTYPE_METHOD(constructor, "minAreaRect", BoundingRect);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "moments", Moments);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
