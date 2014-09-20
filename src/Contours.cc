@@ -11,14 +11,7 @@ void
 Contour::Init(Handle<Object> target) {
 	NanScope();
 
-	//Class
-	/*v8::Local<v8::FunctionTemplate> m = v8::FunctionTemplate::New(New);
-	m->SetClassName(v8::String::NewSymbol("Contours"));
-
-	// Constructor
-	constructor = Persistent<FunctionTemplate>::New(m);
-	constructor->InstanceTemplate()->SetInternalFieldCount(1);
-	constructor->SetClassName(String::NewSymbol("Contours"));*/
+	//Class/contructor
 	
 	Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(Contour::New);
   NanAssignPersistent(constructor, ctor);
@@ -41,7 +34,6 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "minAreaRect", MinAreaRect);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "isConvex", IsConvex);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "moments", Moments);
-	//target->Set(String::NewSymbol("Contours"), m->GetFunction());
 	
 	target->Set(NanNew("Contours"), ctor->GetFunction());
 };
@@ -73,14 +65,14 @@ NAN_METHOD(Contour::Point) {
 
 		cv::Point point = self->contours[pos][index];
 
-		Local<Object> data = Object::New();
-		data->Set(String::NewSymbol("x"), Number::New(point.x));
-		data->Set(String::NewSymbol("y"), Number::New(point.y));
+		Local<Object> data = NanNew<Object>();
+		data->Set(NanNew("x"), NanNew<Number>(point.x));
+		data->Set(NanNew("y"), NanNew<Number>(point.y));
 
-		return scope.Close(data);
+		NanReturnValue(data);
 }
 
-/*
+
 // FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
 // also, this would allow to use ``Size`` for the function returning the number of corners
 // in the contour for better consistency with OpenCV.
@@ -89,8 +81,9 @@ NAN_METHOD(Contour::Size) {
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 
-	return scope.Close(Number::New(self->contours.size()));
+	NanReturnValue(NanNew<Number>(self->contours.size()));
 }
+
 
 NAN_METHOD(Contour::CornerCount) {
 	 NanScope();
@@ -98,8 +91,9 @@ NAN_METHOD(Contour::CornerCount) {
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
 
-	return scope.Close(Number::New(self->contours[pos].size()));
+	NanReturnValue(NanNew<Number>(self->contours[pos].size()));
 }
+
 
 NAN_METHOD(Contour::Area) {
 	 NanScope();
@@ -107,8 +101,8 @@ NAN_METHOD(Contour::Area) {
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
 
-	//return scope.Close(Number::New(contourArea(self->contours)));
-	return scope.Close(Number::New(contourArea(cv::Mat(self->contours[pos]))));
+	//NanReturnValue(NanNew<Number>(contourArea(self->contours)));
+	NanReturnValue(NanNew<Number>(contourArea(cv::Mat(self->contours[pos]))));
 }
 
 
@@ -119,7 +113,7 @@ NAN_METHOD(Contour::ArcLength) {
 	int pos = args[0]->NumberValue();
 	bool isClosed = args[1]->BooleanValue();
 
-	return scope.Close(Number::New(arcLength(cv::Mat(self->contours[pos]), isClosed)));
+	NanReturnValue(NanNew<Number>(arcLength(cv::Mat(self->contours[pos]), isClosed)));
 }
 
 
@@ -135,7 +129,7 @@ NAN_METHOD(Contour::ApproxPolyDP) {
 	approxPolyDP(cv::Mat(self->contours[pos]), approxed, epsilon, isClosed);
 	approxed.copyTo(self->contours[pos]);
 
-	return scope.Close(v8::Null());
+	NanReturnNull();
 }
 
 
@@ -151,7 +145,7 @@ NAN_METHOD(Contour::ConvexHull) {
 	cv::convexHull(cv::Mat(self->contours[pos]), hull, clockwise);
 	hull.copyTo(self->contours[pos]);
 
-	return scope.Close(v8::Null());
+	NanReturnNull();
 }
 
 
@@ -162,14 +156,14 @@ NAN_METHOD(Contour::BoundingRect) {
 	int pos = args[0]->NumberValue();
 
 	cv::Rect bounding =	cv::boundingRect(cv::Mat(self->contours[pos]));
-	Local<Object> rect = Object::New();
+	Local<Object> rect = NanNew<Object>();
 
-	rect->Set(String::NewSymbol("x"), Number::New(bounding.x));
-	rect->Set(String::NewSymbol("y"), Number::New(bounding.y));
-	rect->Set(String::NewSymbol("width"), Number::New(bounding.width));
-	rect->Set(String::NewSymbol("height"), Number::New(bounding.height));
+	rect->Set(NanNew("x"), NanNew<Number>(bounding.x));
+	rect->Set(NanNew("y"), NanNew<Number>(bounding.y));
+	rect->Set(NanNew("width"), NanNew<Number>(bounding.width));
+	rect->Set(NanNew("height"), NanNew<Number>(bounding.height));
 
-	return scope.Close(rect);
+	NanReturnValue(rect);
 }
 
 
@@ -181,33 +175,33 @@ NAN_METHOD(Contour::MinAreaRect) {
 
 	cv::RotatedRect minimum = cv::minAreaRect(cv::Mat(self->contours[pos]));
 
-	Local<Object> rect = Object::New();
-	rect->Set(String::NewSymbol("angle"), Number::New(minimum.angle));
+	Local<Object> rect = NanNew<Object>();
+	rect->Set(NanNew("angle"), NanNew<Number>(minimum.angle));
 
-	Local<Object> size = Object::New();
-	size->Set(String::NewSymbol("height"), Number::New(minimum.size.height));
-	size->Set(String::NewSymbol("width"), Number::New(minimum.size.width));
-	rect->Set(String::NewSymbol("size"), size);
+	Local<Object> size = NanNew<Object>();
+	size->Set(NanNew("height"), NanNew<Number>(minimum.size.height));
+	size->Set(NanNew("width"), NanNew<Number>(minimum.size.width));
+	rect->Set(NanNew("size"), size);
 
-	Local<Object> center = Object::New();
-	center->Set(String::NewSymbol("x"), Number::New(minimum.center.x));
-	center->Set(String::NewSymbol("y"), Number::New(minimum.center.y));
+	Local<Object> center = NanNew<Object>();
+	center->Set(NanNew("x"), NanNew<Number>(minimum.center.x));
+	center->Set(NanNew("y"), NanNew<Number>(minimum.center.y));
 
-	v8::Local<v8::Array> points = v8::Array::New(4);
+	v8::Local<v8::Array> points = NanNew<Array>(4);
 
 	cv::Point2f rect_points[4];
 	minimum.points(rect_points);
 
 	for (unsigned int i=0; i<4; i++){
-		Local<Object> point = Object::New();
-		point->Set(String::NewSymbol("x"), Number::New(rect_points[i].x));
-		point->Set(String::NewSymbol("y"), Number::New(rect_points[i].y));
+		Local<Object> point = NanNew<Object>();
+		point->Set(NanNew("x"), NanNew<Number>(rect_points[i].x));
+		point->Set(NanNew("y"), NanNew<Number>(rect_points[i].y));
 		points->Set(i, point);
 	}
 
-	rect->Set(String::NewSymbol("points"), points);
+	rect->Set(NanNew("points"), points);
 
-	return scope.Close(rect);
+	NanReturnValue(rect);
 }
 
 
@@ -217,7 +211,7 @@ NAN_METHOD(Contour::IsConvex) {
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
 
-	return scope.Close(Boolean::New(isContourConvex(cv::Mat(self->contours[pos]))));
+	NanReturnValue(NanNew<Boolean>(isContourConvex(cv::Mat(self->contours[pos]))));
 }
 
 NAN_METHOD(Contour::Moments) {
@@ -229,13 +223,13 @@ NAN_METHOD(Contour::Moments) {
 	/// Get the moments
 	cv::Moments mu = moments( self->contours[pos], false );
     
-	Local<Object> res = Object::New();
+	Local<Object> res = NanNew<Object>();
 
-	res->Set(String::NewSymbol("m00"), Number::New(mu.m00));
-	res->Set(String::NewSymbol("m10"), Number::New(mu.m10));
-	res->Set(String::NewSymbol("m01"), Number::New(mu.m01));
-	res->Set(String::NewSymbol("m11"), Number::New(mu.m11));
+	res->Set(NanNew("m00"), NanNew<Number>(mu.m00));
+	res->Set(NanNew("m10"), NanNew<Number>(mu.m10));
+	res->Set(NanNew("m01"), NanNew<Number>(mu.m01));
+	res->Set(NanNew("m11"), NanNew<Number>(mu.m11));
 
-	return scope.Close(res);
+	NanReturnValue(res);
 }
-*/
+
