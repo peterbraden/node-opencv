@@ -1,5 +1,6 @@
 #include "Contours.h"
 #include "OpenCV.h"
+#include <nan.h>
 
 #include <iostream>
 
@@ -8,56 +9,63 @@ v8::Persistent<FunctionTemplate> Contour::constructor;
 
 void
 Contour::Init(Handle<Object> target) {
-	HandleScope scope;
+	NanScope();
 
 	//Class
-	v8::Local<v8::FunctionTemplate> m = v8::FunctionTemplate::New(New);
+	/*v8::Local<v8::FunctionTemplate> m = v8::FunctionTemplate::New(New);
 	m->SetClassName(v8::String::NewSymbol("Contours"));
 
 	// Constructor
 	constructor = Persistent<FunctionTemplate>::New(m);
 	constructor->InstanceTemplate()->SetInternalFieldCount(1);
-	constructor->SetClassName(String::NewSymbol("Contours"));
+	constructor->SetClassName(String::NewSymbol("Contours"));*/
+	
+	Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(Contour::New);
+  NanAssignPersistent(constructor, ctor);
+  ctor->InstanceTemplate()->SetInternalFieldCount(1);
+  ctor->SetClassName(NanNew("Contours"));
+	
 
 	// Prototype
 	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "point", Point);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "cornerCount", CornerCount);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "area", Area);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "arcLength", ArcLength);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "approxPolyDP", ApproxPolyDP);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "convexHull", ConvexHull);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "boundingRect", BoundingRect);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "minAreaRect", MinAreaRect);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "moments", Moments);
-	target->Set(String::NewSymbol("Contours"), m->GetFunction());
+	NODE_SET_PROTOTYPE_METHOD(ctor, "point", Point);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "size", Size);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "cornerCount", CornerCount);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "area", Area);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "arcLength", ArcLength);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "approxPolyDP", ApproxPolyDP);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "convexHull", ConvexHull);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "boundingRect", BoundingRect);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "minAreaRect", MinAreaRect);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "isConvex", IsConvex);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "moments", Moments);
+	//target->Set(String::NewSymbol("Contours"), m->GetFunction());
+	
+	target->Set(NanNew("Contours"), ctor->GetFunction());
 };
 
 
-NAN_METHOD(Contour::New() {
-	HandleScope scope;
+NAN_METHOD(Contour::New) {
+  NanScope();
 
 	if (args.This()->InternalFieldCount() == 0)
-		return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Cannot instantiate without new")));
+    NanThrowTypeError("Cannot instantiate without new");
 
 	Contour *contours;
 	contours = new Contour;
 
 	contours->Wrap(args.Holder());
-	return scope.Close(args.Holder());
+	NanReturnValue(args.Holder());
 }
 
 
 Contour::Contour(): ObjectWrap() {
 }
 
-
-NAN_METHOD(Contour::Point() {
-	HandleScope scope;
+NAN_METHOD(Contour::Point) {
+	 NanScope();
 
 		Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 		int pos   = args[0]->NumberValue();
@@ -72,19 +80,20 @@ NAN_METHOD(Contour::Point() {
 		return scope.Close(data);
 }
 
+/*
 // FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
 // also, this would allow to use ``Size`` for the function returning the number of corners
 // in the contour for better consistency with OpenCV.
-NAN_METHOD(Contour::Size() {
-	HandleScope scope;
+NAN_METHOD(Contour::Size) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 
 	return scope.Close(Number::New(self->contours.size()));
 }
 
-NAN_METHOD(Contour::CornerCount() {
-	HandleScope scope;
+NAN_METHOD(Contour::CornerCount) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
@@ -92,8 +101,8 @@ NAN_METHOD(Contour::CornerCount() {
 	return scope.Close(Number::New(self->contours[pos].size()));
 }
 
-NAN_METHOD(Contour::Area() {
-	HandleScope scope;
+NAN_METHOD(Contour::Area) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
@@ -103,8 +112,8 @@ NAN_METHOD(Contour::Area() {
 }
 
 
-NAN_METHOD(Contour::ArcLength() {
-	HandleScope scope;
+NAN_METHOD(Contour::ArcLength) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
@@ -114,8 +123,8 @@ NAN_METHOD(Contour::ArcLength() {
 }
 
 
-NAN_METHOD(Contour::ApproxPolyDP() {
-	HandleScope scope;
+NAN_METHOD(Contour::ApproxPolyDP) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
@@ -130,8 +139,8 @@ NAN_METHOD(Contour::ApproxPolyDP() {
 }
 
 
-NAN_METHOD(Contour::ConvexHull() {
-	HandleScope scope;
+NAN_METHOD(Contour::ConvexHull) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 
@@ -146,8 +155,8 @@ NAN_METHOD(Contour::ConvexHull() {
 }
 
 
-NAN_METHOD(Contour::BoundingRect() {
-	HandleScope scope;
+NAN_METHOD(Contour::BoundingRect) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
@@ -164,8 +173,8 @@ NAN_METHOD(Contour::BoundingRect() {
 }
 
 
-NAN_METHOD(Contour::MinAreaRect() {
-	HandleScope scope;
+NAN_METHOD(Contour::MinAreaRect) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
@@ -202,8 +211,8 @@ NAN_METHOD(Contour::MinAreaRect() {
 }
 
 
-NAN_METHOD(Contour::IsConvex() {
-	HandleScope scope;
+NAN_METHOD(Contour::IsConvex) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
@@ -211,8 +220,8 @@ NAN_METHOD(Contour::IsConvex() {
 	return scope.Close(Boolean::New(isContourConvex(cv::Mat(self->contours[pos]))));
 }
 
-NAN_METHOD(Contour::Moments() {
-	HandleScope scope;
+NAN_METHOD(Contour::Moments) {
+	 NanScope();
 
 	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 	int pos = args[0]->NumberValue();
@@ -229,4 +238,4 @@ NAN_METHOD(Contour::Moments() {
 
 	return scope.Close(res);
 }
-
+*/

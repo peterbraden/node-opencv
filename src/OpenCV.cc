@@ -1,30 +1,29 @@
 #include "OpenCV.h"
 #include "Matrix.h"
+#include <nan.h>
 
 void
 OpenCV::Init(Handle<Object> target) {
-  HandleScope scope;
-  
+  NanScope();
   
   // Version string.
   char out [21];
   int n = sprintf(out, "%i.%i", CV_MAJOR_VERSION, CV_MINOR_VERSION);
-  target->Set(String::NewSymbol("version"), String::New(out, n));
+  target->Set(NanNew<String>("version"), NanNew<String>(out, n));
 
   NODE_SET_METHOD(target, "readImage", ReadImage);
 
 }  
 
 
-
-Handle<Value>
-OpenCV::ReadImage() {
-  HandleScope scope;
+NAN_METHOD(OpenCV::ReadImage) {
+  NanEscapableScope();
 
   try{
     
-    Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+    Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
     Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
+    
     cv::Mat mat;
 
     REQ_FUN_ARG(1, cb);
@@ -38,7 +37,7 @@ OpenCV::ReadImage() {
 
     } else if (args[0]->IsString()) {
       
-      std::string filename = std::string(*v8::String::AsciiValue(args[0]->ToString()));
+      std::string filename = std::string(*NanAsciiString(args[0]->ToString()));
       mat = cv::imread(filename);
 
     } else if (Buffer::HasInstance(args[0])){
@@ -49,7 +48,7 @@ OpenCV::ReadImage() {
       mat = cv::imdecode(*mbuf, -1);
             
       if (mat.empty()){
-        return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Error loading file")));
+        NanThrowTypeError("Error loading file");
       }
     }
 
@@ -57,23 +56,21 @@ OpenCV::ReadImage() {
 
     Local<Value> argv[2];
 
-    argv[0] = Local<Value>::New(Null());
+    argv[0] = NanNull();
     argv[1] = im_h;
 
     TryCatch try_catch;
 
-    cb->Call(Context::GetCurrent()->Global(), 2, argv);
+    cb->Call(NanGetCurrentContext()->Global(), 2, argv);
 
     if (try_catch.HasCaught()) {
       FatalException(try_catch);
     }
 
-    return Undefined();
+    NanReturnUndefined();
 
   } catch( cv::Exception& e ){
       const char* err_msg = e.what();
-      return v8::ThrowException(v8::Exception::Error(v8::String::New(err_msg)));
+      NanThrowError(err_msg);
   }
 };    
-    
-

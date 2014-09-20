@@ -16,8 +16,7 @@ using namespace node;
 
 #define REQ_FUN_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsFunction())                   \
-    return v8::ThrowException(v8::Exception::TypeError(                         \
-                  String::New("Argument " #I " must be a function")));  \
+    return NanThrowTypeError("Argument " #I " must be a function");  \
   Local<Function> VAR = Local<Function>::Cast(args[I]);
 
 
@@ -27,13 +26,13 @@ using namespace node;
 
 #define JSFUNC(NAME) \
   static NAN_METHOD(NAME);
-	//static Handle<Value> NAME(const Arguments& args); 
 
 #define JSTHROW_TYPE(ERR) \
-  return v8::ThrowException(v8::Exception::TypeError(v8::String::New(ERR)));
+  NanThrowTypeError( ERR );
+
 
 #define JSTHROW(ERR) \
-  return v8::ThrowException(v8::Exception::Error(v8::String::New(ERR)));
+  NanThrowError( ERR );
 
 
 #define INT_FROM_ARGS(NAME, IND) \
@@ -51,7 +50,6 @@ class OpenCV: public node::ObjectWrap{
     static void Init(Handle<Object> target);
 
     static NAN_METHOD(ReadImage);
-    //static Handle<Value> ReadImage(const v8::Arguments&);
 };
 
 
