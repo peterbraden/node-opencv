@@ -23,16 +23,16 @@ struct videocapture_baton {
 
 void
 VideoCaptureWrap::Init(Handle<Object> target) {
-    NanScope();
+  NanScope();
 
-	// Prototype
-	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
-	
 	//Class
   Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(VideoCaptureWrap::New);
   NanAssignPersistent(constructor, ctor);
   ctor->InstanceTemplate()->SetInternalFieldCount(1);
   ctor->SetClassName(NanNew("VideoCapture"));
+  
+  // Prototype
+	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 	NODE_SET_PROTOTYPE_METHOD(ctor, "read", Read);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "setWidth", SetWidth);
@@ -141,7 +141,53 @@ NAN_METHOD(VideoCaptureWrap::Close){
 	NanReturnUndefined();
 }
 
-/*FIXME: migrate async method
+
+class AsyncVCWorker : public NanAsyncWorker {
+ public:
+  AsyncVCWorker(NanCallback *callback, VideoCaptureWrap* vc, Matrix* matrix)
+    : NanAsyncWorker(callback), vc(vc), matrix(matrix) {}
+  ~AsyncVCWorker() {}
+
+  // Executed inside the worker-thread.
+  // It is not safe to access V8, or V8 data structures
+  // here, so everything we need for input and output
+  // should go on `this`.
+  void Execute () {
+	  this->vc->cap.read(matrix->mat);
+  }
+
+  // Executed when the async work is complete
+  // this function will be run inside the main event loop
+  // so it is safe to use V8 again
+  void HandleOKCallback () {
+    NanScope();
+    
+    Local<Object> im_to_return= NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+	  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_to_return);
+	  cv::Mat mat;
+	  mat = this->matrix->mat;
+	  img->mat = mat;
+
+    Local<Value> argv[] = {
+        NanNull()
+      , im_to_return
+    };
+    
+    TryCatch try_catch;
+    callback->Call(2, argv);
+    if (try_catch.HasCaught()) {
+      FatalException(try_catch);
+    }
+  }
+
+ private:
+  VideoCaptureWrap *vc;
+  Matrix* matrix;
+  int  res;
+};
+
+
+
 NAN_METHOD(VideoCaptureWrap::Read) {
 
 	NanScope();
@@ -149,50 +195,11 @@ NAN_METHOD(VideoCaptureWrap::Read) {
 
 	REQ_FUN_ARG(0, cb);
 
-	videocapture_baton *baton = new videocapture_baton();
-	baton->vc = v;
-	baton->cb = Persistent<Function>::New(cb);
-	baton->im = new Matrix();
-	baton->request.data = baton;
-
-	uv_queue_work(uv_default_loop(), &baton->request, AsyncRead,  (uv_after_work_cb)AfterAsyncRead);
+  NanCallback *callback = new NanCallback(cb.As<Function>());
+  NanAsyncQueueWorker(new AsyncVCWorker(callback, v, new Matrix()));	
 	
 	NanReturnUndefined();
-
 }
-
-
-void AsyncRead(uv_work_t *req) {
-	videocapture_baton *baton = static_cast<videocapture_baton *>(req->data);
-
-	baton->vc->cap.read(baton->im->mat);
-}
-
-
-void AfterAsyncRead(uv_work_t *req) {
-
-	NanScope();
-
-	videocapture_baton *baton = static_cast<videocapture_baton *>(req->data);
-
-	Local<Object> im_to_return= Matrix::constructor->GetFunction()->NewInstance();
-	Matrix *img = ObjectWrap::Unwrap<Matrix>(im_to_return);
-	cv::Mat mat;
-	mat = baton->im->mat;
-
-	img->mat = mat;
-	Local<Value> argv[2];
-
-  argv[0] = Local<Value>::New(Null());
-	argv[1] = im_to_return;
-
-	baton->cb->Call(Context::GetCurrent()->Global(), 2, argv);
-	baton->cb.Dispose();
-
-		delete baton;
-
-}
-*/
 
 
 NAN_METHOD(VideoCaptureWrap::ReadSync) {
@@ -206,5 +213,4 @@ NAN_METHOD(VideoCaptureWrap::ReadSync) {
   v->cap.read(img->mat);
 
 	NanReturnValue(im_to_return);
-
 }
