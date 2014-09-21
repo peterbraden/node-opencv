@@ -23,31 +23,32 @@ struct videocapture_baton {
 
 void
 VideoCaptureWrap::Init(Handle<Object> target) {
-    HandleScope scope;
-
-	// Constructor
-	constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(VideoCaptureWrap::New));
-	constructor->InstanceTemplate()->SetInternalFieldCount(1);
-	constructor->SetClassName(String::NewSymbol("VideoCapture"));
+    NanScope();
 
 	// Prototype
 	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+	
+	//Class
+  Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(VideoCaptureWrap::New);
+  NanAssignPersistent(constructor, ctor);
+  ctor->InstanceTemplate()->SetInternalFieldCount(1);
+  ctor->SetClassName(NanNew("VideoCapture"));
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "read", Read);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "setWidth", SetWidth);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "setHeight", SetHeight);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "setPosition", SetPosition);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "close", Close);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "ReadSync", ReadSync);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "read", Read);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "setWidth", SetWidth);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "setHeight", SetHeight);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "setPosition", SetPosition);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "close", Close);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "ReadSync", ReadSync);
 
-	target->Set(String::NewSymbol("VideoCapture"), constructor->GetFunction());
+	target->Set(NanNew("VideoCapture"), ctor->GetFunction());
 };    
 
-NAN_METHOD(VideoCaptureWrap::New() {
-	HandleScope scope;
+NAN_METHOD(VideoCaptureWrap::New) {
+	NanScope();
 
   if (args.This()->InternalFieldCount() == 0)
-		return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Cannot Instantiate without new")));
+		return NanThrowTypeError("Cannot Instantiate without new");
 
 	VideoCaptureWrap *v;
 
@@ -55,94 +56,95 @@ NAN_METHOD(VideoCaptureWrap::New() {
 		v = new VideoCaptureWrap(args[0]->NumberValue());
 	} else {
     //TODO - assumes that we have string, verify
-    v = new VideoCaptureWrap(std::string(*v8::String::AsciiValue(args[0]->ToString())));
+    v = new VideoCaptureWrap(std::string(*NanAsciiString(args[0]->ToString())));
   }
 
 
 	v->Wrap(args.This());
 
-	return args.This();
+	NanReturnValue(args.This());
 }
 
 VideoCaptureWrap::VideoCaptureWrap(int device){
 
-	HandleScope scope;
+	NanScope();
 	cap.open(device);
 
 	if(!cap.isOpened()){
-    v8::ThrowException(v8::Exception::Error(String::New("Camera could not be opened")));
+    NanThrowError("Camera could not be opened");
 	}
 }
 
 VideoCaptureWrap::VideoCaptureWrap(const std::string& filename){
-  HandleScope scope;
+  NanScope();
 	cap.open(filename);
   // TODO! At the moment this only takes a full path - do relative too.
 	if(!cap.isOpened()){
-    v8::ThrowException(v8::Exception::Error(String::New("Video file could not be opened (opencv reqs. non relative paths)")));
+    NanThrowError("Video file could not be opened (opencv reqs. non relative paths)");
 	}
 
 }
 
-NAN_METHOD(VideoCaptureWrap::SetWidth(){
+NAN_METHOD(VideoCaptureWrap::SetWidth){
 
-	HandleScope scope;
+	NanScope();
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
 	if(args.Length() != 1)
-		return scope.Close(Undefined());
+		NanReturnUndefined();
 	
 	int w = args[0]->IntegerValue();
 
 	if(v->cap.isOpened())
 		v->cap.set(CV_CAP_PROP_FRAME_WIDTH, w);
 
-	return scope.Close(Undefined());
+	NanReturnUndefined();
 }
 
-NAN_METHOD(VideoCaptureWrap::SetHeight(){
+NAN_METHOD(VideoCaptureWrap::SetHeight){
 
-	HandleScope scope;
+	NanScope();
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
 	if(args.Length() != 1)
-		return scope.Close(Undefined());
+		NanReturnUndefined();
 	
 	int h = args[0]->IntegerValue();
 
 	v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, h);
 
-	return Undefined();
+	NanReturnUndefined();
 }
 
-NAN_METHOD(VideoCaptureWrap::SetPosition(){
+NAN_METHOD(VideoCaptureWrap::SetPosition){
 
-	HandleScope scope;
+	NanScope();
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
 	if(args.Length() != 1)
-		return scope.Close(Undefined());
+		NanReturnUndefined();
 	
 	int pos = args[0]->IntegerValue();
 
 	v->cap.set(CV_CAP_PROP_POS_FRAMES, pos);
 
-	return Undefined();
+	NanReturnUndefined();
 }
 
-NAN_METHOD(VideoCaptureWrap::Close(){
+NAN_METHOD(VideoCaptureWrap::Close){
 
-	HandleScope scope;
+	NanScope();
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
 	v->cap.release();
 
-	return Undefined();
+	NanReturnUndefined();
 }
 
-NAN_METHOD(VideoCaptureWrap::Read() {
+/*FIXME: migrate async method
+NAN_METHOD(VideoCaptureWrap::Read) {
 
-	HandleScope scope;
+	NanScope();
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
 	REQ_FUN_ARG(0, cb);
@@ -154,9 +156,11 @@ NAN_METHOD(VideoCaptureWrap::Read() {
 	baton->request.data = baton;
 
 	uv_queue_work(uv_default_loop(), &baton->request, AsyncRead,  (uv_after_work_cb)AfterAsyncRead);
-	return Undefined();
+	
+	NanReturnUndefined();
 
 }
+
 
 void AsyncRead(uv_work_t *req) {
 	videocapture_baton *baton = static_cast<videocapture_baton *>(req->data);
@@ -167,7 +171,7 @@ void AsyncRead(uv_work_t *req) {
 
 void AfterAsyncRead(uv_work_t *req) {
 
-	HandleScope scope;
+	NanScope();
 
 	videocapture_baton *baton = static_cast<videocapture_baton *>(req->data);
 
@@ -188,19 +192,19 @@ void AfterAsyncRead(uv_work_t *req) {
 		delete baton;
 
 }
+*/
 
 
+NAN_METHOD(VideoCaptureWrap::ReadSync) {
 
-NAN_METHOD(VideoCaptureWrap::ReadSync() {
-
-	HandleScope scope;
+	NanScope();
 	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
 
-  Local<Object> im_to_return= Matrix::constructor->GetFunction()->NewInstance();
+  Local<Object> im_to_return= NanNew(Matrix::constructor)->GetFunction()->NewInstance();
   Matrix *img = ObjectWrap::Unwrap<Matrix>(im_to_return);
 
   v->cap.read(img->mat);
 
-	return scope.Close(im_to_return);
+	NanReturnValue(im_to_return);
 
 }

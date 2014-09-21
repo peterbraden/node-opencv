@@ -10,44 +10,43 @@ Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
 
 void
 CascadeClassifierWrap::Init(Handle<Object> target) {
-    HandleScope scope;
+    NanScope();
 
-    // Constructor
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(CascadeClassifierWrap::New));
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor->SetClassName(String::NewSymbol("CascadeClassifier"));
+    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(CascadeClassifierWrap::New);
+    NanAssignPersistent(constructor, ctor);
+    ctor->InstanceTemplate()->SetInternalFieldCount(1);
+    ctor->SetClassName(NanNew("CascadeClassifier"));
 
     // Prototype
     //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-    NODE_SET_PROTOTYPE_METHOD(constructor, "detectMultiScale", DetectMultiScale);
+    NODE_SET_PROTOTYPE_METHOD(ctor, "detectMultiScale", DetectMultiScale);
 
-
-
-    target->Set(String::NewSymbol("CascadeClassifier"), constructor->GetFunction());
+    target->Set(NanNew("CascadeClassifier"), ctor->GetFunction());
 };    
 
-NAN_METHOD(CascadeClassifierWrap::New() {
-  HandleScope scope;
+NAN_METHOD(CascadeClassifierWrap::New) {
+  NanScope();
 
   if (args.This()->InternalFieldCount() == 0)
-    return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Cannot Instantiate without new")));
+    NanThrowTypeError("Cannot instantiate without new");
 
   CascadeClassifierWrap *pt = new CascadeClassifierWrap(*args[0]);  
   pt->Wrap(args.This());
-  return args.This();
+  NanReturnValue( args.This() );
 }
 
 
 CascadeClassifierWrap::CascadeClassifierWrap(v8::Value* fileName){
 	std::string filename;
-	filename = std::string(*v8::String::AsciiValue(fileName->ToString()));
+	filename = std::string(*NanAsciiString(fileName->ToString()));
 
   
   if (!cc.load(filename.c_str())){
-    v8::ThrowException(v8::Exception::TypeError(v8::String::New("Error loading file")));
+    NanThrowTypeError("Error loading file");
   }  
 }
+
 
 struct classifier_baton_t {
   CascadeClassifierWrap *cc;
@@ -65,12 +64,12 @@ struct classifier_baton_t {
 
 
 NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
-  HandleScope scope;
+  NanScope();
 
   CascadeClassifierWrap *self =  ObjectWrap::Unwrap<CascadeClassifierWrap>(args.This());
   
   if (args.Length() < 2){
-    v8::ThrowException(v8::Exception::TypeError(v8::String::New("detectMultiScale takes at least 2 args")));
+    NanThrowTypeError("detectMultiScale takes at least 2 args");
   }
 
   Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
@@ -91,7 +90,7 @@ NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
     minh = args[5]->IntegerValue();
   }
 
-
+/*FIXME: convert async 
   classifier_baton_t *baton = new classifier_baton_t();
   baton->cc = self;
   baton->cb = Persistent<Function>::New(cb);
@@ -110,11 +109,11 @@ NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
   uv_queue_work(uv_default_loop(), &baton->request, AsyncDetectMultiScale,  (uv_after_work_cb)AfterAsyncDetectMultiScale);
 
   return Undefined();
-
-
+  NanReturnUndefined();
+  */
 }
 
-
+/*FIXME: convert async 
 void AsyncDetectMultiScale(uv_work_t *req) {
   classifier_baton_t *baton = static_cast<classifier_baton_t *>(req->data);
 
@@ -138,7 +137,7 @@ void AsyncDetectMultiScale(uv_work_t *req) {
 
 void AfterAsyncDetectMultiScale(uv_work_t *req) {
 
-  HandleScope scope;
+  NanScope();
   classifier_baton_t *baton = static_cast<classifier_baton_t *>(req->data);
 //  ev_unref(EV_DEFAULT_UC);
 //  baton->cc->Unref();
@@ -175,4 +174,4 @@ void AfterAsyncDetectMultiScale(uv_work_t *req) {
   
 //  return 0;
 }
-
+*/

@@ -109,8 +109,6 @@ Matrix::Init(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(ctor, "meanWithMask", MeanWithMask);
   NODE_SET_PROTOTYPE_METHOD(ctor, "shift", Shift);
 
-	//target->Set(NanNew<String>("Matrix"), m->GetFunction());
-  //target->Set( NanNew<String>("Matrix"), ctor->GetFunction() );
   target->Set(NanNew("Matrix"), ctor->GetFunction());
 };
 
@@ -438,7 +436,7 @@ NAN_METHOD(Matrix::ToBuffer){
 	NanReturnValue(actualBuffer);
 }
 
-/*FIXME: look into this
+/*FIXME: async look into this
 struct matrixToBuffer_baton_t {
   Matrix *mm;
   Persistent<Function> cb;

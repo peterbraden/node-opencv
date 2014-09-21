@@ -10,12 +10,12 @@ class BackgroundSubtractorWrap: public node::ObjectWrap {
 
     static Persistent<FunctionTemplate> constructor;
     static void Init(Handle<Object> target);
-    static Handle<Value> New(const Arguments &args);
+    static NAN_METHOD(New);
 
     BackgroundSubtractorWrap(cv::Ptr<cv::BackgroundSubtractor> bg);
 
-    static Handle<Value> CreateMOG(const v8::Arguments&);
-    static Handle<Value> ApplyMOG(const v8::Arguments&);
+    static NAN_METHOD(CreateMOG);
+    static NAN_METHOD(ApplyMOG);
 };
 
 #endif

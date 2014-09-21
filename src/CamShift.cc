@@ -12,23 +12,27 @@ Persistent<FunctionTemplate> TrackedObject::constructor;
 
 void
 TrackedObject::Init(Handle<Object> target) {
-    HandleScope scope;
+    NanScope();
 
     // Constructor
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(TrackedObject::New));
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor->SetClassName(String::NewSymbol("TrackedObject"));
+    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(TrackedObject::New);
+    NanAssignPersistent(constructor, ctor);
+    ctor->InstanceTemplate()->SetInternalFieldCount(1);
+    ctor->SetClassName(NanNew("TrackedObject"));
+    
 
     // Prototype
     //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-	  NODE_SET_PROTOTYPE_METHOD(constructor, "track", Track);
-    target->Set(String::NewSymbol("TrackedObject"), constructor->GetFunction());
+	  NODE_SET_PROTOTYPE_METHOD(ctor, "track", Track);
+	  
+	  //target->Set(String::NewSymbol("TrackedObject"), constructor->GetFunction());
+	  target->Set(NanNew("TrackedObject"), ctor->GetFunction());
 };    
 
 
-NAN_METHOD(TrackedObject::New() {
-  HandleScope scope;
+NAN_METHOD(TrackedObject::New) {
+  NanScope();
 
   if (args.This()->InternalFieldCount() == 0){
     JSTHROW_TYPE("Cannot Instantiate without new")
@@ -52,8 +56,8 @@ NAN_METHOD(TrackedObject::New() {
   if (args[2]->IsObject()){
     Local<Object> opts = args[2]->ToObject();
 
-    if (opts->Get(String::New("channel"))->IsString()){
-      v8::String::Utf8Value c(opts->Get(String::New("channel"))->ToString());
+    if (opts->Get(NanNew("channel"))->IsString()){
+      v8::String::Utf8Value c(opts->Get(NanNew("channel"))->ToString());
       std::string cc = std::string(*c);
 
       if (cc == "hue" || cc == "h"){
@@ -74,7 +78,7 @@ NAN_METHOD(TrackedObject::New() {
   
   
   to->Wrap(args.This());
-  return args.This();
+  NanReturnValue(args.This());
 }
 
 
@@ -119,12 +123,12 @@ TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect, int chan){
 
 
 
-NAN_METHOD(TrackedObject::Track(const v8::Arguments& args){
+NAN_METHOD(TrackedObject::Track){
 	SETUP_FUNCTION(TrackedObject)
  
   if (args.Length() != 1){
-    v8::ThrowException(v8::Exception::TypeError(v8::String::New("track takes an image param")));
-    return Undefined();
+    NanThrowTypeError("track takes an image param");
+    NanReturnUndefined();
   }
 
 
@@ -135,7 +139,7 @@ NAN_METHOD(TrackedObject::Track(const v8::Arguments& args){
       self->prev_rect.y <0 ||
       self->prev_rect.width <= 1 ||
       self->prev_rect.height <= 1){
-    return v8::ThrowException(v8::Exception::TypeError(v8::String::New("OPENCV ERROR: prev rectangle is illogical")));
+    return NanThrowTypeError("OPENCV ERROR: prev rectangle is illogical");
   }
 
   update_chann_image(self, im->mat);
@@ -165,25 +169,24 @@ NAN_METHOD(TrackedObject::Track(const v8::Arguments& args){
     self->prev_rect = backup_prev_rect;
   }
 
+  v8::Local<v8::Array> arr = NanNew<Array>(4);
 
-	v8::Local<v8::Array> arr = v8::Array::New(4);
 
-
-  arr->Set(0, Number::New(bounds.x));
-  arr->Set(1, Number::New(bounds.y));
-  arr->Set(2, Number::New(bounds.x + bounds.width));
-  arr->Set(3, Number::New(bounds.y + bounds.height));
+  arr->Set(0, NanNew<Number>(bounds.x));
+  arr->Set(1, NanNew<Number>(bounds.y));
+  arr->Set(2, NanNew<Number>(bounds.x + bounds.width));
+  arr->Set(3, NanNew<Number>(bounds.y + bounds.height));
 
   /*
   cv::Point2f pts[4];
   r.points(pts);
 
   for (int i=0; i<8; i+=2){
-    arr->Set(i, Number::New(pts[i].x));
-    arr->Set(i+1, Number::New(pts[i].y));
+    arr->Set(i, NanNew<Number>(pts[i].x));
+    arr->Set(i+1, NanNew<Number>(pts[i].y));
   }
 */
 
-	return scope.Close(arr);
+	NanReturnValue(arr);
 
 }

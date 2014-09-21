@@ -1,6 +1,7 @@
 #include "BackgroundSubtractor.h"
 #include "Matrix.h"
 #include <iostream>
+#include <nan.h>
 
 #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
 
@@ -8,21 +9,23 @@ Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
 
 void
 BackgroundSubtractorWrap::Init(Handle<Object> target) {
-    HandleScope scope;
+    NanScope();
 
     // Constructor
-      constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(BackgroundSubtractorWrap::New));
-      constructor->InstanceTemplate()->SetInternalFieldCount(1);
-      constructor->SetClassName(String::NewSymbol("BackgroundSubtractor"));
+    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(BackgroundSubtractorWrap::New);
+    NanAssignPersistent(constructor, ctor);
+    ctor->InstanceTemplate()->SetInternalFieldCount(1);
+    ctor->SetClassName(NanNew("BackgroundSubtractor"));
 
-    NODE_SET_METHOD(constructor, "createMOG", CreateMOG);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "applyMOG", ApplyMOG);
+    NODE_SET_METHOD(ctor, "createMOG", CreateMOG);
+    NODE_SET_PROTOTYPE_METHOD(ctor, "applyMOG", ApplyMOG);
 
-    target->Set(String::NewSymbol("BackgroundSubtractor"), constructor->GetFunction());
+    target->Set(NanNew("BackgroundSubtractor"), ctor->GetFunction());
+    
 };
 
-NAN_METHOD(BackgroundSubtractorWrap::New() {
-  HandleScope scope;
+NAN_METHOD(BackgroundSubtractorWrap::New) {
+  NanScope();
 
   if (args.This()->InternalFieldCount() == 0)
     JSTHROW_TYPE("Cannot Instantiate without new")
@@ -33,11 +36,11 @@ NAN_METHOD(BackgroundSubtractorWrap::New() {
 
   pt->Wrap(args.This());
 
-  return args.This();
+  NanReturnValue(args.This());
 }
 
-NAN_METHOD(BackgroundSubtractorWrap::CreateMOG() {
-  HandleScope scope;
+NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
+  NanScope();
 
   int history = 200;
   int nmixtures = 5;
@@ -51,17 +54,17 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG() {
     DOUBLE_FROM_ARGS(noiseSigma, 3)
   }
 
-  Local<Object> n = BackgroundSubtractorWrap::constructor->GetFunction()->NewInstance();
+  Local<Object> n = NanNew(BackgroundSubtractorWrap::constructor)->GetFunction()->NewInstance();
 
   cv::Ptr<cv::BackgroundSubtractor> bg;
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
-  return n;
+  NanReturnValue( n );
 };
 
 //Fetch foreground mask
-NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG() {
+NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
 
   SETUP_FUNCTION(BackgroundSubtractorWrap)
 
@@ -70,15 +73,15 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG() {
   Local<Value> argv[2];
 
   if(args.Length() == 0){
-    argv[0] = String::New("Input image missing");
-    argv[1] = Local<Value>::New(Null());
-    cb->Call(Context::GetCurrent()->Global(), 2, argv);
-    return scope.Close(Undefined());
+    argv[0] = NanNew("Input image missing");
+    argv[1] = NanNull();
+    cb->Call(NanGetCurrentContext()->Global(), 2, argv);
+    NanReturnUndefined();
   }
 
   try{
 
-    Local<Object> fgMask = Matrix::constructor->GetFunction()->NewInstance();
+    Local<Object> fgMask = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
     Matrix *img = ObjectWrap::Unwrap<Matrix>(fgMask);
     
 
@@ -97,7 +100,7 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG() {
     }
 
     if (mat.empty()){
-      return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Error loading file")));
+      return NanThrowTypeError("Error loading file");
     }
 
     cv::Mat _fgMask;
@@ -107,22 +110,22 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG() {
 
     mat.release();
 
-    argv[0] = Local<Value>::New(Null());
+    argv[0] = NanNull();
     argv[1] = fgMask;
 
     TryCatch try_catch;
 
-    cb->Call(Context::GetCurrent()->Global(), 2, argv);
+    cb->Call(NanGetCurrentContext()->Global(), 2, argv);
       
     if (try_catch.HasCaught()) {
         FatalException(try_catch);
       }
 
-      return scope.Close(v8::Undefined());
+      NanReturnUndefined();
   } 
   catch( cv::Exception& e ){
     const char* err_msg = e.what();
-    return v8::ThrowException(v8::Exception::Error(v8::String::New(err_msg)));
+    NanThrowError(err_msg);
   }
 
 };
