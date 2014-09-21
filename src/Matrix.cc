@@ -436,29 +436,70 @@ NAN_METHOD(Matrix::ToBuffer){
 	NanReturnValue(actualBuffer);
 }
 
-/*FIXME: async look into this
-struct matrixToBuffer_baton_t {
-  Matrix *mm;
-  Persistent<Function> cb;
-  std::vector<uchar>  res;
-  std::vector<int> params;
+
+
+class AsyncToBufferWorker : public NanAsyncWorker {
+ public:
+  AsyncToBufferWorker(NanCallback *callback, Matrix* matrix, string ext, vector<int> params )
+    : NanAsyncWorker(callback), matrix(matrix), ext(ext), params(params) {}
+  ~AsyncToBufferWorker() {}
+
+  void Execute () {
+    std::vector<uchar> vec(0);
+    
+	  //std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
+
+	  cv::imencode(ext, this->matrix->mat, vec, this->params);
+    
+    res = vec;
+  }
+
+  // Executed when the async work is complete
+  // this function will be run inside the main event loop
+  // so it is safe to use V8 again
+  void HandleOKCallback () {
+    NanScope();
+    
+    Local<Object> buf = NanNewBufferHandle(res.size());
+    uchar* data = (uchar*) Buffer::Data(buf);
+    memcpy(data, &res[0], res.size());//dest, source, size
+  
+	  v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
+	  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
+	  v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>(res.size()), NanNew<v8::Integer>(0)};
+	  v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+
+
+    Local<Value> argv[] = {
+        NanNull()
+      , actualBuffer
+    };
+    
+    TryCatch try_catch;
+    callback->Call(2, argv);
+    if (try_catch.HasCaught()) {
+      FatalException(try_catch);
+    }
+    
+  }
+
+ private:
+  Matrix* matrix;
+  //char* filename;
   std::string ext;
-  uv_work_t request;
+  std::vector<int> params;
+  std::vector<uchar>  res;
 };
 
-void AsyncToBufferAsync(uv_work_t *req);
-void AfterAsyncToBufferAsync(uv_work_t *req);
 
 NAN_METHOD(Matrix::ToBufferAsync){
 	SETUP_FUNCTION(Matrix)
 
   REQ_FUN_ARG(0, cb);
 
-
-  matrixToBuffer_baton_t *baton = new matrixToBuffer_baton_t();
-
-
   std::string ext = std::string(".jpg");
+  std::vector<int> params;
+  
   // See if the options argument is passed
   if ((args.Length() > 1) && (args[1]->IsObject())) {
       // Get this options argument
@@ -471,80 +512,24 @@ NAN_METHOD(Matrix::ToBufferAsync){
       }
       if (options->Has(NanNew<String>("jpegQuality"))) {
           int compression = options->Get(NanNew<String>("jpegQuality"))->IntegerValue();
-          baton->params.push_back(CV_IMWRITE_JPEG_QUALITY);
-          baton->params.push_back(compression);
+          params.push_back(CV_IMWRITE_JPEG_QUALITY);
+          params.push_back(compression);
       }
       if (options->Has(NanNew<String>("pngCompression"))) {
           int compression = options->Get(NanNew<String>("pngCompression"))->IntegerValue();
-          baton->params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-          baton->params.push_back(compression);
+          params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+          params.push_back(compression);
       }        
   }
 
-  baton->ext = ext;
-  baton->mm = self;
   
   NanCallback *callback = new NanCallback(cb.As<Function>());
+
+  NanAsyncQueueWorker(new AsyncToBufferWorker(callback, self, ext, params));
   
-  baton->cb = callback; //NAN_WEAK_CALLBACK(cb);//Persistent<Function>::New(cb);
-  baton->request.data = baton;
-
-  uv_queue_work(uv_default_loop(), &baton->request, AsyncToBufferAsync, (uv_after_work_cb)AfterAsyncToBufferAsync);
-
   NanReturnUndefined();
 }
 
-void AsyncToBufferAsync(uv_work_t *req) {
-  matrixToBuffer_baton_t *baton = static_cast<matrixToBuffer_baton_t *>(req->data);
-
-  std::vector<uchar> vec(0);
-	//std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
-
-  const char * ext = (const char *) baton->ext.c_str();
-	cv::imencode(ext, baton->mm->mat, vec, baton->params);
-
-
-  baton->res = vec;
-}
-
-void AfterAsyncToBufferAsync(uv_work_t *req) {
-
-  NanScope();
-  //FIXME: too many errors here : how to handle integers and node::buffer?
-  /*matrixToBuffer_baton_t *baton = static_cast<matrixToBuffer_baton_t *>(req->data);
-//  ev_unref(EV_DEFAULT_UC);
-//  baton->cc->Unref();
-
-  Local<Value> argv[2];
-
-  argv[0] = NanNull();
-
-  v8::Integer resSize = NanNew<Integer>(baton->res.size());
-	node::Buffer *buf = node::Buffer(resSize);
-	uchar* data = (uchar*) Buffer::Data(buf);
-	memcpy(data, &baton->res[0], resSize);
-
-  v8::Local<v8::Object> globalObj = v8::Context::GetCurrent()->Global();
-	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
-	v8::Handle<v8::Value> constructorArgs[3] = {buf->handle_, v8::Integer::New(baton->res.size()), v8::Integer::New(0)};
-	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
-
-  argv[1] = actualBuffer;
-
-  TryCatch try_catch;
-
-  baton->cb->Call(Context::GetCurrent()->Global(), 2, argv);
-
-  if (try_catch.HasCaught()) {
-    FatalException(try_catch);
-  }
-
-  baton->cb.Dispose();
-
-  delete baton;
-
-//  return 0;
-}*/
 
 NAN_METHOD(Matrix::Ellipse){
 	SETUP_FUNCTION(Matrix)
@@ -697,19 +682,46 @@ NAN_METHOD(Matrix::Save) {
 }
 
 
-//FIXME:All this is for async save, see here for nan example: https://github.com/rvagg/nan/blob/c579ae858ae3208d7e702e8400042ba9d48fa64b/examples/async_pi_estimate/async.cc
-/*
-struct save_baton_t {
-  Matrix *mm;
-  Persistent<Function> cb;
-  std::string filename;
-  int res;
-  uv_work_t request;
+//All this is for async save, see here for nan example: https://github.com/rvagg/nan/blob/c579ae858ae3208d7e702e8400042ba9d48fa64b/examples/async_pi_estimate/async.cc
+class AsyncSaveWorker : public NanAsyncWorker {
+ public:
+  AsyncSaveWorker(NanCallback *callback, Matrix* matrix, char* filename)
+    : NanAsyncWorker(callback), matrix(matrix), filename(filename) {}
+  ~AsyncSaveWorker() {}
+
+  // Executed inside the worker-thread.
+  // It is not safe to access V8, or V8 data structures
+  // here, so everything we need for input and output
+  // should go on `this`.
+  void Execute () {
+    res = cv::imwrite(this->filename, this->matrix->mat);
+  }
+
+  // Executed when the async work is complete
+  // this function will be run inside the main event loop
+  // so it is safe to use V8 again
+  void HandleOKCallback () {
+    NanScope();
+
+    Local<Value> argv[] = {
+        NanNull()
+      , NanNew<Number>(res)
+    };
+    
+    TryCatch try_catch;
+    callback->Call(2, argv);
+    if (try_catch.HasCaught()) {
+      FatalException(try_catch);
+    }
+  }
+
+ private:
+  Matrix* matrix;
+  char* filename;
+  int  res;
 };
 
 
-void DoSaveAsync(uv_work_t *req);
-void AfterSaveAsync(uv_work_t *req);
 
 NAN_METHOD(Matrix::SaveAsync){
   SETUP_FUNCTION(Matrix)
@@ -720,48 +732,13 @@ NAN_METHOD(Matrix::SaveAsync){
   NanAsciiString filename(args[0]);
 
   REQ_FUN_ARG(1, cb);
-
-  save_baton_t *baton = new save_baton_t();
-  baton->mm = self;
-  baton->cb = new NanCallback(cb.As<Function>()); //Persistent<Function>::New(cb);//NanCallback *callback = 
-  baton->filename = *filename;
-  baton->request.data = baton;
-
-  //uv_queue_work(uv_default_loop(), &baton->request, DoSaveAsync, (uv_after_work_cb)AfterSaveAsync);
-  //TODO: swtich to NanAsyncQueueWorker(
   
+  NanCallback *callback = new NanCallback(cb.As<Function>());
+  NanAsyncQueueWorker(new AsyncSaveWorker(callback, self, *filename));
+
   NanReturnUndefined();
 }
 
-
-void DoSaveAsync(uv_work_t *req) {
-  save_baton_t *baton = static_cast<save_baton_t *>(req->data);
-
-  int res = cv::imwrite(baton->filename.c_str(), baton->mm->mat);
-  baton->res = res;
-}
-
-void AfterSaveAsync(uv_work_t *req) {
-  NanScope();
-  save_baton_t *baton = static_cast<save_baton_t *>(req->data);
-
-  Local<Value> argv[2];  // (err, result)
-
-  argv[0] = NanNull();//Local<Value>::New(Null());
-  argv[1] = NanNew<Number>(baton->res);
-
-  TryCatch try_catch;
-
-  baton->cb->Call(Context::GetCurrent()->Global(), 2, argv);
-
-  if (try_catch.HasCaught()) {
-    FatalException(try_catch);
-  }
-
-  baton->cb.Dispose();
-
-  delete baton;
-}*/
 
 NAN_METHOD(Matrix::Eye){
 	NanScope();
