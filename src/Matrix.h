@@ -14,8 +14,6 @@ class Matrix: public node::ObjectWrap {
 
     static double DblGet(cv::Mat mat, int i, int j);
 
-    JSFUNC(Zeros) // factory
-    JSFUNC(Ones) // factory
     JSFUNC(Eye) // factory
 
     JSFUNC(Get) // at

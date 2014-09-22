@@ -108,9 +108,7 @@ Matrix::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(constructor, "getPerspectiveTransform", GetPerspectiveTransform); 
     NODE_SET_PROTOTYPE_METHOD(constructor, "warpPerspective", WarpPerspective);
 
-  NODE_SET_METHOD(constructor, "Zeros", Zeros);
-  NODE_SET_METHOD(constructor, "Ones", Ones);
-  NODE_SET_METHOD(constructor, "Eye", Eye);
+	NODE_SET_METHOD(constructor, "Eye", Eye);
 
     NODE_SET_PROTOTYPE_METHOD(constructor, "copyWithMask", CopyWithMask);
     NODE_SET_PROTOTYPE_METHOD(constructor, "setWithMask", SetWithMask);
@@ -822,37 +820,6 @@ void AfterSaveAsync(uv_work_t *req) {
   delete baton;
 }
 
-Handle<Value>
-Matrix::Zeros(const v8::Arguments& args){
-  HandleScope scope;
-
-  int w = args[0]->Uint32Value();
-  int h = args[1]->Uint32Value();
-  int type = (args.Length() > 2) ? args[2]->IntegerValue() : CV_64FC1;
-
-  Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
-  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
-  cv::Mat mat = cv::Mat::zeros(w, h, type);
-
-  img->mat = mat;
-  return scope.Close(im_h);
-}
-
-Handle<Value>
-Matrix::Ones(const v8::Arguments& args){
-  HandleScope scope;
-
-  int w = args[0]->Uint32Value();
-  int h = args[1]->Uint32Value();
-  int type = (args.Length() > 2) ? args[2]->IntegerValue() : CV_64FC1;
-
-  Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
-  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
-  cv::Mat mat = cv::Mat::ones(w, h, type);
-
-  img->mat = mat;
-  return scope.Close(im_h);
-}
 
 Handle<Value>
 Matrix::Eye(const v8::Arguments& args){
@@ -860,15 +827,15 @@ Matrix::Eye(const v8::Arguments& args){
 
 	int w = args[0]->Uint32Value();
 	int h = args[1]->Uint32Value();
-  int type = (args.Length() > 2) ? args[2]->IntegerValue() : CV_64FC1;
 
 	Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
 	Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
-	cv::Mat mat = cv::Mat::eye(w, h, type);
+	cv::Mat mat = cv::Mat::eye(w, h, CV_64FC1);
 
 	img->mat = mat;
 	return scope.Close(im_h);
 }
+
 
 Handle<Value>
 Matrix::ConvertGrayscale(const v8::Arguments& args) {
