@@ -1687,24 +1687,30 @@ Matrix::CvtColor(const v8::Arguments& args) {
 // arrChannels = img.split();
 Handle<Value>
 Matrix::Split(const v8::Arguments& args) {
-    HandleScope scope;
+  HandleScope scope;
 
-    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+  Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
 
-    vector<cv::Mat> channels;
-    cv::split(self->mat, channels);
-    unsigned int size = channels.size();
-    v8::Local<v8::Array> arrChannels = v8::Array::New(size);
-    for (unsigned int i = 0; i < size; i++) {
-        Local<Object> matObject = Matrix::constructor->GetFunction()->NewInstance();
-        Matrix * m = ObjectWrap::Unwrap<Matrix>(matObject);
-        m->mat = channels[i];
-        arrChannels->Set(i, matObject);
-    }
+  unsigned int size = self->mat.channels();
+  vector<cv::Mat> channels;
 
-    return scope.Close(arrChannels);
+  // Split doesn't seem to work on empty vectors
+  for (int i = 0; i < size; i++) {
+    channels.push_back(cv::Mat());
+  }
+
+  cv::split(self->mat, channels);
+
+  v8::Local<v8::Array> arrChannels = v8::Array::New(size);
+  for (unsigned int i = 0; i < size; i++) {
+      Local<Object> matObject = Matrix::constructor->GetFunction()->NewInstance();
+      Matrix * m = ObjectWrap::Unwrap<Matrix>(matObject);
+      m->mat = channels[i];
+      arrChannels->Set(i, matObject);
+  }
+
+  return scope.Close(arrChannels);
 }
-
 
 // @author SergeMv
 // img.merge(arrChannels);
