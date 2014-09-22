@@ -33,7 +33,8 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "boundingRect", BoundingRect);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "minAreaRect", MinAreaRect);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
-	NODE_SET_PROTOTYPE_METHOD(constructor, "moments", Moments);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "moments", Moments);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "hierarchy", Hierarchy);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
 };
 
@@ -242,3 +243,21 @@ Contour::Moments(const Arguments &args) {
 	return scope.Close(res);
 }
 
+Handle<Value>
+Contour::Hierarchy(const Arguments &args) {
+  HandleScope scope;
+
+  Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+  int pos = args[0]->IntegerValue();
+
+  cv::Vec4i hierarchy = self->hierarchy[pos];
+    
+  Local<Array> res = Array::New(4);
+
+  res->Set(0, Number::New(hierarchy[0]));
+  res->Set(1, Number::New(hierarchy[1]));
+  res->Set(2, Number::New(hierarchy[2]));
+  res->Set(3, Number::New(hierarchy[3]));
+
+  return scope.Close(res);
+}
