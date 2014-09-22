@@ -13,10 +13,11 @@ class Contour: public node::ObjectWrap {
 	static void Init(Handle<Object> target);
 	static Handle<Value> New(const Arguments &args);
 
-	Contour();
-
+  Contour();
+ 
 	//JSFUNC(Size)
-	static Handle<Value> Point(const v8::Arguments&);
+  static Handle<Value> Point(const v8::Arguments&);
+  static Handle<Value> Points(const v8::Arguments&);
 	static Handle<Value> Size(const v8::Arguments&);
 	static Handle<Value> CornerCount(const v8::Arguments&);
 	static Handle<Value> Area(const v8::Arguments&);
@@ -28,5 +29,7 @@ class Contour: public node::ObjectWrap {
 	static Handle<Value> IsConvex(const v8::Arguments&);
 	static Handle<Value> Moments(const v8::Arguments&);
   static Handle<Value> Hierarchy(const v8::Arguments&);
+  static Handle<Value> Serialize(const v8::Arguments&);
+  static Handle<Value> Deserialize(const v8::Arguments&);
 };
 

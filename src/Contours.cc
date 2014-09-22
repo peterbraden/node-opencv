@@ -23,7 +23,8 @@ Contour::Init(Handle<Object> target) {
 	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
 
-	NODE_SET_PROTOTYPE_METHOD(constructor, "point", Point);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "point", Point);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "points", Points);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "size", Size);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "cornerCount", CornerCount);
 	NODE_SET_PROTOTYPE_METHOD(constructor, "area", Area);
@@ -35,6 +36,8 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor, "isConvex", IsConvex);
   NODE_SET_PROTOTYPE_METHOD(constructor, "moments", Moments);
   NODE_SET_PROTOTYPE_METHOD(constructor, "hierarchy", Hierarchy);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "serialize", Serialize);
+  NODE_SET_PROTOTYPE_METHOD(constructor, "deserialize", Deserialize);
 	target->Set(String::NewSymbol("Contours"), m->GetFunction());
 };
 
@@ -73,6 +76,28 @@ Contour::Point(const Arguments &args) {
 		data->Set(String::NewSymbol("y"), Number::New(point.y));
 
 		return scope.Close(data);
+}
+
+Handle<Value>
+Contour::Points(const Arguments &args) {
+  HandleScope scope;
+
+  Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+  int pos   = args[0]->NumberValue();
+
+  vector<cv::Point> points = self->contours[pos];
+
+  Local<Array> data = Array::New(points.size());  
+
+  for (std::vector<int>::size_type i = 0; i != points.size(); i++) {
+    Local<Object> point_data = Object::New();
+    point_data->Set(String::NewSymbol("x"), Number::New(points[i].x));
+    point_data->Set(String::NewSymbol("y"), Number::New(points[i].y));
+
+    data->Set(i, point_data);
+  }
+
+  return scope.Close(data);
 }
 
 // FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
@@ -260,4 +285,92 @@ Contour::Hierarchy(const Arguments &args) {
   res->Set(3, Number::New(hierarchy[3]));
 
   return scope.Close(res);
+}
+
+Handle<Value>
+Contour::Serialize(const Arguments &args) {
+  HandleScope scope;
+
+  Contour *self = ObjectWrap::Unwrap<Contour>(args.This());  
+
+  Local<Array> contours_data = Array::New(self->contours.size());
+  
+  for (std::vector<int>::size_type i = 0; i != self->contours.size(); i++) {
+    vector<cv::Point> points = self->contours[i];
+    Local<Array> contour_data = Array::New(points.size());
+
+    for (std::vector<int>::size_type j = 0; j != points.size(); j++) {
+      Local<Array> point_data = Array::New(2);
+      point_data->Set(0, Number::New(points[j].x));
+      point_data->Set(1, Number::New(points[j].y));
+
+      contour_data->Set(j, point_data);
+    }
+
+    contours_data->Set(i, contour_data);    
+  }
+
+  Local<Array> hierarchy_data = Array::New(self->hierarchy.size());
+  for (std::vector<int>::size_type i = 0; i != self->hierarchy.size(); i++) {
+    Local<Array> contour_data = Array::New(4);
+    contour_data->Set(0, Number::New(self->hierarchy[i][0]));
+    contour_data->Set(1, Number::New(self->hierarchy[i][1]));
+    contour_data->Set(2, Number::New(self->hierarchy[i][2]));
+    contour_data->Set(3, Number::New(self->hierarchy[i][3]));
+
+    hierarchy_data->Set(i, contour_data);
+  }
+
+  Local<Object> data = Object::New();
+  data->Set(String::NewSymbol("contours"), contours_data);
+  data->Set(String::NewSymbol("hierarchy"), hierarchy_data);
+
+  return scope.Close(data);
+}
+
+Handle<Value>
+Contour::Deserialize(const Arguments &args) {
+  HandleScope scope;
+
+  Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+
+  Handle<Object> data = Handle<Object>::Cast(args[0]);
+
+  Handle<Array> contours_data = Handle<Array>::Cast(data->Get(v8::String::NewSymbol("contours")));
+  Handle<Array> hierarchy_data = Handle<Array>::Cast(data->Get(v8::String::NewSymbol("hierarchy")));
+
+  vector<vector<cv::Point>> contours_res;
+  int contours_length = contours_data->Length();
+
+  for (int i = 0; i < contours_length; i++) {
+    Handle<Array> contour_data = Handle<Array>::Cast(contours_data->Get(i));
+    vector<cv::Point> points;
+
+    int contour_length = contour_data->Length();
+    for (int j = 0; j < contour_length; j++) {
+      Handle<Array> point_data = Handle<Array>::Cast(contour_data->Get(j));
+      int x = point_data->Get(0)->IntegerValue();
+      int y = point_data->Get(1)->IntegerValue();
+      points.push_back(cv::Point(x, y));
+    }
+
+    contours_res.push_back(points);
+  }
+
+  vector<cv::Vec4i> hierarchy_res;
+  int hierarchy_length = hierarchy_data->Length();
+
+  for (int i = 0; i < hierarchy_length; i++) {
+    Handle<Array> contour_data = Handle<Array>::Cast(hierarchy_data->Get(i));
+    int a = contour_data->Get(0)->IntegerValue();
+    int b = contour_data->Get(1)->IntegerValue();
+    int c = contour_data->Get(2)->IntegerValue();
+    int d = contour_data->Get(3)->IntegerValue();
+    hierarchy_res.push_back(cv::Vec4i(a, b, c, d));
+  }
+
+  self->contours = contours_res;
+  self->hierarchy = hierarchy_res;
+  
+  return scope.Close(v8::Null());
 }
