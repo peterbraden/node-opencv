@@ -339,7 +339,7 @@ Contour::Deserialize(const Arguments &args) {
   Handle<Array> contours_data = Handle<Array>::Cast(data->Get(v8::String::NewSymbol("contours")));
   Handle<Array> hierarchy_data = Handle<Array>::Cast(data->Get(v8::String::NewSymbol("hierarchy")));
 
-  vector<vector<cv::Point>> contours_res;
+  vector<vector<cv::Point> > contours_res;
   int contours_length = contours_data->Length();
 
   for (int i = 0; i < contours_length; i++) {
