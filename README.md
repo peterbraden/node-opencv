@@ -9,7 +9,7 @@ People are using node-opencv to fly control quadrocoptors, detect faces from web
 
 ## Install
 
-You'll need OpenCV 2.3.1 installed.
+You'll need OpenCV 2.3.1 or newer installed.
 
 Then:
 
