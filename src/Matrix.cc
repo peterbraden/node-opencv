@@ -1701,9 +1701,16 @@ Matrix::Split(const v8::Arguments& args) {
 
     Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
 
+    unsigned int size = self->mat.channels();
     vector<cv::Mat> channels;
+
+    // Split doesn't seem to work on empty vectors
+    for (int i = 0; i < size; i++) {
+      channels.push_back(cv::Mat());
+    }
+
     cv::split(self->mat, channels);
-    unsigned int size = channels.size();
+
     v8::Local<v8::Array> arrChannels = v8::Array::New(size);
     for (unsigned int i = 0; i < size; i++) {
         Local<Object> matObject = Matrix::constructor->GetFunction()->NewInstance();
@@ -1714,7 +1721,6 @@ Matrix::Split(const v8::Arguments& args) {
 
     return scope.Close(arrChannels);
 }
-
 
 // @author SergeMv
 // img.merge(arrChannels);
