@@ -1,7 +1,7 @@
 {
-  "targets": [{ 
+  "targets": [{
       "target_name": "opencv"
-      , "sources": [ 
+      , "sources": [
           "src/init.cc"
         , "src/Matrix.cc"
         , "src/OpenCV.cc"
@@ -13,16 +13,17 @@
         , "src/HighGUI.cc"
         , "src/FaceRecognizer.cc"
         , "src/BackgroundSubtractor.cc"
+        , "src/Constants.cc"
         ]
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'
         ]
-        
+
       # For windows
       ,'include_dirs': [
           '<!@(pkg-config --cflags opencv)'
           ]
-          
+
       , 'cflags': [
             '<!@(pkg-config --cflags "opencv >= 2.3.1" )'
             , '-Wall'
@@ -42,9 +43,8 @@
             , "GCC_ENABLE_CPP_RTTI": "YES"
             , "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
           }
-        }]        
-      
+        }]
+
     ]
   }]
 }
-

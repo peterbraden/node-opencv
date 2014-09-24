@@ -10,7 +10,7 @@ class Matrix: public node::ObjectWrap {
     Matrix();
     Matrix(cv::Mat other, cv::Rect roi);
     Matrix(int rows, int cols);
-    Matrix(int rows, int cols, int typ);
+    Matrix(int rows, int cols, int type);
 
     static double DblGet(cv::Mat mat, int i, int j);
 
@@ -98,7 +98,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(PushBack)
 
     JSFUNC(PutText)
-    JSFUNC(GetPerspectiveTransform) 
+    JSFUNC(GetPerspectiveTransform)
     JSFUNC(WarpPerspective)
 
     JSFUNC(CopyWithMask)
@@ -138,4 +138,3 @@ class Matrix: public node::ObjectWrap {
 */
 
 };
-
