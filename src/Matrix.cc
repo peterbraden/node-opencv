@@ -8,8 +8,6 @@ cv::Scalar setColor(Local<Object> objColor);
 cv::Point setPoint(Local<Object> objPoint);
 cv::Rect* setRect(Local<Object> objRect);
 
-//
-
 void
 Matrix::Init(Handle<Object> target) {
 	HandleScope scope;
@@ -1215,22 +1213,28 @@ Matrix::Erode(const v8::Arguments& args) {
     return scope.Close(v8::Null());
 }
 
-
 Handle<Value>
 Matrix::FindContours(const v8::Arguments& args) {
-	HandleScope scope;
+  SETUP_FUNCTION(Matrix)
 
-	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+  int mode = CV_RETR_LIST;
+  int chain = CV_CHAIN_APPROX_SIMPLE;
 
-	Local<Object> conts_to_return= Contour::constructor->GetFunction()->NewInstance();
-	Contour *contours = ObjectWrap::Unwrap<Contour>(conts_to_return);
+  if (args.Length() > 0) {
+    if (args[0]->IsNumber()) mode = args[0]->IntegerValue();
+  }
 
-	cv::findContours(self->mat, contours->contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+  if (args.Length() > 1) {
+    if (args[1]->IsNumber()) chain = args[1]->IntegerValue();
+  }
 
-	return scope.Close(conts_to_return);
+    Local<Object> conts_to_return = Contour::constructor->GetFunction()->NewInstance();
+    Contour *contours = ObjectWrap::Unwrap<Contour>(conts_to_return);
 
+    cv::findContours(self->mat, contours->contours, contours->hierarchy, mode, chain);
+
+    return scope.Close(conts_to_return);
 }
-
 
 Handle<Value>
 Matrix::DrawContour(const v8::Arguments& args) {
