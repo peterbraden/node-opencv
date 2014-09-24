@@ -208,6 +208,10 @@ doesn't work for you please get in touch.
 ## Changelog
 
 
+#### 0.7.0
+
+Matrix constructors, and contour access from @oskardahlberg and @emallson.
+
 #### 0.6.0
 
 Many updates from the community, thank you to all.
