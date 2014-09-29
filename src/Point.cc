@@ -24,8 +24,8 @@ Point::Init(Handle<Object> target) {
     ctor->SetClassName(NanNew("Point"));
     
     Local<ObjectTemplate> proto = ctor->PrototypeTemplate();
-    proto->SetAccessor(NanNew("x"), GetX);//, RaiseImmutable);
-    proto->SetAccessor(NanNew("y"), GetY);//, RaiseImmutable);
+    proto->SetAccessor(NanNew("x"), GetX, RaiseImmutable);//, RaiseImmutable);
+    proto->SetAccessor(NanNew("y"), GetY, RaiseImmutable);//, RaiseImmutable);
     
     
     NODE_SET_PROTOTYPE_METHOD(ctor, "dot", Dot);
@@ -59,11 +59,10 @@ NAN_GETTER(Point::GetY){//(Local<String> prop, const AccessorInfo &info) {
   NanReturnValue(NanNew<Number>(pt->point.y));
 }
 
-/*FIXME: add this back, possibly in a setter
-void
-Point::RaiseImmutable(Local<String> property, Local<Value> value, const AccessorInfo& info) {
+
+NAN_SETTER(Point::RaiseImmutable){
   NanThrowTypeError("Point is immutable");
-}  */
+}
 
 NAN_METHOD(Point::Dot){
   NanScope();
