@@ -69,7 +69,6 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
 
   void HandleOKCallback () {
     NanScope();
-    //  ev_unref(EV_DEFAULT_UC);
     //  this->matrix->Unref();
     
     v8::Local<v8::Array> arr = NanNew<v8::Array>(this->res.size());
@@ -107,17 +106,6 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
     int sleep_for;
     std::vector<cv::Rect>  res;
     
-    /* baton->cc = self;
-  baton->cb = Persistent<Function>::New(cb);
-  baton->im = im;
-  baton->scale = scale;
-  baton->neighbors = neighbors;
-  baton->minw = minw;
-  baton->minh = minh;
-  baton->sleep_for = 1;
-  baton->request.data = baton;
-};*/
-  
 };
 
 
@@ -150,13 +138,6 @@ NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
     minh = args[5]->IntegerValue();
   }
 
-//FIXME: convert async 
- /* classifier_baton_t *baton = new classifier_baton_t();
-
-//  eio_custom(EIO_DetectMultiScale, EIO_PRI_DEFAULT, EIO_AfterDetectMultiScale, baton);
-//  ev_ref(EV_DEFAULT_UC);
-
-  uv_queue_work(uv_default_loop(), &baton->request, AsyncDetectMultiScale,  (uv_after_work_cb)AfterAsyncDetectMultiScale);*/
 
   NanCallback *callback = new NanCallback(cb.As<Function>());
 

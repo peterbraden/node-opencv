@@ -9,7 +9,6 @@ class Contour: public node::ObjectWrap {
 	vector<vector<cv::Point> > contours;
 	static Persistent<FunctionTemplate> constructor;
 	static void Init(Handle<Object> target);
-	//static Handle<Value> New(const Arguments &args);
   static NAN_METHOD(New);
 
 	Contour();

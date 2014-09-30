@@ -26,7 +26,6 @@ TrackedObject::Init(Handle<Object> target) {
 
 	  NODE_SET_PROTOTYPE_METHOD(ctor, "track", Track);
 	  
-	  //target->Set(String::NewSymbol("TrackedObject"), constructor->GetFunction());
 	  target->Set(NanNew("TrackedObject"), ctor->GetFunction());
 };    
 

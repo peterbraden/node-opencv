@@ -12,7 +12,6 @@ Contour::Init(Handle<Object> target) {
 	NanScope();
 
 	//Class/contructor
-	
 	Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(Contour::New);
   NanAssignPersistent(constructor, ctor);
   ctor->InstanceTemplate()->SetInternalFieldCount(1);
@@ -21,8 +20,6 @@ Contour::Init(Handle<Object> target) {
 
 	// Prototype
 	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
-
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "point", Point);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "size", Size);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "cornerCount", CornerCount);

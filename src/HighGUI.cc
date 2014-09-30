@@ -16,8 +16,6 @@ NamedWindow::Init(Handle<Object> target) {
     ctor->SetClassName(NanNew("NamedWindow"));
 
     // Prototype
-    //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
-
 	  NODE_SET_PROTOTYPE_METHOD(ctor, "show", Show);
 	  NODE_SET_PROTOTYPE_METHOD(ctor, "destroy", Destroy);
 	  NODE_SET_PROTOTYPE_METHOD(ctor, "blockingWaitKey", BlockingWaitKey);

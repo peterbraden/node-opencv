@@ -9,23 +9,15 @@ Point::Init(Handle<Object> target) {
     NanScope();
 
     // Constructor
-    /*constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Point::New));
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor->SetClassName(String::NewSymbol("Point"));
-
-    // Prototype
-    Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
-    proto->SetAccessor(String::NewSymbol("x"), GetX, RaiseImmutable);
-    proto->SetAccessor(String::NewSymbol("y"), GetY, RaiseImmutable);*/
-    
     Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(Point::New);
     NanAssignPersistent(constructor, ctor);
     ctor->InstanceTemplate()->SetInternalFieldCount(1);
     ctor->SetClassName(NanNew("Point"));
     
+    // Prototype
     Local<ObjectTemplate> proto = ctor->PrototypeTemplate();
-    proto->SetAccessor(NanNew("x"), GetX, RaiseImmutable);//, RaiseImmutable);
-    proto->SetAccessor(NanNew("y"), GetY, RaiseImmutable);//, RaiseImmutable);
+    proto->SetAccessor(NanNew("x"), GetX, RaiseImmutable);
+    proto->SetAccessor(NanNew("y"), GetY, RaiseImmutable);
     
     
     NODE_SET_PROTOTYPE_METHOD(ctor, "dot", Dot);
@@ -47,13 +39,13 @@ NAN_METHOD(Point::New) {
   NanReturnValue(args.This());
 }
 
-NAN_GETTER(Point::GetX){ //(Local<String> prop, const AccessorInfo &info) {
+NAN_GETTER(Point::GetX){ 
   NanScope();
   Point *pt = ObjectWrap::Unwrap<Point>(args.This());
   NanReturnValue(NanNew<Number>(pt->point.x));
 }
 
-NAN_GETTER(Point::GetY){//(Local<String> prop, const AccessorInfo &info) {
+NAN_GETTER(Point::GetY){
   NanScope();
   Point *pt = ObjectWrap::Unwrap<Point>(args.This());
   NanReturnValue(NanNew<Number>(pt->point.y));

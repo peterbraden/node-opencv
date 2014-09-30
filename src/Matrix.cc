@@ -22,7 +22,6 @@ Matrix::Init(Handle<Object> target) {
   ctor->SetClassName(NanNew("Matrix"));
 
   // Prototype
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "row", Row);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "col", Col);
 
@@ -279,7 +278,6 @@ NAN_METHOD(Matrix::Size){
 NAN_METHOD(Matrix::Clone){
 	SETUP_FUNCTION(Matrix)
   
-  //Local<FunctionTemplate> constructorHandle = NanNew(Matrix::constructor);
   Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
   
   Matrix *m = ObjectWrap::Unwrap<Matrix>(im_h);
@@ -418,15 +416,12 @@ NAN_METHOD(Matrix::ToBuffer){
 
 	std::vector<uchar> vec(0);
 
-    // We use operator * before the "ext" variable, because it converts String to char *
-	cv::imencode(ext, self->mat, vec, params);
 
-  //Local<Object> buf = NanNewBufferHandle((char*)closure->data, closure->len);
-  //memcpy(Buffer::Data(buf), closure->data, closure->len);
+	cv::imencode(ext, self->mat, vec, params);
 
   Local<Object> buf = NanNewBufferHandle(vec.size());
   uchar* data = (uchar*) Buffer::Data(buf);
-  memcpy(data, &vec[0], vec.size());//dest, source, size
+  memcpy(data, &vec[0], vec.size());
   
 	v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
@@ -454,15 +449,12 @@ class AsyncToBufferWorker : public NanAsyncWorker {
     res = vec;
   }
 
-  // Executed when the async work is complete
-  // this function will be run inside the main event loop
-  // so it is safe to use V8 again
   void HandleOKCallback () {
     NanScope();
     
     Local<Object> buf = NanNewBufferHandle(res.size());
     uchar* data = (uchar*) Buffer::Data(buf);
-    memcpy(data, &res[0], res.size());//dest, source, size
+    memcpy(data, &res[0], res.size());
   
 	  v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
@@ -485,7 +477,6 @@ class AsyncToBufferWorker : public NanAsyncWorker {
 
  private:
   Matrix* matrix;
-  //char* filename;
   std::string ext;
   std::vector<int> params;
   std::vector<uchar>  res;

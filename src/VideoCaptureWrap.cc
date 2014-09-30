@@ -6,9 +6,6 @@
 using namespace std;
 
 
-void AsyncRead(uv_work_t *req);
-void AfterAsyncRead(uv_work_t *req);
-
 v8::Persistent<FunctionTemplate> VideoCaptureWrap::constructor;
 
 struct videocapture_baton {
