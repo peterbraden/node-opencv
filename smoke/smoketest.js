@@ -10,7 +10,7 @@ for (var i = 1; i< 41; i++){
 
 cv.readImage("/Users/peterbraden/Downloads/orl_faces/s6/10.pgm", function(e, im){
 
-  var facerec = cv.FaceRecognizer.createEigenFaceRecognizer(); 
+  var facerec = cv.FaceRecognizer.createEigenFaceRecognizer();
   //facerec.trainSync(trainingData);
   facerec.loadSync("/Users/peterbraden/Desktop/ORL")
 
@@ -20,9 +20,7 @@ cv.readImage("/Users/peterbraden/Downloads/orl_faces/s6/10.pgm", function(e, im)
 
 
 */
-cv.readImage("examples/mona.png", function(e, mat){
+cv.readImage("./examples/files/mona.png", function(e, mat){
   var th = mat.threshold(200, 200, "Threshold to Zero Inverted");
-  th.save('out.png')
-
+  th.save('./examples/tmp/out.png')
 })
-

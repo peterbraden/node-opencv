@@ -6,3 +6,4 @@ npm-debug.log
 out*.jpg
 out*.png
 examples/*.avi
+examples/tmp/*
