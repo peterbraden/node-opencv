@@ -1,46 +1,30 @@
-/*
+// Face recognition proxy
+var http = require('http'),
+    request = require('request'),
+    cv = require('../lib/opencv');
 
-Face recognition proxy
+http.createServer(function(req, resp){
+  var url = req.url.slice(1);
+  request({uri:url, encoding:'binary'}, function(err, r, body){
+    if (err) return resp.end(err.stack);
+    if (!/image\//.test(r.headers['content-type'])) return resp.end('Not an image');
 
-*/
+    cv.readImage(new Buffer(body, 'binary'), function(err, im){
+      if (err) return resp.end(err.stack);
+      if (im.width() < 1 || im.height() < 1) return resp.end('Image has no size');
 
-var http = require('http')
-  , request = require('request')
-  , cv = require('../lib/opencv')
-  , face_cascade = new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml")
- 
- 
- 
- http.createServer(function(req, resp){
- 	var url = req.url.slice(1);
- 	console.log(url);
- 	
- 	if (url.indexOf('http') != 0){
- 		return request({uri:'http://google.com'}).pipe(resp)
- 	}
+      im.detectObject('../data/haarcascade_frontalface_alt.xml', {}, function(err, faces) {
+        if (err) return resp.end(err.stack);
 
- 	// TODO make sure image
- 	if (url.indexOf(".jpg", url.length - 4) !== -1 ||
-        url.indexOf(".png", url.length - 4) !== -1){
-        
-        request({uri:url, encoding:'binary'}, function(err, r, body){
-			if (err) throw err;
-			
-			cv.readImage(new Buffer(body, 'binary'), function(err, im){				
-				im.faceDetect(im, {}, function(err, faces){ 	  
-		          for (var i=0;i<faces.length; i++){
-		            var x = faces[i]
-		            im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
-		          }
+        for (var i = 0; i < faces.length; i++){
+          var face = faces[i];
+          im.ellipse(face.x + face.width / 2, face.y + face.height / 2, face.width / 2, face.height / 2);
+        }
 
-		          //console.log(faces);
-				  resp.writeHead(200, {'Content-Type': 'image/jpeg'});  
-		    	  resp.end(im.toBuffer());  	                
-	        	});
-			});		
-		})
-    } else {
-    	request({uri:url || 'http://google.com'}).pipe(resp)
-    }
- }).listen(1901) 
+        resp.writeHead(200, {'Content-Type': 'image/jpeg'});
+        resp.end(im.toBuffer());
+      });
+    });
+  });
 
+}).listen(3000, function(){ console.log('Listening on http://localhost:3000'); })
