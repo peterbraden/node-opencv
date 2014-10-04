@@ -11,10 +11,12 @@ var RED   = [0, 0, 255]; // B, G, R
 
 cv.readImage('./files/stuff.png', function(err, im) {
   if (err) throw err;
-  if (im.width() < 1 || im.height() < 1) throw new Error('Image has no size');
+  var width = im.width();
+  var height = im.height();
+  if (width < 1 || height < 1) throw new Error('Image has no size');
 
-  var big = new cv.Matrix(im.height(), im.width());
-  var all = new cv.Matrix(im.height(), im.width());
+  var big = new cv.Matrix(height, width);
+  var all = new cv.Matrix(height, width);
 
   im.convertGrayscale();
   im_canny = im.copy();

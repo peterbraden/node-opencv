@@ -3,8 +3,8 @@ var cv = require('../lib/opencv');
 cv.readImage("./mona.png", function(err, im) {
   if (err) throw err;
 
-  width = im.width();
-  height = im.height();
+  var width = im.width();
+  var height = im.height();
   if (width < 1 || height < 1) throw new Error('Image has no size');
 
   var srcArray = [0, 0, width, 0, width, height, 0, height];
