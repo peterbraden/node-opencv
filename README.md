@@ -28,7 +28,7 @@ $ node-gyp rebuild
 ### Face Detection
 
 ```javascript
-cv.readImage("./examples/test.jpg", function(err, im){
+cv.readImage("./examples/files/mona.png", function(err, im){
   im.detectObject(cv.FACE_CASCADE, {}, function(err, faces){
     for (var i=0;i<faces.length; i++){
       var x = faces[i]
@@ -80,7 +80,7 @@ s.on('load', function(matrix){
   ...
 })
 
-fs.createReadStream('./examples/test.jpg').pipe(s);
+fs.createReadStream('./examples/files/mona.png').pipe(s);
 ```
 
 If however, you have a series of images, and you wish to stream them into a
