@@ -11,7 +11,7 @@
     "vows": "*"
   },
   "engines": {
-    "node": ">=0.4.1"
+    "node": ">=0.10"
   },
   "license": "MIT",
   "scripts": {
