@@ -27,6 +27,8 @@ class Contour: public node::ObjectWrap {
   JSFUNC(MinAreaRect)
   JSFUNC(IsConvex)
   JSFUNC(Moments)
-
+  JSFUNC(Hierarchy)
+  JSFUNC(Serialize)
+  JSFUNC(Deserialize)
 };
 

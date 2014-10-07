@@ -71,9 +71,7 @@ NAN_METHOD(Contour::Point) {
 		NanReturnValue(data);
 }
 
-<<<<<<< HEAD
-Handle<Value>
-Contour::Points(const Arguments &args) {
+NAN_METHOD(Contour::Points) {
   HandleScope scope;
 
   Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
@@ -93,8 +91,6 @@ Contour::Points(const Arguments &args) {
 
   return scope.Close(data);
 }
-=======
->>>>>>> a42033ac96f3a3506c62b5add536074ffa0801e8
 
 // FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
 // also, this would allow to use ``Size`` for the function returning the number of corners

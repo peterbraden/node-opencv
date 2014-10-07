@@ -124,7 +124,7 @@ NAN_METHOD(Matrix::New) {
         mat = new Matrix(args[0]->IntegerValue(), args[1]->IntegerValue());
     } else if (args.Length() == 3 && args[0]->IsInt32() && args[1]->IsInt32() && args[2]->IsInt32()) {
         mat = new Matrix(args[0]->IntegerValue(), args[1]->IntegerValue(), args[2]->IntegerValue());
-	} else if (args.Length() == 5) {
+	} else { // if (args.Length() == 5) {
 		Matrix *other = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 		int x = args[1]->IntegerValue();
 		int y = args[2]->IntegerValue();
@@ -229,15 +229,6 @@ NAN_METHOD(Matrix::Pixel){
 			uchar intensity = self->mat.at<uchar>(y, x);
 			return scope.Close(Number::New(intensity));
 		}
-	}
-  else{
-		cv::Vec3b intensity = self->mat.at<cv::Vec3b>(y, x);
-
-		v8::Local<v8::Array> arr = NanNew<Array>(3);
-		arr->Set(0, NanNew<Number>( intensity[0] ));
-		arr->Set(1, NanNew<Number>( intensity[1] ));
-		arr->Set(2, NanNew<Number>( intensity[2] ));
-    NanReturnValue( arr );
 	}
   NanReturnUndefined();
 	//double val = Matrix::DblGet(t, i, j);
@@ -1614,12 +1605,12 @@ NAN_METHOD(Matrix::Split) {
     vector<cv::Mat> channels;
 
     // Split doesn't seem to work on empty vectors
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
       channels.push_back(cv::Mat());
     }
 
     cv::split(self->mat, channels);
-    unsigned int size = channels.size();
+    size = channels.size();
     v8::Local<v8::Array> arrChannels = NanNew<Array>(size);
     for (unsigned int i = 0; i < size; i++) {
         Local<Object> matObject = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
@@ -1729,7 +1720,7 @@ NAN_METHOD(Matrix::MatchTemplate) {
 
   int method = (args.Length() < 2) ? (int)cv::TM_CCORR_NORMED : args[1]->Uint32Value();
 
-  cv::matchTemplate(self->mat, templ->mat, m_out->mat, method);
+  cv::matchTemplate(self->mat, templ, m_out->mat, method);
 
   NanReturnValue(out);
 }
