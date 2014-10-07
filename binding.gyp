@@ -21,7 +21,8 @@
 
       # For windows
       ,'include_dirs': [
-          '<!@(pkg-config --cflags opencv)'
+          '<!@(pkg-config --cflags opencv)',
+          "<!(node -e \"require('nan')\")"
           ]
 
       , 'cflags': [

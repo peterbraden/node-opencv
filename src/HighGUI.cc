@@ -7,26 +7,25 @@ Persistent<FunctionTemplate> NamedWindow::constructor;
 
 void
 NamedWindow::Init(Handle<Object> target) {
-    HandleScope scope;
+    NanScope();
 
     // Constructor
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(NamedWindow::New));
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor->SetClassName(String::NewSymbol("NamedWindow"));
+    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(NamedWindow::New);
+    NanAssignPersistent(constructor, ctor);
+    ctor->InstanceTemplate()->SetInternalFieldCount(1);
+    ctor->SetClassName(NanNew("NamedWindow"));
 
     // Prototype
-    //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
-
-	  NODE_SET_PROTOTYPE_METHOD(constructor, "show", Show);
-	  NODE_SET_PROTOTYPE_METHOD(constructor, "destroy", Destroy);
-	  NODE_SET_PROTOTYPE_METHOD(constructor, "blockingWaitKey", BlockingWaitKey);
-    target->Set(String::NewSymbol("NamedWindow"), constructor->GetFunction());
+	  NODE_SET_PROTOTYPE_METHOD(ctor, "show", Show);
+	  NODE_SET_PROTOTYPE_METHOD(ctor, "destroy", Destroy);
+	  NODE_SET_PROTOTYPE_METHOD(ctor, "blockingWaitKey", BlockingWaitKey);
+    
+    target->Set(NanNew("NamedWindow"), ctor->GetFunction());
 };
 
 
-Handle<Value>
-NamedWindow::New(const Arguments &args) {
-  HandleScope scope;
+NAN_METHOD(NamedWindow::New) {
+  NanScope();
 
   if (args.This()->InternalFieldCount() == 0){
     JSTHROW_TYPE("Cannot Instantiate without new")
@@ -34,13 +33,13 @@ NamedWindow::New(const Arguments &args) {
 
   NamedWindow* win;
 	if (args.Length() == 1){
-		win = new NamedWindow(std::string(*v8::String::AsciiValue(args[0]->ToString())), 0);
+		win = new NamedWindow(std::string(*NanAsciiString(args[0]->ToString())), 0);
 	} else if (args.Length() == 2){
-		win = new NamedWindow(std::string(*v8::String::AsciiValue(args[0]->ToString())), 0);
+		win = new NamedWindow(std::string(*NanAsciiString(args[0]->ToString())), 0);
   }
 
 	win->Wrap(args.Holder());
-	return scope.Close(args.Holder());
+	NanReturnValue(args.Holder());
 }
 
 
@@ -51,26 +50,23 @@ NamedWindow::NamedWindow(const std::string& name, int f){
 }
 
 
-Handle<Value>
-NamedWindow::Show(const v8::Arguments& args){
+NAN_METHOD(NamedWindow::Show){
 	SETUP_FUNCTION(NamedWindow)
   Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
   cv::imshow(self->winname, im->mat);
 
-	return scope.Close(args.Holder());
+	NanReturnValue(args.Holder());
 }
 
-Handle<Value>
-NamedWindow::Destroy(const v8::Arguments& args){
+NAN_METHOD(NamedWindow::Destroy){
 	SETUP_FUNCTION(NamedWindow)
   cv::destroyWindow(self->winname);
-	return scope.Close(args.Holder());
+	NanReturnValue(args.Holder());
 }
 
 
-Handle<Value>
-NamedWindow::BlockingWaitKey(const v8::Arguments& args){
-  HandleScope scope;
+NAN_METHOD(NamedWindow::BlockingWaitKey){
+  NanScope();
 	//SETUP_FUNCTION(NamedWindow)
 	int time = 0;
 
@@ -84,5 +80,5 @@ NamedWindow::BlockingWaitKey(const v8::Arguments& args){
 
   int res = cv::waitKey(time);
 
-	return scope.Close(Number::New(res));
+	NanReturnValue(NanNew<Number>(res));
 }
