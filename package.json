@@ -16,7 +16,6 @@
   "license": "MIT",
   "scripts": {
     "build": "node-gyp build",
-    "preinstall": "node-gyp clean rebuild",
     "test": "vows test/unit.js"
   },
   "keywords": [
