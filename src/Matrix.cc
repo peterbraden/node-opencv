@@ -1144,7 +1144,6 @@ NAN_METHOD(Matrix::FindContours) {
   }
 
 	Local<Object> conts_to_return= NanNew(Contour::constructor)->GetFunction()->NewInstance();
-	Contour *contours = ObjectWrap::Unwrap<Contour>(conts_to_return);
 
 	NanReturnValue(conts_to_return);
 
