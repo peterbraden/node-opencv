@@ -1,12 +1,14 @@
 #include "OpenCV.h"
 #include "Constants.h"
 
-#define CONST(C) inner->Set(String::NewSymbol(#C), Integer::New(C));
+#define CONST(C) \
+  obj->Set(NanNew<String>(#C), NanNew<Integer>(C));
 
 void
 Constants::Init(Handle<Object> target) {
-
-  Persistent<Object> inner = Persistent<Object>::New(Object::New());
+  Persistent<Object> inner;
+  Local<Object> obj = NanNew<Object>();
+  NanAssignPersistent(inner, obj);
 
   CONST(CV_8U);
   CONST(CV_8S);
@@ -52,7 +54,7 @@ Constants::Init(Handle<Object> target) {
   CONST(CV_64FC3);
   CONST(CV_64FC4);
 
-  target->Set(String::NewSymbol("Constants"), inner);
+  target->Set(NanNew("Constants"), obj);
 }
 
 #undef CONST

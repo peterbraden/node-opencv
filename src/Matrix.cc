@@ -218,16 +218,16 @@ NAN_METHOD(Matrix::Pixel){
 		if(self->mat.channels() == 3){
 			cv::Vec3b intensity = self->mat.at<cv::Vec3b>(y, x);
 
-			v8::Local<v8::Array> arr = v8::Array::New(3);
-			arr->Set(0, Number::New( intensity[0] ));
-			arr->Set(1, Number::New( intensity[1] ));
-			arr->Set(2, Number::New( intensity[2] ));
-			return scope.Close(arr);
+			v8::Local<v8::Array> arr = NanNew<v8::Array>(3);
+			arr->Set(0, NanNew<Number>( intensity[0] ));
+			arr->Set(1, NanNew<Number>( intensity[1] ));
+			arr->Set(2, NanNew<Number>( intensity[2] ));
+			NanReturnValue(arr);
 		}
 		else if(self->mat.channels() == 1){
 
 			uchar intensity = self->mat.at<uchar>(y, x);
-			return scope.Close(Number::New(intensity));
+			NanReturnValue(NanNew<Number>(intensity));
 		}
 	}
   NanReturnUndefined();
@@ -303,8 +303,7 @@ NAN_METHOD(Matrix::Clone){
   NanReturnValue(im_h);
 }
 
-Handle<Value>
-Matrix::Crop(const Arguments& args){
+NAN_METHOD(Matrix::Crop){
 
 	SETUP_FUNCTION(Matrix)
 
@@ -317,14 +316,14 @@ Matrix::Crop(const Arguments& args){
 
 		cv::Rect roi(x, y, width, height);
 
-		Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+    Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
 		Matrix *m = ObjectWrap::Unwrap<Matrix>(im_h);
 		m->mat = self->mat(roi);
 
-		return scope.Close(im_h);
+		NanReturnValue(im_h);
 	}
 	else{
-		return scope.Close(v8::String::New("Insufficient or wrong arguments"));
+		NanReturnValue(NanNew("Insufficient or wrong arguments"));
 	}
 }
 
@@ -771,36 +770,34 @@ NAN_METHOD(Matrix::SaveAsync){
   NanReturnUndefined();
 }
 
-Handle<Value>
-Matrix::Zeros(const v8::Arguments& args){
-  HandleScope scope;
+NAN_METHOD(Matrix::Zeros){
+  NanScope();
 
   int w = args[0]->Uint32Value();
   int h = args[1]->Uint32Value();
   int type = (args.Length() > 2) ? args[2]->IntegerValue() : CV_64FC1;
 
-  Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+  Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
   Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
   cv::Mat mat = cv::Mat::zeros(w, h, type);
 
   img->mat = mat;
-  return scope.Close(im_h);
+  NanReturnValue(im_h);
 }
 
-Handle<Value>
-Matrix::Ones(const v8::Arguments& args){
-  HandleScope scope;
+NAN_METHOD(Matrix::Ones){
+  NanScope();
 
   int w = args[0]->Uint32Value();
   int h = args[1]->Uint32Value();
   int type = (args.Length() > 2) ? args[2]->IntegerValue() : CV_64FC1;
 
-  Local<Object> im_h = Matrix::constructor->GetFunction()->NewInstance();
+  Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
   Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
   cv::Mat mat = cv::Mat::ones(w, h, type);
 
   img->mat = mat;
-  return scope.Close(im_h);
+  NanReturnValue(im_h);
 }
 
 NAN_METHOD(Matrix::Eye){
@@ -1147,7 +1144,6 @@ NAN_METHOD(Matrix::FindContours) {
 
 	NanReturnValue(conts_to_return);
 
-  return scope.Close(conts_to_return);
 }
 
 

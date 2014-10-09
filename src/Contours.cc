@@ -31,9 +31,9 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "minAreaRect", MinAreaRect);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "isConvex", IsConvex);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "moments", Moments);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "hierarchy", Hierarchy);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "serialize", Serialize);
-  NODE_SET_PROTOTYPE_METHOD(constructor, "deserialize", Deserialize);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "hierarchy", Hierarchy);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "serialize", Serialize);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "deserialize", Deserialize);
 	target->Set(NanNew("Contours"), ctor->GetFunction());
 };
 
@@ -72,24 +72,24 @@ NAN_METHOD(Contour::Point) {
 }
 
 NAN_METHOD(Contour::Points) {
-  HandleScope scope;
+   NanScope();
 
   Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
   int pos   = args[0]->NumberValue();
 
   vector<cv::Point> points = self->contours[pos];
 
-  Local<Array> data = Array::New(points.size());  
+  Local<Array> data = NanNew<Array>(points.size());  
 
   for (std::vector<int>::size_type i = 0; i != points.size(); i++) {
-    Local<Object> point_data = Object::New();
-    point_data->Set(String::NewSymbol("x"), Number::New(points[i].x));
-    point_data->Set(String::NewSymbol("y"), Number::New(points[i].y));
+    Local<Object> point_data = NanNew<Object>();
+    point_data->Set(NanNew<String>("x"), NanNew<Number>(points[i].x));
+    point_data->Set(NanNew<String>("y"), NanNew<Number>(points[i].y));
 
     data->Set(i, point_data);
   }
 
-  return scope.Close(data);
+  NanReturnValue(data);
 }
 
 // FIXME: this sould better be called "Length" as ``Contours`` is an Array like structure
@@ -252,41 +252,39 @@ NAN_METHOD(Contour::Moments) {
 	NanReturnValue(res);
 }
 
-Handle<Value>
-Contour::Hierarchy(const Arguments &args) {
-  HandleScope scope;
+NAN_METHOD(Contour::Hierarchy) {
+   NanScope();
 
   Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
   int pos = args[0]->IntegerValue();
 
   cv::Vec4i hierarchy = self->hierarchy[pos];
     
-  Local<Array> res = Array::New(4);
+  Local<Array> res = NanNew<Array>(4);
 
-  res->Set(0, Number::New(hierarchy[0]));
-  res->Set(1, Number::New(hierarchy[1]));
-  res->Set(2, Number::New(hierarchy[2]));
-  res->Set(3, Number::New(hierarchy[3]));
+  res->Set(0, NanNew<Number>(hierarchy[0]));
+  res->Set(1, NanNew<Number>(hierarchy[1]));
+  res->Set(2, NanNew<Number>(hierarchy[2]));
+  res->Set(3, NanNew<Number>(hierarchy[3]));
 
-  return scope.Close(res);
+  NanReturnValue(res);
 }
 
-Handle<Value>
-Contour::Serialize(const Arguments &args) {
-  HandleScope scope;
+NAN_METHOD(Contour::Serialize) {
+   NanScope();
 
   Contour *self = ObjectWrap::Unwrap<Contour>(args.This());  
 
-  Local<Array> contours_data = Array::New(self->contours.size());
+  Local<Array> contours_data = NanNew<Array>(self->contours.size());
   
   for (std::vector<int>::size_type i = 0; i != self->contours.size(); i++) {
     vector<cv::Point> points = self->contours[i];
-    Local<Array> contour_data = Array::New(points.size());
+    Local<Array> contour_data = NanNew<Array>(points.size());
 
     for (std::vector<int>::size_type j = 0; j != points.size(); j++) {
-      Local<Array> point_data = Array::New(2);
-      point_data->Set(0, Number::New(points[j].x));
-      point_data->Set(1, Number::New(points[j].y));
+      Local<Array> point_data = NanNew<Array>(2);
+      point_data->Set(0, NanNew<Number>(points[j].x));
+      point_data->Set(1, NanNew<Number>(points[j].y));
 
       contour_data->Set(j, point_data);
     }
@@ -294,34 +292,33 @@ Contour::Serialize(const Arguments &args) {
     contours_data->Set(i, contour_data);    
   }
 
-  Local<Array> hierarchy_data = Array::New(self->hierarchy.size());
+  Local<Array> hierarchy_data = NanNew<Array>(self->hierarchy.size());
   for (std::vector<int>::size_type i = 0; i != self->hierarchy.size(); i++) {
-    Local<Array> contour_data = Array::New(4);
-    contour_data->Set(0, Number::New(self->hierarchy[i][0]));
-    contour_data->Set(1, Number::New(self->hierarchy[i][1]));
-    contour_data->Set(2, Number::New(self->hierarchy[i][2]));
-    contour_data->Set(3, Number::New(self->hierarchy[i][3]));
+    Local<Array> contour_data = NanNew<Array>(4);
+    contour_data->Set(0, NanNew<Number>(self->hierarchy[i][0]));
+    contour_data->Set(1, NanNew<Number>(self->hierarchy[i][1]));
+    contour_data->Set(2, NanNew<Number>(self->hierarchy[i][2]));
+    contour_data->Set(3, NanNew<Number>(self->hierarchy[i][3]));
 
     hierarchy_data->Set(i, contour_data);
   }
 
-  Local<Object> data = Object::New();
-  data->Set(String::NewSymbol("contours"), contours_data);
-  data->Set(String::NewSymbol("hierarchy"), hierarchy_data);
+  Local<Object> data = NanNew<Object>();
+  data->Set(NanNew<String>("contours"), contours_data);
+  data->Set(NanNew<String>("hierarchy"), hierarchy_data);
 
-  return scope.Close(data);
+  NanReturnValue(data);
 }
 
-Handle<Value>
-Contour::Deserialize(const Arguments &args) {
-  HandleScope scope;
+NAN_METHOD(Contour::Deserialize) {
+  NanScope();
 
   Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
 
   Handle<Object> data = Handle<Object>::Cast(args[0]);
 
-  Handle<Array> contours_data = Handle<Array>::Cast(data->Get(v8::String::NewSymbol("contours")));
-  Handle<Array> hierarchy_data = Handle<Array>::Cast(data->Get(v8::String::NewSymbol("hierarchy")));
+  Handle<Array> contours_data = Handle<Array>::Cast(data->Get(NanNew<String>("contours")));
+  Handle<Array> hierarchy_data = Handle<Array>::Cast(data->Get(NanNew<String>("hierarchy")));
 
   vector<vector<cv::Point> > contours_res;
   int contours_length = contours_data->Length();
@@ -356,5 +353,5 @@ Contour::Deserialize(const Arguments &args) {
   self->contours = contours_res;
   self->hierarchy = hierarchy_res;
   
-  return scope.Close(v8::Null());
+  NanReturnNull();
 }
