@@ -1,5 +1,6 @@
 #include "OpenCV.h"
 #include "Matrix.h"
+#include "MatOp.h"
 
 void
 OpenCV::Init(Handle<Object> target) {
@@ -12,10 +13,9 @@ OpenCV::Init(Handle<Object> target) {
   target->Set(String::NewSymbol("version"), String::New(out, n));
 
   NODE_SET_METHOD(target, "readImage", ReadImage);
+  NODE_SET_METHOD(target, "add", MatOp::Add);
 
 }  
-
-
 
 Handle<Value>
 OpenCV::ReadImage(const Arguments &args) {
