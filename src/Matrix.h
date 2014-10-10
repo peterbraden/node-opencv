@@ -91,6 +91,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Split)
     JSFUNC(Merge)
     JSFUNC(EqualizeHist)
+    JSFUNC(AdaptiveEqualizeHist)
     JSFUNC(Pixel)
     JSFUNC(FloodFill)
 
