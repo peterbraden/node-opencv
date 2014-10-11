@@ -22,10 +22,8 @@ Matrix::Init(Handle<Object> target) {
   // Prototype
 	NODE_SET_PROTOTYPE_METHOD(ctor, "row", Row);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "col", Col);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pixelRow", PixelRow);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pixelCol", PixelCol);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "empty", Empty);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "get", Get);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "set", Set);
@@ -47,7 +45,6 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pyrDown", PyrDown);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pyrUp", PyrUp);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "channels", Channels);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "convertGrayscale", ConvertGrayscale);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "convertHSVscale", ConvertHSVscale);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "gaussianBlur", GaussianBlur);
@@ -66,43 +63,31 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "canny", Canny);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "dilate", Dilate);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "erode", Erode);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "findContours", FindContours);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "drawContour", DrawContour);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "drawAllContours", DrawAllContours);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "houghLinesP", HoughLinesP);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "inRange", inRange);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "adjustROI", AdjustROI);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "locateROI", LocateROI);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "threshold", Threshold);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "adaptiveThreshold", AdaptiveThreshold);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "meanStdDev", MeanStdDev);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "cvtColor", CvtColor);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "split", Split);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "merge", Merge);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "equalizeHist", EqualizeHist);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "floodFill", FloodFill);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "matchTemplate", MatchTemplate);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "minMaxLoc", MinMaxLoc);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pushBack", PushBack);
-
 	NODE_SET_PROTOTYPE_METHOD(ctor, "putText", PutText);
-    
-  NODE_SET_PROTOTYPE_METHOD(ctor, "getPerspectiveTransform", GetPerspectiveTransform); 
+  NODE_SET_PROTOTYPE_METHOD(ctor, "getPerspectiveTransform", GetPerspectiveTransform);
   NODE_SET_PROTOTYPE_METHOD(ctor, "warpPerspective", WarpPerspective);
-
   NODE_SET_METHOD(ctor, "Zeros", Zeros);
   NODE_SET_METHOD(ctor, "Ones", Ones);
   NODE_SET_METHOD(ctor, "Eye", Eye);
-
   NODE_SET_PROTOTYPE_METHOD(ctor, "copyWithMask", CopyWithMask);
   NODE_SET_PROTOTYPE_METHOD(ctor, "setWithMask", SetWithMask);
   NODE_SET_PROTOTYPE_METHOD(ctor, "meanWithMask", MeanWithMask);
@@ -1519,23 +1504,23 @@ NAN_METHOD(Matrix::MeanStdDev) {
 // our.width + x <= destination.width (and the same for y and height)
 // both x and y must be >= 0
 NAN_METHOD(Matrix::CopyTo) {
-    NanScope();
+  NanScope();
 
-    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
-    int width = self->mat.size().width;
-    int height = self->mat.size().height;
+  Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+  int width = self->mat.size().width;
+  int height = self->mat.size().height;
 
-    // param 0 - destination image:
-    Matrix *dest = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
-    // param 1 - x coord of the destination
-    int x = args[1]->IntegerValue();
-    // param 2 - y coord of the destination
-    int y = args[2]->IntegerValue();
+  // param 0 - destination image:
+  Matrix *dest = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+  // param 1 - x coord of the destination
+  int x = args[1]->IntegerValue();
+  // param 2 - y coord of the destination
+  int y = args[2]->IntegerValue();
 
-    cv::Mat dstROI = cv::Mat(dest->mat, cv::Rect(x, y, width, height));
-    self->mat.copyTo(dstROI);
+  cv::Mat dstROI = cv::Mat(dest->mat, cv::Rect(x, y, width, height));
+  self->mat.copyTo(dstROI);
 
-    NanReturnUndefined();
+  NanReturnUndefined();
 }
 
 
@@ -1544,100 +1529,100 @@ NAN_METHOD(Matrix::CopyTo) {
 // Does in-place color transformation
 // img.cvtColor('CV_BGR2YCrCb');
 NAN_METHOD(Matrix::CvtColor) {
-    NanScope();
+  NanScope();
 
-    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+  Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
 
-    v8::String::Utf8Value str (args[0]->ToString());
-    std::string str2 = std::string(*str);
-    const char * sTransform = (const char *) str2.c_str();
-    int iTransform;
-    //
-    if (!strcmp(sTransform, "CV_BGR2GRAY")) { iTransform = CV_BGR2GRAY; }
-    else if (!strcmp(sTransform, "CV_GRAY2BGR")) { iTransform = CV_GRAY2BGR; }
-    //
-    else if (!strcmp(sTransform, "CV_BGR2XYZ")) { iTransform = CV_BGR2XYZ; }
-    else if (!strcmp(sTransform, "CV_XYZ2BGR")) { iTransform = CV_XYZ2BGR; }
-    //
-    else if (!strcmp(sTransform, "CV_BGR2YCrCb")) { iTransform = CV_BGR2YCrCb; }
-    else if (!strcmp(sTransform, "CV_YCrCb2BGR")) { iTransform = CV_YCrCb2BGR; }
-    //
-    else if (!strcmp(sTransform, "CV_BGR2HSV")) { iTransform = CV_BGR2HSV; }
-    else if (!strcmp(sTransform, "CV_HSV2BGR")) { iTransform = CV_HSV2BGR; }
-    //
-    else if (!strcmp(sTransform, "CV_BGR2HLS")) { iTransform = CV_BGR2HLS; }
-    else if (!strcmp(sTransform, "CV_HLS2BGR")) { iTransform = CV_HLS2BGR; }
-    //
-    else if (!strcmp(sTransform, "CV_BGR2Lab")) { iTransform = CV_BGR2Lab; }
-    else if (!strcmp(sTransform, "CV_Lab2BGR")) { iTransform = CV_Lab2BGR; }
-    //
-    else if (!strcmp(sTransform, "CV_BGR2Luv")) { iTransform = CV_BGR2Luv; }
-    else if (!strcmp(sTransform, "CV_Luv2BGR")) { iTransform = CV_Luv2BGR; }
-    //
-    else if (!strcmp(sTransform, "CV_BayerBG2BGR")) { iTransform = CV_BayerBG2BGR; }
-    else if (!strcmp(sTransform, "CV_BayerGB2BGR")) { iTransform = CV_BayerGB2BGR; }
-    else if (!strcmp(sTransform, "CV_BayerRG2BGR")) { iTransform = CV_BayerRG2BGR; }
-    else if (!strcmp(sTransform, "CV_BayerGR2BGR")) { iTransform = CV_BayerGR2BGR; }
-    else {
-        iTransform = 0; // to avoid compiler warning
-        NanThrowTypeError("Conversion code is unsupported");
-    }
+  v8::String::Utf8Value str (args[0]->ToString());
+  std::string str2 = std::string(*str);
+  const char * sTransform = (const char *) str2.c_str();
+  int iTransform;
+  //
+  if (!strcmp(sTransform, "CV_BGR2GRAY")) { iTransform = CV_BGR2GRAY; }
+  else if (!strcmp(sTransform, "CV_GRAY2BGR")) { iTransform = CV_GRAY2BGR; }
+  //
+  else if (!strcmp(sTransform, "CV_BGR2XYZ")) { iTransform = CV_BGR2XYZ; }
+  else if (!strcmp(sTransform, "CV_XYZ2BGR")) { iTransform = CV_XYZ2BGR; }
+  //
+  else if (!strcmp(sTransform, "CV_BGR2YCrCb")) { iTransform = CV_BGR2YCrCb; }
+  else if (!strcmp(sTransform, "CV_YCrCb2BGR")) { iTransform = CV_YCrCb2BGR; }
+  //
+  else if (!strcmp(sTransform, "CV_BGR2HSV")) { iTransform = CV_BGR2HSV; }
+  else if (!strcmp(sTransform, "CV_HSV2BGR")) { iTransform = CV_HSV2BGR; }
+  //
+  else if (!strcmp(sTransform, "CV_BGR2HLS")) { iTransform = CV_BGR2HLS; }
+  else if (!strcmp(sTransform, "CV_HLS2BGR")) { iTransform = CV_HLS2BGR; }
+  //
+  else if (!strcmp(sTransform, "CV_BGR2Lab")) { iTransform = CV_BGR2Lab; }
+  else if (!strcmp(sTransform, "CV_Lab2BGR")) { iTransform = CV_Lab2BGR; }
+  //
+  else if (!strcmp(sTransform, "CV_BGR2Luv")) { iTransform = CV_BGR2Luv; }
+  else if (!strcmp(sTransform, "CV_Luv2BGR")) { iTransform = CV_Luv2BGR; }
+  //
+  else if (!strcmp(sTransform, "CV_BayerBG2BGR")) { iTransform = CV_BayerBG2BGR; }
+  else if (!strcmp(sTransform, "CV_BayerGB2BGR")) { iTransform = CV_BayerGB2BGR; }
+  else if (!strcmp(sTransform, "CV_BayerRG2BGR")) { iTransform = CV_BayerRG2BGR; }
+  else if (!strcmp(sTransform, "CV_BayerGR2BGR")) { iTransform = CV_BayerGR2BGR; }
+  else {
+      iTransform = 0; // to avoid compiler warning
+      NanThrowTypeError("Conversion code is unsupported");
+  }
 
-    cv::cvtColor(self->mat, self->mat, iTransform);
+  cv::cvtColor(self->mat, self->mat, iTransform);
 
-    NanReturnUndefined();
+  NanReturnUndefined();
 }
 
 
 // @author SergeMv
 // arrChannels = img.split();
 NAN_METHOD(Matrix::Split) {
-    NanScope();
+  NanScope();
 
-    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+  Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
 
-    unsigned int size = self->mat.channels();
-    vector<cv::Mat> channels;
+  unsigned int size = self->mat.channels();
+  vector<cv::Mat> channels;
 
-    // Split doesn't seem to work on empty vectors
-    for (unsigned int i = 0; i < size; i++) {
-      channels.push_back(cv::Mat());
-    }
+  // Split doesn't seem to work on empty vectors
+  for (unsigned int i = 0; i < size; i++) {
+    channels.push_back(cv::Mat());
+  }
 
-    cv::split(self->mat, channels);
-    size = channels.size();
-    v8::Local<v8::Array> arrChannels = NanNew<Array>(size);
-    for (unsigned int i = 0; i < size; i++) {
-        Local<Object> matObject = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
-        Matrix * m = ObjectWrap::Unwrap<Matrix>(matObject);
-        m->mat = channels[i];
-        arrChannels->Set(i, matObject);
-    }
+  cv::split(self->mat, channels);
+  size = channels.size();
+  v8::Local<v8::Array> arrChannels = NanNew<Array>(size);
+  for (unsigned int i = 0; i < size; i++) {
+      Local<Object> matObject = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+      Matrix * m = ObjectWrap::Unwrap<Matrix>(matObject);
+      m->mat = channels[i];
+      arrChannels->Set(i, matObject);
+  }
 
-    NanReturnValue(arrChannels);
+  NanReturnValue(arrChannels);
 }
 
 // @author SergeMv
 // img.merge(arrChannels);
 NAN_METHOD(Matrix::Merge) {
-    NanScope();
+  NanScope();
 
-    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+  Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
 
-    if (!args[0]->IsArray()) {
-        NanThrowTypeError("The argument must be an array");
-    }
-    v8::Handle<v8::Array> jsChannels = v8::Handle<v8::Array>::Cast(args[0]);
+  if (!args[0]->IsArray()) {
+      NanThrowTypeError("The argument must be an array");
+  }
+  v8::Handle<v8::Array> jsChannels = v8::Handle<v8::Array>::Cast(args[0]);
 
-    unsigned int L = jsChannels->Length();
-    vector<cv::Mat> vChannels(L);
-    for (unsigned int i = 0; i < L; i++) {
-         Matrix * matObject = ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
-         vChannels[i] = matObject->mat;
-    }
-    cv::merge(vChannels, self->mat);
+  unsigned int L = jsChannels->Length();
+  vector<cv::Mat> vChannels(L);
+  for (unsigned int i = 0; i < L; i++) {
+       Matrix * matObject = ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
+       vChannels[i] = matObject->mat;
+  }
+  cv::merge(vChannels, self->mat);
 
-    NanReturnUndefined();
+  NanReturnUndefined();
 }
 
 
@@ -1645,12 +1630,12 @@ NAN_METHOD(Matrix::Merge) {
 // Equalizes histogram
 // img.equalizeHist()
 NAN_METHOD(Matrix::EqualizeHist) {
-    NanScope();
-    Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
+  NanScope();
+  Matrix * self = ObjectWrap::Unwrap<Matrix>(args.This());
 
-    cv::equalizeHist(self->mat, self->mat);
+  cv::equalizeHist(self->mat, self->mat);
 
-    NanReturnUndefined();
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Matrix::FloodFill){
@@ -1813,100 +1798,100 @@ NAN_METHOD(Matrix::PutText) {
 
 
 NAN_METHOD(Matrix::GetPerspectiveTransform) {
-    NanScope();
+  NanScope();
 
-    // extract quad args
-    Local<Object> srcArray = args[0]->ToObject();
-    Local<Object> tgtArray = args[1]->ToObject();
+  // extract quad args
+  Local<Object> srcArray = args[0]->ToObject();
+  Local<Object> tgtArray = args[1]->ToObject();
 
-    std::vector<cv::Point2f> src_corners(4);
-    std::vector<cv::Point2f> tgt_corners(4);
-    for (unsigned int i = 0; i < 4; i++) {
-        src_corners[i] = cvPoint(srcArray->Get(i*2)->IntegerValue(),srcArray->Get(i*2+1)->IntegerValue());
-        tgt_corners[i] = cvPoint(tgtArray->Get(i*2)->IntegerValue(),tgtArray->Get(i*2+1)->IntegerValue());
-    }
+  std::vector<cv::Point2f> src_corners(4);
+  std::vector<cv::Point2f> tgt_corners(4);
+  for (unsigned int i = 0; i < 4; i++) {
+      src_corners[i] = cvPoint(srcArray->Get(i*2)->IntegerValue(),srcArray->Get(i*2+1)->IntegerValue());
+      tgt_corners[i] = cvPoint(tgtArray->Get(i*2)->IntegerValue(),tgtArray->Get(i*2+1)->IntegerValue());
+  }
 
-    Local<Object> xfrm = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
-    Matrix *xfrmmat = ObjectWrap::Unwrap<Matrix>(xfrm);
-    xfrmmat->mat = cv::getPerspectiveTransform(src_corners, tgt_corners);
+  Local<Object> xfrm = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *xfrmmat = ObjectWrap::Unwrap<Matrix>(xfrm);
+  xfrmmat->mat = cv::getPerspectiveTransform(src_corners, tgt_corners);
 
-    NanReturnValue(xfrm);
+  NanReturnValue(xfrm);
 }
 
 
 NAN_METHOD(Matrix::WarpPerspective) {
-    SETUP_FUNCTION(Matrix)
+  SETUP_FUNCTION(Matrix)
 
-    Matrix *xfrm = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+  Matrix *xfrm = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 
-    int width = args[1]->IntegerValue();
-    int height = args[2]->IntegerValue();
+  int width = args[1]->IntegerValue();
+  int height = args[2]->IntegerValue();
 
-    int flags = cv::INTER_LINEAR;
-    int borderMode = cv::BORDER_REPLICATE;
+  int flags = cv::INTER_LINEAR;
+  int borderMode = cv::BORDER_REPLICATE;
 
-    cv::Scalar borderColor(0, 0, 255);
+  cv::Scalar borderColor(0, 0, 255);
 
-    if(args[3]->IsArray()) {
-        Local<Object> objColor = args[3]->ToObject();
-        borderColor = setColor(objColor);
-    }
+  if(args[3]->IsArray()) {
+      Local<Object> objColor = args[3]->ToObject();
+      borderColor = setColor(objColor);
+  }
 
-    cv::Mat res = cv::Mat(width, height, CV_32FC3);
+  cv::Mat res = cv::Mat(width, height, CV_32FC3);
 
-    cv::warpPerspective(self->mat, res, xfrm->mat, cv::Size(width, height), flags, borderMode, borderColor);
+  cv::warpPerspective(self->mat, res, xfrm->mat, cv::Size(width, height), flags, borderMode, borderColor);
 
-    ~self->mat;
-    self->mat = res;
+  ~self->mat;
+  self->mat = res;
 
-    NanReturnNull();
+  NanReturnNull();
 }
 
 NAN_METHOD(Matrix::CopyWithMask) {
-    SETUP_FUNCTION(Matrix)
+  SETUP_FUNCTION(Matrix)
 
-    // param 0 - destination image:
-    Matrix *dest = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
-    // param 1 - mask. same size as src and dest
-    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+  // param 0 - destination image:
+  Matrix *dest = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+  // param 1 - mask. same size as src and dest
+  Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
 
-    self->mat.copyTo(dest->mat,mask->mat);
+  self->mat.copyTo(dest->mat,mask->mat);
 
-    NanReturnUndefined();
+  NanReturnUndefined();
 }
 
 
 NAN_METHOD(Matrix::SetWithMask) {
-    SETUP_FUNCTION(Matrix)
+  SETUP_FUNCTION(Matrix)
 
-    // param 0 - target value:
-    Local<Object> valArray = args[0]->ToObject();
-    cv::Scalar newvals;
-    newvals.val[0] = valArray->Get(0)->NumberValue();
-    newvals.val[1] = valArray->Get(1)->NumberValue();
-    newvals.val[2] = valArray->Get(2)->NumberValue();
+  // param 0 - target value:
+  Local<Object> valArray = args[0]->ToObject();
+  cv::Scalar newvals;
+  newvals.val[0] = valArray->Get(0)->NumberValue();
+  newvals.val[1] = valArray->Get(1)->NumberValue();
+  newvals.val[2] = valArray->Get(2)->NumberValue();
 
-    // param 1 - mask. same size as src and dest
-    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+  // param 1 - mask. same size as src and dest
+  Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
 
-    self->mat.setTo(newvals,mask->mat);
+  self->mat.setTo(newvals,mask->mat);
 
-    NanReturnUndefined();
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Matrix::MeanWithMask) {
-    SETUP_FUNCTION(Matrix)
+  SETUP_FUNCTION(Matrix)
 
-    // param 0 - mask. same size as src and dest
-    Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+  // param 0 - mask. same size as src and dest
+  Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 
-    cv::Scalar means = cv::mean(self->mat, mask->mat);
-    v8::Local<v8::Array> arr = NanNew<Array>(3);
-    arr->Set(0, NanNew<Number>( means[0] ));
-    arr->Set(1, NanNew<Number>( means[1] ));
-    arr->Set(2, NanNew<Number>( means[2] ));
+  cv::Scalar means = cv::mean(self->mat, mask->mat);
+  v8::Local<v8::Array> arr = NanNew<Array>(3);
+  arr->Set(0, NanNew<Number>( means[0] ));
+  arr->Set(1, NanNew<Number>( means[1] ));
+  arr->Set(2, NanNew<Number>( means[2] ));
 
-    NanReturnValue(arr);
+  NanReturnValue(arr);
 }
 
 NAN_METHOD(Matrix::Shift){
