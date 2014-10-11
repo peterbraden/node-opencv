@@ -4,7 +4,7 @@ var vows = require('vows')
 
 assertDeepSimilar = function(res, exp){
   for (var i = 0; i < res.length; i++){
- //   res[i] = Math.round(res[i]/100)*100;  
+ //   res[i] = Math.round(res[i]/100)*100;
   }
   assert.deepEqual(res, exp)
 }
@@ -34,27 +34,27 @@ vows.describe('Smoke Tests OpenCV').addBatch({
 
     	, '.Point imports': function(topic){
     		assert.ok(!!topic.Point)
-    	} 
-      
+    	}
+
       , '.Matrix imports': function(topic){
         assert.ok(!!topic.Matrix)
-      } 
+      }
 
       , 'importing library multiple times is ok' : function(){
         var cv1 = require('../lib/opencv')
           , cv2 = require('../lib/opencv')
-          cv1.readImage('./examples/mona.png', function(){});
-          cv2.readImage('./examples/mona.png', function(){});
+          cv1.readImage('./examples/files/mona.png', function(){});
+          cv2.readImage('./examples/files/mona.png', function(){});
       }
     }
 
   , "Point" : {
     topic : require('../lib/opencv')
-    
+
     , 'constructor' : function(cv){
       assert.ok(!!new cv.Point(1, 2))
       assert.throws(function () { cv.Point(1, 2)}, TypeError); // cannot call without new
-    }    
+    }
 
     , 'accessors' : function(cv){
         assert.equal(new cv.Point(1, 2).x, 1)
@@ -144,20 +144,20 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
     , "toBuffer": function(cv){
-        var buf = fs.readFileSync('./examples/mona.png')
-        
+        var buf = fs.readFileSync('./examples/files/mona.png')
+
         cv.readImage(buf.slice(0), function(err, mat){
           var buf0 = mat.toBuffer()
-        
+
           assert.ok(buf0);
         //assert.equal(buf.toString('base64'), buf0.toString('base64'));
         })
 
     }
-    
+
     , "toBuffer Async": {
       topic: function(cv){
-          var buf = fs.readFileSync('./examples/mona.png')
+          var buf = fs.readFileSync('./examples/files/mona.png')
             , cb = this.callback
           cv.readImage(buf.slice(0), function(err, mat){
             var buff = mat.toBuffer(function(){
@@ -173,14 +173,14 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
     , "detectObject": {
-      
+
      topic : function(){
         var cv = require('../lib/opencv')
           , cb = this.callback
 
-        cv.readImage("./examples/mona.png", function(err, im){
+        cv.readImage("./examples/files/mona.png", function(err, im){
           im.detectObject(cv.FACE_CASCADE, {}, cb)
-        })  
+        })
       }
 
       , "finds face": function(err, faces){
@@ -191,8 +191,8 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     }
 
     , ".absDiff and .countNonZero" : function(cv) {
-      cv.readImage("./examples/mona.png", function(err, im) {
-        cv.readImage("./examples/mona.png", function(err, im2){
+      cv.readImage("./examples/files/mona.png", function(err, im) {
+        cv.readImage("./examples/files/mona.png", function(err, im2){
           assert.ok(im);
           assert.ok(im2);
 
@@ -226,20 +226,20 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     topic : require('../lib/opencv')
 
     , ".readImage from file": function(cv){
-      cv.readImage("./examples/mona.png", function(err, im){
+      cv.readImage("./examples/files/mona.png", function(err, im){
         assert.ok(im);
         assert.equal(im.width(), 500);
         assert.equal(im.height(), 756)
-        assert.equal(im.empty(), false)      
+        assert.equal(im.empty(), false)
       })
     }
 
     , ".readImage from buffer" : function(cv){
-      cv.readImage(fs.readFileSync('./examples/mona.png'), function(err, im){
+      cv.readImage(fs.readFileSync('./examples/files/mona.png'), function(err, im){
         assert.ok(im);
         assert.equal(im.width(), 500);
         assert.equal(im.height(), 756)
-        assert.equal(im.empty(), false)      
+        assert.equal(im.empty(), false)
       })
 
     }
@@ -258,10 +258,10 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       topic : function(){
         var cv = require('../lib/opencv')
           , self = this
-        
-        cv.readImage("./examples/mona.png", function(err, im){
+
+        cv.readImage("./examples/files/mona.png", function(err, im){
           cascade = new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml");
-          cascade.detectMultiScale(im, self.callback)//, 1.1, 2, [30, 30]);          
+          cascade.detectMultiScale(im, self.callback)//, 1.1, 2, [30, 30]);
         })
 
       }
@@ -289,7 +289,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
           assert.equal(im.empty(), false);
           self.callback()
         }) 
-        fs.createReadStream('./examples/mona.png').pipe(s);
+        fs.createReadStream('./examples/files/mona.png').pipe(s);
       }
 
       , "loaded" : function(im){
@@ -305,7 +305,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
     , "write" : {
       topic: function(cv){
         var s = new cv.ImageStream()
-          , im = fs.readFileSync('./examples/mona.png')
+          , im = fs.readFileSync('./examples/files/mona.png')
           , self = this;
 
         s.on('data', function(m){
@@ -330,14 +330,14 @@ vows.describe('Smoke Tests OpenCV').addBatch({
       topic : function(){
         var cv = require('../lib/opencv')
           , self = this
-        
-        cv.readImage('./examples/coin1.jpg', function(e, im){
-          cv.readImage('./examples/coin2.jpg', function(e, im2){
+
+        cv.readImage('./examples/files/coin1.jpg', function(e, im){
+          cv.readImage('./examples/files/coin2.jpg', function(e, im2){
             self.callback(im, im2, cv)
           })
         })
       }
-      
+
       , "create TrackedObject" : function(im, im2, cv){
         var tracked = new cv.TrackedObject(im, [420, 110, 490, 170]);
         assert.ok(tracked);
@@ -348,15 +348,15 @@ vows.describe('Smoke Tests OpenCV').addBatch({
           assertWithinRanges(tracked.track(im2), [386, 112, 459, 166], 10);
       }
     }
-  
+
   }
 
   , "putText": {
     topic: function() {
       var cv = require('../lib/opencv')
         , self = this
-      
-      cv.readImage('./examples/coin1.jpg', function(e, im){
+
+      cv.readImage('./examples/files/coin1.jpg', function(e, im){
         self.callback(null, im);
       });
     },
@@ -381,7 +381,7 @@ vows.describe('Smoke Tests OpenCV').addBatch({
         im.putText("Some text", 0, y += 20, font, [rnd(), rnd(), rnd()]);
       });
 
-      im.save("./examples/coin1-with-text.jpg");
+      im.save("./examples/tmp/coin1-with-text.jpg");
     }
   }
 
