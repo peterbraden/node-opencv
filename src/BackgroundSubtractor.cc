@@ -126,6 +126,7 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
   catch( cv::Exception& e ){
     const char* err_msg = e.what();
     NanThrowError(err_msg);
+    NanReturnUndefined();
   }
 
 };

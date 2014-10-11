@@ -180,7 +180,6 @@ class AsyncVCWorker : public NanAsyncWorker {
  private:
   VideoCaptureWrap *vc;
   Matrix* matrix;
-  int  res;
 };
 
 
