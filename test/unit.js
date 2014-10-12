@@ -1,176 +1,128 @@
-var vows = require('vows')
-  , assert = require('assert')
-  , fs = require('fs');
-
-assertDeepSimilar = function(res, exp){
-  for (var i = 0; i < res.length; i++){
- //   res[i] = Math.round(res[i]/100)*100;
-  }
-  assert.deepEqual(res, exp)
-}
-
-assertWithinRange = function(res, exp, range){
-  assert.ok((res - exp) < range || (res - exp) > -range, "Not within range:" + res + " (" + exp + "+- " + range + ")")  
-}
-
-assertWithinRanges = function(res, exp, range){
-  for (var i =0; i<res.length; i++){
-    assertWithinRange(res[i], exp[i], range);
-  }
-}
-
-vows.describe('Smoke Tests OpenCV').addBatch({
-	  "Importing": {
-
-    	topic: require('../lib/opencv')
-
-      , "returns obj": function(topic){
-        assert.ok(!!topic)
-      }
-
-    	, '.version' : function(topic){
-    		assert.ok(!!topic.version)
-    	  }
-
-    	, '.Point imports': function(topic){
-    		assert.ok(!!topic.Point)
-    	}
-
-      , '.Matrix imports': function(topic){
-        assert.ok(!!topic.Matrix)
-      }
-
-      , 'importing library multiple times is ok' : function(){
-        var cv1 = require('../lib/opencv')
-          , cv2 = require('../lib/opencv')
-          cv1.readImage('./examples/files/mona.png', function(){});
-          cv2.readImage('./examples/files/mona.png', function(){});
-      }
-    }
-
-  , "Point" : {
-    topic : require('../lib/opencv')
-
-    , 'constructor' : function(cv){
-      assert.ok(!!new cv.Point(1, 2))
-      assert.throws(function () { cv.Point(1, 2)}, TypeError); // cannot call without new
-    }
-
-    , 'accessors' : function(cv){
-        assert.equal(new cv.Point(1, 2).x, 1)
-        assert.equal(new cv.Point(1, 2).y, 2)
-        assert.equal(Math.round(new cv.Point(1.1, 2).x * 100), 110)
-        assert.equal(Math.round(new cv.Point(1.2, 2.75).y *100), 275)
-
-        assert.throws(function () {new cv.Point(1.1, 2).x = 5}, Error); // Points are immutable
-        assert.throws(function () {new cv.Point(1.1, 2).y = 5}, Error); // Points are immutable
-
-    }
+var fs = require('fs')
+  , test = require('tape')
+  , cv = null
 
 
-    , '.dot': function(cv){
-      var p1 = new cv.Point(3, 6)
-        , p2 = new cv.Point(5, 7)
 
-      assert.ok(p1.dot);
-      assert.equal(p1.dot(p2), 57);
-
-    }
-
-    , '.inside' : function(){}
-  }
+test("Smoke tests / Can Import", function(t){
+  cv = require('../lib/opencv')
+  t.ok(cv, "imported fine")
+  t.ok(cv.version, "version is there:" + cv.version)
+  t.ok(cv.Point, "point is there")
+  t.ok(cv.Matrix, "matrix is there")
+  t.end()
+})
 
 
-  , "Matrix": {
-    topic : require('../lib/opencv')
-
-    , "constructor" : function(cv){
-      assert.ok(cv.Matrix);
-      assert.ok(new cv.Matrix);
-      assert.ok(new cv.Matrix(1,2));
-    }
-
-    , "set/row" : function(cv){
-      var mat = new cv.Matrix(1, 2);
-      mat.set(0,0,3)
-      mat.set(0,1,5000)
-      assert.deepEqual(mat.row(0), [3,5000]);
-    }
-
-    , "get/set" : function(cv){
-       var mat = new cv.Matrix(1,2);
-       assert.equal(mat.set(0,0,3), undefined);
-       assert.equal(mat.get(0,0), 3);
-    }
-
-    , ".width" : function(cv){
-      var mat = new cv.Matrix(6,7);
-      assert.equal(mat.width(), 7);
-    }
-
-    , ".height" : function(cv){
-      var mat = new cv.Matrix(6,7);
-      assert.equal(mat.height(), 6);
-    }
-
-    , ".size" : function(cv){
-      var mat = new cv.Matrix(6,7);
-      assert.deepEqual(mat.size(), [6, 7]);
-    }
+test('importing library multiple times is ok', function(t){
+  var cv1 = require('../lib/opencv')
+    , cv2 = require('../lib/opencv')
+    cv1.readImage('./examples/files/mona.png', function(err, im){
+      t.error(err)
+      cv2.readImage('./examples/files/mona.png', function(err, im){
+        t.error(err)
+        t.end();
+      });
+    });
+})
 
 
-    , "resize" : function(cv){
-      var mat = new cv.Matrix(6,7);
-      assert.equal(mat.width(), 7);
-      mat.resize(8,9);
-      assert.equal(mat.width(), 8);
+test('Point', function(t){
 
-    }
+  t.ok(new cv.Point(1, 2))
+  t.throws(function () { cv.Point(1, 2)}, TypeError, "cannot call without new")
 
-    , 'row' : function(cv){
-      var mat = new cv.Matrix.Eye(4,4)
-      assertDeepSimilar(mat.row(1), [0,1,0,0])
-      assertDeepSimilar(mat.row(2), [0,0,1,0])
-    }
+  t.equal(new cv.Point(1, 2).x, 1)
+  t.equal(new cv.Point(1, 2).y, 2)
+  t.equal(Math.round(new cv.Point(1.1, 2).x * 100), 110)
+  t.equal(Math.round(new cv.Point(1.2, 2.75).y *100), 275)
 
-    , 'col' : function(cv){
-      var mat = new cv.Matrix.Eye(4,4);
-      assertDeepSimilar(mat.col(1), [0,1,0,0])
-      assertDeepSimilar(mat.col(2), [0,0,1,0])
-    }
+  t.throws(function () {new cv.Point(1.1, 2).x = 5}, Error, "Points are immutable")
+  t.throws(function () {new cv.Point(1.1, 2).y = 5}, Error, "Points are immutable")
 
-    , "empty": function(cv){
-      assert.equal(new cv.Matrix().empty(), true);
-    }
+  var p1 = new cv.Point(3, 6)
+    , p2 = new cv.Point(5, 7)
 
-    , "toBuffer": function(cv){
-        var buf = fs.readFileSync('./examples/files/mona.png')
+  t.ok(p1.dot);
+  t.equal(p1.dot(p2), 57);
 
-        cv.readImage(buf.slice(0), function(err, mat){
-          var buf0 = mat.toBuffer()
+  t.end()
+})
 
-          assert.ok(buf0);
-        //assert.equal(buf.toString('base64'), buf0.toString('base64'));
-        })
 
-    }
+test('Matrix constructor', function(assert){
+  assert.ok(cv.Matrix);
+  assert.ok(new cv.Matrix);
+  assert.ok(new cv.Matrix(1,2));
+  assert.end()
+})
 
-    , "toBuffer Async": {
-      topic: function(cv){
-          var buf = fs.readFileSync('./examples/files/mona.png')
-            , cb = this.callback
-          cv.readImage(buf.slice(0), function(err, mat){
-            var buff = mat.toBuffer(function(){
-              cb.apply(this, arguments)
-            })
-          })
-        }
-    ,  'gives a buffer' : function(e, res){
-        assert.ok(!e)
-        assert.ok(res);
-        assert.ok(res.length > 100);
-      }
-    }
+test('Matrix accessors', function(assert){
+  var mat = new cv.Matrix(1, 2);
+  mat.set(0,0,3)
+  mat.set(0,1,5000)
+  assert.deepEqual(mat.row(0), [3,5000]);
+
+  mat = new cv.Matrix(1,2);
+  assert.equal(mat.set(0,0,3), undefined);
+  assert.equal(mat.get(0,0), 3);
+
+  mat = new cv.Matrix(6,7);
+  assert.equal(mat.width(), 7);
+
+  mat = new cv.Matrix(6,7);
+  assert.equal(mat.height(), 6);
+
+  mat = new cv.Matrix(6,7);
+  assert.deepEqual(mat.size(), [6, 7]);
+
+  mat = new cv.Matrix(6,7);
+  assert.equal(mat.width(), 7);
+  mat.resize(8,9);
+  assert.equal(mat.width(), 8);
+
+  mat = new cv.Matrix.Eye(4,4)
+  assert.deepEqual(mat.row(1), [0,1,0,0])
+  assert.deepEqual(mat.row(2), [0,0,1,0])
+
+  mat = new cv.Matrix.Eye(4,4);
+  assert.deepEqual(mat.col(1), [0,1,0,0])
+  assert.deepEqual(mat.col(2), [0,0,1,0])
+
+  assert.equal(new cv.Matrix().empty(), true);
+
+  assert.end()
+})
+
+
+test("Matrix toBuffer", function(assert){
+  var buf = fs.readFileSync('./examples/files/mona.png')
+
+  cv.readImage(buf.slice(0), function(err, mat){
+    var buf0 = mat.toBuffer()
+    assert.ok(buf0);
+    assert.end()
+  })
+})
+
+
+
+test("Matrix toBuffer Async", function(assert){
+  var buf = fs.readFileSync('./examples/files/mona.png')
+
+  cv.readImage(buf.slice(0), function(err, mat){
+    mat.toBuffer(function(err, buff){
+      assert.error(err)
+      assert.ok(buf)
+      assert.ok(buf.length > 100)
+
+      assert.end()
+    })
+  })
+})
+
+/*
+
 
     , "detectObject": {
 
@@ -321,69 +273,56 @@ vows.describe('Smoke Tests OpenCV').addBatch({
   }
   , "ObjectDetectionStream" :{
     topic : require('../lib/opencv')
-
   }
-
-  , "CamShift" : {
-
-     "Can Create and Track" : {
-      topic : function(){
-        var cv = require('../lib/opencv')
-          , self = this
-
-        cv.readImage('./examples/files/coin1.jpg', function(e, im){
-          cv.readImage('./examples/files/coin2.jpg', function(e, im2){
-            self.callback(im, im2, cv)
-          })
-        })
-      }
-
-      , "create TrackedObject" : function(im, im2, cv){
-        var tracked = new cv.TrackedObject(im, [420, 110, 490, 170]);
-        assert.ok(tracked);
-      }
-
-      , "use TrackedObject.track" : function(im, im2, cv){
-          var tracked = new cv.TrackedObject(im, [420, 110, 490, 170], {channel: 'v'});
-          assertWithinRanges(tracked.track(im2), [386, 112, 459, 166], 10);
-      }
-    }
-
-  }
-
-  , "putText": {
-    topic: function() {
-      var cv = require('../lib/opencv')
-        , self = this
-
-      cv.readImage('./examples/files/coin1.jpg', function(e, im){
-        self.callback(null, im);
-      });
-    },
-    "fonts": function(im) {
-      function rnd() {
-        return Math.round(Math.random() * 255);
-      };
-
-      var y = 0;
-
-      ([
-        "HERSEY_SIMPLEX",
-        "HERSEY_PLAIN",
-        "HERSEY_DUPLEX",
-        "HERSEY_COMPLEX",
-        "HERSEY_TRIPLEX",
-        "HERSEY_COMPLEX_SMALL",
-        "HERSEY_SCRIPT_SIMPLEX",
-        "HERSEY_SCRIPT_COMPLEX",
-        "HERSEY_SCRIPT_SIMPLEX"
-      ]).forEach(function(font) {
-        im.putText("Some text", 0, y += 20, font, [rnd(), rnd(), rnd()]);
-      });
-
-      im.save("./examples/tmp/coin1-with-text.jpg");
-    }
-  }
+*/
 
 
-}).export(module);
+test("CamShift", function(assert){
+  cv.readImage('./examples/files/coin1.jpg', function(e, im){
+    cv.readImage('./examples/files/coin2.jpg', function(e, im2){
+      var tracked = new cv.TrackedObject(im, [420, 110, 490, 170], {channel: 'v'});
+      assert.ok(tracked);
+      var res = tracked.track(im2)
+      assert.ok(res);
+      assert.ok(res[0]  < 396)
+      assert.ok(res[0]  > 376)
+      assert.ok(res[1]  < 122)
+      assert.ok(res[1]  > 102)
+      assert.ok(res[2]  < 469)
+      assert.ok(res[2]  > 449)
+      assert.ok(res[3]  < 176)
+      assert.ok(res[3]  > 156)
+      assert.end()
+    })
+  })
+})
+
+test("fonts", function(t) {
+
+  function rnd() {
+    return Math.round(Math.random() * 255);
+  };
+
+  cv.readImage('./examples/files/coin1.jpg', function(e, im){
+    var y = 0;
+
+    ([
+      "HERSEY_SIMPLEX",
+      "HERSEY_PLAIN",
+      "HERSEY_DUPLEX",
+      "HERSEY_COMPLEX",
+      "HERSEY_TRIPLEX",
+      "HERSEY_COMPLEX_SMALL",
+      "HERSEY_SCRIPT_SIMPLEX",
+      "HERSEY_SCRIPT_COMPLEX",
+      "HERSEY_SCRIPT_SIMPLEX"
+    ]).forEach(function(font) {
+      im.putText("Some text", 0, y += 20, font, [rnd(), rnd(), rnd()]);
+    });
+
+    t.ok(im, "image is ok")
+    //im.save("./examples/tmp/coin1-with-text.jpg");
+    t.end();
+  });
+})
+
