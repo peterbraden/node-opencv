@@ -53,7 +53,13 @@ NamedWindow::NamedWindow(const std::string& name, int f){
 NAN_METHOD(NamedWindow::Show){
 	SETUP_FUNCTION(NamedWindow)
   Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
-  cv::imshow(self->winname, im->mat);
+
+  try{
+    cv::imshow(self->winname, im->mat);
+  } catch(cv::Exception& e ){
+    const char* err_msg = e.what();
+    NanThrowError(err_msg);
+  }
 
 	NanReturnValue(args.Holder());
 }
