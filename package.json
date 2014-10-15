@@ -8,12 +8,12 @@
   },
   "version": "1.0.0",
   "devDependencies": {
-    "vows": "*"
+    "tape": "^3.0.0"
   },
   "license": "MIT",
   "scripts": {
     "build": "node-gyp build",
-    "test": "vows test/unit.js"
+    "test": "node test/unit.js"
   },
   "keywords": [
     "opencv",
