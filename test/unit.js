@@ -121,160 +121,109 @@ test("Matrix toBuffer Async", function(assert){
   })
 })
 
-/*
+
+test("detectObject", function(assert){
+  cv.readImage("./examples/files/mona.png", function(err, im){
+    im.detectObject(cv.FACE_CASCADE, {}, function(err, faces){
+      assert.error(err)
+      assert.ok(faces)
+      assert.equal(faces.length, 1)
+      assert.end()
+    })
+  })
+})
+
+test(".absDiff and .countNonZero", function(assert){
+  cv.readImage("./examples/files/mona.png", function(err, im) {
+    cv.readImage("./examples/files/mona.png", function(err, im2){
+      assert.ok(im);
+      assert.ok(im2);
+
+      var diff = new cv.Matrix(im.width(), im.height());
+      diff.absDiff(im, im2);
+
+      diff.convertGrayscale();
+      assert.equal(diff.countNonZero(), 0);
+      assert.end()
+    });
+  });
+})
 
 
-    , "detectObject": {
+test(".bitwiseXor", function(assert){
+  var mat1 = new cv.Matrix(1,1);
+  mat1.set(0,0, 1);
 
-     topic : function(){
-        var cv = require('../lib/opencv')
-          , cb = this.callback
+  var mat2 = new cv.Matrix(1,1);
+  mat2.set(0,0, 1);
 
-        cv.readImage("./examples/files/mona.png", function(err, im){
-          im.detectObject(cv.FACE_CASCADE, {}, cb)
-        })
-      }
+  var xored = new cv.Matrix(1,1);
+  xored.bitwiseXor(mat1, mat2);
 
-      , "finds face": function(err, faces){
-          assert.isNull(err);
-          assert.isArray(faces);
-          assert.equal(faces.length, 1)
-      }
-    }
+  assert.equal(xored.get(0,0), 0);
 
-    , ".absDiff and .countNonZero" : function(cv) {
-      cv.readImage("./examples/files/mona.png", function(err, im) {
-        cv.readImage("./examples/files/mona.png", function(err, im2){
-          assert.ok(im);
-          assert.ok(im2);
-
-          var diff = new cv.Matrix(im.width(), im.height());
-          diff.absDiff(im, im2);
-
-          diff.convertGrayscale();
-          assert.equal(diff.countNonZero(), 0);
-        });
-      });
-    }
-
-    , ".bitwiseXor" : function(cv) {
-      var mat1 = new cv.Matrix(1,1);
-      mat1.set(0,0, 1);
-
-      var mat2 = new cv.Matrix(1,1);
-      mat2.set(0,0, 1);
-
-      var xored = new cv.Matrix(1,1);
-      xored.bitwiseXor(mat1, mat2);
-
-      assert.equal(xored.get(0,0), 0);
-    }
-
-  }
+  assert.end()
+})
 
 
-
-  , "Image" : {
-    topic : require('../lib/opencv')
-
-    , ".readImage from file": function(cv){
-      cv.readImage("./examples/files/mona.png", function(err, im){
-        assert.ok(im);
-        assert.equal(im.width(), 500);
-        assert.equal(im.height(), 756)
-        assert.equal(im.empty(), false)
-      })
-    }
-
-    , ".readImage from buffer" : function(cv){
-      cv.readImage(fs.readFileSync('./examples/files/mona.png'), function(err, im){
-        assert.ok(im);
-        assert.equal(im.width(), 500);
-        assert.equal(im.height(), 756)
-        assert.equal(im.empty(), false)
-      })
-
-    }
-
-  }
+test("Image read from file", function(assert){
+  cv.readImage("./examples/files/mona.png", function(err, im){
+    assert.ok(im);
+    assert.equal(im.width(), 500);
+    assert.equal(im.height(), 756)
+    assert.equal(im.empty(), false)
+    assert.end()
+  })
+})
 
 
-  , "CascadeClassifier": {
-    topic : require('../lib/opencv')
+test("read Image from buffer", function(assert){
+  cv.readImage(fs.readFileSync('./examples/files/mona.png'), function(err, im){
+    assert.ok(im);
+    assert.equal(im.width(), 500);
+    assert.equal(im.height(), 756)
+    assert.equal(im.empty(), false)
+    assert.end()
+  })
+})
 
-    , "constructor" : function(cv){
-      assert.ok(new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml"))
-    }
+test("Cascade Classifier", function(assert){
+  assert.ok(new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml"), 'test constructor')
 
-    , "face detection": {
-      topic : function(){
-        var cv = require('../lib/opencv')
-          , self = this
-
-        cv.readImage("./examples/files/mona.png", function(err, im){
-          cascade = new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml");
-          cascade.detectMultiScale(im, self.callback)//, 1.1, 2, [30, 30]);
-        })
-
-      }
-
-      , "finds face": function(err, faces){
-          assert.isNull(err);
-          assert.isArray(faces);
-          assert.equal(faces.length, 1)
-
-      }
-    }
-
-  }
+  cv.readImage("./examples/files/mona.png", function(err, im){
+    cascade = new cv.CascadeClassifier("./data/haarcascade_frontalface_alt.xml");
+    cascade.detectMultiScale(im, function(err, faces){//, 1.1, 2, [30, 30]);
+      assert.error(err);
+      assert.equal(typeof faces, typeof []);
+      assert.equal(faces.length, 1)
+      assert.end()
+    })
+  })
+})
 
 
-  , "ImageDataStream" : {
-    topic : require('../lib/opencv')
+test("ImageDataStream", function(assert){
+  var s = new cv.ImageDataStream()
+  s.on('load', function(im){ 
+    assert.ok(im)
+    assert.equal(im.empty(), false);
+    assert.end()
+  })
 
-    , "pipe" : {
-      topic : function(cv){
-        var s = new cv.ImageDataStream()
-          , self = this
-        s.on('load', function(im){ 
-          assert.ok(im)
-          assert.equal(im.empty(), false);
-          self.callback()
-        }) 
-        fs.createReadStream('./examples/files/mona.png').pipe(s);
-      }
+  fs.createReadStream('./examples/files/mona.png').pipe(s);
 
-      , "loaded" : function(im){
-        //assert.ok(im)
-        //assert.equal(im.empty(), false);
-      }
-    }
+})
 
+test("ImageStream", function(assert){
+  var s = new cv.ImageStream()
+    , im = fs.readFileSync('./examples/files/mona.png')
 
-  }
-  , "ImageStream" :{
-    topic : require('../lib/opencv')
-    , "write" : {
-      topic: function(cv){
-        var s = new cv.ImageStream()
-          , im = fs.readFileSync('./examples/files/mona.png')
-          , self = this;
-
-        s.on('data', function(m){
-          self.callback(null, m)
-        })
-        s.write(im);
-      }
-      , "receives data" : function(mat){
-        assert.deepEqual(mat.size(), [756,500])
-      }
-    }
-
-  }
-  , "ObjectDetectionStream" :{
-    topic : require('../lib/opencv')
-  }
-*/
+  s.on('data', function(mat){
+    assert.deepEqual(mat.size(), [756,500])
+    assert.end()
+  })
+  s.write(im);
+})
 
 
 test("CamShift", function(assert){
