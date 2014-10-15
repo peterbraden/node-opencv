@@ -12,7 +12,7 @@ var RED   = [0, 0, 255]; //B, G, R
 var GREEN = [0, 255, 0]; //B, G, R
 var WHITE = [255, 255, 255]; //B, G, R
 
-cv.readImage('./files/quads.jpg', function(err, im) {
+cv.readImage('./examples/files/quads.jpg', function(err, im) {
   if (err) throw err;
   if (im.width() < 1 || im.height() < 1) throw new Error('Image has no size');
 

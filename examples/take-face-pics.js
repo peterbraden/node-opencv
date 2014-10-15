@@ -18,7 +18,7 @@ vid.read(function(err, im){
        , -face.x
        , (face.x + face.width) - ims[1])
        */
-    im2.save('./tmp/take-face-pics.jpg')
+    im2.save('./examples/tmp/take-face-pics.jpg')
     console.log('Image saved to ./tmp/take-face-pics.jpg');
   })
 });
