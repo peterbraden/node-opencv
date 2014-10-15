@@ -12,7 +12,7 @@ var GREEN = [0, 255, 0]; // B, G, R
 var WHITE = [255, 255, 255]; // B, G, R
 
 
-cv.readImage('./files/shapes.jpg', function(err, im) {
+cv.readImage('./examples/files/shapes.jpg', function(err, im) {
   if (err) throw err;
 
   width = im.width()
@@ -46,6 +46,6 @@ cv.readImage('./files/shapes.jpg', function(err, im) {
     }
   }
 
-  out.save('./tmp/detect-shapes.png');
-  console.log('Image saved to ./tmp/detect-shapes.png');
+  out.save('./examples/tmp/detect-shapes.png');
+  console.log('Image saved to ./examples/tmp/detect-shapes.png');
 });

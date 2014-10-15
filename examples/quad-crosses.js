@@ -47,6 +47,6 @@ cv.readImage('./examples/files/quads.jpg', function(err, im) {
     out.line([points[1].x,points[1].y], [points[3].x, points[3].y], RED);
   }
 
-  out.save('./tmp/quad-crosses.png');
-  console.log('Image saved to ./tmp/quad-crosses.png');
+  out.save('./examples/tmp/quad-crosses.png');
+  console.log('Image saved to ./examples/tmp/quad-crosses.png');
 });

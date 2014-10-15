@@ -68,6 +68,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "drawAllContours", DrawAllContours);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "houghLinesP", HoughLinesP);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "crop", Crop);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "inRange", inRange);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "adjustROI", AdjustROI);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "locateROI", LocateROI);
