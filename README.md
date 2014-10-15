@@ -22,6 +22,7 @@ $ npm install opencv
 ```
 
 ## Examples
+Run the examples from the parent directory.
 
 ### Face Detection
 
