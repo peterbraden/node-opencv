@@ -9,7 +9,8 @@
   "version": "1.0.0",
   "devDependencies": {
     "tape": "^3.0.0",
-    "glob": "^4.0.6"
+    "glob": "^4.0.6",
+    "request": "^2.45.0"
   },
   "license": "MIT",
   "scripts": {
