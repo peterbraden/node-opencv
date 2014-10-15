@@ -1,9 +1,9 @@
 var cv = require('../lib/opencv');
 
-cv.readImage("./files/mona.png", function(err, orig) {
+cv.readImage("./examples/files/mona.png", function(err, orig) {
   if (err) throw err;
 
-  cv.readImage("./files/over_text.png", function(err, over_text) {
+  cv.readImage("./examples/over_text.png", function(err, over_text) {
     if (err) throw err;
 
     var result = new cv.Matrix(orig.width(), orig.height());
