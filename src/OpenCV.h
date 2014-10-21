@@ -6,32 +6,33 @@
 #include <node_object_wrap.h>
 #include <node_version.h>
 #include <node_buffer.h>
-#include <cv.h>
-#include <highgui.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 #include <string.h>
+#include <nan.h>
 
 using namespace v8;
 using namespace node;
 
 #define REQ_FUN_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsFunction())                   \
-    return v8::ThrowException(v8::Exception::TypeError(                         \
-                  String::New("Argument " #I " must be a function")));  \
+    return NanThrowTypeError("Argument " #I " must be a function");  \
   Local<Function> VAR = Local<Function>::Cast(args[I]);
 
 
 #define SETUP_FUNCTION(TYP)	\
-	HandleScope scope;		\
+	NanScope();		\
 	TYP *self = ObjectWrap::Unwrap<TYP>(args.This());
 
 #define JSFUNC(NAME) \
-	static Handle<Value> NAME(const Arguments& args); 
+  static NAN_METHOD(NAME);
 
 #define JSTHROW_TYPE(ERR) \
-  return v8::ThrowException(v8::Exception::TypeError(v8::String::New(ERR)));
+  NanThrowTypeError( ERR );
+
 
 #define JSTHROW(ERR) \
-  return v8::ThrowException(v8::Exception::Error(v8::String::New(ERR)));
+  NanThrowError( ERR );
 
 
 #define INT_FROM_ARGS(NAME, IND) \
@@ -48,9 +49,9 @@ class OpenCV: public node::ObjectWrap{
   public:
     static void Init(Handle<Object> target);
 
-    static Handle<Value> ReadImage(const v8::Arguments&);
-
+    static NAN_METHOD(ReadImage);
 };
+
 
 
 #endif

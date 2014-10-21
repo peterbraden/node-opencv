@@ -11,7 +11,7 @@ class FaceRecognizerWrap: public node::ObjectWrap {
 
     static Persistent<FunctionTemplate> constructor;
     static void Init(Handle<Object> target);
-    static Handle<Value> New(const Arguments &args);
+    static NAN_METHOD(New);
 
     FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f, int type);
 

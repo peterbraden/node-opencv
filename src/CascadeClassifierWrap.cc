@@ -1,81 +1,123 @@
 #include "CascadeClassifierWrap.h"
 #include "OpenCV.h"
 #include "Matrix.h"
+#include <nan.h>
 
-
-void AsyncDetectMultiScale(uv_work_t *req);
-void AfterAsyncDetectMultiScale(uv_work_t *req);
 
 Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
 
 void
 CascadeClassifierWrap::Init(Handle<Object> target) {
-    HandleScope scope;
+    NanScope();
 
-    // Constructor
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(CascadeClassifierWrap::New));
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor->SetClassName(String::NewSymbol("CascadeClassifier"));
+    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(CascadeClassifierWrap::New);
+    NanAssignPersistent(constructor, ctor);
+    ctor->InstanceTemplate()->SetInternalFieldCount(1);
+    ctor->SetClassName(NanNew("CascadeClassifier"));
 
     // Prototype
     //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-    NODE_SET_PROTOTYPE_METHOD(constructor, "detectMultiScale", DetectMultiScale);
+    NODE_SET_PROTOTYPE_METHOD(ctor, "detectMultiScale", DetectMultiScale);
 
-
-
-    target->Set(String::NewSymbol("CascadeClassifier"), constructor->GetFunction());
+    target->Set(NanNew("CascadeClassifier"), ctor->GetFunction());
 };    
 
-Handle<Value>
-CascadeClassifierWrap::New(const Arguments &args) {
-  HandleScope scope;
+NAN_METHOD(CascadeClassifierWrap::New) {
+  NanScope();
 
   if (args.This()->InternalFieldCount() == 0)
-    return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Cannot Instantiate without new")));
+    NanThrowTypeError("Cannot instantiate without new");
 
   CascadeClassifierWrap *pt = new CascadeClassifierWrap(*args[0]);  
   pt->Wrap(args.This());
-  return args.This();
+  NanReturnValue( args.This() );
 }
 
 
 CascadeClassifierWrap::CascadeClassifierWrap(v8::Value* fileName){
 	std::string filename;
-	filename = std::string(*v8::String::AsciiValue(fileName->ToString()));
+	filename = std::string(*NanAsciiString(fileName->ToString()));
 
   
   if (!cc.load(filename.c_str())){
-    v8::ThrowException(v8::Exception::TypeError(v8::String::New("Error loading file")));
+    NanThrowTypeError("Error loading file");
   }  
 }
 
 
 
 
-struct classifier_baton_t {
-  CascadeClassifierWrap *cc;
-  Persistent<Function> cb;
-  Matrix *im;
-  double scale;
-  int neighbors;
-  int minw;
-  int minh;
-  int sleep_for;
-  std::vector<cv::Rect> res;
+class AsyncDetectMultiScale : public NanAsyncWorker {
+ public:
+  AsyncDetectMultiScale(NanCallback *callback, CascadeClassifierWrap *cc, Matrix* im, double scale, int neighbors,  int minw, int minh, int sleep_for) : NanAsyncWorker(callback), cc(cc), im(im), scale(scale), neighbors(neighbors), minw(minw), minh(minh), sleep_for(sleep_for) {}
+  ~AsyncDetectMultiScale() {}
 
-  uv_work_t request;
+  void Execute () {
+    std::vector<cv::Rect> objects;
+
+    cv::Mat gray;
+
+    if(this->im->mat.channels() != 1)
+		    cvtColor(this->im->mat, gray, CV_BGR2GRAY);
+
+    equalizeHist( gray, gray);
+    this->cc->cc.detectMultiScale(gray, objects, this->scale, this->neighbors, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(this->minw, this->minh));
+    
+    res = objects;
+  }
+
+  void HandleOKCallback () {
+    NanScope();
+    //  this->matrix->Unref();
+    
+    v8::Local<v8::Array> arr = NanNew<v8::Array>(this->res.size());
+
+    for(unsigned int i = 0; i < this->res.size(); i++ ){
+      v8::Local<v8::Object> x = NanNew<v8::Object>();
+      x->Set(NanNew("x"), NanNew<Number>(this->res[i].x));
+      x->Set(NanNew("y"), NanNew<Number>(this->res[i].y));
+      x->Set(NanNew("width"), NanNew<Number>(this->res[i].width));
+      x->Set(NanNew("height"), NanNew<Number>(this->res[i].height));
+      arr->Set(i, x);
+    }
+
+    //argv[1] = arr;
+    Local<Value> argv[] = {
+        NanNull()
+      , arr
+    };
+    
+    TryCatch try_catch;
+    callback->Call(2, argv);
+    if (try_catch.HasCaught()) {
+      FatalException(try_catch);
+    }
+    
+  }
+  
+  private:
+    CascadeClassifierWrap *cc;
+    Matrix* im;
+    double scale;
+    int neighbors;
+    int minw;
+    int minh;
+    int sleep_for;
+    std::vector<cv::Rect>  res;
+    
 };
 
 
-Handle<Value>
-CascadeClassifierWrap::DetectMultiScale(const v8::Arguments& args){
-  HandleScope scope;
+
+
+NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
+  NanScope();
 
   CascadeClassifierWrap *self =  ObjectWrap::Unwrap<CascadeClassifierWrap>(args.This());
   
   if (args.Length() < 2){
-    v8::ThrowException(v8::Exception::TypeError(v8::String::New("detectMultiScale takes at least 2 args")));
+    NanThrowTypeError("detectMultiScale takes at least 2 args");
   }
 
   Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
@@ -97,87 +139,9 @@ CascadeClassifierWrap::DetectMultiScale(const v8::Arguments& args){
   }
 
 
-  classifier_baton_t *baton = new classifier_baton_t();
-  baton->cc = self;
-  baton->cb = Persistent<Function>::New(cb);
-  baton->im = im;
-  baton->scale = scale;
-  baton->neighbors = neighbors;
-  baton->minw = minw;
-  baton->minh = minh;
-  baton->sleep_for = 1;
-  baton->request.data = baton;
-//  self->Ref();
+  NanCallback *callback = new NanCallback(cb.As<Function>());
 
-//  eio_custom(EIO_DetectMultiScale, EIO_PRI_DEFAULT, EIO_AfterDetectMultiScale, baton);
-//  ev_ref(EV_DEFAULT_UC);
-
-  uv_queue_work(uv_default_loop(), &baton->request, AsyncDetectMultiScale,  (uv_after_work_cb)AfterAsyncDetectMultiScale);
-
-  return Undefined();
-
-
+  NanAsyncQueueWorker( new AsyncDetectMultiScale(callback, self, im, scale, neighbors, minw, minh, 1) );
+  NanReturnUndefined();
+   
 }
-
-
-void AsyncDetectMultiScale(uv_work_t *req) {
-  classifier_baton_t *baton = static_cast<classifier_baton_t *>(req->data);
-
-//  sleep(baton->sleep_for);
-
-  std::vector<cv::Rect> objects;
-
-  cv::Mat gray;
-
-  if(baton->im->mat.channels() != 1)
-		  cvtColor(baton->im->mat, gray, CV_BGR2GRAY);
-
-
-  equalizeHist( gray, gray);
-  baton->cc->cc.detectMultiScale(gray, objects, baton->scale, baton->neighbors, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(baton->minw, baton->minh));
-  
-  baton->res = objects;
-
-
-}
-
-void AfterAsyncDetectMultiScale(uv_work_t *req) {
-
-  HandleScope scope;
-  classifier_baton_t *baton = static_cast<classifier_baton_t *>(req->data);
-//  ev_unref(EV_DEFAULT_UC);
-//  baton->cc->Unref();
-
-  Local<Value> argv[2];
-
-  argv[0] = Local<Value>::New(Null());
-  
-
-  v8::Local<v8::Array> arr = v8::Array::New(baton->res.size());
-
-  for(unsigned int i = 0; i < baton->res.size(); i++ ){
-    v8::Local<v8::Object> x = v8::Object::New();
-    x->Set(v8::String::New("x"), v8::Number::New(baton->res[i].x));
-    x->Set(v8::String::New("y"), v8::Number::New(baton->res[i].y));
-    x->Set(v8::String::New("width"), v8::Number::New(baton->res[i].width));
-    x->Set(v8::String::New("height"), v8::Number::New(baton->res[i].height));
-    arr->Set(i, x);
-  }
-
-  argv[1] = arr;
-
-  TryCatch try_catch;
-
-  baton->cb->Call(Context::GetCurrent()->Global(), 2, argv);
-
-  if (try_catch.HasCaught()) {
-    FatalException(try_catch);
-  }
-
-  baton->cb.Dispose();
-
-  delete baton;
-  
-//  return 0;
-}
-

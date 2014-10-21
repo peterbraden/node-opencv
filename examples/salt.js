@@ -1,27 +1,20 @@
 var cv = require('../lib/opencv');
 
-
-cv.readImage("./mona.png", function(err, im) {
-	salt(im, 3000);
-	im.save("/tmp/salt.png");
+cv.readImage("./files/mona.png", function(err, im) {
+  salt(im, 1000);
+  im.save("./tmp/salt.png");
+  console.log('Image saved to ./tmp/salt.png');
 });
 
-
-
 function salt(img, n) {
+  var channels;
+  if ((channels = img.channels()) != 3) return console.log('Image has only %s Channel. It\'s not possible to salt this image.', channels)
 
-
-	if (img.channels() == 1) {
-
-		console.log("1 Canales");
-	} else if (img.channels() == 3) {
-
-		for(k = 0; k < n; k ++) {
-			i = Math.random() * img.width();
-			j = Math.random() * img.height();
-
-			img.set(j, i, 255);
-		}
-	}
-
+  var width = img.width();
+  var height = img.height();
+  for(var i = 0; i < n; i ++) {
+    x = Math.random() * width;
+    y = Math.random() * height;
+    img.set(y, x, 255);
+  }
 }

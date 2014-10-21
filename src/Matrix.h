@@ -3,17 +3,19 @@
 class Matrix: public node::ObjectWrap {
   public:
 
-  	cv::Mat mat;
+    cv::Mat mat;
     static Persistent<FunctionTemplate> constructor;
     static void Init(Handle<Object> target);
-    static Handle<Value> New(const Arguments &args);
+    static NAN_METHOD(New);
     Matrix();
     Matrix(cv::Mat other, cv::Rect roi);
     Matrix(int rows, int cols);
-    Matrix(int rows, int cols, int typ);
+    Matrix(int rows, int cols, int type);
 
     static double DblGet(cv::Mat mat, int i, int j);
 
+    JSFUNC(Zeros) // factory
+    JSFUNC(Ones) // factory
     JSFUNC(Eye) // factory
 
     JSFUNC(Get) // at
@@ -48,6 +50,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(ConvertGrayscale)
     JSFUNC(ConvertHSVscale)
     JSFUNC(GaussianBlur)
+    JSFUNC(MedianBlur)
+    JSFUNC(BilateralFilter)
     JSFUNC(Copy)
     JSFUNC(Flip)
     JSFUNC(ROI)
@@ -55,6 +59,8 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(AbsDiff)
     JSFUNC(AddWeighted)
     JSFUNC(BitwiseXor)
+    JSFUNC(BitwiseNot)
+    JSFUNC(BitwiseAnd)
     JSFUNC(CountNonZero)
     //JSFUNC(Split)
     JSFUNC(Canny)
@@ -69,12 +75,15 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(GoodFeaturesToTrack)
     JSFUNC(HoughLinesP)
 
+    JSFUNC(Crop)
+
     JSFUNC(inRange)
 
     JSFUNC(LocateROI)
     JSFUNC(AdjustROI)
 
     JSFUNC(Threshold)
+    JSFUNC(AdaptiveThreshold)
     JSFUNC(MeanStdDev)
 
     JSFUNC(CopyTo)
@@ -84,14 +93,28 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(EqualizeHist)
     JSFUNC(Pixel)
     JSFUNC(FloodFill)
+
+    JSFUNC(MatchTemplate)
+    JSFUNC(MinMaxLoc)
+
+    JSFUNC(PushBack)
+
+    JSFUNC(PutText)
+    JSFUNC(GetPerspectiveTransform)
+    JSFUNC(WarpPerspective)
+
+    JSFUNC(CopyWithMask)
+    JSFUNC(SetWithMask)
+    JSFUNC(MeanWithMask)
+    JSFUNC(Shift)
 /*
-	static Handle<Value> Val(const Arguments& args);
-	static Handle<Value> RowRange(const Arguments& args);
-	static Handle<Value> ColRange(const Arguments& args);
-	static Handle<Value> Diag(const Arguments& args);
-	static Handle<Value> Clone(const Arguments& args);
-	static Handle<Value> CopyTo(const Arguments& args);
-	static Handle<Value> ConvertTo(const Arguments& args);
+    static Handle<Value> Val(const Arguments& args);
+    static Handle<Value> RowRange(const Arguments& args);
+    static Handle<Value> ColRange(const Arguments& args);
+    static Handle<Value> Diag(const Arguments& args);
+    static Handle<Value> Clone(const Arguments& args);
+    static Handle<Value> CopyTo(const Arguments& args);
+    static Handle<Value> ConvertTo(const Arguments& args);
     static Handle<Value> AssignTo(const Arguments& args);
     static Handle<Value> SetTo(const Arguments& args);
     static Handle<Value> Reshape(const Arguments& args);
@@ -111,9 +134,9 @@ class Matrix: public node::ObjectWrap {
     static Handle<Value> Depth(const Arguments& args);
     static Handle<Value> Channels(const Arguments& args);
     static Handle<Value> StepOne(const Arguments& args);
-
+    static Handle<Value> GetPerspectiveTransform(const Arguments& args);
+    static Handle<Value> WarpPerspective(const Arguments& args);
 
 */
 
 };
-

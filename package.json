@@ -3,19 +3,17 @@
   "description": "Node Bindings to OpenCV",
   "author": "Peter Braden <peterbraden@peterbraden.co.uk>",
   "dependencies": {
-    "buffers": "0.1.1"
+    "buffers": "0.1.1",
+    "nan": "^1.3.0"
   },
-  "version": "0.4.0",
+  "version": "1.0.0",
   "devDependencies": {
-    "vows": "*"
-  },
-  "engines": {
-    "node": ">=0.4.1"
+    "tape": "^3.0.0"
   },
   "license": "MIT",
   "scripts": {
-    "preinstall": "node-gyp clean rebuild",
-    "test": "vows test/unit.js"
+    "build": "node-gyp build",
+    "test": "node test/unit.js"
   },
   "keywords": [
     "opencv",
@@ -27,5 +25,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/peterbraden/node-opencv.git"
+  },
+  "engines": {
+    "node": ">=0.10"
   }
 }
