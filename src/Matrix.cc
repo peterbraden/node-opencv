@@ -1027,7 +1027,12 @@ NAN_METHOD(Matrix::BitwiseXor) {
 	Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 	Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
 
-	cv::bitwise_xor(src1->mat, src2->mat, self->mat);
+    if(args.Length() == 3){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+		cv::bitwise_xor(src1->mat, src2->mat, self->mat, mask->mat);
+    }else{
+		cv::bitwise_xor(src1->mat, src2->mat, self->mat);
+    }	
 
 	NanReturnNull();
 }
@@ -1039,6 +1044,12 @@ NAN_METHOD(Matrix::BitwiseNot) {
 
     Matrix *dst = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 
+    if(args.Length() == 2){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+    	cv::bitwise_not(self->mat, dst->mat, mask->mat);
+    }else{
+    	cv::bitwise_not(self->mat, dst->mat);
+    }	
     cv::bitwise_not(self->mat, dst->mat);
 
     NanReturnNull();
@@ -1052,7 +1063,12 @@ NAN_METHOD(Matrix::BitwiseAnd) {
     Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
     Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
 
-    cv::bitwise_and(src1->mat, src2->mat, self->mat);
+    if(args.Length() == 3){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+	    cv::bitwise_and(src1->mat, src2->mat, self->mat, mask->mat);
+    }else{
+	    cv::bitwise_and(src1->mat, src2->mat, self->mat);
+    }	
 
     NanReturnNull();
 }
@@ -1125,7 +1141,11 @@ NAN_METHOD(Matrix::FindContours) {
     if (args[1]->IsNumber()) chain = args[1]->IntegerValue();
   }
 
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 	Local<Object> conts_to_return= NanNew(Contour::constructor)->GetFunction()->NewInstance();
+	Contour *contours = ObjectWrap::Unwrap<Contour>(conts_to_return);
+
+	cv::findContours(self->mat, contours->contours, contours->hierarchy, mode, chain);
 
 	NanReturnValue(conts_to_return);
 
