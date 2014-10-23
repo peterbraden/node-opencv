@@ -74,6 +74,7 @@ class Matrix: public node::ObjectWrap {
     // Feature Detection
     JSFUNC(GoodFeaturesToTrack)
     JSFUNC(HoughLinesP)
+    JSFUNC(HoughCircles)
 
     JSFUNC(Crop)
 
