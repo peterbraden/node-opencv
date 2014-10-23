@@ -1050,7 +1050,6 @@ NAN_METHOD(Matrix::BitwiseNot) {
     }else{
     	cv::bitwise_not(self->mat, dst->mat);
     }	
-    cv::bitwise_not(self->mat, dst->mat);
 
     NanReturnNull();
 }
