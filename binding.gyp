@@ -32,6 +32,16 @@
       , 'cflags!' : [ '-fno-exceptions']
       , 'cflags_cc!': [ '-fno-rtti',  '-fno-exceptions']
       , "conditions": [
+        ['OS=="win"',
+          {
+            'msvs_settings': {
+              'VCCLCompilerTool': {
+                'ExceptionHandling': '2',
+                'DisableSpecificWarnings': [ '4530', '4506', '4244' ],
+              },
+            },
+          },
+        ],
         ['OS=="mac"', {
           # cflags on OS X are stupid and have to be defined like this
           'xcode_settings': {
@@ -46,6 +56,17 @@
           }
         }]
 
+    ]
+  },
+  {
+    "target_name": "action_after_build",
+    "type": "none",
+    "dependencies": [ "<(module_name)" ],
+    "copies": [
+      {
+        "files": [ "<(PRODUCT_DIR)/<(module_name).node" ],
+        "destination": "<(module_path)"
+      }
     ]
   }]
 }
