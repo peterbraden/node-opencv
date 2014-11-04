@@ -61,4 +61,11 @@ It is even easier than Travis, you do not need to install anything, just go to y
 click in `encrypt tool`, there enter the values in the input field and click encrypt. Same as with
 Travis we then need to substitute the newly generated values for the old ones.
 
-Detaild instructions can be found here: http://www.appveyor.com/docs/build-configuration#secure-variables
+Detailed instructions can be found here: http://www.appveyor.com/docs/build-configuration#secure-variables
+
+### OSX binaries
+
+Since Travis does not support config file for multiple OSs we need to create a new branch that contains
+a slightly different version of the .travis.yml file to compile for OSX. The branch needs to be called
+`osx-binaries` and be based of `master` once the pre-compiled binaries PR has been merged in.
+
