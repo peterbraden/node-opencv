@@ -68,6 +68,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "drawAllContours", DrawAllContours);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "houghLinesP", HoughLinesP);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "houghCircles", HoughCircles);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "inRange", inRange);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "adjustROI", AdjustROI);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "locateROI", LocateROI);
@@ -1027,7 +1028,12 @@ NAN_METHOD(Matrix::BitwiseXor) {
 	Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 	Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
 
-	cv::bitwise_xor(src1->mat, src2->mat, self->mat);
+    if(args.Length() == 3){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+		cv::bitwise_xor(src1->mat, src2->mat, self->mat, mask->mat);
+    }else{
+		cv::bitwise_xor(src1->mat, src2->mat, self->mat);
+    }	
 
 	NanReturnNull();
 }
@@ -1039,7 +1045,12 @@ NAN_METHOD(Matrix::BitwiseNot) {
 
     Matrix *dst = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 
-    cv::bitwise_not(self->mat, dst->mat);
+    if(args.Length() == 2){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+    	cv::bitwise_not(self->mat, dst->mat, mask->mat);
+    }else{
+    	cv::bitwise_not(self->mat, dst->mat);
+    }	
 
     NanReturnNull();
 }
@@ -1052,7 +1063,12 @@ NAN_METHOD(Matrix::BitwiseAnd) {
     Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
     Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
 
-    cv::bitwise_and(src1->mat, src2->mat, self->mat);
+    if(args.Length() == 3){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+	    cv::bitwise_and(src1->mat, src2->mat, self->mat, mask->mat);
+    }else{
+	    cv::bitwise_and(src1->mat, src2->mat, self->mat);
+    }	
 
     NanReturnNull();
 }
@@ -1125,7 +1141,11 @@ NAN_METHOD(Matrix::FindContours) {
     if (args[1]->IsNumber()) chain = args[1]->IntegerValue();
   }
 
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 	Local<Object> conts_to_return= NanNew(Contour::constructor)->GetFunction()->NewInstance();
+	Contour *contours = ObjectWrap::Unwrap<Contour>(conts_to_return);
+
+	cv::findContours(self->mat, contours->contours, contours->hierarchy, mode, chain);
 
 	NanReturnValue(conts_to_return);
 
@@ -1231,6 +1251,41 @@ NAN_METHOD(Matrix::HoughLinesP) {
     pt->Set(1, NanNew<Number>((double) lines[i][1]));
     pt->Set(2, NanNew<Number>((double) lines[i][2]));
     pt->Set(3, NanNew<Number>((double) lines[i][3]));
+    arr->Set(i, pt);
+  }
+
+  NanReturnValue(arr);
+
+}
+
+NAN_METHOD(Matrix::HoughCircles) {
+	NanScope();
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  double dp = args.Length() < 1 ? 1 : args[0]->NumberValue();
+  double minDist = args.Length() < 2 ? 1 : args[1]->NumberValue();
+  double higherThreshold = args.Length() < 3 ? 100 : args[2]->NumberValue();
+  double accumulatorThreshold = args.Length() < 4 ? 100 : args[3]->NumberValue();
+  int minRadius = args.Length() < 5 ? 0 : args[4]->Uint32Value();
+  int maxRadius = args.Length() < 6 ? 0 : args[5]->Uint32Value();
+  std::vector<cv::Vec3f> circles;
+
+  cv::Mat gray;
+
+
+  equalizeHist(self->mat, gray);
+  
+  cv::HoughCircles(gray, circles, CV_HOUGH_GRADIENT, dp, minDist, higherThreshold, accumulatorThreshold, minRadius, maxRadius);
+
+  v8::Local<v8::Array> arr = NanNew<Array>(circles.size());
+
+
+  for (unsigned int i=0; i < circles.size(); i++){
+    v8::Local<v8::Array> pt = NanNew<Array>(3);
+    pt->Set(0, NanNew<Number>((double) circles[i][0]));// center x
+    pt->Set(1, NanNew<Number>((double) circles[i][1]));// center y
+    pt->Set(2, NanNew<Number>((double) circles[i][2]));// radius
     arr->Set(i, pt);
   }
 
