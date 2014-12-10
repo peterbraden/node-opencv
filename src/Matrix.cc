@@ -32,6 +32,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "height", Height);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "size", Size);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "clone", Clone);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "crop", Crop);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "toBuffer", ToBuffer);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "toBufferAsync", ToBufferAsync);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "ellipse", Ellipse);
