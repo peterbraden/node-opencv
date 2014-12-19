@@ -94,6 +94,7 @@ Matrix::Init(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(ctor, "setWithMask", SetWithMask);
   NODE_SET_PROTOTYPE_METHOD(ctor, "meanWithMask", MeanWithMask);
   NODE_SET_PROTOTYPE_METHOD(ctor, "shift", Shift);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "applyCLAHE", ApplyCLAHE);
 
   target->Set(NanNew("Matrix"), ctor->GetFunction());
 };
@@ -1981,4 +1982,39 @@ NAN_METHOD(Matrix::Shift){
   self->mat = res;
 
   NanReturnUndefined();
+}
+
+NAN_METHOD(Matrix::ApplyCLAHE) {
+	SETUP_FUNCTION(Matrix)
+	
+	if(args.Length() > 3){
+		NanReturnValue(NanNew("Either none, 1 or 3 arguments must be passed"));
+	}
+	
+	//parameter 2 and 3 (tileRows and tileColumns must both be supplied at the same time)
+	if(args.Length() > 1){
+		if(args.Length() != 3){
+			NanReturnValue(NanNew("Either none, 1 or 3 arguments must be passed"));
+		}
+	}
+	for(int i = 0; i < args.Length(); i++){
+		if(!(args[i]->IsNumber())){
+			NanReturnValue(NanNew("All arguments must be numbers"));
+		}
+	}
+	
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+
+	if(args.Length() == 1){
+		clahe->setClipLimit(args[0]->NumberValue());
+	}
+	if(args.Length() > 1){
+		clahe->setTilesGridSize(cv::Size(args[1]->IntegerValue(),args[2]->IntegerValue()));
+	}
+	
+	cv::Mat after;
+	clahe->apply(self->mat, after);
+	after.copyTo(self->mat);
+	
+	NanReturnNull();
 }

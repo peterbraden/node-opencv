@@ -32,11 +32,11 @@ NAN_METHOD(NamedWindow::New) {
   }
 
   NamedWindow* win;
-	if (args.Length() == 1){
-		win = new NamedWindow(std::string(*NanAsciiString(args[0]->ToString())), 0);
+	if (args.Length() > 1){
+		win = new NamedWindow(std::string(*NanAsciiString(args[0]->ToString())), args[1]->IntegerValue());
 	} else { //if (args.Length() == 2){
-		win = new NamedWindow(std::string(*NanAsciiString(args[0]->ToString())), 0);
-  }
+		win = new NamedWindow(std::string(*NanAsciiString(args[0]->ToString())));
+	}
 
 	win->Wrap(args.Holder());
 	NanReturnValue(args.Holder());
