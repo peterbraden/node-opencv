@@ -452,7 +452,7 @@ NAN_METHOD(Matrix::ToBuffer){
   
 	v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
-	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>(vec.size()), NanNew<v8::Integer>(0)};
+	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned)vec.size()), NanNew<v8::Integer>(0)};
 	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
 	NanReturnValue(actualBuffer);
@@ -485,7 +485,7 @@ class AsyncToBufferWorker : public NanAsyncWorker {
   
 	  v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
-	  v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>(res.size()), NanNew<v8::Integer>(0)};
+	  v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned)res.size()), NanNew<v8::Integer>(0)};
 	  v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
 
