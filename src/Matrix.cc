@@ -7,7 +7,7 @@ v8::Persistent<FunctionTemplate> Matrix::constructor;
 
 cv::Scalar setColor(Local<Object> objColor);
 cv::Point setPoint(Local<Object> objPoint);
-cv::Rect* setRect(Local<Object> objRect);
+cv::Rect* setRect(Local<Object> objRect, cv::Rect &result);
 
 void
 Matrix::Init(Handle<Object> target) {
@@ -452,7 +452,7 @@ NAN_METHOD(Matrix::ToBuffer){
   
 	v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
-	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>(vec.size()), NanNew<v8::Integer>(0)};
+	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned)vec.size()), NanNew<v8::Integer>(0)};
 	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
 	NanReturnValue(actualBuffer);
@@ -485,7 +485,7 @@ class AsyncToBufferWorker : public NanAsyncWorker {
   
 	  v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
-	  v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>(res.size()), NanNew<v8::Integer>(0)};
+	  v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned)res.size()), NanNew<v8::Integer>(0)};
 	  v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
 
@@ -1310,7 +1310,7 @@ cv::Point setPoint(Local<Object> objPoint) {
 	return  cv::Point( objPoint->Get(0)->IntegerValue(),  objPoint->Get(1)->IntegerValue() );
 }
 
-cv::Rect* setRect(Local<Object> objRect) {
+cv::Rect* setRect(Local<Object> objRect, cv::Rect &result) {
 
 	if(!objRect->IsArray() || !objRect->Get(0)->IsArray() || !objRect->Get(0)->IsArray() ){
 		printf("error");
@@ -1319,14 +1319,13 @@ cv::Rect* setRect(Local<Object> objRect) {
 
 	Local<Object> point = objRect->Get(0)->ToObject();
 	Local<Object> size = objRect->Get(1)->ToObject();
-	cv::Rect ret;
 
-	ret.x = point->Get(0)->IntegerValue();
-	ret.y = point->Get(1)->IntegerValue();
-	ret.width = size->Get(0)->IntegerValue();
-	ret.height = size->Get(1)->IntegerValue();
+	result.x = point->Get(0)->IntegerValue();
+	result.y = point->Get(1)->IntegerValue();
+	result.width = size->Get(0)->IntegerValue();
+	result.height = size->Get(1)->IntegerValue();
 
-	return (cv::Rect*) &ret;
+	return &result;
 }
 
 
@@ -1714,10 +1713,11 @@ NAN_METHOD(Matrix::FloodFill){
 
 
 	Local<Object> obj = args[0]->ToObject();
+	cv::Rect rect;
 
 	int  ret = cv::floodFill(self->mat, setPoint(obj->Get(NanNew<String>("seedPoint"))->ToObject())
 			, setColor(obj->Get(NanNew<String>("newColor"))->ToObject())
-			, obj->Get(NanNew<String>("rect"))->IsUndefined() ? 0 : setRect(obj->Get(NanNew<String>("rect"))->ToObject())
+			, obj->Get(NanNew<String>("rect"))->IsUndefined() ? 0 : setRect(obj->Get(NanNew<String>("rect"))->ToObject(), rect)
 			, setColor(obj->Get(NanNew<String>("loDiff"))->ToObject())
 			, setColor(obj->Get(NanNew<String>("upDiff"))->ToObject())
 			, 4 );
