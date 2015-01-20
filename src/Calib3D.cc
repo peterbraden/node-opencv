@@ -38,47 +38,27 @@ NAN_METHOD(Calib3D::FindChessboardCorners)
 
         // Arg 2 would normally be the flags, ignoring this for now and using the default flags
 
-        // Final argument is the callback function
-        REQ_FUN_ARG(2, cb);
-
         // Find the corners
         std::vector<cv::Point2f> corners;
         bool found = cv::findChessboardCorners(mat, patternSize, corners);
 
-        // Make the callback arguments
-        Local<Value> argv[2];
+        // Make the return value
+        Local<Object> ret = NanNew<Object>();
+        ret->Set(NanNew<String>("found"), NanNew<Boolean>(found));
 
-        argv[0] = NanNull();
-        argv[1] = NanNull(); // This will be replaced by the corners array if corners were found
-
-        // Further processing if we found corners
-        Local<Array> cornersArray;
-        if(found)
+        Local<Array> cornersArray = Array::New(corners.size());
+        for(unsigned int i = 0; i < corners.size(); i++)
         {
-            // Convert the return value to a javascript array
-            cornersArray = Array::New(corners.size());
-            for(unsigned int i = 0; i < corners.size(); i++)
-            {
-                Local<Object> point_data = NanNew<Object>();
-                point_data->Set(NanNew<String>("x"), NanNew<Number>(corners[i].x));
-                point_data->Set(NanNew<String>("y"), NanNew<Number>(corners[i].y));
+            Local<Object> point_data = NanNew<Object>();
+            point_data->Set(NanNew<String>("x"), NanNew<Number>(corners[i].x));
+            point_data->Set(NanNew<String>("y"), NanNew<Number>(corners[i].y));
 
-                cornersArray->Set(Number::New(i), point_data);
-            }
-
-            argv[1] = cornersArray;
+            cornersArray->Set(Number::New(i), point_data);
         }
 
-        // Callback
-        TryCatch try_catch;
+        ret->Set(NanNew<String>("corners"), cornersArray);
 
-        cb->Call(NanGetCurrentContext()->Global(), 2, argv);
-
-        if(try_catch.HasCaught()) {
-            FatalException(try_catch);
-        }
-
-        NanReturnUndefined();
+        NanReturnValue(ret);
 
 
     } catch (cv::Exception &e) {
@@ -129,27 +109,11 @@ NAN_METHOD(Calib3D::DrawChessboardCorners)
         // Arg 3, pattern found boolean
         bool patternWasFound = args[3]->ToBoolean()->Value();
 
-        // Final argument is the callback
-        REQ_FUN_ARG(4, cb);
-
         // Draw the corners
         cv::drawChessboardCorners(mat, patternSize, corners, patternWasFound);
 
-        // Make the callback arguments (same image that was passed, now with corners drawn on it)
-        Local<Value> argv[2];
-        argv[0] = NanNull();
-        argv[1] = args[0];
-
-        // Callback
-        TryCatch try_catch;
-
-        cb->Call(NanGetCurrentContext()->Global(), 2, argv);
-
-        if(try_catch.HasCaught()) {
-            FatalException(try_catch);
-        }
-
-        NanReturnUndefined();
+        // Return the passed image, now with corners drawn on it
+        NanReturnValue(args[0]);
 
     } catch (cv::Exception &e) {
         const char *err_msg = e.what();
