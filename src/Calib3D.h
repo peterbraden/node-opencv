@@ -14,6 +14,8 @@ public:
     static NAN_METHOD(DrawChessboardCorners);
 
     static NAN_METHOD(CalibrateCamera);
+
+    static NAN_METHOD(SolvePnP);
 };
 
 #endif

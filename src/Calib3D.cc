@@ -10,6 +10,7 @@ void Calib3D::Init(Handle<Object> target)
     NODE_SET_METHOD(obj, "findChessboardCorners", FindChessboardCorners);
     NODE_SET_METHOD(obj, "drawChessboardCorners", DrawChessboardCorners);
     NODE_SET_METHOD(obj, "calibrateCamera", CalibrateCamera);
+    NODE_SET_METHOD(obj, "solvePnP", SolvePnP);
 
     target->Set(NanNew("calib3d"), obj);
 }
@@ -218,6 +219,89 @@ NAN_METHOD(Calib3D::CalibrateCamera)
         ret->Set(NanNew<String>("distortion"), distMatrixWrap);
 
         // Per frame R and t, skiping for now
+
+        // Return
+        NanReturnValue(ret);
+
+    } catch (cv::Exception &e) {
+        const char *err_msg = e.what();
+        NanThrowError(err_msg);
+        NanReturnUndefined();
+    }
+}
+
+// cv::solvePnP
+NAN_METHOD(Calib3D::SolvePnP)
+{
+    NanEscapableScope();
+
+    try {
+        // Get the arguments
+
+        // Arg 0, the array of object points
+        std::vector<cv::Point3f> objectPoints;
+        if(args[0]->IsArray()) {
+            Local<Array> objectPointsArray = Local<Array>::Cast(args[0]);
+
+            for(unsigned int i = 0; i < objectPointsArray->Length(); i++)
+            {
+                Local<Object> pt = objectPointsArray->Get(i)->ToObject();
+                objectPoints.push_back(cv::Point3f(pt->Get(NanNew<String>("x"))->ToNumber()->Value(),
+                                             pt->Get(NanNew<String>("y"))->ToNumber()->Value(),
+                                             pt->Get(NanNew<String>("z"))->ToNumber()->Value()));
+            }
+        } else {
+            JSTHROW_TYPE("Must pass array of object points for each frame")
+        }
+
+        // Arg 1, the image points
+        std::vector<cv::Point2f> imagePoints;
+        if(args[1]->IsArray()) {
+            Local<Array> imagePointsArray = Local<Array>::Cast(args[1]);
+
+            for(unsigned int i = 0; i < imagePointsArray->Length(); i++)
+            {
+                Local<Object> pt = imagePointsArray->Get(i)->ToObject();
+                imagePoints.push_back(cv::Point2f(pt->Get(NanNew<String>("x"))->ToNumber()->Value(),
+                                                  pt->Get(NanNew<String>("y"))->ToNumber()->Value()));
+            }
+        } else {
+            JSTHROW_TYPE("Must pass array of object points for each frame")
+        }
+
+        // Arg 2, the camera matrix
+        Matrix* kWrap = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+        cv::Mat K = kWrap->mat;
+
+        // Arg 3, the distortion coefficients
+        Matrix* distWrap = ObjectWrap::Unwrap<Matrix>(args[3]->ToObject());
+        cv::Mat dist = distWrap->mat;
+
+        // Arg 4, use extrinsic guess, skipped for now
+
+        // Arg 5, flags, skip for now
+
+        // solve for r and t
+        cv::Mat rvec, tvec;
+
+        cv::solvePnP(objectPoints, imagePoints, K, dist, rvec, tvec);
+
+        // make the return values
+        Local<Object> ret = NanNew<Object>();
+
+        // rvec
+        Local<Object> rMatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *rMatrix = ObjectWrap::Unwrap<Matrix>(rMatrixWrap);
+        rMatrix->mat = rvec;
+
+        ret->Set(NanNew<String>("rvec"), rMatrixWrap);
+
+        // tvec
+        Local<Object> tMatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *tMatrix = ObjectWrap::Unwrap<Matrix>(tMatrixWrap);
+        tMatrix->mat = tvec;
+
+        ret->Set(NanNew<String>("tvec"), tMatrixWrap);
 
         // Return
         NanReturnValue(ret);
