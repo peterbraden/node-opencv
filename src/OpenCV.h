@@ -50,8 +50,6 @@ class OpenCV: public node::ObjectWrap{
     static void Init(Handle<Object> target);
 
     static NAN_METHOD(ReadImage);
-
-    static NAN_METHOD(FindChessboardCorners);
 };
 
 
