@@ -10,6 +10,8 @@ public:
     static void Init(Handle<Object> target);
 
     static NAN_METHOD(FindChessboardCorners);
+
+    static NAN_METHOD(DrawChessboardCorners);
 };
 
 #endif
