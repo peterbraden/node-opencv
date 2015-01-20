@@ -12,6 +12,8 @@ public:
     static NAN_METHOD(FindChessboardCorners);
 
     static NAN_METHOD(DrawChessboardCorners);
+
+    static NAN_METHOD(CalibrateCamera);
 };
 
 #endif
