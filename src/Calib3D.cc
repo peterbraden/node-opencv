@@ -47,14 +47,14 @@ NAN_METHOD(Calib3D::FindChessboardCorners)
         Local<Object> ret = NanNew<Object>();
         ret->Set(NanNew<String>("found"), NanNew<Boolean>(found));
 
-        Local<Array> cornersArray = Array::New(corners.size());
+        Local<Array> cornersArray = NanNew<Array>(corners.size());
         for(unsigned int i = 0; i < corners.size(); i++)
         {
             Local<Object> point_data = NanNew<Object>();
             point_data->Set(NanNew<String>("x"), NanNew<Number>(corners[i].x));
             point_data->Set(NanNew<String>("y"), NanNew<Number>(corners[i].y));
 
-            cornersArray->Set(Number::New(i), point_data);
+            cornersArray->Set(NanNew<Number>(i), point_data);
         }
 
         ret->Set(NanNew<String>("corners"), cornersArray);
