@@ -14,6 +14,7 @@
         , "src/FaceRecognizer.cc"
         , "src/BackgroundSubtractor.cc"
         , "src/Constants.cc"
+        , "src/Calib3D.cc"
         ]
       , 'libraries': [
           '<!@(pkg-config --libs opencv)'
