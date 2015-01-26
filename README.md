@@ -172,13 +172,13 @@ See [relevant source code](src/Contours.cc) and [examples](examples/)
 ```javascript
 var contours = im.findContours;
 
-# Count of contours in the Contours object
+// Count of contours in the Contours object
 contours.size();
 
-# Count of corners(verticies) of contour `index`
+// Count of corners(verticies) of contour `index`
 contours.cornerCount(index);
 
-# Access vertex data of contours
+// Access vertex data of contours
 for(var c = 0; c < contours.size(); ++c) {
   console.log("Contour " + c);
   for(var i = 0; i < contours.cornerCount(c); ++i) {
@@ -187,14 +187,14 @@ for(var c = 0; c < contours.size(); ++c) {
   }
 }
 
-# Computations of contour `index`
+// Computations of contour `index`
 contours.area(index);
 contours.arcLength(index, isClosed);
 contours.boundingRect(index);
 contours.minAreaRect(index);
 contours.isConvex(index);
 
-# Destructively alter contour `index`
+// Destructively alter contour `index`
 contours.approxPolyDP(index, epsilon, isClosed);
 contours.convexHull(index, clockwise);
 ```
