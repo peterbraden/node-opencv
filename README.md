@@ -183,7 +183,7 @@ for(var c = 0; c < contours.size(); ++c) {
   console.log("Contour " + c);
   for(var i = 0; i < contours.cornerCount(c); ++i) {
     var point = contours.point(c, i);
-    console.log("(" + point.x + "," + point.y + ")");"
+    console.log("(" + point.x + "," + point.y + ")");
   }
 }
 
