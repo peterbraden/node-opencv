@@ -10,6 +10,8 @@ public:
     static void Init(Handle<Object> target);
 
     static NAN_METHOD(Undistort);
+
+    static NAN_METHOD(InitUndistortRectifyMap);
 };
 
 #endif
