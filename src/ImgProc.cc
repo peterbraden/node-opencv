@@ -9,6 +9,7 @@ void ImgProc::Init(Handle<Object> target)
 
     NODE_SET_METHOD(obj, "undistort", Undistort);
     NODE_SET_METHOD(obj, "initUndistortRectifyMap", InitUndistortRectifyMap);
+    NODE_SET_METHOD(obj, "remap", Remap);
 
     target->Set(NanNew("imgproc"), obj);
 }
@@ -82,9 +83,9 @@ NAN_METHOD(ImgProc::InitUndistortRectifyMap)
         if (args[4]->IsArray()) {
             Local<Object> v8sz = args[4]->ToObject();
 
-            imageSize = cv::Size(v8sz->Get(0)->IntegerValue(), v8sz->Get(1)->IntegerValue());
+            imageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
         } else {
-            JSTHROW_TYPE("Must pass pattern size");
+            JSTHROW_TYPE("Must pass image size");
         }
 
         // Arg 5 is the first map type, skip for now
@@ -113,6 +114,52 @@ NAN_METHOD(ImgProc::InitUndistortRectifyMap)
         // Return the maps
         NanReturnValue(ret);
 
+
+    } catch (cv::Exception &e) {
+        const char *err_msg = e.what();
+        NanThrowError(err_msg);
+        NanReturnUndefined();
+    }
+}
+
+// cv::remap
+NAN_METHOD(ImgProc::Remap)
+{
+    NanEscapableScope();
+
+    try {
+        // Get the arguments
+
+        // Arg 0 is the image
+        Matrix* m0 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+        cv::Mat inputImage = m0->mat;
+
+        // Arg 1 is the first map
+        Matrix* m1 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+        cv::Mat map1 = m1->mat;
+
+        // Arg 2 is the second map
+        Matrix* m2 = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+        cv::Mat map2 = m2->mat;
+
+        // Arg 3 is the interpolation mode
+        int interpolation = args[3]->IntegerValue();
+
+        // Args 4, 5 border settings, skipping for now
+
+        // Output image
+        cv::Mat outputImage;
+
+        // Remap
+        cv::remap(inputImage, outputImage, map1, map2, interpolation);
+
+        // Wrap the output image
+        Local<Object> outMatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *outMatrix = ObjectWrap::Unwrap<Matrix>(outMatrixWrap);
+        outMatrix->mat = outputImage;
+
+        // Return the image
+        NanReturnValue(outMatrixWrap);
 
     } catch (cv::Exception &e) {
         const char *err_msg = e.what();

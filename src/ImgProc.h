@@ -12,6 +12,8 @@ public:
     static NAN_METHOD(Undistort);
 
     static NAN_METHOD(InitUndistortRectifyMap);
+
+    static NAN_METHOD(Remap);
 };
 
 #endif
