@@ -184,7 +184,7 @@ NAN_METHOD(Calib3D::CalibrateCamera)
         if (args[2]->IsArray()) {
             Local<Object> v8sz = args[2]->ToObject();
 
-            imageSize = cv::Size(v8sz->Get(0)->IntegerValue(), v8sz->Get(1)->IntegerValue());
+            imageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
         } else {
             JSTHROW_TYPE("Must pass pattern size");
         }
@@ -335,9 +335,9 @@ NAN_METHOD(Calib3D::GetOptimalNewCameraMatrix)
         if (args[2]->IsArray()) {
             Local<Object> v8sz = args[2]->ToObject();
 
-            imageSize = cv::Size(v8sz->Get(0)->IntegerValue(), v8sz->Get(1)->IntegerValue());
+            imageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
         } else {
-            JSTHROW_TYPE("Must pass pattern size");
+            JSTHROW_TYPE("Must pass original image size");
         }
 
         // Arg 3 is the alpha free scaling parameter
@@ -348,9 +348,9 @@ NAN_METHOD(Calib3D::GetOptimalNewCameraMatrix)
         if (args[4]->IsArray()) {
             Local<Object> v8sz = args[4]->ToObject();
 
-            newImageSize = cv::Size(v8sz->Get(0)->IntegerValue(), v8sz->Get(1)->IntegerValue());
+            newImageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
         } else {
-            JSTHROW_TYPE("Must pass pattern size");
+            JSTHROW_TYPE("Must pass new image size");
         }
 
         // Arg 5, valid ROI, skip for now
