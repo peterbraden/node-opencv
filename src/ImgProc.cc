@@ -89,7 +89,7 @@ NAN_METHOD(ImgProc::InitUndistortRectifyMap)
         }
 
         // Arg 5 is the first map type, skip for now
-        int m1type = CV_16SC2;
+        int m1type = args[5]->IntegerValue();
 
         // Make matrices to hold the output maps
         cv::Mat map1, map2;
