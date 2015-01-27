@@ -16,6 +16,8 @@ public:
     static NAN_METHOD(CalibrateCamera);
 
     static NAN_METHOD(SolvePnP);
+
+    static NAN_METHOD(GetOptimalNewCameraMatrix);
 };
 
 #endif
