@@ -11,6 +11,7 @@ void Calib3D::Init(Handle<Object> target)
     NODE_SET_METHOD(obj, "drawChessboardCorners", DrawChessboardCorners);
     NODE_SET_METHOD(obj, "calibrateCamera", CalibrateCamera);
     NODE_SET_METHOD(obj, "solvePnP", SolvePnP);
+    NODE_SET_METHOD(obj, "getOptimalNewCameraMatrix", GetOptimalNewCameraMatrix);
 
     target->Set(NanNew("calib3d"), obj);
 }
@@ -183,7 +184,7 @@ NAN_METHOD(Calib3D::CalibrateCamera)
         if (args[2]->IsArray()) {
             Local<Object> v8sz = args[2]->ToObject();
 
-            imageSize = cv::Size(v8sz->Get(0)->IntegerValue(), v8sz->Get(1)->IntegerValue());
+            imageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
         } else {
             JSTHROW_TYPE("Must pass pattern size");
         }
@@ -305,6 +306,66 @@ NAN_METHOD(Calib3D::SolvePnP)
 
         // Return
         NanReturnValue(ret);
+
+    } catch (cv::Exception &e) {
+        const char *err_msg = e.what();
+        NanThrowError(err_msg);
+        NanReturnUndefined();
+    }
+}
+
+// cv::solvePnP
+NAN_METHOD(Calib3D::GetOptimalNewCameraMatrix)
+{
+    NanEscapableScope();
+
+    try {
+        // Get the arguments
+
+        // Arg 0 is the original camera matrix
+        Matrix* m0 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+        cv::Mat Kin = m0->mat;
+
+        // Arg 1 is the distortion coefficients
+        Matrix* m1 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+        cv::Mat dist = m1->mat;
+
+        // Arg 2, the image size
+        cv::Size imageSize;
+        if (args[2]->IsArray()) {
+            Local<Object> v8sz = args[2]->ToObject();
+
+            imageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
+        } else {
+            JSTHROW_TYPE("Must pass original image size");
+        }
+
+        // Arg 3 is the alpha free scaling parameter
+        double alpha = args[3]->ToNumber()->Value();
+
+        // Arg 4, the new image size
+        cv::Size newImageSize;
+        if (args[4]->IsArray()) {
+            Local<Object> v8sz = args[4]->ToObject();
+
+            newImageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
+        } else {
+            JSTHROW_TYPE("Must pass new image size");
+        }
+
+        // Arg 5, valid ROI, skip for now
+        // Arg 6, center principal point, skip for now
+
+        // Get the optimal new camera matrix
+        cv::Mat Kout = cv::getOptimalNewCameraMatrix(Kin, dist, imageSize, alpha, newImageSize);
+
+        // Wrap the output K
+        Local<Object> KMatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *KMatrix = ObjectWrap::Unwrap<Matrix>(KMatrixWrap);
+        KMatrix->mat = Kout;
+
+        // Return the new K matrix
+        NanReturnValue(KMatrixWrap);
 
     } catch (cv::Exception &e) {
         const char *err_msg = e.what();
