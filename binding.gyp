@@ -13,7 +13,9 @@
         "src/HighGUI.cc",
         "src/FaceRecognizer.cc",
         "src/BackgroundSubtractor.cc",
-        "src/Constants.cc"
+        "src/Constants.cc",
+        "src/Calib3D.cc",
+        "src/ImgProc.cc"
       ],
 
       "libraries": [
