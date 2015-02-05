@@ -536,9 +536,9 @@ NAN_METHOD(Calib3D::ComputeCorrespondEpilines)
         for(unsigned int i = 0; i < lines.size(); i++)
         {
             Local<Object> line_data = NanNew<Object>();
-            line_data->Set(NanNew<String>("a"), NanNew<Number>(corners[i][0]));
-            line_data->Set(NanNew<String>("b"), NanNew<Number>(corners[i][1]));
-            line_data->Set(NanNew<String>("c"), NanNew<Number>(corners[i][2]));
+            line_data->Set(NanNew<String>("a"), NanNew<Number>(lines[i][0]));
+            line_data->Set(NanNew<String>("b"), NanNew<Number>(lines[i][1]));
+            line_data->Set(NanNew<String>("c"), NanNew<Number>(lines[i][2]));
 
             linesArray->Set(NanNew<Number>(i), line_data);
         }
