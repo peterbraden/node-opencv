@@ -20,6 +20,8 @@ public:
     static NAN_METHOD(GetOptimalNewCameraMatrix);
 
     static NAN_METHOD(StereoCalibrate);
+
+    static NAN_METHOD(StereoRectify);
 };
 
 #endif

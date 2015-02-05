@@ -130,6 +130,7 @@ void Calib3D::Init(Handle<Object> target)
     NODE_SET_METHOD(obj, "solvePnP", SolvePnP);
     NODE_SET_METHOD(obj, "getOptimalNewCameraMatrix", GetOptimalNewCameraMatrix);
     NODE_SET_METHOD(obj, "stereoCalibrate", StereoCalibrate);
+    NODE_SET_METHOD(obj, "stereoRectify", StereoRectify);
 
     target->Set(NanNew("calib3d"), obj);
 }
@@ -440,6 +441,66 @@ NAN_METHOD(Calib3D::StereoCalibrate)
         // Return
         NanReturnValue(ret);
 
+    } catch (cv::Exception &e) {
+        const char *err_msg = e.what();
+        NanThrowError(err_msg);
+        NanReturnUndefined();
+    }
+}
+
+// cv::stereoCalibrate
+NAN_METHOD(Calib3D::StereoRectify)
+{
+    NanEscapableScope();
+
+    try {
+        // Get the arguments
+
+        // Arg0, the first camera matrix
+        cv::Mat K1 = matFromMatrix(args[0]);
+
+        // Arg1, the first distortion coefficients
+        cv::Mat d1 = matFromMatrix(args[1]);
+
+        // Arg3, the second camera matrix
+        cv::Mat K2 = matFromMatrix(args[3]);
+
+        // Arg4, the second distortion coefficients
+        cv::Mat d2 = matFromMatrix(args[4]);
+
+        // Arg5, the image size
+        cv::Size imageSize = sizeFromArray(args[5]);
+
+        // arg6, the intercamera rotation matrix
+        cv::Mat R = matFromMatrix(args[6]);
+
+        // Arg7, the intercamera translation vector
+        cv::Mat t = matFromMatrix(args[7]);
+
+        // Arg8, flags, skipping for now
+
+        // Arg9, freescaling paremeter, skipping for now
+
+        // Arg10, new image size, skipping for now to fix at original image size
+
+        // Make output matrics
+        cv::Mat R1, R2, P1, P2, Q;
+
+        // Do the stereo rectification
+        cv::stereoRectify(K1, d1, K2, d2, imageSize, R, t, R1, R2, P1, P2, Q);
+
+        // Make the return object
+        Local<Object> ret = NanNew<Object>();
+
+        ret->Set(NanNew<String>("R1"), matrixFromMat(R1));
+        ret->Set(NanNew<String>("R2"), matrixFromMat(R2));
+        ret->Set(NanNew<String>("P1"), matrixFromMat(P1));
+        ret->Set(NanNew<String>("P2"), matrixFromMat(P2));
+        ret->Set(NanNew<String>("Q"), matrixFromMat(Q));
+
+        // Return the recification parameters
+        NanReturnValue(ret);
+        
     } catch (cv::Exception &e) {
         const char *err_msg = e.what();
         NanThrowError(err_msg);
