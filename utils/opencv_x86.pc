@@ -9,4 +9,4 @@ Description: Open Source Computer Vision Library
 Version: 2.4.9
 
 Cflags: ${includedir} ${includedir}/opencv
-Libs: ${libdir}/opencv_core249 ${libdir}/opencv_imgproc249 ${libdir}/opencv_highgui249 ${libdir}/opencv_ml249 ${libdir}/opencv_video249 ${libdir}/opencv_features2d249 ${libdir}/opencv_calib3d249 ${libdir}/opencv_objdetect249 ${libdir}/opencv_contrib249 ${libdir}/opencv_legacy249 ${libdir}/opencv_flann249 ${libdir}/opencv_core249
+Libs: ${libdir}/opencv_calib3d249 ${libdir}/opencv_contrib249 ${libdir}/opencv_core249 ${libdir}/opencv_features2d249 ${libdir}/opencv_flann249 ${libdir}/opencv_gpu249 ${libdir}/opencv_highgui249 ${libdir}/opencv_imgproc249 ${libdir}/opencv_legacy249 ${libdir}/opencv_ml249 ${libdir}/opencv_nonfree249 ${libdir}/opencv_objdetect249 ${libdir}/opencv_ocl249 ${libdir}/opencv_photo249 ${libdir}/opencv_stitching249 ${libdir}/opencv_superres249 ${libdir}/opencv_ts249 ${libdir}/opencv_video249 ${libdir}/opencv_videostab249
