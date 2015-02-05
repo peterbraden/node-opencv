@@ -509,8 +509,8 @@ NAN_METHOD(Calib3D::StereoRectify)
     }
 }
 
-// cv::stereoRectify
-NAN_METHOD(Calib3D::StereoRectify)
+// cv::computeCorrespondEpilines
+NAN_METHOD(Calib3D::ComputeCorrespondEpilines)
 {
     NanEscapableScope();
 
