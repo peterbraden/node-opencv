@@ -12,6 +12,7 @@ void Calib3D::Init(Handle<Object> target)
     NODE_SET_METHOD(obj, "calibrateCamera", CalibrateCamera);
     NODE_SET_METHOD(obj, "solvePnP", SolvePnP);
     NODE_SET_METHOD(obj, "getOptimalNewCameraMatrix", GetOptimalNewCameraMatrix);
+    NODE_SET_METHOD(obj, "stereoCalibrate", StereoCalibrate);
 
     target->Set(NanNew("calib3d"), obj);
 }
@@ -314,7 +315,7 @@ NAN_METHOD(Calib3D::SolvePnP)
     }
 }
 
-// cv::solvePnP
+// cv::getOptimalNewCameraMAtrix
 NAN_METHOD(Calib3D::GetOptimalNewCameraMatrix)
 {
     NanEscapableScope();
@@ -366,6 +367,183 @@ NAN_METHOD(Calib3D::GetOptimalNewCameraMatrix)
 
         // Return the new K matrix
         NanReturnValue(KMatrixWrap);
+
+    } catch (cv::Exception &e) {
+        const char *err_msg = e.what();
+        NanThrowError(err_msg);
+        NanReturnUndefined();
+    }
+}
+
+// cv::stereoCalibrate
+NAN_METHOD(Calib3D::StereoCalibrate)
+{
+    NanEscapableScope();
+
+    try {
+        // Get the arguments
+
+        // Arg 0, the array of object points, an array of arrays
+        std::vector<std::vector<cv::Point3f> > objectPoints;
+        if(args[0]->IsArray()) {
+            Local<Array> objectPointsArray = Local<Array>::Cast(args[0]);
+
+            for(unsigned int i = 0; i < objectPointsArray->Length(); i++)
+            {
+                std::vector<cv::Point3f> points;
+
+                Local<Array> pointsArray = Local<Array>::Cast(objectPointsArray->Get(i));
+                for(unsigned int j = 0; j < pointsArray->Length(); j++)
+                {
+                    Local<Object> pt = pointsArray->Get(j)->ToObject();
+                    points.push_back(cv::Point3f(pt->Get(NanNew<String>("x"))->ToNumber()->Value(),
+                                                 pt->Get(NanNew<String>("y"))->ToNumber()->Value(),
+                                                 pt->Get(NanNew<String>("z"))->ToNumber()->Value()));
+                }
+
+                objectPoints.push_back(points);
+            }
+        } else {
+            JSTHROW_TYPE("Must pass array of object points for each frame")
+        }
+
+        // Arg 1, the image points1, another array of arrays =(
+        std::vector<std::vector<cv::Point2f> > imagePoints1;
+        if(args[1]->IsArray()) {
+            Local<Array> imagePointsArray = Local<Array>::Cast(args[1]);
+
+            for(unsigned int i = 0; i < imagePointsArray->Length(); i++)
+            {
+                std::vector<cv::Point2f> points;
+
+                Local<Array> pointsArray = Local<Array>::Cast(imagePointsArray->Get(i));
+                for(unsigned int j = 0; j < pointsArray->Length(); j++)
+                {
+                    Local<Object> pt = pointsArray->Get(j)->ToObject();
+                    points.push_back(cv::Point2f(pt->Get(NanNew<String>("x"))->ToNumber()->Value(),
+                                                 pt->Get(NanNew<String>("y"))->ToNumber()->Value()));
+                }
+
+                imagePoints1.push_back(points);
+            }
+        } else {
+            JSTHROW_TYPE("Must pass array of object points for each frame")
+        }
+
+        // Arg 2, the image points2, another array of arrays =(
+        std::vector<std::vector<cv::Point2f> > imagePoints2;
+        if(args[2]->IsArray()) {
+            Local<Array> imagePointsArray = Local<Array>::Cast(args[2]);
+
+            for(unsigned int i = 0; i < imagePointsArray->Length(); i++)
+            {
+                std::vector<cv::Point2f> points;
+
+                Local<Array> pointsArray = Local<Array>::Cast(imagePointsArray->Get(i));
+                for(unsigned int j = 0; j < pointsArray->Length(); j++)
+                {
+                    Local<Object> pt = pointsArray->Get(j)->ToObject();
+                    points.push_back(cv::Point2f(pt->Get(NanNew<String>("x"))->ToNumber()->Value(),
+                                                 pt->Get(NanNew<String>("y"))->ToNumber()->Value()));
+                }
+
+                imagePoints2.push_back(points);
+            }
+        } else {
+            JSTHROW_TYPE("Must pass array of object points for each frame")
+        }
+
+        // Arg 3 is the image size (follows the PYTHON api not the C++ api since all following arguments are optional or outputs)
+        cv::Size imageSize;
+        if (args[3]->IsArray()) {
+            Local<Object> v8sz = args[3]->ToObject();
+
+            imageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
+        } else {
+            JSTHROW_TYPE("Must pass original image size");
+        }
+
+        // Arg 4,5,6,7 is the camera matrix and distortion coefficients (optional but must pass all 4 or none)
+        cv::Mat k1, d1, k2, d2;
+        if(args.Length() >= 8)
+        {
+            Matrix* mk1 = ObjectWrap::Unwrap<Matrix>(args[4]->ToObject());
+            Matrix* md1 = ObjectWrap::Unwrap<Matrix>(args[5]->ToObject());
+            Matrix* mk2 = ObjectWrap::Unwrap<Matrix>(args[6]->ToObject());
+            Matrix* md2 = ObjectWrap::Unwrap<Matrix>(args[7]->ToObject());
+
+            k1 = mk1->mat;
+            d1 = md1->mat;
+
+            k2 = mk2->mat;
+            d2 = md2->mat;
+        }
+
+        // Last argument is flags, skipping for now
+
+        // Output mats
+        cv::Mat R, t, E, F;
+
+        // Do the stereo calibration
+        cv::stereoCalibrate(objectPoints, imagePoints1, imagePoints2, k1, d1, k2, d2, imageSize, R, t, E, F);
+
+        // make the return value
+        Local<Object> ret = NanNew<Object>();
+
+        // Make the output arguments
+
+        // k1
+        Local<Object> K1MatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *K1Matrix = ObjectWrap::Unwrap<Matrix>(K1MatrixWrap);
+        K1Matrix->mat = k1;
+
+        // d1
+        Local<Object> d1MatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *d1Matrix = ObjectWrap::Unwrap<Matrix>(d1MatrixWrap);
+        d1Matrix->mat = d1;
+
+        // k2
+        Local<Object> K2MatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *K2Matrix = ObjectWrap::Unwrap<Matrix>(K2MatrixWrap);
+        K2Matrix->mat = k2;
+
+        // d2
+        Local<Object> d2MatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *d2Matrix = ObjectWrap::Unwrap<Matrix>(d2MatrixWrap);
+        d2Matrix->mat = d2;
+
+        // R
+        Local<Object> RMatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *RMatrix = ObjectWrap::Unwrap<Matrix>(RMatrixWrap);
+        RMatrix->mat = R;
+
+        // t
+        Local<Object> tMatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *tMatrix = ObjectWrap::Unwrap<Matrix>(tMatrixWrap);
+        tMatrix->mat = t;
+
+        // E
+        Local<Object> EMatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *EMatrix = ObjectWrap::Unwrap<Matrix>(EMatrixWrap);
+        EMatrix->mat = E;
+
+        // F
+        Local<Object> FMatrixWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *FMatrix = ObjectWrap::Unwrap<Matrix>(FMatrixWrap);
+        FMatrix->mat = F;
+
+        // Add to return object
+        ret->Set(NanNew<String>("K1"), K1MatrixWrap);
+        ret->Set(NanNew<String>("distortion1"), d1MatrixWrap);
+        ret->Set(NanNew<String>("K2"), K2MatrixWrap);
+        ret->Set(NanNew<String>("distortion2"), d2MatrixWrap);
+        ret->Set(NanNew<String>("R"), RMatrixWrap);
+        ret->Set(NanNew<String>("t"), tMatrixWrap);
+        ret->Set(NanNew<String>("E"), EMatrixWrap);
+        ret->Set(NanNew<String>("F"), FMatrixWrap);
+
+        // Return
+        NanReturnValue(ret);
 
     } catch (cv::Exception &e) {
         const char *err_msg = e.what();
