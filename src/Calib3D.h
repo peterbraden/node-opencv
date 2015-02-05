@@ -22,6 +22,8 @@ public:
     static NAN_METHOD(StereoCalibrate);
 
     static NAN_METHOD(StereoRectify);
+
+    static NAN_METHOD(ComputeCorrespondEpilines);
 };
 
 #endif

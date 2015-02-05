@@ -131,6 +131,7 @@ void Calib3D::Init(Handle<Object> target)
     NODE_SET_METHOD(obj, "getOptimalNewCameraMatrix", GetOptimalNewCameraMatrix);
     NODE_SET_METHOD(obj, "stereoCalibrate", StereoCalibrate);
     NODE_SET_METHOD(obj, "stereoRectify", StereoRectify);
+    NODE_SET_METHOD(obj, "computeCorrespondEpilines", ComputeCorrespondEpilines);
 
     target->Set(NanNew("calib3d"), obj);
 }
@@ -448,7 +449,7 @@ NAN_METHOD(Calib3D::StereoCalibrate)
     }
 }
 
-// cv::stereoCalibrate
+// cv::stereoRectify
 NAN_METHOD(Calib3D::StereoRectify)
 {
     NanEscapableScope();
@@ -500,7 +501,50 @@ NAN_METHOD(Calib3D::StereoRectify)
 
         // Return the recification parameters
         NanReturnValue(ret);
-        
+
+    } catch (cv::Exception &e) {
+        const char *err_msg = e.what();
+        NanThrowError(err_msg);
+        NanReturnUndefined();
+    }
+}
+
+// cv::stereoRectify
+NAN_METHOD(Calib3D::StereoRectify)
+{
+    NanEscapableScope();
+
+    try {
+        // Get the arguments
+
+        // Arg0, the image points
+        std::vector<cv::Point2f> points = points2fFromArray(args[0]);
+
+        // Arg1, the image index (1 or 2)
+        int whichImage = int(args[1]->ToNumber()->Value());
+
+        // Arg2, the fundamental matrix
+        cv::Mat F = matFromMatrix(args[2]);
+
+        // compute the lines
+        std::vector<cv::Vec3f> lines;
+        cv::computeCorrespondEpilines(points, whichImage, F, lines);
+
+        // Convert the lines to an array of objects (ax + by + c = 0)
+        Local<Array> linesArray = NanNew<Array>(lines.size());
+        for(unsigned int i = 0; i < lines.size(); i++)
+        {
+            Local<Object> line_data = NanNew<Object>();
+            line_data->Set(NanNew<String>("a"), NanNew<Number>(corners[i][0]));
+            line_data->Set(NanNew<String>("b"), NanNew<Number>(corners[i][1]));
+            line_data->Set(NanNew<String>("c"), NanNew<Number>(corners[i][2]));
+
+            linesArray->Set(NanNew<Number>(i), line_data);
+        }
+
+        // Return the lines
+        NanReturnValue(linesArray);
+
     } catch (cv::Exception &e) {
         const char *err_msg = e.what();
         NanThrowError(err_msg);
