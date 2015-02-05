@@ -65,7 +65,7 @@ build_script:
   - cmd: ECHO "PUBLISH x64 binary package:"
   - cmd: npm install aws-sdk
   - cmd: IF %PUBLISH_BINARY%==true (node-pre-gyp package publish 2>&1)
-  - cmd: node-pre-gyp info
+  #- cmd: node-pre-gyp info
   - cmd: node-pre-gyp clean
   - cmd: node-gyp clean
   - cmd: npm uninstall -g node-gyp
@@ -99,7 +99,7 @@ on_success:
   #- cmd: IF %PUBLISH_BINARY%==true npm install --fallback-to-build=false
   - cmd: npm install --fallback-to-build=false
   # Print Available Binaries
-  - cmd: node-pre-gyp info
+  #- cmd: node-pre-gyp info
 
 test: OFF
 
