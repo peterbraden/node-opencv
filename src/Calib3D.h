@@ -24,6 +24,8 @@ public:
     static NAN_METHOD(StereoRectify);
 
     static NAN_METHOD(ComputeCorrespondEpilines);
+
+    static NAN_METHOD(ReprojectImageTo3D);
 };
 
 #endif

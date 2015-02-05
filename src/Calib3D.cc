@@ -132,6 +132,7 @@ void Calib3D::Init(Handle<Object> target)
     NODE_SET_METHOD(obj, "stereoCalibrate", StereoCalibrate);
     NODE_SET_METHOD(obj, "stereoRectify", StereoRectify);
     NODE_SET_METHOD(obj, "computeCorrespondEpilines", ComputeCorrespondEpilines);
+    NODE_SET_METHOD(obj, "reprojectImageTo3D", ReprojectImageTo3D);
 
     target->Set(NanNew("calib3d"), obj);
 }
@@ -544,6 +545,41 @@ NAN_METHOD(Calib3D::ComputeCorrespondEpilines)
 
         // Return the lines
         NanReturnValue(linesArray);
+
+    } catch (cv::Exception &e) {
+        const char *err_msg = e.what();
+        NanThrowError(err_msg);
+        NanReturnUndefined();
+    }
+}
+
+// cv::reprojectImageTo3D
+NAN_METHOD(Calib3D::ReprojectImageTo3D)
+{
+    NanEscapableScope();
+
+    try {
+        // Get the arguments
+
+        // Arg0, the disparity image
+        cv::Mat disparity = matFromMatrix(args[0]);
+
+        // Arg1, the depth-to-disparity transformation Q
+        cv::Mat Q = matFromMatrix(args[1]);
+
+        // Arg 2, handle missing values, skipped for now
+
+        // Arg3, output bit depth, skipped for now
+
+        // Compute the depth image
+        cv::Mat depthImage;
+        cv::reprojectImageTo3D(disparity, depthImage, Q);
+
+        // Wrap the depth image
+        Local<Object> depthImageMatrix = matrixFromMat(depthImage);
+
+        NanReturnValue(depthImageMatrix);
+
 
     } catch (cv::Exception &e) {
         const char *err_msg = e.what();
