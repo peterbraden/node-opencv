@@ -16,4 +16,28 @@ public:
     JSFUNC(Compute);
 };
 
+class StereoSGBM: public node::ObjectWrap {
+public:
+    cv::StereoSGBM stereo;
+
+    static Persistent<FunctionTemplate> constructor;
+    static void Init(Handle<Object> target);
+    static NAN_METHOD(New);
+
+    StereoSGBM();
+    StereoSGBM(int minDisparity,
+    int ndisparities,
+    int SADWindowSize,
+    int p1 = 0,
+    int p2 = 0,
+    int disp12MaxDiff = 0,
+    int preFilterCap = 0,
+    int uniquenessRatio = 0,
+    int speckleWindowSize = 0,
+    int speckleRange = 0,
+    bool fullDP = false);
+
+    JSFUNC(Compute);
+};
+
 #endif

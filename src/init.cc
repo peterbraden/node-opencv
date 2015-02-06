@@ -29,6 +29,7 @@ init(Handle<Object> target) {
     Calib3D::Init(target);
     ImgProc::Init(target);
     StereoBM::Init(target);
+    StereoSGBM::Init(target);
 
 
    #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
