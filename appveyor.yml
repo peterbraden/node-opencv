@@ -50,6 +50,8 @@ before_build:
   - cmd: SET OPENCV_DIR=%OPENCV_ROOT_PATH%\build\%ARCH%\vc12\bin
   - cmd: SET PATH=%cd%\node_modules\.bin\;C:\MinGW\bin;C:\GTK\bin;C:\msys\1.0\bin;%OPENCV_DIR%;%PATH%
   - cmd: SET PKG_CONFIG_PATH=C:\GTK\lib\pkgconfig
+  - cmd: DIR %OPENCV_ROOT_PATH%\build\%ARCH%\vc12\bin
+  - cmd: DIR %OPENCV_ROOT_PATH%\build\%ARCH%\vc12\lib
   # Here we need to copy the opencv.pc file from the repo into PKG_CONFIG_PATH
   # trick part is to check for the vc12 folder and use that one
   - cmd: copy .\utils\opencv_x64.pc C:\GTK\lib\pkgconfig\opencv.pc
@@ -57,7 +59,8 @@ before_build:
 # to run your custom scripts instead of automatic MSBuild
 build_script:
   - cmd: ECHO "BUILDING x64 binary package:"
-  - cmd: npm install --build-from-source --msvs_version=2013
+  #- cmd: npm install --build-from-source --msvs_version=2013
+  - cmd: npm install --msvs_version=2013
   - cmd: npm test
   - cmd: node lib/opencv.js
   - cmd: ECHO "PUBLISH x64 binary package:"
@@ -79,7 +82,8 @@ after_build:
   - cmd: npm install -g node-gyp
   - cmd: copy .\utils\opencv_x86.pc C:\GTK\lib\pkgconfig\opencv.pc
   - cmd: ECHO "BUILDING x86 binary package:"
-  - cmd: npm install --build-from-source --msvs_version=2013
+  #- cmd: npm install --build-from-source --msvs_version=2013
+  - cmd: npm install --msvs_version=2013
   - cmd: npm test
   - cmd: node lib/opencv.js
   - cmd: ECHO "PUBLISH x86 binary package:"

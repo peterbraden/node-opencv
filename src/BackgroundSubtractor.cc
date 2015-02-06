@@ -21,7 +21,7 @@ BackgroundSubtractorWrap::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(ctor, "applyMOG", ApplyMOG);
 
     target->Set(NanNew("BackgroundSubtractor"), ctor->GetFunction());
-    
+
 };
 
 NAN_METHOD(BackgroundSubtractorWrap::New) {
@@ -42,17 +42,17 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
 NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
   NanScope();
 
-  int history = 200;
-  int nmixtures = 5;
-  double backgroundRatio = 0.7;
-  double noiseSigma = 0;
-
-  if(args.Length() > 1){
-    INT_FROM_ARGS(history, 0)
-    INT_FROM_ARGS(nmixtures, 1)
-    DOUBLE_FROM_ARGS(backgroundRatio, 2)
-    DOUBLE_FROM_ARGS(noiseSigma, 3)
-  }
+  // int history = 200;
+  // int nmixtures = 5;
+  // double backgroundRatio = 0.7;
+  // double noiseSigma = 0;
+  //
+  // if(args.Length() > 1){
+  //   INT_FROM_ARGS(history, 0)
+  //   INT_FROM_ARGS(nmixtures, 1)
+  //   DOUBLE_FROM_ARGS(backgroundRatio, 2)
+  //   DOUBLE_FROM_ARGS(noiseSigma, 3)
+  // }
 
   Local<Object> n = NanNew(BackgroundSubtractorWrap::constructor)->GetFunction()->NewInstance();
 
@@ -83,13 +83,13 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
 
     Local<Object> fgMask = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
     Matrix *img = ObjectWrap::Unwrap<Matrix>(fgMask);
-    
+
 
     cv::Mat mat;
-    
+
     if(Buffer::HasInstance(args[0])){
       uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());
-      unsigned len = Buffer::Length(args[0]->ToObject());  
+      unsigned len = Buffer::Length(args[0]->ToObject());
       cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
       mat = cv::imdecode(*mbuf, -1);
       //mbuf->release();
@@ -116,13 +116,13 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     TryCatch try_catch;
 
     cb->Call(NanGetCurrentContext()->Global(), 2, argv);
-      
+
     if (try_catch.HasCaught()) {
         FatalException(try_catch);
       }
 
       NanReturnUndefined();
-  } 
+  }
   catch( cv::Exception& e ){
     const char* err_msg = e.what();
     NanThrowError(err_msg);
@@ -136,3 +136,4 @@ BackgroundSubtractorWrap::BackgroundSubtractorWrap(cv::Ptr<cv::BackgroundSubtrac
 };
 
 #endif
+
