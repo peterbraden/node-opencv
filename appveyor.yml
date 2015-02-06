@@ -59,7 +59,8 @@ before_build:
 # to run your custom scripts instead of automatic MSBuild
 build_script:
   - cmd: ECHO "BUILDING x64 binary package:"
-  - cmd: npm install --build-from-source --msvs_version=2013
+  #- cmd: npm install --build-from-source --msvs_version=2013
+  - cmd: npm install --msvs_version=2013
   - cmd: npm test
   - cmd: node lib/opencv.js
   - cmd: ECHO "PUBLISH x64 binary package:"
@@ -81,7 +82,8 @@ after_build:
   - cmd: npm install -g node-gyp
   - cmd: copy .\utils\opencv_x86.pc C:\GTK\lib\pkgconfig\opencv.pc
   - cmd: ECHO "BUILDING x86 binary package:"
-  - cmd: npm install --build-from-source --msvs_version=2013
+  #- cmd: npm install --build-from-source --msvs_version=2013
+  - cmd: npm install --msvs_version=2013
   - cmd: npm test
   - cmd: node lib/opencv.js
   - cmd: ECHO "PUBLISH x86 binary package:"
