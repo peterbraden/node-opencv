@@ -133,6 +133,21 @@ test("detectObject", function(assert){
   })
 })
 
+test("detectObject concurrently", function(assert){
+  var results = [];
+  for(var i = 0; i < 2; ++i) {
+    cv.readImage("./examples/files/mona.png", function(err, im){
+      im.detectObject(cv.FACE_CASCADE, {}, function(err, faces){
+        results.push(faces)
+        if (results.length === 2) {
+          assert.deepEqual(results[0], results[1])
+          assert.end()
+        }
+      })
+    })
+  }
+})
+
 test(".absDiff and .countNonZero", function(assert){
   cv.readImage("./examples/files/mona.png", function(err, im) {
     cv.readImage("./examples/files/mona.png", function(err, im2){
