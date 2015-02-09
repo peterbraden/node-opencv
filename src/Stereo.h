@@ -40,4 +40,19 @@ public:
     JSFUNC(Compute);
 };
 
+struct CvStereoGCState;
+
+class StereoGC: public node::ObjectWrap {
+public:
+    CvStereoGCState *stereo;
+
+    static Persistent<FunctionTemplate> constructor;
+    static void Init(Handle<Object> target);
+    static NAN_METHOD(New);
+
+    StereoGC(int numberOfDisparities = 16, int maxIterations = 2);
+
+    JSFUNC(Compute);
+};
+
 #endif

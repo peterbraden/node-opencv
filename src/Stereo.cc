@@ -1,5 +1,6 @@
 #include "Stereo.h"
 #include "Matrix.h"
+#include <opencv2/legacy/legacy.hpp>
 
 // Block matching
 
@@ -216,6 +217,95 @@ NAN_METHOD(StereoSGBM::Compute)
         // Compute stereo using the block matching algorithm
         cv::Mat disparity;
         self->stereo(left, right, disparity);
+
+        // Wrap the returned disparity map
+        Local<Object> disparityWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+        Matrix *disp = ObjectWrap::Unwrap<Matrix>(disparityWrap);
+        disp->mat = disparity;
+
+        NanReturnValue(disparityWrap);
+
+    } catch (cv::Exception &e) {
+        const char *err_msg = e.what();
+        NanThrowError(err_msg);
+        NanReturnUndefined();
+    }
+
+};
+
+// Graph cut
+
+v8::Persistent<FunctionTemplate> StereoGC::constructor;
+
+void
+StereoGC::Init(Handle<Object> target) {
+    NanScope();
+
+    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(StereoGC::New);
+    NanAssignPersistent(constructor, ctor);
+    ctor->InstanceTemplate()->SetInternalFieldCount(1);
+    ctor->SetClassName(NanNew("StereoGC"));
+
+    NODE_SET_PROTOTYPE_METHOD(ctor, "compute", Compute);
+
+    target->Set(NanNew("StereoGC"), ctor->GetFunction());
+}
+
+NAN_METHOD(StereoGC::New) {
+    NanScope();
+
+    if (args.This()->InternalFieldCount() == 0)
+        NanThrowTypeError("Cannot instantiate without new");
+
+    StereoGC *stereo;
+
+    if (args.Length() == 0)
+    {
+        stereo = new StereoGC();
+    }
+    else if (args.Length() == 1)
+    {
+        stereo = new StereoGC(args[0]->IntegerValue()); // numberOfDisparities
+    }
+    else
+    {
+        stereo = new StereoGC(args[0]->IntegerValue(), args[1]->IntegerValue()); // max iterations
+    }
+
+    stereo->Wrap(args.Holder());
+    NanReturnValue(args.Holder());
+}
+
+StereoGC::StereoGC(int numberOfDisparities, int maxIters)
+: ObjectWrap()
+{
+    stereo = cvCreateStereoGCState(numberOfDisparities, maxIters);
+}
+
+// TODO make this async
+NAN_METHOD(StereoGC::Compute)
+{
+    SETUP_FUNCTION(StereoGC)
+
+    try {
+        // Get the arguments
+
+        // Arg 0, the 'left' image
+        Matrix* m0 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+        cv::Mat left = m0->mat;
+
+        // Arg 1, the 'right' image
+        Matrix* m1 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+        cv::Mat right = m1->mat;
+
+        // Compute stereo using the block matching algorithm
+        CvMat left_leg = left, right_leg = right;
+        CvMat *disp_left = cvCreateMat(left.rows, left.cols, CV_16S), *disp_right = cvCreateMat(right.rows, right.cols, CV_16S);
+        cvFindStereoCorrespondenceGC(&left_leg, &right_leg, disp_left, disp_right, self->stereo, 0);
+
+        cv::Mat disp16 = disp_left;
+        cv::Mat disparity(disp16.rows, disp16.cols, CV_8U);
+        disp16.convertTo(disparity, CV_8U, -16);
 
         // Wrap the returned disparity map
         Local<Object> disparityWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
