@@ -1,7 +1,7 @@
 
 # Changelog
 
-### Next
+### 2.0.0
 
 - Support for node 0.12
 - Camera Calibration Functions from @queuecumber
