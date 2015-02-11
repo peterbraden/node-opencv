@@ -1730,11 +1730,8 @@ NAN_METHOD(Matrix::FloodFill){
 // @author olfox
 // Returns an array of the most probable positions
 // Usage: output = input.templateMatches(min_probability, max_probability, limit, ascending, min_x_distance, min_y_distance);
-Handle<Value>
-Matrix::TemplateMatches(const v8::Arguments& args) {
-  HandleScope scope;
-
-  Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+NAN_METHOD(Matrix::TemplateMatches){
+	SETUP_FUNCTION(Matrix)
 
   bool filter_min_probability = (args.Length() >= 1) ? args[0]->IsNumber() : false;
   bool filter_max_probability = (args.Length() >= 2) ? args[1]->IsNumber() : false;
