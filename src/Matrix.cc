@@ -69,6 +69,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "drawAllContours", DrawAllContours);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "houghLinesP", HoughLinesP);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "crop", Crop);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "houghCircles", HoughCircles);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "inRange", inRange);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "adjustROI", AdjustROI);
@@ -1016,7 +1017,12 @@ NAN_METHOD(Matrix::AddWeighted) {
 	float beta = args[3]->NumberValue();
 	int gamma = 0;
 
-	cv::addWeighted(src1->mat, alpha, src2->mat, beta, gamma, self->mat);
+  try{
+	  cv::addWeighted(src1->mat, alpha, src2->mat, beta, gamma, self->mat);
+  } catch(cv::Exception& e ){
+    const char* err_msg = e.what();
+    NanThrowError(err_msg);
+  }
 
 
 	NanReturnNull();
