@@ -50,7 +50,7 @@ install:
 before_script:
   - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
   # if publishing, do it
-  - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish; fi;
+  - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish || true ; fi;
   # cleanup
   - node-pre-gyp clean
   - node-gyp clean
