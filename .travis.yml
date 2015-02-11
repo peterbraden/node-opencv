@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 language: objective-c
 #compiler: clang
 
@@ -21,49 +20,11 @@ before_install:
     # get commit message
   - COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
     # put local node-pre-gyp on PATH
-=======
-language: node_js
-
-node_js:
-  - '0.10'
-  - '0.11'
-  - '0.12'
-
-compiler: clang
-
-env:
-  global:
-  - secure: "kCAwXdfcMv4l4ok5lO89ANbKXXwWQpn5/3qupSbhmX2NDIGUxyXze/cs90u9gF5hcT7ebq27ZJPEtu7pRov8MadfQM9BAd4ZZrHcMHWSkA0Iz+nM+m0Urwach6jkp2Iuwx15L2NHSis7f5PUKJcEv4Gnqs8jrCJzHHS7m7dO0Xo="
-  - secure: "lBIk4BhdIkSmJtFUNp93UjDm445i9eF7nKA+oSiLRu+b9i/WeRLiKFI89tehexWeXBlyNhziBN16LrHmx3I86yZfEok9dBMA1JuzYBjrvpjRAflGcqaCFLV3axyyyNQRIh7Q+ziAlg0xg8HL752BpnfXO91g3jfDPjGxcvBb5xQ="
-
-
-
-before_install:
-  # Fix a problem with apt-get failing later, see http://docs.travis-ci.com/user/installing-dependencies/#Installing-Ubuntu-packages
-  - sudo apt-get update -qq
-  # - sudo add-apt-repository -y ppa:kubuntu-ppa/backports
-  # - sudo apt-get update
-  - sudo apt-get install libcv-dev
-  - sudo apt-get install libopencv-dev
-  - sudo apt-get install libhighgui-dev
-  # get commit message
-  - COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
-  # put local node-pre-gyp on PATH
->>>>>>> master
   - export PATH=./node_modules/.bin/:$PATH
     # install node-pre-gyp so it is available for packaging and publishing
   - npm install node-gyp -g
     # install node-pre-gyp so it is available for packaging and publishing
   - npm install node-pre-gyp
-<<<<<<< HEAD
-    # install aws-sdk so it is available for publishing to AS3
-  - npm install aws-sdk
-    # figure out if we should publish
-  - PUBLISH_BINARY=false
-    # if we are building a tag then publish
-  - if [[ $TRAVIS_BRANCH == `git describe --tags --always HEAD` ]]; then PUBLISH_BINARY=true; fi;
-    # or if we put [publish binary] in the commit message
-=======
   # install aws-sdk so it is available for publishing to AS3
   - npm install aws-sdk
   # figure out if we should publish
@@ -71,7 +32,6 @@ before_install:
   # if we are building a tag then publish
   - if [[ $TRAVIS_BRANCH == `git describe --tags --always HEAD` ]]; then PUBLISH_BINARY=true; fi;
   # or if we put [publish binary] in the commit message
->>>>>>> master
   - if test "${COMMIT_MESSAGE#*'[publish binary]'}" != "$COMMIT_MESSAGE"; then PUBLISH_BINARY=true; fi;
   - platform=$(uname -s | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
 
@@ -85,20 +45,10 @@ install:
 before_script:
   - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
   # if publishing, do it
-<<<<<<< HEAD
   - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish || true; fi;
   # cleanup
   - node-pre-gyp clean
   - node-gyp clean
-=======
-  - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish || true ; fi;
-  # cleanup
-  - node-pre-gyp clean
-  - node-gyp clean
-  - sudo apt-get purge libcv-dev
-  - sudo apt-get purge libopencv-dev
-  - sudo apt-get purge libhighgui-dev
->>>>>>> master
 
 script:
   # if publishing, test installing from remote
@@ -106,17 +56,8 @@ script:
   - if [[ $PUBLISH_BINARY == true ]]; then INSTALL_RESULT=$(npm install --fallback-to-build=false > /dev/null)$? || true; fi;
   # if install returned non zero (errored) then we first unpublish and then call false so travis will bail at this line
   - if [[ $INSTALL_RESULT != 0 ]]; then echo "returned $INSTALL_RESULT";node-pre-gyp unpublish;false; fi
-<<<<<<< HEAD
   # there is no need for 32bit binaries on Mac OSx since those machines are ancient
 
 after_success:
     # if success then query and display all published binaries
-=======
-  # If success then we arrive here so lets clean up
-  - node-pre-gyp clean
-  # Can't compile opencv 32bit in 64 bit env.
-
-after_success:
-  # if success then query and display all published binaries
->>>>>>> master
   - node-pre-gyp info
