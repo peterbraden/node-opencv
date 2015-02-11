@@ -1,9 +1,9 @@
 # environment variables
 environment:
   node_pre_gyp_accessKeyId:
-    secure: hTQMi31kndQOPU0AZVkVXgH7Vc3EjJmvThFwMYhkno4=
+    secure: 3GHZvq0y83PQ8Qi7FOc5rKoULRQvd2OohhtGqRQLZB4
   node_pre_gyp_secretAccessKey:
-    secure: ZOsWmB5rxfiPgPW5bCuvkK1UUEupssSoHfK5jWcJBJsPuPWQHEWOr1lUteVbx2NV
+    secure: AiX8Bx+U8LKu5JZHb5CMth5xOHuWawkQW3il0OFWfV4kodPZnC8dLYIqb4XZeF7f
 
 # try on unstable version of the server to build node-opencv
 os: unstable
