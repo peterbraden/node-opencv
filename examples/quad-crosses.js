@@ -12,7 +12,7 @@ var RED   = [0, 0, 255]; //B, G, R
 var GREEN = [0, 255, 0]; //B, G, R
 var WHITE = [255, 255, 255]; //B, G, R
 
-cv.readImage('./examples/files/quads.jpg', function(err, im) {
+cv.readImage('./files/quads.jpg', function(err, im) {
   if (err) throw err;
   if (im.width() < 1 || im.height() < 1) throw new Error('Image has no size');
 
@@ -47,6 +47,6 @@ cv.readImage('./examples/files/quads.jpg', function(err, im) {
     out.line([points[1].x,points[1].y], [points[3].x, points[3].y], RED);
   }
 
-  out.save('./examples/tmp/quad-crosses.png');
-  console.log('Image saved to ./examples/tmp/quad-crosses.png');
+  out.save('./tmp/quad-crosses.png');
+  console.log('Image saved to ./tmp/quad-crosses.png');
 });

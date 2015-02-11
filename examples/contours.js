@@ -9,7 +9,7 @@ var GREEN = [0, 255, 0]; // B, G, R
 var WHITE = [255, 255, 255]; // B, G, R
 var RED   = [0, 0, 255]; // B, G, R
 
-cv.readImage('./examples/files/stuff.png', function(err, im) {
+cv.readImage('./files/stuff.png', function(err, im) {
   if (err) throw err;
   var width = im.width();
   var height = im.height();
@@ -39,7 +39,7 @@ cv.readImage('./examples/files/stuff.png', function(err, im) {
 
   all.drawAllContours(contours, WHITE);
 
-  big.save('./examples/tmp/big.png');
-  all.save('./examples/tmp/all.png');
-  console.log('Image saved to ./examples/tmp/big.png && ./tmp/all.png');
+  big.save('./tmp/big.png');
+  all.save('./tmp/all.png');
+  console.log('Image saved to ./tmp/big.png && ./tmp/all.png');
 });
