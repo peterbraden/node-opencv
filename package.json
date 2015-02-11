@@ -10,7 +10,7 @@
   "version": "3.0.0",
   "devDependencies": {
     "tape": "^3.0.0",
-    "aws-sdk": "~2.0.21"
+    "aws-sdk": "~2.0.21",
     "glob": "^4.0.6",
     "request": "^2.45.0"
   },
