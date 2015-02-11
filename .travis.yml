@@ -6,8 +6,8 @@ env:
     - export NODE_VERSION="0.10"
     - export NODE_VERSION="0.11"
   global:
-    - secure: # Add keys here
-    - secure: # Add keys here
+    - secure: "kCAwXdfcMv4l4ok5lO89ANbKXXwWQpn5/3qupSbhmX2NDIGUxyXze/cs90u9gF5hcT7ebq27ZJPEtu7pRov8MadfQM9BAd4ZZrHcMHWSkA0Iz+nM+m0Urwach6jkp2Iuwx15L2NHSis7f5PUKJcEv4Gnqs8jrCJzHHS7m7dO0Xo="
+    - secure: "lBIk4BhdIkSmJtFUNp93UjDm445i9eF7nKA+oSiLRu+b9i/WeRLiKFI89tehexWeXBlyNhziBN16LrHmx3I86yZfEok9dBMA1JuzYBjrvpjRAflGcqaCFLV3axyyyNQRIh7Q+ziAlg0xg8HL752BpnfXO91g3jfDPjGxcvBb5xQ="
 
 before_install:
   - git clone https://github.com/creationix/nvm.git ./.nvm
