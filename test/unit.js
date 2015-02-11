@@ -275,3 +275,7 @@ test("fonts", function(t) {
   });
 })
 
+// Test the examples folder.
+require('./examples')()
+
+

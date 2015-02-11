@@ -1,6 +1,6 @@
-var cv = require('../lib/opencv')
+var cv = require('../lib/opencv');
 
-var trainingData = []
+var trainingData = [];
 /*
 for (var i = 1; i< 41; i++){
   for (var j = 1; j<10; j++){
@@ -22,5 +22,5 @@ cv.readImage("/Users/peterbraden/Downloads/orl_faces/s6/10.pgm", function(e, im)
 */
 cv.readImage("./examples/files/mona.png", function(e, mat){
   var th = mat.threshold(200, 200, "Threshold to Zero Inverted");
-  th.save('./examples/tmp/out.png')
-})
+  th.save('./examples/tmp/out.png');
+});
