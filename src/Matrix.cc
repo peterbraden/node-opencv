@@ -1750,7 +1750,7 @@ NAN_METHOD(Matrix::TemplateMatches){
     cv::sortIdx(self->mat.reshape(0,1), indices, CV_SORT_DESCENDING + CV_SORT_EVERY_ROW);
 
   cv::Mat hit_mask = cv::Mat::zeros(self->mat.size(), CV_64F);
-  v8::Local<v8::Array> probabilites_array = v8::Array::New();
+  v8::Local<v8::Array> probabilites_array = NanNew<v8::Array>(limit);
 
   cv::Mat_<float>::const_iterator begin = self->mat.begin<float>();
   cv::Mat_<int>::const_iterator it = indices.begin();
@@ -1789,20 +1789,20 @@ NAN_METHOD(Matrix::TemplateMatches){
       cv::rectangle(hit_mask, top_left, bottom_right, color, CV_FILLED);
     }
 
-    Local<Value> x_value = v8::Number::New(pt.x);
-    Local<Value> y_value = v8::Number::New(pt.y);
-    Local<Value> probability_value = v8::Number::New(probability);
+    Local<Value> x_value = NanNew<Number>(pt.x);
+    Local<Value> y_value = NanNew<Number>(pt.y);
+    Local<Value> probability_value = NanNew<Number>(probability);
 
-    Local<Object> probability_object = Object::New();
-    probability_object->Set(String::NewSymbol("x"), x_value);
-    probability_object->Set(String::NewSymbol("y"), y_value);
-    probability_object->Set(String::NewSymbol("probability"), probability_value);
+    Local<Object> probability_object = NanNew<Object>();
+    probability_object->Set(NanNew<String>("x"), x_value);
+    probability_object->Set(NanNew<String>("y"), y_value);
+    probability_object->Set(NanNew<String>("probability"), probability_value);
 
     probabilites_array->Set(index, probability_object);
     index++;
   }
 
-  return scope.Close(probabilites_array);
+  NanReturnValue(probabilites_array);
 }
 
 // @author ytham
