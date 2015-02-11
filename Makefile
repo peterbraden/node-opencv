@@ -1,11 +1,15 @@
 VERSION := $(shell node -e "console.log(require('./package.json').version)")
 
-.PHONY: default release
+.PHONY: default release smoke
 
-# Add a default task so we don't release just because someone ran 'make'
-default:
-	@echo "Did you mean to release a new version?"
-	@echo "If so, run 'make release'."
+test:
+	npm test
+
+smoke:
+	npm install --build-from-source
+	node smoke/smoketest.js
+	npm test
+
 
 release:
 	@echo "Tagging release $(VERSION)"
