@@ -55,4 +55,3 @@ class OpenCV: public node::ObjectWrap{
 
 
 #endif
-

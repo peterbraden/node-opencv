@@ -50,7 +50,7 @@ CascadeClassifierWrap::CascadeClassifierWrap(v8::Value* fileName){
 
 class AsyncDetectMultiScale : public NanAsyncWorker {
  public:
-  AsyncDetectMultiScale(NanCallback *callback, CascadeClassifierWrap *cc, Matrix* im, double scale, int neighbors,  int minw, int minh, int sleep_for) : NanAsyncWorker(callback), cc(cc), im(im), scale(scale), neighbors(neighbors), minw(minw), minh(minh), sleep_for(sleep_for) {}
+  AsyncDetectMultiScale(NanCallback *callback, CascadeClassifierWrap *cc, Matrix* im, double scale, int neighbors,  int minw, int minh) : NanAsyncWorker(callback), cc(cc), im(im), scale(scale), neighbors(neighbors), minw(minw), minh(minh)  {}
   ~AsyncDetectMultiScale() {}
 
   void Execute () {
@@ -103,7 +103,6 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
     int neighbors;
     int minw;
     int minh;
-    int sleep_for;
     std::vector<cv::Rect>  res;
     
 };
@@ -141,7 +140,7 @@ NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
 
   NanCallback *callback = new NanCallback(cb.As<Function>());
 
-  NanAsyncQueueWorker( new AsyncDetectMultiScale(callback, self, im, scale, neighbors, minw, minh, 1) );
+  NanAsyncQueueWorker( new AsyncDetectMultiScale(callback, self, im, scale, neighbors, minw, minh) );
   NanReturnUndefined();
    
 }

@@ -7,7 +7,7 @@ v8::Persistent<FunctionTemplate> Matrix::constructor;
 
 cv::Scalar setColor(Local<Object> objColor);
 cv::Point setPoint(Local<Object> objPoint);
-cv::Rect* setRect(Local<Object> objRect);
+cv::Rect* setRect(Local<Object> objRect, cv::Rect &result);
 
 void
 Matrix::Init(Handle<Object> target) {
@@ -32,6 +32,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "height", Height);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "size", Size);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "clone", Clone);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "crop", Crop);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "toBuffer", ToBuffer);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "toBufferAsync", ToBufferAsync);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "ellipse", Ellipse);
@@ -69,6 +70,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "houghLinesP", HoughLinesP);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "crop", Crop);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "houghCircles", HoughCircles);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "inRange", inRange);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "adjustROI", AdjustROI);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "locateROI", LocateROI);
@@ -81,6 +83,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "equalizeHist", EqualizeHist);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "floodFill", FloodFill);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "matchTemplate", MatchTemplate);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "templateMatches", TemplateMatches);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "minMaxLoc", MinMaxLoc);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pushBack", PushBack);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "putText", PutText);
@@ -451,7 +454,7 @@ NAN_METHOD(Matrix::ToBuffer){
   
 	v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
-	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>(vec.size()), NanNew<v8::Integer>(0)};
+	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned)vec.size()), NanNew<v8::Integer>(0)};
 	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
 	NanReturnValue(actualBuffer);
@@ -484,7 +487,7 @@ class AsyncToBufferWorker : public NanAsyncWorker {
   
 	  v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
-	  v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>(res.size()), NanNew<v8::Integer>(0)};
+	  v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned)res.size()), NanNew<v8::Integer>(0)};
 	  v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
 
@@ -1033,7 +1036,12 @@ NAN_METHOD(Matrix::BitwiseXor) {
 	Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 	Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
 
-	cv::bitwise_xor(src1->mat, src2->mat, self->mat);
+    if(args.Length() == 3){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+		cv::bitwise_xor(src1->mat, src2->mat, self->mat, mask->mat);
+    }else{
+		cv::bitwise_xor(src1->mat, src2->mat, self->mat);
+    }	
 
 	NanReturnNull();
 }
@@ -1045,7 +1053,12 @@ NAN_METHOD(Matrix::BitwiseNot) {
 
     Matrix *dst = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
 
-    cv::bitwise_not(self->mat, dst->mat);
+    if(args.Length() == 2){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+    	cv::bitwise_not(self->mat, dst->mat, mask->mat);
+    }else{
+    	cv::bitwise_not(self->mat, dst->mat);
+    }	
 
     NanReturnNull();
 }
@@ -1058,7 +1071,12 @@ NAN_METHOD(Matrix::BitwiseAnd) {
     Matrix *src1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
     Matrix *src2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
 
-    cv::bitwise_and(src1->mat, src2->mat, self->mat);
+    if(args.Length() == 3){
+    	Matrix *mask = ObjectWrap::Unwrap<Matrix>(args[2]->ToObject());
+	    cv::bitwise_and(src1->mat, src2->mat, self->mat, mask->mat);
+    }else{
+	    cv::bitwise_and(src1->mat, src2->mat, self->mat);
+    }	
 
     NanReturnNull();
 }
@@ -1131,7 +1149,11 @@ NAN_METHOD(Matrix::FindContours) {
     if (args[1]->IsNumber()) chain = args[1]->IntegerValue();
   }
 
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 	Local<Object> conts_to_return= NanNew(Contour::constructor)->GetFunction()->NewInstance();
+	Contour *contours = ObjectWrap::Unwrap<Contour>(conts_to_return);
+
+	cv::findContours(self->mat, contours->contours, contours->hierarchy, mode, chain);
 
 	NanReturnValue(conts_to_return);
 
@@ -1244,6 +1266,41 @@ NAN_METHOD(Matrix::HoughLinesP) {
 
 }
 
+NAN_METHOD(Matrix::HoughCircles) {
+	NanScope();
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+  double dp = args.Length() < 1 ? 1 : args[0]->NumberValue();
+  double minDist = args.Length() < 2 ? 1 : args[1]->NumberValue();
+  double higherThreshold = args.Length() < 3 ? 100 : args[2]->NumberValue();
+  double accumulatorThreshold = args.Length() < 4 ? 100 : args[3]->NumberValue();
+  int minRadius = args.Length() < 5 ? 0 : args[4]->Uint32Value();
+  int maxRadius = args.Length() < 6 ? 0 : args[5]->Uint32Value();
+  std::vector<cv::Vec3f> circles;
+
+  cv::Mat gray;
+
+
+  equalizeHist(self->mat, gray);
+  
+  cv::HoughCircles(gray, circles, CV_HOUGH_GRADIENT, dp, minDist, higherThreshold, accumulatorThreshold, minRadius, maxRadius);
+
+  v8::Local<v8::Array> arr = NanNew<Array>(circles.size());
+
+
+  for (unsigned int i=0; i < circles.size(); i++){
+    v8::Local<v8::Array> pt = NanNew<Array>(3);
+    pt->Set(0, NanNew<Number>((double) circles[i][0]));// center x
+    pt->Set(1, NanNew<Number>((double) circles[i][1]));// center y
+    pt->Set(2, NanNew<Number>((double) circles[i][2]));// radius
+    arr->Set(i, pt);
+  }
+
+  NanReturnValue(arr);
+
+}
+
 cv::Scalar setColor(Local<Object> objColor) {
 
 	Local<Value> valB = objColor->Get(0);
@@ -1260,7 +1317,7 @@ cv::Point setPoint(Local<Object> objPoint) {
 	return  cv::Point( objPoint->Get(0)->IntegerValue(),  objPoint->Get(1)->IntegerValue() );
 }
 
-cv::Rect* setRect(Local<Object> objRect) {
+cv::Rect* setRect(Local<Object> objRect, cv::Rect &result) {
 
 	if(!objRect->IsArray() || !objRect->Get(0)->IsArray() || !objRect->Get(0)->IsArray() ){
 		printf("error");
@@ -1269,14 +1326,13 @@ cv::Rect* setRect(Local<Object> objRect) {
 
 	Local<Object> point = objRect->Get(0)->ToObject();
 	Local<Object> size = objRect->Get(1)->ToObject();
-	cv::Rect ret;
 
-	ret.x = point->Get(0)->IntegerValue();
-	ret.y = point->Get(1)->IntegerValue();
-	ret.width = size->Get(0)->IntegerValue();
-	ret.height = size->Get(1)->IntegerValue();
+	result.x = point->Get(0)->IntegerValue();
+	result.y = point->Get(1)->IntegerValue();
+	result.width = size->Get(0)->IntegerValue();
+	result.height = size->Get(1)->IntegerValue();
 
-	return (cv::Rect*) &ret;
+	return &result;
 }
 
 
@@ -1664,16 +1720,95 @@ NAN_METHOD(Matrix::FloodFill){
 
 
 	Local<Object> obj = args[0]->ToObject();
+	cv::Rect rect;
 
 	int  ret = cv::floodFill(self->mat, setPoint(obj->Get(NanNew<String>("seedPoint"))->ToObject())
 			, setColor(obj->Get(NanNew<String>("newColor"))->ToObject())
-			, obj->Get(NanNew<String>("rect"))->IsUndefined() ? 0 : setRect(obj->Get(NanNew<String>("rect"))->ToObject())
+			, obj->Get(NanNew<String>("rect"))->IsUndefined() ? 0 : setRect(obj->Get(NanNew<String>("rect"))->ToObject(), rect)
 			, setColor(obj->Get(NanNew<String>("loDiff"))->ToObject())
 			, setColor(obj->Get(NanNew<String>("upDiff"))->ToObject())
 			, 4 );
 
 
 	NanReturnValue(NanNew<Number>( ret ));
+}
+
+// @author olfox
+// Returns an array of the most probable positions
+// Usage: output = input.templateMatches(min_probability, max_probability, limit, ascending, min_x_distance, min_y_distance);
+NAN_METHOD(Matrix::TemplateMatches){
+	SETUP_FUNCTION(Matrix)
+
+  bool filter_min_probability = (args.Length() >= 1) ? args[0]->IsNumber() : false;
+  bool filter_max_probability = (args.Length() >= 2) ? args[1]->IsNumber() : false;
+  double min_probability = filter_min_probability ? args[0]->NumberValue() : 0;
+  double max_probability = filter_max_probability ? args[1]->NumberValue() : 0;
+  int limit = (args.Length() >= 3) ? args[2]->IntegerValue() : 0;
+  bool ascending = (args.Length() >= 4) ? args[3]->BooleanValue() : false;
+  int min_x_distance = (args.Length() >= 5) ? args[4]->IntegerValue() : 0;
+  int min_y_distance = (args.Length() >= 6) ? args[5]->IntegerValue() : 0;
+
+  cv::Mat_<int> indices;
+
+  if (ascending)
+    cv::sortIdx(self->mat.reshape(0,1), indices, CV_SORT_ASCENDING + CV_SORT_EVERY_ROW);
+  else
+    cv::sortIdx(self->mat.reshape(0,1), indices, CV_SORT_DESCENDING + CV_SORT_EVERY_ROW);
+
+  cv::Mat hit_mask = cv::Mat::zeros(self->mat.size(), CV_64F);
+  v8::Local<v8::Array> probabilites_array = NanNew<v8::Array>(limit);
+
+  cv::Mat_<float>::const_iterator begin = self->mat.begin<float>();
+  cv::Mat_<int>::const_iterator it = indices.begin();
+  cv::Mat_<int>::const_iterator end = indices.end();
+  int index = 0;
+  for (; (limit == 0 || index < limit) && it != end; ++it) {
+    cv::Point pt = (begin + *it).pos();
+
+    float probability = self->mat.at<float>(pt.y, pt.x);
+
+    if (filter_min_probability && probability < min_probability) {
+      if (ascending) continue;
+      else break;
+    }
+
+    if (filter_max_probability && probability > max_probability) {
+      if (ascending) break;
+      else continue;
+    }
+
+    if (min_x_distance != 0 || min_y_distance != 0) {
+      // Check hit mask color for for every corner
+
+      cv::Size maxSize = hit_mask.size();
+      int max_x = maxSize.width - 1;
+      int max_y = maxSize.height - 1;
+      cv::Point top_left = cv::Point(max(0, pt.x - min_x_distance), max(0, pt.y - min_y_distance));
+      cv::Point top_right = cv::Point(min(max_x, pt.x + min_x_distance), max(0, pt.y - min_y_distance));
+      cv::Point bottom_left = cv::Point(max(0, pt.x - min_x_distance), min(max_y, pt.y + min_y_distance));
+      cv::Point bottom_right = cv::Point(min(max_x, pt.x + min_x_distance), min(max_y, pt.y + min_y_distance));
+      if (hit_mask.at<double>(top_left.y, top_left.x) > 0) continue;
+      if (hit_mask.at<double>(top_right.y, top_right.x) > 0) continue;
+      if (hit_mask.at<double>(bottom_left.y, bottom_left.x) > 0) continue;
+      if (hit_mask.at<double>(bottom_right.y, bottom_right.x) > 0) continue;
+      cv::Scalar color(255.0);
+      cv::rectangle(hit_mask, top_left, bottom_right, color, CV_FILLED);
+    }
+
+    Local<Value> x_value = NanNew<Number>(pt.x);
+    Local<Value> y_value = NanNew<Number>(pt.y);
+    Local<Value> probability_value = NanNew<Number>(probability);
+
+    Local<Object> probability_object = NanNew<Object>();
+    probability_object->Set(NanNew<String>("x"), x_value);
+    probability_object->Set(NanNew<String>("y"), y_value);
+    probability_object->Set(NanNew<String>("probability"), probability_value);
+
+    probabilites_array->Set(index, probability_object);
+    index++;
+  }
+
+  NanReturnValue(probabilites_array);
 }
 
 // @author ytham
