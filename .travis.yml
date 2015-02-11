@@ -9,8 +9,10 @@ compiler: clang
 
 env:
   global:
-  - secure: v7yz4KwR5+Iv7+oPs54wAK6/fYp7xnEDmbbr2z5F2i8NaG5Qvi4AGwfRuPTLNAeFhpapzL8wk8LI4NfxChUe2S1Rj9ytpW350wtHNcIEBiJXsbfKBeHCZQcZnlx+KofmuP//BRjO3kiVgilOxuLvVbdA9Ob/6ixAdKTHl0yk+NA=
-  - secure: ehjkxVYyBwL9dZAD1w/D3oEN2lWQebN44CnrftTYw0xVPiYsNeCKV0SpTs/RIlhhiVlQjZRmZbt+My213q32vYdKGEv4TGyyiSfy3BQz+hkXb5vCtxS0WZjfQpxcApYlh9bLh4LzvCcEXe6RrdLSApTXVh9PPiKVGBPtZjLXfZU=
+  - secure: "kCAwXdfcMv4l4ok5lO89ANbKXXwWQpn5/3qupSbhmX2NDIGUxyXze/cs90u9gF5hcT7ebq27ZJPEtu7pRov8MadfQM9BAd4ZZrHcMHWSkA0Iz+nM+m0Urwach6jkp2Iuwx15L2NHSis7f5PUKJcEv4Gnqs8jrCJzHHS7m7dO0Xo="
+  - secure: "lBIk4BhdIkSmJtFUNp93UjDm445i9eF7nKA+oSiLRu+b9i/WeRLiKFI89tehexWeXBlyNhziBN16LrHmx3I86yZfEok9dBMA1JuzYBjrvpjRAflGcqaCFLV3axyyyNQRIh7Q+ziAlg0xg8HL752BpnfXO91g3jfDPjGxcvBb5xQ="
+
+
 
 before_install:
   # Fix a problem with apt-get failing later, see http://docs.travis-ci.com/user/installing-dependencies/#Installing-Ubuntu-packages
