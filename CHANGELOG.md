@@ -1,6 +1,17 @@
 
 # Changelog
 
+### 3.0.0
+
+You wait ages for a release, and 2 come along at once...
+
+This one is awesome. It adds prebuilt binaries, so you don't need
+to build opencv for the common platforms.
+
+Many many thanks to @edgarsilva for awesome work here, and
+http://hybridgroup.com/ for hosting the binaries
+
+
 ### 2.0.0
 
 - Support for node 0.12
