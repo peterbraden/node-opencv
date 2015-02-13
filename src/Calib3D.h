@@ -18,6 +18,14 @@ public:
     static NAN_METHOD(SolvePnP);
 
     static NAN_METHOD(GetOptimalNewCameraMatrix);
+
+    static NAN_METHOD(StereoCalibrate);
+
+    static NAN_METHOD(StereoRectify);
+
+    static NAN_METHOD(ComputeCorrespondEpilines);
+
+    static NAN_METHOD(ReprojectImageTo3D);
 };
 
 #endif

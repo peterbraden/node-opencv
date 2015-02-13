@@ -15,13 +15,13 @@
         "src/BackgroundSubtractor.cc",
         "src/Constants.cc",
         "src/Calib3D.cc",
-        "src/ImgProc.cc"
+        "src/ImgProc.cc",
+        "src/Stereo.cc"
       ],
 
       "libraries": [
         "<!@(pkg-config --libs opencv)"
       ],
-
       # For windows
 
       "include_dirs": [
