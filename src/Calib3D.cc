@@ -132,7 +132,7 @@ void Calib3D::Init(Handle<Object> target)
     NODE_SET_METHOD(obj, "stereoCalibrate", StereoCalibrate);
     NODE_SET_METHOD(obj, "stereoRectify", StereoRectify);
     NODE_SET_METHOD(obj, "computeCorrespondEpilines", ComputeCorrespondEpilines);
-    NODE_SET_METHOD(obj, "reprojectImageTo3D", ReprojectImageTo3D);
+    NODE_SET_METHOD(obj, "reprojectImageTo3d", ReprojectImageTo3D);
 
     target->Set(NanNew("calib3d"), obj);
 }
