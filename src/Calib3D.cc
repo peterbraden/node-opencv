@@ -464,20 +464,20 @@ NAN_METHOD(Calib3D::StereoRectify)
         // Arg1, the first distortion coefficients
         cv::Mat d1 = matFromMatrix(args[1]);
 
-        // Arg3, the second camera matrix
-        cv::Mat K2 = matFromMatrix(args[3]);
+        // Arg2, the second camera matrix
+        cv::Mat K2 = matFromMatrix(args[2]);
 
-        // Arg4, the second distortion coefficients
-        cv::Mat d2 = matFromMatrix(args[4]);
+        // Arg3, the second distortion coefficients
+        cv::Mat d2 = matFromMatrix(args[3]);
 
-        // Arg5, the image size
-        cv::Size imageSize = sizeFromArray(args[5]);
+        // Arg4, the image size
+        cv::Size imageSize = sizeFromArray(args[4]);
 
-        // arg6, the intercamera rotation matrix
-        cv::Mat R = matFromMatrix(args[6]);
+        // arg5, the intercamera rotation matrix
+        cv::Mat R = matFromMatrix(args[5]);
 
-        // Arg7, the intercamera translation vector
-        cv::Mat t = matFromMatrix(args[7]);
+        // Arg6, the intercamera translation vector
+        cv::Mat t = matFromMatrix(args[6]);
 
         // Arg8, flags, skipping for now
 
