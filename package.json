@@ -3,17 +3,23 @@
   "description": "Node Bindings to OpenCV",
   "author": "Peter Braden <peterbraden@peterbraden.co.uk>",
   "dependencies": {
+    "node-pre-gyp": "0.5.31",
     "buffers": "0.1.1",
     "nan": "1.4.3"
   },
-  "version": "1.0.0",
+  "version": "3.0.0",
   "devDependencies": {
-    "tape": "^3.0.0"
+    "tape": "^3.0.0",
+    "aws-sdk": "~2.0.21",
+    "glob": "^4.0.6",
+    "request": "^2.45.0"
   },
+  "bundledDependencies":["node-pre-gyp"],
   "license": "MIT",
   "scripts": {
     "build": "node-gyp build",
-    "test": "node test/unit.js"
+    "test": "node test/unit.js",
+    "install": "node-pre-gyp install --fallback-to-build"
   },
   "keywords": [
     "opencv",
@@ -28,5 +34,12 @@
   },
   "engines": {
     "node": ">=0.10"
+  },
+  "binary": {
+    "module_name" : "opencv",
+    "module_path" : "./build/{module_name}/v{version}/{configuration}/{node_abi}-{platform}-{arch}/",
+    "remote_path" : "./{module_name}/v{version}/{configuration}/",
+    "package_name": "{node_abi}-{platform}-{arch}.tar.gz",
+    "host"        : "https://node-opencv.s3.amazonaws.com"
   }
 }

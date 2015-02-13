@@ -1,6 +1,6 @@
 var cv = require('../lib/opencv');
 
-cv.readImage("./mona.png", function(err, im) {
+cv.readImage("./files/mona.png", function(err, im) {
   if (err) throw err;
 
   var width = im.width();
@@ -11,6 +11,6 @@ cv.readImage("./mona.png", function(err, im) {
   var dstArray = [0, 0, width * 0.9, height * 0.1, width, height, width * 0.2, height * 0.8];
   var xfrmMat = im.getPerspectiveTransform(srcArray, dstArray);
   im.warpPerspective(xfrmMat, width, height, [255, 255, 255]);
-  im.save("./warp-image.png");
+  im.save("./tmp/warp-image.png");
   console.log('Image saved to ./tmp/warp-image.png');
 });

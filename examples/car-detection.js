@@ -1,3 +1,6 @@
+/* For some reason the cascade file is broken on linux :(
+
+
 var cv = require('../lib/opencv');
 
 cv.readImage("./files/car1.jpg", function(err, im){
@@ -16,3 +19,4 @@ cv.readImage("./files/car1.jpg", function(err, im){
     console.log('Image saved to ./tmp/car-detection.jpg');
   });
 });
+*/

@@ -136,3 +136,4 @@ BackgroundSubtractorWrap::BackgroundSubtractorWrap(cv::Ptr<cv::BackgroundSubtrac
 };
 
 #endif
+

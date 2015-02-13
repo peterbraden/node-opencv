@@ -1,6 +1,29 @@
 
 # Changelog
 
+### 3.0.0
+
+You wait ages for a release, and 2 come along at once...
+
+This one is awesome. It adds prebuilt binaries, so you don't need
+to build opencv for the common platforms.
+
+Many many thanks to @edgarsilva for awesome work here, and
+http://hybridgroup.com/ for hosting the binaries
+
+
+### 2.0.0
+
+- Support for node 0.12
+- Camera Calibration Functions from @queuecumber
+- Fix for Nan 1.5.1 from @IMGNRY
+- More build fixes from @scanlime
+- Matrix crop prototype from @dbpieter
+- Many fixes from @madshall
+
+Thanks to everyone that contributed!
+
+
 ### 1.0.0
 
 Ok, let's do a proper semver release :)
