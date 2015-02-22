@@ -11,6 +11,7 @@
 #include "Constants.h"
 #include "Calib3D.h"
 #include "ImgProc.h"
+#include "Stereo.h"
 
 extern "C" void
 init(Handle<Object> target) {
@@ -27,6 +28,9 @@ init(Handle<Object> target) {
     Constants::Init(target);
     Calib3D::Init(target);
     ImgProc::Init(target);
+    StereoBM::Init(target);
+    StereoSGBM::Init(target);
+    StereoGC::Init(target);
 
 
    #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
