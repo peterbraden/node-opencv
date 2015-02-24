@@ -9,19 +9,15 @@ compiler: clang
 
 env:
   global:
-  - secure: "kCAwXdfcMv4l4ok5lO89ANbKXXwWQpn5/3qupSbhmX2NDIGUxyXze/cs90u9gF5hcT7ebq27ZJPEtu7pRov8MadfQM9BAd4ZZrHcMHWSkA0Iz+nM+m0Urwach6jkp2Iuwx15L2NHSis7f5PUKJcEv4Gnqs8jrCJzHHS7m7dO0Xo="
-  - secure: "lBIk4BhdIkSmJtFUNp93UjDm445i9eF7nKA+oSiLRu+b9i/WeRLiKFI89tehexWeXBlyNhziBN16LrHmx3I86yZfEok9dBMA1JuzYBjrvpjRAflGcqaCFLV3axyyyNQRIh7Q+ziAlg0xg8HL752BpnfXO91g3jfDPjGxcvBb5xQ="
-
-
+  - secure: "kCAwXdfcMv4l4ok5lO89ANbKXXwWQpn5/3qupSbhmX2NDIGUxyXze/cs90u9gF5hcT7ebq27ZJPEtu7pRov8MadfQM9BAd4ZZrHcMHWSkA0Iz+nM+
+  - secure: "lBIk4BhdIkSmJtFUNp93UjDm445i9eF7nKA+oSiLRu+b9i/WeRLiKFI89tehexWeXBlyNhziBN16LrHmx3I86yZfEok9dBMA1JuzYBjrvpjRAflGc
 
 before_install:
   # Fix a problem with apt-get failing later, see http://docs.travis-ci.com/user/installing-dependencies/#Installing-Ubuntu-packages
   - sudo apt-get update -qq
-  # - sudo add-apt-repository -y ppa:kubuntu-ppa/backports
-  # - sudo apt-get update
-  - sudo apt-get install libcv-dev
-  - sudo apt-get install libopencv-dev
-  - sudo apt-get install libhighgui-dev
+  - sudo add-apt-repository -y ppa:kubuntu-ppa/backports
+  - sudo apt-get update
+  - sudo apt-get install --force-yes libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
   # get commit message
   - COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
   # put local node-pre-gyp on PATH
@@ -50,7 +46,7 @@ install:
 before_script:
   - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
   # if publishing, do it
-  - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish || true ; fi;
+  - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish || true; fi;
   # cleanup
   - node-pre-gyp clean
   - node-gyp clean
