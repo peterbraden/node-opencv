@@ -7,7 +7,7 @@
     "buffers": "0.1.1",
     "nan": "1.4.3"
   },
-  "version": "3.0.0",
+  "version": "3.0.1",
   "devDependencies": {
     "tape": "^3.0.0",
     "aws-sdk": "~2.0.21",
