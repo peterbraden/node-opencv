@@ -35,6 +35,7 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Rectangle)
     JSFUNC(Line)
     JSFUNC(Empty)
+    JSFUNC(FillPoly)
 
     JSFUNC(Save)
     JSFUNC(SaveAsync)

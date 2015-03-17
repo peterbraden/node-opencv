@@ -38,6 +38,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "ellipse", Ellipse);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "rectangle", Rectangle);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "line", Line);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "fillPoly", FillPoly);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "save", Save);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "saveAsync", SaveAsync);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "resize", Resize);
@@ -266,7 +267,7 @@ NAN_METHOD(Matrix::Set){
   } else {
       NanThrowTypeError( "Invalid number of arguments" );
   }
-  
+
 	NanReturnUndefined();
 }
 
@@ -283,9 +284,9 @@ NAN_METHOD(Matrix::Size){
 
 NAN_METHOD(Matrix::Clone){
 	SETUP_FUNCTION(Matrix)
-  
+
   Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
-  
+
   Matrix *m = ObjectWrap::Unwrap<Matrix>(im_h);
   m->mat = self->mat.clone();
 
@@ -451,7 +452,7 @@ NAN_METHOD(Matrix::ToBuffer){
   Local<Object> buf = NanNewBufferHandle(vec.size());
   uchar* data = (uchar*) Buffer::Data(buf);
   memcpy(data, &vec[0], vec.size());
-  
+
 	v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
 	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned)vec.size()), NanNew<v8::Integer>(0)};
@@ -470,21 +471,21 @@ class AsyncToBufferWorker : public NanAsyncWorker {
 
   void Execute () {
     std::vector<uchar> vec(0);
-    
+
 	  //std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
 
 	  cv::imencode(ext, this->matrix->mat, vec, this->params);
-    
+
     res = vec;
   }
 
   void HandleOKCallback () {
     NanScope();
-    
+
     Local<Object> buf = NanNewBufferHandle(res.size());
     uchar* data = (uchar*) Buffer::Data(buf);
     memcpy(data, &res[0], res.size());
-  
+
 	  v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
 	  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
 	  v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned)res.size()), NanNew<v8::Integer>(0)};
@@ -495,13 +496,13 @@ class AsyncToBufferWorker : public NanAsyncWorker {
         NanNull()
       , actualBuffer
     };
-    
+
     TryCatch try_catch;
     callback->Call(2, argv);
     if (try_catch.HasCaught()) {
       FatalException(try_catch);
     }
-    
+
   }
 
  private:
@@ -519,7 +520,7 @@ NAN_METHOD(Matrix::ToBufferAsync){
 
   std::string ext = std::string(".jpg");
   std::vector<int> params;
-  
+
   // See if the options argument is passed
   if ((args.Length() > 1) && (args[1]->IsObject())) {
       // Get this options argument
@@ -539,14 +540,14 @@ NAN_METHOD(Matrix::ToBufferAsync){
           int compression = options->Get(NanNew<String>("pngCompression"))->IntegerValue();
           params.push_back(CV_IMWRITE_PNG_COMPRESSION);
           params.push_back(compression);
-      }        
+      }
   }
 
-  
+
   NanCallback *callback = new NanCallback(cb.As<Function>());
 
   NanAsyncQueueWorker(new AsyncToBufferWorker(callback, self, ext, params));
-  
+
   NanReturnUndefined();
 }
 
@@ -685,6 +686,42 @@ NAN_METHOD(Matrix::Line) {
 	NanReturnNull();
 }
 
+NAN_METHOD(Matrix::FillPoly) {
+	SETUP_FUNCTION(Matrix)
+
+	if(args[0]->IsArray())
+	{
+		Local<Array> polyArray = Local<Array>::Cast(args[0]->ToObject());
+
+		cv::Point **polygons = new cv::Point*[polyArray->Length()];
+		int *polySizes = new int[polyArray->Length()];
+		for(unsigned int i = 0; i < polyArray->Length(); i++)
+		{
+			Local<Array> singlePoly = Local<Array>::Cast(polyArray->Get(i)->ToObject());
+			polygons[i] = new cv::Point[singlePoly->Length()];
+			polySizes[i] = singlePoly->Length();
+
+			for(unsigned int j = 0; j < singlePoly->Length(); j++)
+			{
+				Local<Array> point = Local<Array>::Cast(singlePoly->Get(j)->ToObject());
+				polygons[i][j].x = point->Get(0)->IntegerValue();
+				polygons[i][j].y = point->Get(1)->IntegerValue();
+			}
+		}
+
+		cv::Scalar color(0, 0, 255);
+
+		if(args[1]->IsArray()) {
+			Local<Object> objColor = args[1]->ToObject();
+			color = setColor(objColor);
+		}
+
+		cv::fillPoly(self->mat, (const cv::Point **)polygons, polySizes, polyArray->Length(), color);
+	}
+
+	NanReturnNull();
+}
+
 
 NAN_METHOD(Matrix::Save) {
   SETUP_FUNCTION(Matrix)
@@ -727,7 +764,7 @@ class AsyncSaveWorker : public NanAsyncWorker {
         NanNull()
       , NanNew<Number>(res)
     };
-    
+
     TryCatch try_catch;
     callback->Call(2, argv);
     if (try_catch.HasCaught()) {
@@ -752,7 +789,7 @@ NAN_METHOD(Matrix::SaveAsync){
   NanAsciiString filename(args[0]);
 
   REQ_FUN_ARG(1, cb);
-  
+
   NanCallback *callback = new NanCallback(cb.As<Function>());
   NanAsyncQueueWorker(new AsyncSaveWorker(callback, self, *filename));
 
@@ -1041,7 +1078,7 @@ NAN_METHOD(Matrix::BitwiseXor) {
 		cv::bitwise_xor(src1->mat, src2->mat, self->mat, mask->mat);
     }else{
 		cv::bitwise_xor(src1->mat, src2->mat, self->mat);
-    }	
+    }
 
 	NanReturnNull();
 }
@@ -1058,7 +1095,7 @@ NAN_METHOD(Matrix::BitwiseNot) {
     	cv::bitwise_not(self->mat, dst->mat, mask->mat);
     }else{
     	cv::bitwise_not(self->mat, dst->mat);
-    }	
+    }
 
     NanReturnNull();
 }
@@ -1076,7 +1113,7 @@ NAN_METHOD(Matrix::BitwiseAnd) {
 	    cv::bitwise_and(src1->mat, src2->mat, self->mat, mask->mat);
     }else{
 	    cv::bitwise_and(src1->mat, src2->mat, self->mat);
-    }	
+    }
 
     NanReturnNull();
 }
@@ -1283,7 +1320,7 @@ NAN_METHOD(Matrix::HoughCircles) {
 
 
   equalizeHist(self->mat, gray);
-  
+
   cv::HoughCircles(gray, circles, CV_HOUGH_GRADIENT, dp, minDist, higherThreshold, accumulatorThreshold, minRadius, maxRadius);
 
   v8::Local<v8::Array> arr = NanNew<Array>(circles.size());
