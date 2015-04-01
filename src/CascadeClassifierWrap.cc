@@ -21,7 +21,7 @@ CascadeClassifierWrap::Init(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(ctor, "detectMultiScale", DetectMultiScale);
 
     target->Set(NanNew("CascadeClassifier"), ctor->GetFunction());
-};    
+};
 
 NAN_METHOD(CascadeClassifierWrap::New) {
   NanScope();
@@ -29,7 +29,7 @@ NAN_METHOD(CascadeClassifierWrap::New) {
   if (args.This()->InternalFieldCount() == 0)
     NanThrowTypeError("Cannot instantiate without new");
 
-  CascadeClassifierWrap *pt = new CascadeClassifierWrap(*args[0]);  
+  CascadeClassifierWrap *pt = new CascadeClassifierWrap(*args[0]);
   pt->Wrap(args.This());
   NanReturnValue( args.This() );
 }
@@ -39,10 +39,10 @@ CascadeClassifierWrap::CascadeClassifierWrap(v8::Value* fileName){
 	std::string filename;
 	filename = std::string(*NanAsciiString(fileName->ToString()));
 
-  
+
   if (!cc.load(filename.c_str())){
     NanThrowTypeError("Error loading file");
-  }  
+  }
 }
 
 
@@ -63,14 +63,15 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
 
     equalizeHist( gray, gray);
     this->cc->cc.detectMultiScale(gray, objects, this->scale, this->neighbors, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(this->minw, this->minh));
-    
+
     res = objects;
   }
 
   void HandleOKCallback () {
     NanScope();
     //  this->matrix->Unref();
-    
+
+    Handle<Value> argv[2];
     v8::Local<v8::Array> arr = NanNew<v8::Array>(this->res.size());
 
     for(unsigned int i = 0; i < this->res.size(); i++ ){
@@ -82,20 +83,17 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
       arr->Set(i, x);
     }
 
-    //argv[1] = arr;
-    Local<Value> argv[] = {
-        NanNull()
-      , arr
-    };
-    
+    argv[0] = NanNull();
+    argv[1] = arr;
+
     TryCatch try_catch;
     callback->Call(2, argv);
     if (try_catch.HasCaught()) {
       FatalException(try_catch);
     }
-    
+
   }
-  
+
   private:
     CascadeClassifierWrap *cc;
     Matrix* im;
@@ -104,7 +102,7 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
     int minw;
     int minh;
     std::vector<cv::Rect>  res;
-    
+
 };
 
 
@@ -114,7 +112,7 @@ NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
   NanScope();
 
   CascadeClassifierWrap *self =  ObjectWrap::Unwrap<CascadeClassifierWrap>(args.This());
-  
+
   if (args.Length() < 2){
     NanThrowTypeError("detectMultiScale takes at least 2 args");
   }
@@ -142,5 +140,5 @@ NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
 
   NanAsyncQueueWorker( new AsyncDetectMultiScale(callback, self, im, scale, neighbors, minw, minh) );
   NanReturnUndefined();
-   
+
 }

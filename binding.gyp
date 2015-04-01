@@ -1,6 +1,8 @@
 {
   "targets": [{
-    "target_name": "opencv",
+
+      "target_name": "opencv",
+
       "sources": [
         "src/init.cc",
         "src/Matrix.cc",
@@ -12,6 +14,7 @@
         "src/CamShift.cc",
         "src/HighGUI.cc",
         "src/FaceRecognizer.cc",
+        "src/Features2d.cc",
         "src/BackgroundSubtractor.cc",
         "src/Constants.cc",
         "src/Calib3D.cc",
