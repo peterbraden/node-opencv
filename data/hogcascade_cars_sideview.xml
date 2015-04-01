@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <opencv_storage>
-<cascade>
+<output type_id="opencv-haar-classifier">
   <stageType>BOOST</stageType>
   <featureType>HOG</featureType>
   <height>24</height>
@@ -835,5 +835,7 @@
         16 8 16 8 24</rect></_>
     <_>
       <rect>
-        16 8 16 8 28</rect></_></features></cascade>
+        16 8 16 8 28</rect></_></features>
+
+</output>
 </opencv_storage>

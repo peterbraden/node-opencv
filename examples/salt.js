@@ -1,7 +1,7 @@
 var cv = require('../lib/opencv');
 
 cv.readImage("./files/mona.png", function(err, im) {
-  salt(im, 1000);
+  salt(im, 100);
   im.save("./tmp/salt.png");
   console.log('Image saved to ./tmp/salt.png');
 });
