@@ -20,6 +20,7 @@ class Matrix: public node::ObjectWrap {
 
     JSFUNC(Get) // at
     JSFUNC(Set)
+    JSFUNC(Put)
 
     JSFUNC(Row)
     JSFUNC(PixelRow)
