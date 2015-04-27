@@ -27,6 +27,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "empty", Empty);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "get", Get);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "set", Set);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "put", Put);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pixel", Pixel);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "width", Width);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "height", Height);
@@ -268,6 +269,21 @@ NAN_METHOD(Matrix::Set){
       NanThrowTypeError( "Invalid number of arguments" );
   }
 
+	NanReturnUndefined();
+}
+
+// @author tualo
+// put node buffer directly into the image data
+// img.put(new Buffer([0,100,0,100,100...]));
+NAN_METHOD(Matrix::Put){
+	SETUP_FUNCTION(Matrix)
+
+	if (!Buffer::HasInstance(args[0])) {
+		NanThrowTypeError( "Not a buffer" );
+	}
+	const char* buffer_data = Buffer::Data(args[0]);
+	size_t buffer_length = Buffer::Length(args[0]);
+	memcpy(self->mat.data, buffer_data, buffer_length);
 	NanReturnUndefined();
 }
 
