@@ -1984,8 +1984,9 @@ NAN_METHOD(Matrix::PutText) {
   }
 
   double scale = args.Length() < 6 ? 1 : args[5]->NumberValue();
+  double thickness = args.Length() < 7 ? 1 : args[6]->NumberValue();
 
-  cv::putText(self->mat, text, cv::Point(x, y), constFont, scale, color, 2);
+  cv::putText(self->mat, text, cv::Point(x, y), constFont, scale, color, thickness);
 
   NanReturnUndefined();
 }

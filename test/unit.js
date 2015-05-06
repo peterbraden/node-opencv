@@ -252,8 +252,9 @@ test("fonts", function(t) {
     return Math.round(Math.random() * 255);
   };
 
-  cv.readImage('./examples/files/coin1.jpg', function(e, im){
+  cv.readImage("./examples/files/coin1.jpg", function(e, im){
     var y = 0;
+    var scale = 1;
 
     ([
       "HERSEY_SIMPLEX",
@@ -266,11 +267,11 @@ test("fonts", function(t) {
       "HERSEY_SCRIPT_COMPLEX",
       "HERSEY_SCRIPT_SIMPLEX"
     ]).forEach(function(font) {
-      im.putText("Some text", 0, y += 20, font, [rnd(), rnd(), rnd()]);
+      im.putText("Some text", 0, y += 20, font, [rnd(), rnd(), rnd()], 2, scale++);
     });
 
-    t.ok(im, "image is ok")
-    //im.save("./examples/tmp/coin1-with-text.jpg");
+    t.ok(im, "image is ok");
+    im.save("./examples/tmp/coin1-with-text.jpg");
     t.end();
   });
 })
