@@ -321,12 +321,43 @@ NAN_METHOD(Matrix::Normalize) {
 	if (!args[1]->IsNumber())
     NanThrowTypeError("max is required (argument 2)");
 
-	int min = args[0]->Uint32Value();
-	int max = args[1]->Uint32Value();
+	int type = cv::NORM_MINMAX;
+	if (args[2]->IsNumber()){
+		type = args[2]->Uint32Value();
+		if (
+			(type!=cv::NORM_MINMAX) ||
+			(type!=cv::NORM_INF) ||
+			(type!=cv::NORM_L1) ||
+			(type!=cv::NORM_L2) ||
+			(type!=cv::NORM_L2SQR) ||
+			(type!=cv::NORM_HAMMING) ||
+			(type!=cv::NORM_HAMMING2) ||
+			(type!=cv::NORM_RELATIVE) ||
+			(type!=cv::NORM_TYPE_MASK)
+		){
+			NanThrowTypeError("type value must be NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 ");
+		}
+	}
+	int dtype = -1;
+	if (args[3]->IsNumber()){
+		dtype = args[3]->IntegerValue();
+	}
+
+	double min = args[0]->NumberValue();
+	double max = args[1]->NumberValue();
+
 
 	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 	cv::Mat norm;
-	cv::normalize(self->mat, norm,min,max, cv::NORM_MINMAX);
+
+	cv::Mat mask;
+	if (args[4]->IsObject()){
+		Matrix *mmask = ObjectWrap::Unwrap<Matrix>( args[4]->ToObject() );
+		mask = mmask->mat;
+	}
+
+
+	cv::normalize(self->mat, norm,min,max, type, dtype, mask);
 
 	norm.copyTo(self->mat);
 
