@@ -63,6 +63,16 @@ Constants::Init(Handle<Object> target) {
   CONST_ENUM(INTER_CUBIC);
   CONST_ENUM(INTER_LANCZOS4);
 
+  CONST(cv::NORM_MINMAX);
+  CONST(cv::NORM_INF);
+  CONST(cv::NORM_L1);
+  CONST(cv::NORM_L2);
+  CONST(cv::NORM_L2SQR);
+  CONST(cv::NORM_HAMMING);
+  CONST(cv::NORM_HAMMING2);
+  CONST(cv::NORM_RELATIVE);
+  CONST(cv::NORM_TYPE_MASK);
+
   target->Set(NanNew("Constants"), obj);
 }
 
