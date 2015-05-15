@@ -28,6 +28,8 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "get", Get);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "set", Set);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "put", Put);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "normalize", Normalize);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "getData", GetData);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pixel", Pixel);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "width", Width);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "height", Height);
@@ -286,6 +288,52 @@ NAN_METHOD(Matrix::Put){
 	memcpy(self->mat.data, buffer_data, buffer_length);
 	NanReturnUndefined();
 }
+
+
+// @author tualo
+// getData getting node buffer of image data
+NAN_METHOD(Matrix::GetData) {
+	NanScope();
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+	int size = self->mat.rows * self->mat.cols * self->mat.elemSize1();
+	Local<Object> buf = NanNewBufferHandle(size);
+	uchar* data = (uchar*) Buffer::Data(buf);
+	memcpy(data, self->mat.data, size);
+
+	v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
+	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
+	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned) size), NanNew<v8::Integer>(0)};
+	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+
+	NanReturnValue(actualBuffer);
+
+}
+
+// @author tualo
+// normalize wrapper
+NAN_METHOD(Matrix::Normalize) {
+	NanScope();
+
+	if (!args[0]->IsNumber())
+    NanThrowTypeError("min is required (argument 1)");
+
+	if (!args[1]->IsNumber())
+    NanThrowTypeError("max is required (argument 2)");
+
+	int min = args[0]->Uint32Value();
+	int max = args[1]->Uint32Value();
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+	cv::Mat norm;
+	cv::normalize(self->mat, norm,min,max, cv::NORM_MINMAX);
+
+	norm.copyTo(self->mat);
+
+	NanReturnNull();
+}
+
+
 
 NAN_METHOD(Matrix::Size){
 	SETUP_FUNCTION(Matrix)
