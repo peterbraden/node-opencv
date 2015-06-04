@@ -1,9 +1,6 @@
 var cv = require('../lib/opencv');
-
-
-
-
 cv.readImage("./examples/files/mona.png", function(err, orig) {
+  /*
   if (err) throw err;
   orig.convertGrayscale();
 
@@ -15,7 +12,7 @@ cv.readImage("./examples/files/mona.png", function(err, orig) {
   }
   mask.put(buf);
   orig.normalize(10,250,cv.Constants.NORM_TYPE_MASK,-1,mask);
-  /*
+
   var window = new cv.NamedWindow('Mat-Normalize', 0);
   window.show(orig);
   window.blockingWaitKey(0, 50);
