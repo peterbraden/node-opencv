@@ -28,6 +28,7 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "get", Get);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "set", Set);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "put", Put);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "brightness", Brightness);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "normalize", Normalize);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "getData", GetData);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pixel", Pixel);
@@ -310,10 +311,36 @@ NAN_METHOD(Matrix::GetData) {
 
 }
 
+NAN_METHOD(Matrix::Brightness){
+	NanScope();
+
+	if (args.Length() == 2){
+		Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+		cv::Mat image = self->mat;
+		cv::Mat new_image = cv::Mat::zeros( image.size(), image.type() );
+		double alpha = args[0]->NumberValue();
+		int beta = args[1]->IntegerValue();
+		/// Do the operation new_image(i,j) = alpha*image(i,j) + beta
+		for( int y = 0; y < image.rows; y++ ){
+			for( int x = 0; x < image.cols; x++ ){
+				for( int c = 0; c < 3; c++ ){
+					new_image.at<cv::Vec3b>(y,x)[c] = cv::saturate_cast<uchar>( alpha*( image.at<cv::Vec3b>(y,x)[c] ) + beta );
+				}
+			}
+		}
+		new_image.copyTo(self->mat);
+	}else{
+		NanReturnValue(NanNew("Insufficient or wrong arguments"));
+	}
+
+
+	NanReturnNull();
+}
+
 // @author tualo
 // normalize wrapper
 NAN_METHOD(Matrix::Normalize) {
-	NanScope();
+
 
 	if (!args[0]->IsNumber())
     NanThrowTypeError("min is required (argument 1)");
