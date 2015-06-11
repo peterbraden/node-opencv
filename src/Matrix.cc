@@ -316,6 +316,10 @@ NAN_METHOD(Matrix::Brightness){
 
 	if (args.Length() == 2){
 		Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+		if(self->mat.channels() != 3)
+			NanThrowError("Image is no 3-channel");
+
 		cv::Mat image = self->mat;
 		cv::Mat new_image = cv::Mat::zeros( image.size(), image.type() );
 		double alpha = args[0]->NumberValue();
