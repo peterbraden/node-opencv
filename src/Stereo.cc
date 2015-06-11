@@ -1,6 +1,7 @@
 #include "Stereo.h"
 #include "Matrix.h"
-#include <opencv2/legacy/legacy.hpp>
+//#include <opencv2/legacy.hpp>
+#include <opencv2/ml.hpp>
 
 // Block matching
 
@@ -17,9 +18,9 @@ StereoBM::Init(Handle<Object> target) {
 
     NODE_SET_PROTOTYPE_METHOD(ctor, "compute", Compute);
 
-    ctor->Set(NanNew<String>("BASIC_PRESET"), NanNew<Integer>((int)cv::StereoBM::BASIC_PRESET));
-    ctor->Set(NanNew<String>("FISH_EYE_PRESET"), NanNew<Integer>((int)cv::StereoBM::FISH_EYE_PRESET));
-    ctor->Set(NanNew<String>("NARROW_PRESET"), NanNew<Integer>((int)cv::StereoBM::NARROW_PRESET));
+    ctor->Set(NanNew<String>("BASIC_PRESET"), NanNew<Integer>((int)0));
+    ctor->Set(NanNew<String>("FISH_EYE_PRESET"), NanNew<Integer>((int)1));
+    ctor->Set(NanNew<String>("NARROW_PRESET"), NanNew<Integer>((int)2));
 
     target->Set(NanNew("StereoBM"), ctor->GetFunction());
 }
@@ -30,7 +31,7 @@ NAN_METHOD(StereoBM::New) {
     if (args.This()->InternalFieldCount() == 0)
         NanThrowTypeError("Cannot instantiate without new");
 
-    StereoBM *stereo;
+    StereoBM *stereo=0;
 
     if (args.Length() == 0)
     {
@@ -38,25 +39,21 @@ NAN_METHOD(StereoBM::New) {
     }
     else if (args.Length() == 1)
     {
-        stereo = new StereoBM(args[0]->IntegerValue()); // preset
+        stereo = new StereoBM(args[0]->IntegerValue()); // disparity search range
     }
     else if (args.Length() == 2)
     {
-        stereo = new StereoBM(args[0]->IntegerValue(), args[1]->IntegerValue()); // preset, disparity search range
-    }
-    else
-    {
-        stereo = new StereoBM(args[0]->IntegerValue(), args[1]->IntegerValue(), args[2]->IntegerValue()); // preset, disparity search range, sum of absolute differences window size
+        stereo = new StereoBM(args[0]->IntegerValue(), args[1]->IntegerValue()); // disparity search range, sum of absolute differences window size
     }
 
     stereo->Wrap(args.Holder());
     NanReturnValue(args.Holder());
 }
 
-StereoBM::StereoBM(int preset, int ndisparities, int SADWindowSize)
-    : ObjectWrap(), stereo(preset, ndisparities, SADWindowSize)
+StereoBM::StereoBM( int ndisparities, int SADWindowSize)
+    : ObjectWrap()
 {
-
+	stereo = cv::StereoBM::create(ndisparities, SADWindowSize);
 }
 
 // TODO make this async
@@ -83,8 +80,8 @@ NAN_METHOD(StereoBM::Compute)
         }
 
         // Compute stereo using the block matching algorithm
-        cv::Mat disparity;
-        self->stereo(left, right, disparity, type);
+        cv::Mat disparity(left.size(), type);
+        self->stereo->compute(left, right, disparity);
 
         // Wrap the returned disparity map
         Local<Object> disparityWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
@@ -187,15 +184,15 @@ NAN_METHOD(StereoSGBM::New) {
 }
 
 StereoSGBM::StereoSGBM()
-    : ObjectWrap(), stereo()
+    : ObjectWrap()
 {
-
+	stereo = cv::StereoSGBM::create(0,64,11);
 }
 
 StereoSGBM::StereoSGBM(int minDisparity, int ndisparities, int SADWindowSize, int p1, int p2, int disp12MaxDiff, int preFilterCap, int uniquenessRatio, int speckleWindowSize, int speckleRange, bool fullDP)
-    : ObjectWrap(), stereo(minDisparity, ndisparities, SADWindowSize, p1, p2, disp12MaxDiff, preFilterCap, uniquenessRatio, speckleWindowSize, speckleRange, fullDP)
+    : ObjectWrap()
 {
-
+	stereo = cv::StereoSGBM::create(minDisparity, ndisparities, SADWindowSize, p1, p2, disp12MaxDiff, preFilterCap, uniquenessRatio, speckleWindowSize, speckleRange, fullDP);
 }
 
 // TODO make this async
@@ -216,7 +213,7 @@ NAN_METHOD(StereoSGBM::Compute)
 
         // Compute stereo using the block matching algorithm
         cv::Mat disparity;
-        self->stereo(left, right, disparity);
+        self->stereo->compute(left, right, disparity);
 
         // Wrap the returned disparity map
         Local<Object> disparityWrap = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
@@ -232,7 +229,7 @@ NAN_METHOD(StereoSGBM::Compute)
     }
 
 };
-
+#if 0
 // Graph cut
 
 v8::Persistent<FunctionTemplate> StereoGC::constructor;
@@ -321,3 +318,4 @@ NAN_METHOD(StereoGC::Compute)
     }
 
 };
+#endif

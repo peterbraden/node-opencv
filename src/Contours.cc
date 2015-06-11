@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <opencv2/imgproc.hpp>
+
 v8::Persistent<FunctionTemplate> Contour::constructor;
 
 

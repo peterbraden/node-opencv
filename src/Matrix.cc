@@ -3,6 +3,11 @@
 #include "OpenCV.h"
 #include <nan.h>
 
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/ml.hpp>
+
 v8::Persistent<FunctionTemplate> Matrix::constructor;
 
 cv::Scalar setColor(Local<Object> objColor);

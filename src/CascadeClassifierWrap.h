@@ -1,4 +1,5 @@
 #include "OpenCV.h"
+#include <opencv2/objdetect.hpp>
 
 class CascadeClassifierWrap: public node::ObjectWrap {
   public: 

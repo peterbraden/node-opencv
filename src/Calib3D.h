@@ -3,6 +3,8 @@
 
 #include "OpenCV.h"
 
+#include <opencv2/calib3d.hpp>
+
 // Implementation of calib3d.hpp functions
 
 class Calib3D: public node::ObjectWrap {
