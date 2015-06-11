@@ -316,11 +316,18 @@ NAN_METHOD(Matrix::Brightness){
 
 	if (args.Length() == 2){
 		Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+		cv::Mat image;
 
-		if(self->mat.channels() != 3)
-			NanThrowError("Image is no 3-channel");
+		if(self->mat.channels() == 3){
+			image = self->mat;
+		}else if(self->mat.channels() == 1){
+			cv::Mat myimg = self->mat;
+			cv::cvtColor(myimg, image, CV_GRAY2RGB);
+		}else{
+			NanThrowError("those channels are not supported");
+		}
 
-		cv::Mat image = self->mat;
+
 		cv::Mat new_image = cv::Mat::zeros( image.size(), image.type() );
 		double alpha = args[0]->NumberValue();
 		int beta = args[1]->IntegerValue();
@@ -332,7 +339,15 @@ NAN_METHOD(Matrix::Brightness){
 				}
 			}
 		}
-		new_image.copyTo(self->mat);
+
+		if(self->mat.channels() == 3){
+			new_image.copyTo(self->mat);
+		}else if(self->mat.channels() == 1){
+			cv::Mat gray;
+			cv::cvtColor(new_image, gray, CV_BGR2GRAY);
+			gray.copyTo(self->mat);
+		}
+
 	}else{
 		NanReturnValue(NanNew("Insufficient or wrong arguments"));
 	}
