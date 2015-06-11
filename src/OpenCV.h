@@ -7,9 +7,11 @@
 #include <node_version.h>
 #include <node_buffer.h>
 #include <opencv/cv.h>
+#if CV_MAJOR_VERSION >= 3
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
+#endif
 #include <string.h>
 #include <nan.h>
 

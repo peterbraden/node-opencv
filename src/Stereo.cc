@@ -1,8 +1,12 @@
 #include "Stereo.h"
 #include "Matrix.h"
-//#include <opencv2/legacy.hpp>
-#include <opencv2/ml.hpp>
+#if CV_MAJOR_VERSION < 3
+#include <opencv2/legacy.hpp>
+#endif
 
+#if CV_MAJOR_VERSION >= 3
+#include <opencv2/ml.hpp>
+#endif
 // Block matching
 
 v8::Persistent<FunctionTemplate> StereoBM::constructor;
@@ -17,11 +21,11 @@ StereoBM::Init(Handle<Object> target) {
     ctor->SetClassName(NanNew("StereoBM"));
 
     NODE_SET_PROTOTYPE_METHOD(ctor, "compute", Compute);
-
-    ctor->Set(NanNew<String>("BASIC_PRESET"), NanNew<Integer>((int)0));
-    ctor->Set(NanNew<String>("FISH_EYE_PRESET"), NanNew<Integer>((int)1));
-    ctor->Set(NanNew<String>("NARROW_PRESET"), NanNew<Integer>((int)2));
-
+#if CV_MAJOR_VERSION < 3
+    ctor->Set(NanNew<String>("BASIC_PRESET"), NanNew<Integer>((int)cv::StereoBM::BASIC_PRESET));
+    ctor->Set(NanNew<String>("FISH_EYE_PRESET"), NanNew<Integer>((int)cv::StereoBM::FISH_EYE_PRESET));
+    ctor->Set(NanNew<String>("NARROW_PRESET"), NanNew<Integer>((int)cv::StereoBM::NARROW_PRESET));
+#endif
     target->Set(NanNew("StereoBM"), ctor->GetFunction());
 }
 
@@ -229,7 +233,7 @@ NAN_METHOD(StereoSGBM::Compute)
     }
 
 };
-#if 0
+#if CV_VERSION_MAJOR < 3
 // Graph cut
 
 v8::Persistent<FunctionTemplate> StereoGC::constructor;

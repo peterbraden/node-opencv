@@ -2,9 +2,10 @@
 #include "Matrix.h"
 #include <nan.h>
 
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
+
+#if CV_MAJOR_VERSION >= 3
 #include <opencv2/imgcodecs.hpp>
+#endif
 
 void
 OpenCV::Init(Handle<Object> target) {

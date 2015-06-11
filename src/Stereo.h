@@ -40,7 +40,9 @@ public:
 
     JSFUNC(Compute);
 };
-#if 0
+
+#if CV_VERSION_MAJOR < 3
+
 struct CvStereoGCState;
 
 class StereoGC: public node::ObjectWrap {

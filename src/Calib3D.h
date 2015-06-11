@@ -3,7 +3,9 @@
 
 #include "OpenCV.h"
 
+#if CV_MAJOR_VERSION >= 3
 #include <opencv2/calib3d.hpp>
+#endif
 
 // Implementation of calib3d.hpp functions
 

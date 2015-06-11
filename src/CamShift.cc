@@ -2,7 +2,9 @@
 #include "OpenCV.h"
 #include "Matrix.h"
 
+#if CV_MAJOR_VERSION >= 3
 #include <opencv2/video/tracking.hpp>
+#endif
 
 #define CHANNEL_HUE 0
 #define CHANNEL_SATURATION 1
