@@ -1,5 +1,9 @@
 #include "OpenCV.h"
 
+#if CV_MAJOR_VERSION >= 3
+#include <opencv2/objdetect.hpp>
+#endif
+
 class CascadeClassifierWrap: public node::ObjectWrap {
   public: 
  	cv::CascadeClassifier cc;
