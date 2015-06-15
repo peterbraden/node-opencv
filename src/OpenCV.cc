@@ -27,6 +27,11 @@ NAN_METHOD(OpenCV::ReadImage) {
 
     REQ_FUN_ARG(1, cb);
 
+    Local<Value> argv[2];
+
+    argv[0] = NanNull();
+    argv[1] = im_h;
+
     if (args[0]->IsNumber() && args[1]->IsNumber()){
       int width, height;
 
@@ -47,16 +52,11 @@ NAN_METHOD(OpenCV::ReadImage) {
       mat = cv::imdecode(*mbuf, -1);
 
       if (mat.empty()){
-        NanThrowTypeError("Error loading file");
+        argv[0] = NanError("Error loading file");
       }
     }
 
     img->mat = mat;
-
-    Local<Value> argv[2];
-
-    argv[0] = NanNull();
-    argv[1] = im_h;
 
     TryCatch try_catch;
 
