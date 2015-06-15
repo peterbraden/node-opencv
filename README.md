@@ -194,6 +194,7 @@ contours.arcLength(index, isClosed);
 contours.boundingRect(index);
 contours.minAreaRect(index);
 contours.isConvex(index);
+contours.fitEllipse(index);
 
 // Destructively alter contour `index`
 contours.approxPolyDP(index, epsilon, isClosed);

@@ -25,6 +25,7 @@ class Contour: public node::ObjectWrap {
   JSFUNC(ConvexHull)
   JSFUNC(BoundingRect)
   JSFUNC(MinAreaRect)
+  JSFUNC(FitEllipse)
   JSFUNC(IsConvex)
   JSFUNC(Moments)
   JSFUNC(Hierarchy)

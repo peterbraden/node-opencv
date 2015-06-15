@@ -29,6 +29,7 @@ Contour::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "convexHull", ConvexHull);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "boundingRect", BoundingRect);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "minAreaRect", MinAreaRect);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "fitEllipse", FitEllipse);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "isConvex", IsConvex);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "moments", Moments);
   NODE_SET_PROTOTYPE_METHOD(ctor, "hierarchy", Hierarchy);
@@ -222,6 +223,36 @@ NAN_METHOD(Contour::MinAreaRect) {
 
 	NanReturnValue(rect);
 }
+
+
+NAN_METHOD(Contour::FitEllipse) {
+	 NanScope();
+
+	Contour *self = ObjectWrap::Unwrap<Contour>(args.This());
+	int pos = args[0]->NumberValue();
+	
+	if(self->contours[pos].size() >= 5){  //Minimum number for an ellipse
+		cv::RotatedRect ellipse = cv::fitEllipse(cv::Mat(self->contours[pos]));
+
+		Local<Object> jsEllipse = NanNew<Object>();
+		jsEllipse->Set(NanNew("angle"), NanNew<Number>(ellipse.angle));
+
+		Local<Object> size = NanNew<Object>();
+		size->Set(NanNew("height"), NanNew<Number>(ellipse.size.height));
+		size->Set(NanNew("width"), NanNew<Number>(ellipse.size.width));
+		jsEllipse->Set(NanNew("size"), size);
+
+		Local<Object> center = NanNew<Object>();
+		center->Set(NanNew("x"), NanNew<Number>(ellipse.center.x));
+		center->Set(NanNew("y"), NanNew<Number>(ellipse.center.y));
+		jsEllipse->Set(NanNew("center"), center);
+
+		NanReturnValue(jsEllipse);
+	}
+
+	NanReturnNull();
+}
+
 
 
 NAN_METHOD(Contour::IsConvex) {
