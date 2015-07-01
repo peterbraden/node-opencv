@@ -313,9 +313,10 @@ NAN_METHOD(Matrix::GetData) {
 
 NAN_METHOD(Matrix::Brightness){
 	NanScope();
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
 
 	if (args.Length() == 2){
-		Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
 		cv::Mat image;
 
 		if(self->mat.channels() == 3){
@@ -349,7 +350,13 @@ NAN_METHOD(Matrix::Brightness){
 		}
 
 	}else{
-		NanReturnValue(NanNew("Insufficient or wrong arguments"));
+		if (args.Length() == 1){
+			int diff = args[0]->IntegerValue();
+			cv::Mat img = self->mat + diff;
+			img.copyTo(self->mat);
+		}else{
+			NanReturnValue(NanNew("Insufficient or wrong arguments"));
+		}
 	}
 
 
