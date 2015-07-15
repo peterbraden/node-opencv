@@ -22,6 +22,10 @@ class Matrix: public node::ObjectWrap {
     JSFUNC(Set)
     JSFUNC(Put)
 
+    JSFUNC(GetData)
+    JSFUNC(Normalize)
+    JSFUNC(Brightness)
+
     JSFUNC(Row)
     JSFUNC(PixelRow)
     JSFUNC(Col)

@@ -13,6 +13,7 @@
 #include "Calib3D.h"
 #include "ImgProc.h"
 #include "Stereo.h"
+#include "BackgroundSubtractor.h"
 
 extern "C" void
 init(Handle<Object> target) {
@@ -33,8 +34,8 @@ init(Handle<Object> target) {
     StereoSGBM::Init(target);
     StereoGC::Init(target);
 
-
    #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
+      BackgroundSubtractorWrap::Init(target);
       Features::Init(target);
       FaceRecognizerWrap::Init(target);
    #endif

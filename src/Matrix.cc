@@ -28,6 +28,9 @@ Matrix::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "get", Get);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "set", Set);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "put", Put);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "brightness", Brightness);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "normalize", Normalize);
+	NODE_SET_PROTOTYPE_METHOD(ctor, "getData", GetData);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "pixel", Pixel);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "width", Width);
 	NODE_SET_PROTOTYPE_METHOD(ctor, "height", Height);
@@ -286,6 +289,135 @@ NAN_METHOD(Matrix::Put){
 	memcpy(self->mat.data, buffer_data, buffer_length);
 	NanReturnUndefined();
 }
+
+
+// @author tualo
+// getData getting node buffer of image data
+NAN_METHOD(Matrix::GetData) {
+	NanScope();
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+	int size = self->mat.rows * self->mat.cols * self->mat.elemSize1();
+	Local<Object> buf = NanNewBufferHandle(size);
+	uchar* data = (uchar*) Buffer::Data(buf);
+	memcpy(data, self->mat.data, size);
+
+	v8::Local<v8::Object> globalObj = NanGetCurrentContext()->Global();
+	v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
+	v8::Handle<v8::Value> constructorArgs[3] = {buf, NanNew<v8::Integer>((unsigned) size), NanNew<v8::Integer>(0)};
+	v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+
+	NanReturnValue(actualBuffer);
+
+}
+
+NAN_METHOD(Matrix::Brightness){
+	NanScope();
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	if (args.Length() == 2){
+
+		cv::Mat image;
+
+		if(self->mat.channels() == 3){
+			image = self->mat;
+		}else if(self->mat.channels() == 1){
+			cv::Mat myimg = self->mat;
+			cv::cvtColor(myimg, image, CV_GRAY2RGB);
+		}else{
+			NanThrowError("those channels are not supported");
+		}
+
+
+		cv::Mat new_image = cv::Mat::zeros( image.size(), image.type() );
+		double alpha = args[0]->NumberValue();
+		int beta = args[1]->IntegerValue();
+		/// Do the operation new_image(i,j) = alpha*image(i,j) + beta
+		for( int y = 0; y < image.rows; y++ ){
+			for( int x = 0; x < image.cols; x++ ){
+				for( int c = 0; c < 3; c++ ){
+					new_image.at<cv::Vec3b>(y,x)[c] = cv::saturate_cast<uchar>( alpha*( image.at<cv::Vec3b>(y,x)[c] ) + beta );
+				}
+			}
+		}
+
+		if(self->mat.channels() == 3){
+			new_image.copyTo(self->mat);
+		}else if(self->mat.channels() == 1){
+			cv::Mat gray;
+			cv::cvtColor(new_image, gray, CV_BGR2GRAY);
+			gray.copyTo(self->mat);
+		}
+
+	}else{
+		if (args.Length() == 1){
+			int diff = args[0]->IntegerValue();
+			cv::Mat img = self->mat + diff;
+			img.copyTo(self->mat);
+		}else{
+			NanReturnValue(NanNew("Insufficient or wrong arguments"));
+		}
+	}
+
+
+	NanReturnNull();
+}
+
+// @author tualo
+// normalize wrapper
+NAN_METHOD(Matrix::Normalize) {
+
+
+	if (!args[0]->IsNumber())
+    NanThrowTypeError("min is required (argument 1)");
+
+	if (!args[1]->IsNumber())
+    NanThrowTypeError("max is required (argument 2)");
+
+	int type = cv::NORM_MINMAX;
+	if (args[2]->IsNumber()){
+		type = args[2]->Uint32Value();
+		if (
+			(type!=cv::NORM_MINMAX) ||
+			(type!=cv::NORM_INF) ||
+			(type!=cv::NORM_L1) ||
+			(type!=cv::NORM_L2) ||
+			(type!=cv::NORM_L2SQR) ||
+			(type!=cv::NORM_HAMMING) ||
+			(type!=cv::NORM_HAMMING2) ||
+			(type!=cv::NORM_RELATIVE) ||
+			(type!=cv::NORM_TYPE_MASK)
+		){
+			NanThrowTypeError("type value must be NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 ");
+		}
+	}
+	int dtype = -1;
+	if (args[3]->IsNumber()){
+		dtype = args[3]->IntegerValue();
+	}
+
+	double min = args[0]->NumberValue();
+	double max = args[1]->NumberValue();
+
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+	cv::Mat norm;
+
+	cv::Mat mask;
+	if (args[4]->IsObject()){
+		Matrix *mmask = ObjectWrap::Unwrap<Matrix>( args[4]->ToObject() );
+		mask = mmask->mat;
+	}
+
+
+	cv::normalize(self->mat, norm,min,max, type, dtype, mask);
+
+	norm.copyTo(self->mat);
+
+	NanReturnNull();
+}
+
+
 
 NAN_METHOD(Matrix::Size){
 	SETUP_FUNCTION(Matrix)
