@@ -54,17 +54,21 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
   ~AsyncDetectMultiScale() {}
 
   void Execute () {
-    std::vector<cv::Rect> objects;
+    try {
+      std::vector<cv::Rect> objects;
 
-    cv::Mat gray;
+      cv::Mat gray;
 
-    if(this->im->mat.channels() != 1)
-		    cvtColor(this->im->mat, gray, CV_BGR2GRAY);
-
-    equalizeHist( gray, gray);
-    this->cc->cc.detectMultiScale(gray, objects, this->scale, this->neighbors, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(this->minw, this->minh));
-
-    res = objects;
+      if(this->im->mat.channels() != 1) {
+        cvtColor(this->im->mat, gray, CV_BGR2GRAY);
+      }
+      equalizeHist( gray, gray);
+      this->cc->cc.detectMultiScale(gray, objects, this->scale, this->neighbors, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(this->minw, this->minh));
+      res = objects;
+    }
+    catch( cv::Exception& e ){
+      SetErrorMessage(e.what());
+    }
   }
 
   void HandleOKCallback () {
