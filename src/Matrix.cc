@@ -101,6 +101,7 @@ Matrix::Init(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(ctor, "setWithMask", SetWithMask);
   NODE_SET_PROTOTYPE_METHOD(ctor, "meanWithMask", MeanWithMask);
   NODE_SET_PROTOTYPE_METHOD(ctor, "shift", Shift);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "release", Release);
 
   target->Set(NanNew("Matrix"), ctor->GetFunction());
 };
@@ -2252,4 +2253,15 @@ NAN_METHOD(Matrix::Shift){
   self->mat = res;
 
   NanReturnUndefined();
+}
+
+NAN_METHOD(Matrix::Release)
+{
+	NanScope();
+
+	Matrix *self = ObjectWrap::Unwrap<Matrix>(args.This());
+
+	self->mat.release();
+
+	NanReturnUndefined();
 }
