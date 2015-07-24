@@ -32,13 +32,15 @@ init(Handle<Object> target) {
     ImgProc::Init(target);
     StereoBM::Init(target);
     StereoSGBM::Init(target);
+#if CV_MAJOR_VERSION < 3
     StereoGC::Init(target);
+#endif
 
-   #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
-      BackgroundSubtractorWrap::Init(target);
-      Features::Init(target);
-      FaceRecognizerWrap::Init(target);
-   #endif
+ #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
+    BackgroundSubtractorWrap::Init(target);
+    Features::Init(target);
+    FaceRecognizerWrap::Init(target);
+ #endif
 
 };
 

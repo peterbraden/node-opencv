@@ -3,6 +3,11 @@
 #include "Matrix.h"
 #include <nan.h>
 
+#if CV_MAJOR_VERSION >= 3
+#include <opencv2/objdetect.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
+#endif
 
 Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
 

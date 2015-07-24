@@ -2,23 +2,24 @@
 #define __NODE_STEREO_H
 
 #include "OpenCV.h"
+#include <opencv2/calib3d.hpp>
 
 class StereoBM: public node::ObjectWrap {
 public:
-    cv::StereoBM stereo;
+    cv::Ptr<cv::StereoBM> stereo;
 
     static Persistent<FunctionTemplate> constructor;
     static void Init(Handle<Object> target);
     static NAN_METHOD(New);
 
-    StereoBM(int preset = cv::StereoBM::BASIC_PRESET, int ndisparities = 0, int SADWindowSize=21);
+    StereoBM( int ndisparities = 0, int blockSize=21);
 
     JSFUNC(Compute);
 };
 
 class StereoSGBM: public node::ObjectWrap {
 public:
-    cv::StereoSGBM stereo;
+    cv::Ptr<cv::StereoSGBM> stereo;
 
     static Persistent<FunctionTemplate> constructor;
     static void Init(Handle<Object> target);
@@ -40,6 +41,8 @@ public:
     JSFUNC(Compute);
 };
 
+#if CV_VERSION_MAJOR < 3
+
 struct CvStereoGCState;
 
 class StereoGC: public node::ObjectWrap {
@@ -54,5 +57,5 @@ public:
 
     JSFUNC(Compute);
 };
-
+#endif
 #endif
