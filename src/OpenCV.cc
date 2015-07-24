@@ -18,19 +18,19 @@ OpenCV::Init(Handle<Object> target) {
 NAN_METHOD(OpenCV::ReadImage) {
   NanEscapableScope();
 
+  REQ_FUN_ARG(1, cb);
+
+  Local<Value> argv[2];
+
+  argv[0] = NanNull();
+
+  Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
+  argv[1] = im_h;
+
   try{
 
-    Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
-    Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
-
     cv::Mat mat;
-
-    REQ_FUN_ARG(1, cb);
-
-    Local<Value> argv[2];
-
-    argv[0] = NanNull();
-    argv[1] = im_h;
 
     if (args[0]->IsNumber() && args[1]->IsNumber()){
       int width, height;
@@ -58,19 +58,18 @@ NAN_METHOD(OpenCV::ReadImage) {
 
     img->mat = mat;
 
-    TryCatch try_catch;
-
-    cb->Call(NanGetCurrentContext()->Global(), 2, argv);
-
-    if (try_catch.HasCaught()) {
-      FatalException(try_catch);
-    }
-
-    NanReturnUndefined();
-
   } catch( cv::Exception& e ){
-      const char* err_msg = e.what();
-      NanThrowError(err_msg);
-      NanReturnUndefined();
+      argv[0] = NanError(e.what());
+      argv[1] = NanNull();
   }
+
+  TryCatch try_catch;
+
+  cb->Call(NanGetCurrentContext()->Global(), 2, argv);
+
+  if (try_catch.HasCaught()) {
+    FatalException(try_catch);
+  }
+
+  NanReturnUndefined();
 };
