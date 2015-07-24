@@ -36,11 +36,11 @@ init(Handle<Object> target) {
     StereoGC::Init(target);
 #endif
 
- #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
-    BackgroundSubtractorWrap::Init(target);
-    Features::Init(target);
-    FaceRecognizerWrap::Init(target);
- #endif
+   #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
+      BackgroundSubtractorWrap::Init(target);
+      Features::Init(target);
+      FaceRecognizerWrap::Init(target);
+   #endif
 
 };
 

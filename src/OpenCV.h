@@ -11,6 +11,8 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
+#else
+#include <opencv/highgui.h>
 #endif
 #include <string.h>
 #include <nan.h>
