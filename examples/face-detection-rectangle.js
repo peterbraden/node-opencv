@@ -12,7 +12,7 @@ cv.readImage('./files/mona.png', function(err, im) {
 
     for (var i = 0; i < faces.length; i++) {
       face = faces[i];
-      im.rectangle([face.x, face.y], [face.x + face.width, face.y + face.height], COLOR, 2);
+      im.rectangle([face.x, face.y], [face.width, face.height], COLOR, 2);
     }
 
     im.save('./tmp/face-detection-rectangle.png');
