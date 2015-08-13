@@ -2,10 +2,14 @@
 <html>
   <head>
     <title></title>
-    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/documentup/latest.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/documentup/0.1.1/documentup.min.js"></script>
     <script type="text/javascript">
-      DocumentUp.document("peterbraden/node-opencv");
+      if (typeof DocumentUp == 'undefined') {
+        alert('Some resources failed loading: try reloading the page.');
+      } else {
+        DocumentUp.document("peterbraden/node-opencv");
+      }
     </script>
   </head>
-  <body></body>
+  <body><noscript>This page requires JavaScript.</noscript></body>
 </html>
