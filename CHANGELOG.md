@@ -1,6 +1,10 @@
 
 # Changelog
 
+### 3.1.0
+Many bugfixes from @queuecumber, @emanuelandrada, @thomashoffmann1979,
+@paulmorrishill, @zankich, @morganrallen and @AVVS.
+
 ### 3.0.0
 
 You wait ages for a release, and 2 come along at once...
