@@ -41,7 +41,7 @@ NAN_METHOD(OpenCV::ReadImage) {
 
     } else if (args[0]->IsString()) {
 
-      std::string filename = std::string(*NanAsciiString(args[0]->ToString()));
+      std::string filename = std::string(*NanUtf8String(args[0]->ToString()));
       mat = cv::imread(filename);
 
     } else if (Buffer::HasInstance(args[0])){
