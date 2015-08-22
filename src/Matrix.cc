@@ -569,6 +569,7 @@ NAN_METHOD(Matrix::ToBuffer){
     //---------------------------
     // Provide default value
     const char *ext = ".jpg";
+    std::string optExt;
     std::vector<int> params;
     // See if the options argument is passed
     if ((args.Length() > 0) && (args[0]->IsObject())) {
@@ -577,8 +578,8 @@ NAN_METHOD(Matrix::ToBuffer){
         // If the extension (image format) is provided
         if (options->Has(NanNew<String>("ext"))) {
             v8::String::Utf8Value str ( options->Get(NanNew<String>("ext"))->ToString() );
-            std::string str2 = std::string(*str);
-            ext = (const char *) str2.c_str();
+            optExt = *str;
+            ext = (const char *) optExt.c_str();
         }
         if (options->Has(NanNew<String>("jpegQuality"))) {
             int compression = options->Get(NanNew<String>("jpegQuality"))->IntegerValue();
