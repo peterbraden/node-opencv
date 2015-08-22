@@ -37,6 +37,8 @@ VideoCaptureWrap::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(ctor, "setPosition", SetPosition);
   NODE_SET_PROTOTYPE_METHOD(ctor, "close", Close);
   NODE_SET_PROTOTYPE_METHOD(ctor, "ReadSync", ReadSync);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "grab", Grab);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "retrieve", Retrieve);
 
 	target->Set(NanNew("VideoCapture"), ctor->GetFunction());
 };    
@@ -141,8 +143,10 @@ NAN_METHOD(VideoCaptureWrap::Close){
 
 class AsyncVCWorker : public NanAsyncWorker {
  public:
-  AsyncVCWorker(NanCallback *callback, VideoCaptureWrap* vc, Matrix* matrix)
-    : NanAsyncWorker(callback), vc(vc), matrix(matrix) {}
+  AsyncVCWorker(NanCallback *callback, VideoCaptureWrap* vc, Matrix* matrix,
+                bool retrieve = false, int channel = 0)
+    : NanAsyncWorker(callback), vc(vc), matrix(matrix),
+      retrieve(retrieve), channel(channel) {}
   ~AsyncVCWorker() {}
 
   // Executed inside the worker-thread.
@@ -150,7 +154,13 @@ class AsyncVCWorker : public NanAsyncWorker {
   // here, so everything we need for input and output
   // should go on `this`.
   void Execute () {
-	  this->vc->cap.read(matrix->mat);
+    if (retrieve) {
+      if (!this->vc->cap.retrieve(matrix->mat, channel)) {
+        SetErrorMessage("retrieve failed");
+      }
+      return;
+    }
+    this->vc->cap.read(matrix->mat);
   }
 
   // Executed when the async work is complete
@@ -180,6 +190,8 @@ class AsyncVCWorker : public NanAsyncWorker {
  private:
   VideoCaptureWrap *vc;
   Matrix* matrix;
+  bool retrieve;
+  int channel;
 };
 
 
@@ -210,3 +222,49 @@ NAN_METHOD(VideoCaptureWrap::ReadSync) {
 
 	NanReturnValue(im_to_return);
 }
+
+
+class AsyncGrabWorker : public NanAsyncWorker {
+ public:
+  AsyncGrabWorker(NanCallback *callback, VideoCaptureWrap* vc)
+    : NanAsyncWorker(callback), vc(vc) {}
+  ~AsyncGrabWorker() {}
+
+  void Execute () {
+    if (!this->vc->cap.grab()) {
+      SetErrorMessage("grab failed");
+    }
+  }
+
+ private:
+  VideoCaptureWrap *vc;
+};
+
+NAN_METHOD(VideoCaptureWrap::Grab) {
+
+  NanScope();
+  VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+
+  REQ_FUN_ARG(0, cb);
+
+  NanCallback *callback = new NanCallback(cb.As<Function>());
+  NanAsyncQueueWorker(new AsyncGrabWorker(callback, v));
+
+  NanReturnUndefined();
+}
+
+NAN_METHOD(VideoCaptureWrap::Retrieve) {
+
+  NanScope();
+  VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+
+  int channel = 0;
+  REQ_FUN_ARG(0, cb);
+  INT_FROM_ARGS(channel, 1);
+
+  NanCallback *callback = new NanCallback(cb.As<Function>());
+  NanAsyncQueueWorker(new AsyncVCWorker(callback, v, new Matrix(), true, channel));
+
+  NanReturnUndefined();
+}
+

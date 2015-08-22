@@ -14,6 +14,9 @@ class VideoCaptureWrap: public node::ObjectWrap {
       static NAN_METHOD(Read);
       static NAN_METHOD(ReadSync);
 
+      static NAN_METHOD(Grab);
+      static NAN_METHOD(Retrieve);
+
       //(Optional) For setting width and height of the input video stream 
       static NAN_METHOD(SetWidth);
       static NAN_METHOD(SetHeight);
