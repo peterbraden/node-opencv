@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 3.2.0
+
+Bugfixes from @mvines and @dropfen. Thanks!
+
 ### 3.1.0
 Many bugfixes from @queuecumber, @emanuelandrada, @thomashoffmann1979,
 @paulmorrishill, @zankich, @morganrallen and @AVVS.
