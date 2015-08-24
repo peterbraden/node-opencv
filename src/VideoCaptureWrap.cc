@@ -143,9 +143,9 @@ NAN_METHOD(VideoCaptureWrap::Close){
 
 class AsyncVCWorker : public NanAsyncWorker {
  public:
-  AsyncVCWorker(NanCallback *callback, VideoCaptureWrap* vc, Matrix* matrix,
+  AsyncVCWorker(NanCallback *callback, VideoCaptureWrap* vc,
                 bool retrieve = false, int channel = 0)
-    : NanAsyncWorker(callback), vc(vc), matrix(matrix),
+    : NanAsyncWorker(callback), vc(vc),
       retrieve(retrieve), channel(channel) {}
   ~AsyncVCWorker() {}
 
@@ -155,12 +155,12 @@ class AsyncVCWorker : public NanAsyncWorker {
   // should go on `this`.
   void Execute () {
     if (retrieve) {
-      if (!this->vc->cap.retrieve(matrix->mat, channel)) {
+      if (!this->vc->cap.retrieve(mat, channel)) {
         SetErrorMessage("retrieve failed");
       }
       return;
     }
-    this->vc->cap.read(matrix->mat);
+    this->vc->cap.read(mat);
   }
 
   // Executed when the async work is complete
@@ -171,8 +171,6 @@ class AsyncVCWorker : public NanAsyncWorker {
     
     Local<Object> im_to_return= NanNew(Matrix::constructor)->GetFunction()->NewInstance();
 	  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_to_return);
-	  cv::Mat mat;
-	  mat = this->matrix->mat;
 	  img->mat = mat;
 
     Local<Value> argv[] = {
@@ -189,7 +187,7 @@ class AsyncVCWorker : public NanAsyncWorker {
 
  private:
   VideoCaptureWrap *vc;
-  Matrix* matrix;
+  cv::Mat mat;
   bool retrieve;
   int channel;
 };
@@ -204,7 +202,7 @@ NAN_METHOD(VideoCaptureWrap::Read) {
 	REQ_FUN_ARG(0, cb);
 
   NanCallback *callback = new NanCallback(cb.As<Function>());
-  NanAsyncQueueWorker(new AsyncVCWorker(callback, v, new Matrix()));	
+  NanAsyncQueueWorker(new AsyncVCWorker(callback, v));
 	
 	NanReturnUndefined();
 }
@@ -263,7 +261,7 @@ NAN_METHOD(VideoCaptureWrap::Retrieve) {
   INT_FROM_ARGS(channel, 1);
 
   NanCallback *callback = new NanCallback(cb.As<Function>());
-  NanAsyncQueueWorker(new AsyncVCWorker(callback, v, new Matrix(), true, channel));
+  NanAsyncQueueWorker(new AsyncVCWorker(callback, v, true, channel));
 
   NanReturnUndefined();
 }
