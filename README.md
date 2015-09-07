@@ -32,10 +32,15 @@ put it in c:\pkg-config
 C:\pkg-config\bin;C:\OpenCV\build\x64\vc11\bin;
 
 5. Install visual-studio in 4 steps
-- First install Visual C++ 2010 Express
-- Second install Windows SDK for windows 7 and .net framework 4
-- Third install Visual Studio 2010 Service Pack 1
-- Fourth install Visual C++ 2010 Service Pack 1 Compiler
+
+  - install Visual C++ 2010 Express
+  
+  - install Windows SDK for windows 7 and .net framework 4
+  
+  - install Visual Studio 2010 Service Pack 1
+  
+  - install Visual C++ 2010 Service Pack 1 Compiler
+
 
 6. Download npeterbraden/node-opencv fork
 git clone https://github.com/peterbraden/node-opencv
