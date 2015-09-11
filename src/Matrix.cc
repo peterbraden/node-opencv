@@ -108,27 +108,32 @@ Matrix::Init(Handle<Object> target) {
 
 NAN_METHOD(Matrix::New) {
   NanScope();
-	if (args.This()->InternalFieldCount() == 0)
+  if (args.This()->InternalFieldCount() == 0) {
     NanThrowTypeError("Cannot instantiate without new");
+  }
 
-	Matrix *mat;
+  Matrix *mat;
 
-	if (args.Length() == 0){
-		mat = new Matrix;
-	} else if (args.Length() == 2 && args[0]->IsInt32() && args[1]->IsInt32()){
-        mat = new Matrix(args[0]->IntegerValue(), args[1]->IntegerValue());
-    } else if (args.Length() == 3 && args[0]->IsInt32() && args[1]->IsInt32() && args[2]->IsInt32()) {
-        mat = new Matrix(args[0]->IntegerValue(), args[1]->IntegerValue(), args[2]->IntegerValue());
-	} else { // if (args.Length() == 5) {
-		Matrix *other = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
-		int x = args[1]->IntegerValue();
-		int y = args[2]->IntegerValue();
-		int w = args[3]->IntegerValue();
-		int h = args[4]->IntegerValue();
-		mat = new Matrix(other->mat, cv::Rect(x, y, w, h));
-	}
+  if (args.Length() == 0) {
+    mat = new Matrix;
+  } else if (args.Length() == 2 && args[0]->IsInt32() && args[1]->IsInt32()) {
+    mat = new Matrix(args[0]->IntegerValue(), args[1]->IntegerValue());
+  } else if (args.Length() == 3 && args[0]->IsInt32() && args[1]->IsInt32() && args[2]->IsInt32()) {
+    mat = new Matrix(args[0]->IntegerValue(), args[1]->IntegerValue(), args[2]->IntegerValue());
+  } else if (args.Length() == 4 && args[0]->IsInt32() && args[1]->IsInt32() &&
+        args[2]->IsInt32() && args[3]->IsArray()) {
+    mat = new Matrix(args[0]->IntegerValue(), args[1]->IntegerValue(),
+        args[2]->IntegerValue(), args[3]->ToObject());
+  } else {  // if (args.Length() == 5) {
+    Matrix *other = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+    int x = args[1]->IntegerValue();
+    int y = args[2]->IntegerValue();
+    int w = args[3]->IntegerValue();
+    int h = args[4]->IntegerValue();
+    mat = new Matrix(other->mat, cv::Rect(x, y, w, h));
+  }
 
-	mat->Wrap(args.Holder());
+  mat->Wrap(args.Holder());
   NanReturnValue(args.Holder());
 }
 
@@ -148,6 +153,22 @@ Matrix::Matrix(int rows, int cols, int type): ObjectWrap() {
 
 Matrix::Matrix(cv::Mat m, cv::Rect roi): ObjectWrap() {
 	mat = cv::Mat(m, roi);
+}
+
+Matrix::Matrix(int rows, int cols, int type, Local<Object> scalarObj) {
+  mat = cv::Mat(rows, cols, type);
+  if (mat.channels() == 3) {
+    mat.setTo(cv::Scalar(scalarObj->Get(0)->IntegerValue(),
+        scalarObj->Get(1)->IntegerValue(),
+        scalarObj->Get(2)->IntegerValue()));
+  } else if (mat.channels() == 2) {
+    mat.setTo(cv::Scalar(scalarObj->Get(0)->IntegerValue(),
+        scalarObj->Get(1)->IntegerValue()));
+  } else if (mat.channels() == 1) {
+    mat.setTo(cv::Scalar(scalarObj->Get(0)->IntegerValue()));
+  } else {
+    NanThrowError("Only 1-3 channels are supported");
+  }
 }
 
 
