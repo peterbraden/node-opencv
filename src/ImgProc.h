@@ -5,7 +5,7 @@
 
 // Implementation of imgproc.hpp functions
 
-class ImgProc: public node::ObjectWrap {
+class ImgProc: public Nan::ObjectWrap {
 public:
     static void Init(Handle<Object> target);
 
