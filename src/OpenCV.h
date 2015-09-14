@@ -19,7 +19,6 @@ using namespace node;
     return NanThrowTypeError("Argument " #I " must be a function");  \
   Local<Function> VAR = Local<Function>::Cast(args[I]);
 
-
 #define SETUP_FUNCTION(TYP)	\
 	NanScope();		\
 	TYP *self = ObjectWrap::Unwrap<TYP>(args.This());
@@ -30,10 +29,8 @@ using namespace node;
 #define JSTHROW_TYPE(ERR) \
   NanThrowTypeError( ERR );
 
-
 #define JSTHROW(ERR) \
   NanThrowError( ERR );
-
 
 #define INT_FROM_ARGS(NAME, IND) \
   if (args[IND]->IsInt32()){ \
@@ -45,13 +42,11 @@ using namespace node;
     NAME = args[IND]->NumberValue(); \
   }
 
-class OpenCV: public node::ObjectWrap{
-  public:
-    static void Init(Handle<Object> target);
+class OpenCV: public node::ObjectWrap {
+public:
+  static void Init(Handle<Object> target);
 
-    static NAN_METHOD(ReadImage);
+  static NAN_METHOD(ReadImage);
 };
-
-
 
 #endif
