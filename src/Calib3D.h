@@ -5,7 +5,7 @@
 
 // Implementation of calib3d.hpp functions
 
-class Calib3D: public node::ObjectWrap {
+class Calib3D: public Nan::ObjectWrap {
 public:
     static void Init(Handle<Object> target);
 
