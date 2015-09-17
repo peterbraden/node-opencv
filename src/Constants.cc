@@ -2,16 +2,16 @@
 #include "Constants.h"
 
 #define CONST(C) \
-  obj->Set(NanNew<String>(#C), NanNew<Integer>(C));
+  obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>(C));
 
 #define CONST_ENUM(C) \
-    obj->Set(NanNew<String>(#C), NanNew<Integer>((int)(cv::C)));
+    obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)(cv::C)));
 
 void
 Constants::Init(Handle<Object> target) {
-  Persistent<Object> inner;
-  Local<Object> obj = NanNew<Object>();
-  NanAssignPersistent(inner, obj);
+  Nan::Persistent<Object> inner;
+  Local<Object> obj = Nan::New<Object>();
+  inner.Reset(obj);
 
   CONST(CV_8U);
   CONST(CV_8S);
@@ -73,7 +73,7 @@ Constants::Init(Handle<Object> target) {
   CONST_ENUM(NORM_RELATIVE);
   CONST_ENUM(NORM_TYPE_MASK);
 
-  target->Set(NanNew("Constants"), obj);
+  target->Set(Nan::New("Constants").ToLocalChecked(), obj);
 }
 
 #undef CONST

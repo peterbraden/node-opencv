@@ -4,53 +4,53 @@
 #include <nan.h>
 
 
-Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
+Nan::Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
 
 void
 CascadeClassifierWrap::Init(Handle<Object> target) {
-    NanScope();
+    Nan::HandleScope scope;
 
-    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(CascadeClassifierWrap::New);
-    NanAssignPersistent(constructor, ctor);
+    Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(CascadeClassifierWrap::New);
+    constructor.Reset(ctor);
     ctor->InstanceTemplate()->SetInternalFieldCount(1);
-    ctor->SetClassName(NanNew("CascadeClassifier"));
+    ctor->SetClassName(Nan::New("CascadeClassifier").ToLocalChecked());
 
     // Prototype
     //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-    NODE_SET_PROTOTYPE_METHOD(ctor, "detectMultiScale", DetectMultiScale);
+    Nan::SetPrototypeMethod(ctor, "detectMultiScale", DetectMultiScale);
 
-    target->Set(NanNew("CascadeClassifier"), ctor->GetFunction());
+    target->Set(Nan::New("CascadeClassifier").ToLocalChecked(), ctor->GetFunction());
 };
 
 NAN_METHOD(CascadeClassifierWrap::New) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  if (args.This()->InternalFieldCount() == 0)
-    NanThrowTypeError("Cannot instantiate without new");
+  if (info.This()->InternalFieldCount() == 0)
+    Nan::ThrowTypeError("Cannot instantiate without new");
 
-  CascadeClassifierWrap *pt = new CascadeClassifierWrap(*args[0]);
-  pt->Wrap(args.This());
-  NanReturnValue( args.This() );
+  CascadeClassifierWrap *pt = new CascadeClassifierWrap(*info[0]);
+  pt->Wrap(info.This());
+  info.GetReturnValue().Set( info.This() );
 }
 
 
 CascadeClassifierWrap::CascadeClassifierWrap(v8::Value* fileName){
 	std::string filename;
-	filename = std::string(*NanAsciiString(fileName->ToString()));
+	filename = std::string(*Nan::Utf8String(fileName->ToString()));
 
 
   if (!cc.load(filename.c_str())){
-    NanThrowTypeError("Error loading file");
+    Nan::ThrowTypeError("Error loading file");
   }
 }
 
 
 
 
-class AsyncDetectMultiScale : public NanAsyncWorker {
+class AsyncDetectMultiScale : public Nan::AsyncWorker {
  public:
-  AsyncDetectMultiScale(NanCallback *callback, CascadeClassifierWrap *cc, Matrix* im, double scale, int neighbors,  int minw, int minh) : NanAsyncWorker(callback), cc(cc), im(im), scale(scale), neighbors(neighbors), minw(minw), minh(minh)  {}
+  AsyncDetectMultiScale(Nan::Callback *callback, CascadeClassifierWrap *cc, Matrix* im, double scale, int neighbors,  int minw, int minh) : Nan::AsyncWorker(callback), cc(cc), im(im), scale(scale), neighbors(neighbors), minw(minw), minh(minh)  {}
   ~AsyncDetectMultiScale() {}
 
   void Execute () {
@@ -74,28 +74,28 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
   }
 
   void HandleOKCallback () {
-    NanScope();
+    Nan::HandleScope scope;
     //  this->matrix->Unref();
 
     Handle<Value> argv[2];
-    v8::Local<v8::Array> arr = NanNew<v8::Array>(this->res.size());
+    v8::Local<v8::Array> arr = Nan::New<v8::Array>(this->res.size());
 
     for(unsigned int i = 0; i < this->res.size(); i++ ){
-      v8::Local<v8::Object> x = NanNew<v8::Object>();
-      x->Set(NanNew("x"), NanNew<Number>(this->res[i].x));
-      x->Set(NanNew("y"), NanNew<Number>(this->res[i].y));
-      x->Set(NanNew("width"), NanNew<Number>(this->res[i].width));
-      x->Set(NanNew("height"), NanNew<Number>(this->res[i].height));
+      v8::Local<v8::Object> x = Nan::New<v8::Object>();
+      x->Set(Nan::New("x").ToLocalChecked(), Nan::New<Number>(this->res[i].x));
+      x->Set(Nan::New("y").ToLocalChecked(), Nan::New<Number>(this->res[i].y));
+      x->Set(Nan::New("width").ToLocalChecked(), Nan::New<Number>(this->res[i].width));
+      x->Set(Nan::New("height").ToLocalChecked(), Nan::New<Number>(this->res[i].height));
       arr->Set(i, x);
     }
 
-    argv[0] = NanNull();
+    argv[0] = Nan::Null();
     argv[1] = arr;
 
-    TryCatch try_catch;
+    Nan::TryCatch try_catch;
     callback->Call(2, argv);
     if (try_catch.HasCaught()) {
-      FatalException(try_catch);
+      Nan::FatalException(try_catch);
     }
 
   }
@@ -115,36 +115,36 @@ class AsyncDetectMultiScale : public NanAsyncWorker {
 
 
 NAN_METHOD(CascadeClassifierWrap::DetectMultiScale){
-  NanScope();
+  Nan::HandleScope scope;
 
-  CascadeClassifierWrap *self =  ObjectWrap::Unwrap<CascadeClassifierWrap>(args.This());
+  CascadeClassifierWrap *self =  Nan::ObjectWrap::Unwrap<CascadeClassifierWrap>(info.This());
 
-  if (args.Length() < 2){
-    NanThrowTypeError("detectMultiScale takes at least 2 args");
+  if (info.Length() < 2){
+    Nan::ThrowTypeError("detectMultiScale takes at least 2 info");
   }
 
-  Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+  Matrix *im = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
   REQ_FUN_ARG(1, cb);
 
   double scale = 1.1;
-  if (args.Length() > 2 && args[2]->IsNumber())
-    scale = args[2]->NumberValue();
+  if (info.Length() > 2 && info[2]->IsNumber())
+    scale = info[2]->NumberValue();
 
   int neighbors = 2;
-  if (args.Length() > 3 && args[3]->IsInt32())
-    neighbors = args[3]->IntegerValue();
+  if (info.Length() > 3 && info[3]->IsInt32())
+    neighbors = info[3]->IntegerValue();
 
   int minw = 30;
   int minh = 30;
-  if (args.Length() > 5 && args[4]->IsInt32() && args[5]->IsInt32()){
-    minw = args[4]->IntegerValue();
-    minh = args[5]->IntegerValue();
+  if (info.Length() > 5 && info[4]->IsInt32() && info[5]->IsInt32()){
+    minw = info[4]->IntegerValue();
+    minh = info[5]->IntegerValue();
   }
 
 
-  NanCallback *callback = new NanCallback(cb.As<Function>());
+  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
 
-  NanAsyncQueueWorker( new AsyncDetectMultiScale(callback, self, im, scale, neighbors, minw, minh) );
-  NanReturnUndefined();
+  Nan::AsyncQueueWorker( new AsyncDetectMultiScale(callback, self, im, scale, neighbors, minw, minh) );
+  return;
 
 }

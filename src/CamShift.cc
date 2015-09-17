@@ -8,41 +8,41 @@
 #define CHANNEL_VALUE 2
 
 
-Persistent<FunctionTemplate> TrackedObject::constructor;
+Nan::Persistent<FunctionTemplate> TrackedObject::constructor;
 
 void
 TrackedObject::Init(Handle<Object> target) {
-    NanScope();
+    Nan::HandleScope scope;
 
     // Constructor
-    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(TrackedObject::New);
-    NanAssignPersistent(constructor, ctor);
+    Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(TrackedObject::New);
+    constructor.Reset(ctor);
     ctor->InstanceTemplate()->SetInternalFieldCount(1);
-    ctor->SetClassName(NanNew("TrackedObject"));
+    ctor->SetClassName(Nan::New("TrackedObject").ToLocalChecked());
     
 
     // Prototype
     //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-	  NODE_SET_PROTOTYPE_METHOD(ctor, "track", Track);
+	  Nan::SetPrototypeMethod(ctor, "track", Track);
 	  
-	  target->Set(NanNew("TrackedObject"), ctor->GetFunction());
+	  target->Set(Nan::New("TrackedObject").ToLocalChecked(), ctor->GetFunction());
 };    
 
 
 NAN_METHOD(TrackedObject::New) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  if (args.This()->InternalFieldCount() == 0){
+  if (info.This()->InternalFieldCount() == 0){
     JSTHROW_TYPE("Cannot Instantiate without new")
   }
 
-  Matrix* m = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+  Matrix* m = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
   cv::Rect r;
   int channel = CHANNEL_HUE;
 
-  if (args[1]->IsArray()){
-    Local<Object> v8rec = args[1]->ToObject(); 
+  if (info[1]->IsArray()){
+    Local<Object> v8rec = info[1]->ToObject(); 
     r = cv::Rect(
         v8rec->Get(0)->IntegerValue(),
         v8rec->Get(1)->IntegerValue(),
@@ -52,11 +52,11 @@ NAN_METHOD(TrackedObject::New) {
         JSTHROW_TYPE("Must pass rectangle to track")
   }
   
-  if (args[2]->IsObject()){
-    Local<Object> opts = args[2]->ToObject();
+  if (info[2]->IsObject()){
+    Local<Object> opts = info[2]->ToObject();
 
-    if (opts->Get(NanNew("channel"))->IsString()){
-      v8::String::Utf8Value c(opts->Get(NanNew("channel"))->ToString());
+    if (opts->Get(Nan::New("channel").ToLocalChecked())->IsString()){
+      v8::String::Utf8Value c(opts->Get(Nan::New("channel").ToLocalChecked())->ToString());
       std::string cc = std::string(*c);
 
       if (cc == "hue" || cc == "h"){
@@ -76,8 +76,8 @@ NAN_METHOD(TrackedObject::New) {
   TrackedObject *to = new TrackedObject(m->mat, r, channel);  
   
   
-  to->Wrap(args.This());
-  NanReturnValue(args.This());
+  to->Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 
@@ -125,20 +125,20 @@ TrackedObject::TrackedObject(cv::Mat image, cv::Rect rect, int chan){
 NAN_METHOD(TrackedObject::Track){
 	SETUP_FUNCTION(TrackedObject)
  
-  if (args.Length() != 1){
-    NanThrowTypeError("track takes an image param");
-    NanReturnUndefined();
+  if (info.Length() != 1){
+    Nan::ThrowTypeError("track takes an image param");
+    return;
   }
 
 
-  Matrix *im = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+  Matrix *im = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
   cv::RotatedRect r;
   
   if (self->prev_rect.x <0 ||
       self->prev_rect.y <0 ||
       self->prev_rect.width <= 1 ||
       self->prev_rect.height <= 1){
-    return NanThrowTypeError("OPENCV ERROR: prev rectangle is illogical");
+    return Nan::ThrowTypeError("OPENCV ERROR: prev rectangle is illogical");
   }
 
   update_chann_image(self, im->mat);
@@ -168,24 +168,24 @@ NAN_METHOD(TrackedObject::Track){
     self->prev_rect = backup_prev_rect;
   }
 
-  v8::Local<v8::Array> arr = NanNew<Array>(4);
+  v8::Local<v8::Array> arr = Nan::New<Array>(4);
 
 
-  arr->Set(0, NanNew<Number>(bounds.x));
-  arr->Set(1, NanNew<Number>(bounds.y));
-  arr->Set(2, NanNew<Number>(bounds.x + bounds.width));
-  arr->Set(3, NanNew<Number>(bounds.y + bounds.height));
+  arr->Set(0, Nan::New<Number>(bounds.x));
+  arr->Set(1, Nan::New<Number>(bounds.y));
+  arr->Set(2, Nan::New<Number>(bounds.x + bounds.width));
+  arr->Set(3, Nan::New<Number>(bounds.y + bounds.height));
 
   /*
   cv::Point2f pts[4];
   r.points(pts);
 
   for (int i=0; i<8; i+=2){
-    arr->Set(i, NanNew<Number>(pts[i].x));
-    arr->Set(i+1, NanNew<Number>(pts[i].y));
+    arr->Set(i, Nan::New<Number>(pts[i].x));
+    arr->Set(i+1, Nan::New<Number>(pts[i].y));
   }
 */
 
-	NanReturnValue(arr);
+	info.GetReturnValue().Set(arr);
 
 }
