@@ -5,10 +5,9 @@
   obj->Set(NanNew<String>(#C), NanNew<Integer>(C));
 
 #define CONST_ENUM(C) \
-    obj->Set(NanNew<String>(#C), NanNew<Integer>((int)(cv::C)));
+  obj->Set(NanNew<String>(#C), NanNew<Integer>((int)(cv::C)));
 
-void
-Constants::Init(Handle<Object> target) {
+void Constants::Init(Handle<Object> target) {
   Persistent<Object> inner;
   Local<Object> obj = NanNew<Object>();
   NanAssignPersistent(inner, obj);
