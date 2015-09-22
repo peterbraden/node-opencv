@@ -17,4 +17,4 @@ run apt-get install -y libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
 run curl -sL https://deb.nodesource.com/setup | bash -
 run apt-get install -y nodejs
 # ensure npm installs at v3.2.0 vice tip
-run	npm install opencv@3.2.0 || cat npm-debug.log
+run	npm install opencv || cat npm-debug.log
