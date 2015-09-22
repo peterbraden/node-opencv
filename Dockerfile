@@ -7,7 +7,8 @@
 # VERSION		0.1
 # DOCKER-VERSION	0.1.6
 
-from	ubuntu:12.04
+# update to 14.04, but lock versions at 12.04 for now
+from	ubuntu:14.04
 run apt-get update -qq
 run apt-get install -y software-properties-common python-software-properties
 run add-apt-repository -y ppa:kubuntu-ppa/backports
@@ -15,4 +16,4 @@ run apt-get update
 run apt-get install -y libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
 run curl -sL https://deb.nodesource.com/setup | bash -
 run apt-get install -y nodejs
-run	npm install opencv || cat npm-debug.log
+run	npm install opencv@3.2.0 || cat npm-debug.log
