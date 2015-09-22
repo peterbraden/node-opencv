@@ -1,3 +1,4 @@
+/*
 var cv = require('../lib/opencv');
 
 cv.readImage("./files/mona.png", function(err, im) {
@@ -18,3 +19,4 @@ function salt(img, n) {
     img.set(y, x, 255);
   }
 }
+*/
