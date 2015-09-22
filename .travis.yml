@@ -47,8 +47,6 @@ before_install:
   # or if we put [publish binary] in the commit message
   - if test "${COMMIT_MESSAGE#*'[publish binary]'}" != "$COMMIT_MESSAGE"; then PUBLISH_BINARY=true; fi;
   - platform=$(uname -s | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
-  - docker build -t peterbraden/node-opencv .
-  - docker run peterbraden/node-opencv /bin/sh -c "cd /root/node-opencv; make test"
 
 install:
   # ensure source install works
@@ -56,6 +54,7 @@ install:
   # test our module
   - npm test
   - node lib/opencv.js
+  - docker build -t peterbraden/node-opencv .
 
 before_script:
   - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY

@@ -15,5 +15,7 @@ run apt-get update
 run apt-get install -y libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
 run curl -sL https://deb.nodesource.com/setup | bash -
 run apt-get install -y nodejs
-run	npm install opencv || cat npm-debug.log
-run add . /root/node-opencv
+WORKDIR /root/node-opencv
+add . /root/node-opencv
+run	npm install --unsafe-perm --build-from-source || cat npm-debug.log
+run make test
