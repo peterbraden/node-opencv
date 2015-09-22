@@ -2,7 +2,7 @@ language: node_js
 
 os:
   - linux
-  - osx
+#  - osx
 
 matrix:
   allow_failures:
@@ -10,7 +10,7 @@ matrix:
 
 node_js:
   - '0.12'
-  - "iojs-v1.0.4"
+#  - "iojs-v1.0.4"
 
 sudo: required
 services:
@@ -54,7 +54,8 @@ install:
   # test our module
   - npm test
   - node lib/opencv.js
-  - docker build -t peterbraden/node-opencv .
+  - docker build -t peterbraden/node-opencv-ubuntu-12-04 -f test/Dockerfile-ubuntu-12-04 .
+  - docker build -t peterbraden/node-opencv-ubuntu-14-04 -f test/Dockerfile-ubuntu-14-04 .
 
 before_script:
   - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
