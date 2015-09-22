@@ -148,7 +148,7 @@ detection. This can be used for face detection etc.
 mat.detectObject(haar_cascade_xml, opts, function(err, matches){})
 ```
 
-For convenience in face recognition, cv.FACE_CASCADE is a cascade that can be used for frontal face recognition.
+For convenience in face detection, cv.FACE_CASCADE is a cascade that can be used for frontal face detection.
 
 Also:
 

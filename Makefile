@@ -1,14 +1,14 @@
 VERSION := $(shell node -e "console.log(require('./package.json').version)")
 
-.PHONY: default release smoke
-
 test:
 	npm test
+.PHONY: test
 
 smoke:
 	npm install --build-from-source
 	node smoke/smoketest.js
 	npm test
+.PHONY: smoke
 
 
 release:
@@ -32,3 +32,4 @@ release:
 
 	@echo "Publishing to NPM"
 	@npm publish
+.PHONY: release
