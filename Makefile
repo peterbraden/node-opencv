@@ -33,3 +33,10 @@ release:
 	@echo "Publishing to NPM"
 	@npm publish
 .PHONY: release
+
+
+travis-build:
+  docker build -t peterbraden/node-opencv-ubuntu-12-04 -f test/Dockerfile-ubuntu-12-04 .
+  docker build -t peterbraden/node-opencv-ubuntu-12-04 -f test/Dockerfile-ubuntu-14-04 .
+
+.PHONY: travis-build
