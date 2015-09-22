@@ -55,7 +55,7 @@ install:
   - npm test
   - node lib/opencv.js
   - docker build -t peterbraden/node-opencv-ubuntu-12-04 -f test/Dockerfile-ubuntu-12-04 .
-  - docker build -t peterbraden/node-opencv-ubuntu-12-04 -f test/Dockerfile-ubuntu-14-04 .
+  - docker build -t peterbraden/node-opencv-ubuntu-14-04 -f test/Dockerfile-ubuntu-14-04 .
 
 before_script:
   - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
