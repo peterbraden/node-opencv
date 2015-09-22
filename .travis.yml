@@ -12,6 +12,10 @@ node_js:
   - '0.12'
   - "iojs-v1.0.4"
 
+sudo: required
+services:
+  - docker
+
 compiler: clang
 
 env:
@@ -50,6 +54,7 @@ install:
   # test our module
   - npm test
   - node lib/opencv.js
+  - docker build -t peterbraden/node-opencv .
 
 before_script:
   - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
