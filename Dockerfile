@@ -5,9 +5,9 @@
 # 3) Test: docker run $USER/node-opencv node -e "console.log(require('opencv').version)"
 #
 # VERSION		0.2
-# DOCKER-VERSION	1.8.2
+# DOCKER-VERSION	8.1.2
 
-# update to 14.04, but lock versions at 12.04 for now
+# update to 14.04
 from	ubuntu:14.04
 run apt-get update -qq
 run apt-get install -y software-properties-common python-software-properties
