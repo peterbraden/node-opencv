@@ -31,6 +31,7 @@ void Matrix::Init(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(ctor, "normalize", Normalize);
   NODE_SET_PROTOTYPE_METHOD(ctor, "getData", GetData);
   NODE_SET_PROTOTYPE_METHOD(ctor, "pixel", Pixel);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "packPixels", PackPixels);
   NODE_SET_PROTOTYPE_METHOD(ctor, "width", Width);
   NODE_SET_PROTOTYPE_METHOD(ctor, "height", Height);
   NODE_SET_PROTOTYPE_METHOD(ctor, "size", Size);
@@ -242,6 +243,40 @@ NAN_METHOD(Matrix::Pixel) {
   NanReturnUndefined();
   // double val = Matrix::DblGet(t, i, j);
   // NanReturnValue(NanNew<Number>(val));
+}
+
+NAN_METHOD(Matrix::PackPixels) {
+	SETUP_FUNCTION(Matrix)
+
+	int channels = self->mat.channels();
+	if (args.Length() == 1)
+	{
+		v8::String::Utf8Value str(args[0]->ToString());
+		string f = *str;
+		if (f == "RGB")
+		{
+			if (channels >= 3)
+			{
+				NanReturnValue(PixelPacker::BGRToRGB(&self->mat));
+			}
+			else if (channels == 1)
+			{
+				NanReturnValue(PixelPacker::grayscaleToRGB(&self->mat));
+			}
+			else
+			{
+				NanReturnValue(NanNew<String>("Error: wrong number of channels"));
+			}
+		}
+		else
+		{
+			NanReturnValue(NanNew<String>("Unrecognized format"));
+		}
+	}
+	else
+	{
+		NanReturnValue(NanNew<String>("Need a format"));
+	}
 }
 
 NAN_METHOD(Matrix::Get) {

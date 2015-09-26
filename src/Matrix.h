@@ -1,4 +1,5 @@
 #include "OpenCV.h"
+#include "PixelPacker.h"
 
 class Matrix: public node::ObjectWrap {
 public:
@@ -31,6 +32,7 @@ public:
   JSFUNC(PixelRow)
   JSFUNC(Col)
   JSFUNC(PixelCol)
+  JSFUNC(PackPixels)
 
   JSFUNC(Size)
   JSFUNC(Width)
