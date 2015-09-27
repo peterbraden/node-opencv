@@ -14,7 +14,7 @@ v8::Local<v8::Array> PixelPacker::BGRToRGB(cv::Mat * mat)
 		{
 
 			int index = (y * width + x) * 3;
-			cv::Vec3b pixel = mat->at<cv::Vec3b>(x, y);
+			cv::Vec3b pixel = mat->at<cv::Vec3b>(y, x);
 			int r = pixel[2];
 			int g = pixel[1];
 			int b = pixel[0];
@@ -41,7 +41,7 @@ v8::Local<v8::Array> PixelPacker::grayscaleToRGB(cv::Mat * mat)
 		{
 
 			int index = (y * width + x) * 3;
-			char pixel = mat->at<char>(x, y);
+			char pixel = mat->at<char>(y, x);
 			int r = pixel;
 			int g = pixel;
 			int b = pixel;
