@@ -249,32 +249,21 @@ NAN_METHOD(Matrix::PackPixels) {
 	SETUP_FUNCTION(Matrix)
 
 	int channels = self->mat.channels();
-	if (args.Length() == 1)
-	{
+	if (args.Length() == 1) {
 		v8::String::Utf8Value str(args[0]->ToString());
 		string f = *str;
-		if (f == "RGB")
-		{
-			if (channels >= 3)
-			{
+		if (f == "RGB") {
+			if (channels >= 3) {
 				NanReturnValue(PixelPacker::BGRToRGB(&self->mat));
-			}
-			else if (channels == 1)
-			{
+			} else if (channels == 1) {
 				NanReturnValue(PixelPacker::grayscaleToRGB(&self->mat));
-			}
-			else
-			{
+			} else {
 				NanReturnValue(NanNew<String>("Error: wrong number of channels"));
 			}
-		}
-		else
-		{
+		} else {
 			NanReturnValue(NanNew<String>("Unrecognized format"));
 		}
-	}
-	else
-	{
+	} else {
 		NanReturnValue(NanNew<String>("Need a format"));
 	}
 }

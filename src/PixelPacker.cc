@@ -1,18 +1,14 @@
 #include "PixelPacker.h"
 
-v8::Local<v8::Array> PixelPacker::BGRToRGB(cv::Mat * mat)
-{
+v8::Local<v8::Array> PixelPacker::BGRToRGB(cv::Mat * mat) {
 	int width = mat->size().width;
 	int height = mat->size().height;
 	int size = width * height * 3;
 
 	v8::Local < v8::Array > arr = NanNew<Array>(size);
 
-	for (int y = 0; y < height; y++)
-	{
-		for (int x = 0; x < width; x++)
-		{
-
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
 			int index = (y * width + x) * 3;
 			cv::Vec3b pixel = mat->at<cv::Vec3b>(y, x);
 			int r = pixel[2];
@@ -27,19 +23,15 @@ v8::Local<v8::Array> PixelPacker::BGRToRGB(cv::Mat * mat)
 	return arr;
 }
 
-v8::Local<v8::Array> PixelPacker::grayscaleToRGB(cv::Mat * mat)
-{
+v8::Local<v8::Array> PixelPacker::grayscaleToRGB(cv::Mat * mat) {
 	int width = mat->size().width;
 	int height = mat->size().height;
 	int size = width * height;
 
 	v8::Local < v8::Array > arr = NanNew<Array>(size);
 
-	for (int y = 0; y < height; y++)
-	{
-		for (int x = 0; x < width; x++)
-		{
-
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
 			int index = (y * width + x) * 3;
 			char pixel = mat->at<char>(y, x);
 			int r = pixel;
