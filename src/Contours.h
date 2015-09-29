@@ -2,13 +2,13 @@
 
 using namespace std;
 
-class Contour: public node::ObjectWrap {
+class Contour: public Nan::ObjectWrap {
 public:
   cv::Mat mat;
   vector<vector<cv::Point> > contours;
   vector<cv::Vec4i> hierarchy;
 
-  static Persistent<FunctionTemplate> constructor;
+  static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Handle<Object> target);
   static NAN_METHOD(New);
 

@@ -3,66 +3,66 @@
 #include <nan.h>
 
 void OpenCV::Init(Handle<Object> target) {
-  NanScope();
+  Nan::HandleScope scope;
 
   // Version string.
   char out [21];
   int n = sprintf(out, "%i.%i", CV_MAJOR_VERSION, CV_MINOR_VERSION);
-  target->Set(NanNew<String>("version"), NanNew<String>(out, n));
+  target->Set(Nan::New<String>("version").ToLocalChecked(), Nan::New<String>(out, n).ToLocalChecked());
 
-  NODE_SET_METHOD(target, "readImage", ReadImage);
+  Nan::SetMethod(target, "readImage", ReadImage);
 }
 
 NAN_METHOD(OpenCV::ReadImage) {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
 
   REQ_FUN_ARG(1, cb);
 
   Local<Value> argv[2];
-  argv[0] = NanNull();
+  argv[0] = Nan::Null();
 
-  Local<Object> im_h = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
-  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_h);
+  Local<Object> im_h = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
   argv[1] = im_h;
 
   try {
     cv::Mat mat;
 
-    if (args[0]->IsNumber() && args[1]->IsNumber()) {
+    if (info[0]->IsNumber() && info[1]->IsNumber()) {
       int width, height;
 
-      width = args[0]->Uint32Value();
-      height = args[1]->Uint32Value();
+      width = info[0]->Uint32Value();
+      height = info[1]->Uint32Value();
       mat = *(new cv::Mat(width, height, CV_64FC1));
 
-    } else if (args[0]->IsString()) {
-      std::string filename = std::string(*NanUtf8String(args[0]->ToString()));
+    } else if (info[0]->IsString()) {
+      std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
       mat = cv::imread(filename);
 
-    } else if (Buffer::HasInstance(args[0])) {
-      uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());
-      unsigned len = Buffer::Length(args[0]->ToObject());
+    } else if (Buffer::HasInstance(info[0])) {
+      uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
+      unsigned len = Buffer::Length(info[0]->ToObject());
 
       cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
       mat = cv::imdecode(*mbuf, -1);
 
       if (mat.empty()) {
-        argv[0] = NanError("Error loading file");
+        argv[0] = Nan::Error("Error loading file");
       }
     }
 
     img->mat = mat;
   } catch (cv::Exception& e) {
-    argv[0] = NanError(e.what());
-    argv[1] = NanNull();
+    argv[0] = Nan::Error(e.what());
+    argv[1] = Nan::Null();
   }
 
   TryCatch try_catch;
-  cb->Call(NanGetCurrentContext()->Global(), 2, argv);
+  cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
 
   if (try_catch.HasCaught()) {
     FatalException(try_catch);
   }
 
-  NanReturnUndefined();
+  return;
 }

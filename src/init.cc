@@ -16,7 +16,7 @@
 #include "BackgroundSubtractor.h"
 
 extern "C" void init(Handle<Object> target) {
-  NanScope();
+  Nan::HandleScope scope;
   OpenCV::Init(target);
 
   Point::Init(target);
