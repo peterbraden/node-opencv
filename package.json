@@ -32,7 +32,7 @@
   "main": "./lib/opencv",
   "repository": {
     "type": "git",
-    "url": "https://github.com/peterbraden/node-opencv.git"
+    "url": "https://github.com/keeganbrown/node-opencv.git"
   },
   "engines": {
     "node": ">=0.12"
