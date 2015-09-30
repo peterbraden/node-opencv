@@ -213,7 +213,10 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
   SETUP_FUNCTION(FaceRecognizerWrap)
 
   cv::Mat im = fromMatrixOrFilename(info[0]);  // TODO CHECK!
-  cv::cvtColor(im, im, CV_RGB2GRAY);
+  if (im.channels() == 3) {
+    cv::cvtColor(im, im, CV_RGB2GRAY);
+  }
+
   // int predictedLabel = self->rec->predict(im);
 
   int predictedLabel = -1;
