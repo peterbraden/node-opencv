@@ -6,7 +6,7 @@
 /**
  * Implementation of imgproc.hpp functions
  */
-class ImgProc: public Nan::ObjectWrap {
+class ImgProc: public node::ObjectWrap {
 public:
   static void Init(Handle<Object> target);
   static NAN_METHOD(Undistort);

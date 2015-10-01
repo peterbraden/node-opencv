@@ -24,5 +24,3 @@ apt-get -y install libgtk2.0-dev
 cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON ..
 make install
 cd /home/vagrant/$REPO_FOLDER/
-
-npm install node-gyp -g

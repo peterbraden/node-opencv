@@ -3,11 +3,11 @@
 
 #include "OpenCV.h"
 
-class StereoBM: public Nan::ObjectWrap {
+class StereoBM: public node::ObjectWrap {
 public:
   cv::StereoBM stereo;
 
-  static Nan::Persistent<FunctionTemplate> constructor;
+  static Persistent<FunctionTemplate> constructor;
   static void Init(Handle<Object> target);
   static NAN_METHOD(New);
 
@@ -18,11 +18,11 @@ public:
   ;
 };
 
-class StereoSGBM: public Nan::ObjectWrap {
+class StereoSGBM: public node::ObjectWrap {
 public:
   cv::StereoSGBM stereo;
 
-  static Nan::Persistent<FunctionTemplate> constructor;
+  static Persistent<FunctionTemplate> constructor;
   static void Init(Handle<Object> target);
   static NAN_METHOD(New);
 
@@ -37,11 +37,11 @@ public:
 
 struct CvStereoGCState;
 
-class StereoGC: public Nan::ObjectWrap {
+class StereoGC: public node::ObjectWrap {
 public:
   CvStereoGCState *stereo;
 
-  static Nan::Persistent<FunctionTemplate> constructor;
+  static Persistent<FunctionTemplate> constructor;
   static void Init(Handle<Object> target);
   static NAN_METHOD(New);
 

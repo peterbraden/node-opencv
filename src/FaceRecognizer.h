@@ -4,12 +4,12 @@
 
 #include "opencv2/contrib/contrib.hpp"
 
-class FaceRecognizerWrap: public Nan::ObjectWrap {
+class FaceRecognizerWrap: public node::ObjectWrap {
 public:
   cv::Ptr<cv::FaceRecognizer> rec;
   int typ;
 
-  static Nan::Persistent<FunctionTemplate> constructor;
+  static Persistent<FunctionTemplate> constructor;
   static void Init(Handle<Object> target);
   static NAN_METHOD(New);
 

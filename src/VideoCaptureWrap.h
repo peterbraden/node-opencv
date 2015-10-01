@@ -1,10 +1,10 @@
 #include "OpenCV.h"
 
-class VideoCaptureWrap: public Nan::ObjectWrap {
+class VideoCaptureWrap: public node::ObjectWrap {
 public:
   cv::VideoCapture cap;
 
-  static Nan::Persistent<FunctionTemplate> constructor;
+  static Persistent<FunctionTemplate> constructor;
   static void Init(Handle<Object> target);
   static NAN_METHOD(New);
 

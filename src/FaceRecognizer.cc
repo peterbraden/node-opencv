@@ -14,11 +14,11 @@
 cv::Mat fromMatrixOrFilename(Local<Value> v) {
   cv::Mat im;
   if (v->IsString()) {
-    std::string filename = std::string(*Nan::Utf8String(v->ToString()));
+    std::string filename = std::string(*NanAsciiString(v->ToString()));
     im = cv::imread(filename);
     // std::cout<< im.size();
   } else {
-    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject());
+    Matrix *img = ObjectWrap::Unwrap<Matrix>(v->ToObject());
     im = img->mat;
   }
   return im;
@@ -27,36 +27,36 @@ cv::Mat fromMatrixOrFilename(Local<Value> v) {
 void AsyncPredict(uv_work_t *req);
 void AfterAsyncPredict(uv_work_t *req);
 
-Nan::Persistent<FunctionTemplate> FaceRecognizerWrap::constructor;
+Persistent<FunctionTemplate> FaceRecognizerWrap::constructor;
 
 void FaceRecognizerWrap::Init(Handle<Object> target) {
-  Nan::HandleScope scope;
+  NanScope();
 
   // Constructor
-  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(FaceRecognizerWrap::New);
-  constructor.Reset(ctor);
+  Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(FaceRecognizerWrap::New);
+  NanAssignPersistent(constructor, ctor);
   ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("FaceRecognizer").ToLocalChecked());
+  ctor->SetClassName(NanNew("FaceRecognizer"));
 
-  Nan::SetMethod(ctor, "createLBPHFaceRecognizer", CreateLBPH);
-  Nan::SetMethod(ctor, "createEigenFaceRecognizer", CreateEigen);
-  Nan::SetMethod(ctor, "createFisherFaceRecognizer", CreateFisher);
+  NODE_SET_METHOD(ctor, "createLBPHFaceRecognizer", CreateLBPH);
+  NODE_SET_METHOD(ctor, "createEigenFaceRecognizer", CreateEigen);
+  NODE_SET_METHOD(ctor, "createFisherFaceRecognizer", CreateFisher);
 
-  Nan::SetPrototypeMethod(ctor, "trainSync", TrainSync);
-  Nan::SetPrototypeMethod(ctor, "updateSync", UpdateSync);
-  Nan::SetPrototypeMethod(ctor, "predictSync", PredictSync);
-  Nan::SetPrototypeMethod(ctor, "saveSync", SaveSync);
-  Nan::SetPrototypeMethod(ctor, "loadSync", LoadSync);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "trainSync", TrainSync);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "updateSync", UpdateSync);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "predictSync", PredictSync);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "saveSync", SaveSync);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "loadSync", LoadSync);
 
-  Nan::SetPrototypeMethod(ctor, "getMat", GetMat);
+  NODE_SET_PROTOTYPE_METHOD(ctor, "getMat", GetMat);
 
-  target->Set(Nan::New("FaceRecognizer").ToLocalChecked(), ctor->GetFunction());
+  target->Set(NanNew("FaceRecognizer"), ctor->GetFunction());
 };
 
 NAN_METHOD(FaceRecognizerWrap::New) {
-  Nan::HandleScope scope;
+  NanScope();
 
-  if (info.This()->InternalFieldCount() == 0) {
+  if (args.This()->InternalFieldCount() == 0) {
     JSTHROW_TYPE("Cannot Instantiate without new")
   }
 
@@ -64,12 +64,12 @@ NAN_METHOD(FaceRecognizerWrap::New) {
   cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(1, 8, 8, 8, 80.0);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
 
-  pt->Wrap(info.This());
-  info.GetReturnValue().Set(info.This());
+  pt->Wrap(args.This());
+  NanReturnValue(args.This());
 }
 
 NAN_METHOD(FaceRecognizerWrap::CreateLBPH) {
-  Nan::HandleScope scope;
+  NanScope();
 
   int radius = 1;
   int neighbors = 8;
@@ -83,17 +83,17 @@ NAN_METHOD(FaceRecognizerWrap::CreateLBPH) {
   INT_FROM_ARGS(grid_y, 3)
   DOUBLE_FROM_ARGS(threshold, 4)
 
-  Local<Object> n = Nan::New(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
+  Local<Object> n = NanNew(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
   cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(radius,
       neighbors, grid_x, grid_y, threshold);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
   pt->Wrap(n);
 
-  info.GetReturnValue().Set( n );
+  NanReturnValue( n );
 }
 
 NAN_METHOD(FaceRecognizerWrap::CreateEigen) {
-  Nan::HandleScope scope;
+  NanScope();
 
   int components = 0;
   double threshold = DBL_MAX;
@@ -101,17 +101,17 @@ NAN_METHOD(FaceRecognizerWrap::CreateEigen) {
   INT_FROM_ARGS(components, 0)
   DOUBLE_FROM_ARGS(threshold, 1)
 
-  Local<Object> n = Nan::New(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
+  Local<Object> n = NanNew(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
   cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer(components,
       threshold);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, EIGEN);
   pt->Wrap(n);
 
-  info.GetReturnValue().Set( n );
+  NanReturnValue( n );
 }
 
 NAN_METHOD(FaceRecognizerWrap::CreateFisher) {
-  Nan::HandleScope scope;
+  NanScope();
 
   int components = 0;
   double threshold = DBL_MAX;
@@ -119,14 +119,14 @@ NAN_METHOD(FaceRecognizerWrap::CreateFisher) {
   INT_FROM_ARGS(components, 0)
   DOUBLE_FROM_ARGS(threshold, 1)
 
-  Local<Object> n = Nan::New(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
+  Local<Object> n = NanNew(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
 
   cv::Ptr<cv::FaceRecognizer> f = cv::createFisherFaceRecognizer(components,
       threshold);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, FISHER);
   pt->Wrap(n);
 
-  info.GetReturnValue().Set( n );
+  NanReturnValue( n );
 }
 
 FaceRecognizerWrap::FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f,
@@ -135,16 +135,16 @@ FaceRecognizerWrap::FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f,
   typ = type;
 }
 
-Handle<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
+Handle<Value> UnwrapTrainingData(_NAN_METHOD_ARGS_TYPE args,
     cv::vector<cv::Mat>* images, cv::vector<int>* labels) {
 
-  if (info.Length() < 1 || !info[0]->IsArray()) {
+  if (args.Length() < 1 || !args[0]->IsArray()) {
     JSTHROW("FaceRecognizer.train takes a list of [<int> label, image] tuples")
   }
 
   // Iterate through [[label, image], ...] etc, and add matrix / label to vectors
-  // const Local<Array> tuples = v8::Array::Cast(*info[0]);
-  const Local<Array> tuples = Local<Array>::Cast(info[0]);
+  // const Local<Array> tuples = v8::Array::Cast(*args[0]);
+  const Local<Array> tuples = Local<Array>::Cast(args[0]);
 
   const uint32_t length = tuples->Length();
   for (uint32_t i=0; i<length; ++i) {
@@ -167,7 +167,7 @@ Handle<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
     labels->push_back(label);
     images->push_back(im);
   }
-  return Nan::Undefined();
+  return NanUndefined();
 }
 
 NAN_METHOD(FaceRecognizerWrap::TrainSync) {
@@ -176,14 +176,14 @@ NAN_METHOD(FaceRecognizerWrap::TrainSync) {
   cv::vector<cv::Mat> images;
   cv::vector<int> labels;
 
-  Handle<Value> exception = UnwrapTrainingData(info, &images, &labels);
+  Handle<Value> exception = UnwrapTrainingData(args, &images, &labels);
   if (!exception->IsUndefined()) {
-    info.GetReturnValue().Set(exception);  // FIXME: not too sure about returning exceptions like this
+    NanReturnValue(exception);  // FIXME: not too sure about returning exceptions like this
   }
 
   self->rec->train(images, labels);
 
-  return;
+  NanReturnUndefined();
 }
 
 NAN_METHOD(FaceRecognizerWrap::UpdateSync) {
@@ -199,20 +199,20 @@ NAN_METHOD(FaceRecognizerWrap::UpdateSync) {
   cv::vector<cv::Mat> images;
   cv::vector<int> labels;
 
-  Handle<Value> exception = UnwrapTrainingData(info, &images, &labels);
+  Handle<Value> exception = UnwrapTrainingData(args, &images, &labels);
   if (!exception->IsUndefined()) {
     JSTHROW(exception);
   }
 
   self->rec->update(images, labels);
 
-  return;
+  NanReturnUndefined();
 }
 
 NAN_METHOD(FaceRecognizerWrap::PredictSync) {
   SETUP_FUNCTION(FaceRecognizerWrap)
 
-  cv::Mat im = fromMatrixOrFilename(info[0]);  // TODO CHECK!
+  cv::Mat im = fromMatrixOrFilename(args[0]);  // TODO CHECK!
   cv::cvtColor(im, im, CV_RGB2GRAY);
   // int predictedLabel = self->rec->predict(im);
 
@@ -220,46 +220,46 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
   double confidence = 0.0;
   self->rec->predict(im, predictedLabel, confidence);
 
-  v8::Local<v8::Object> res = Nan::New<Object>();
-  res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
-  res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
+  v8::Local<v8::Object> res = NanNew<Object>();
+  res->Set(NanNew("id"), NanNew<Number>(predictedLabel));
+  res->Set(NanNew("confidence"), NanNew<Number>(confidence));
 
-  info.GetReturnValue().Set(res);
+  NanReturnValue(res);
 }
 
 NAN_METHOD(FaceRecognizerWrap::SaveSync) {
   SETUP_FUNCTION(FaceRecognizerWrap)
-  if (!info[0]->IsString()) {
+  if (!args[0]->IsString()) {
     JSTHROW("Save takes a filename")
   }
-  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+  std::string filename = std::string(*NanAsciiString(args[0]->ToString()));
   self->rec->save(filename);
-  return;
+  NanReturnUndefined();
 }
 
 NAN_METHOD(FaceRecognizerWrap::LoadSync) {
   SETUP_FUNCTION(FaceRecognizerWrap)
-  if (!info[0]->IsString()) {
+  if (!args[0]->IsString()) {
     JSTHROW("Load takes a filename")
   }
-  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+  std::string filename = std::string(*NanAsciiString(args[0]->ToString()));
   self->rec->load(filename);
-  return;
+  NanReturnUndefined();
 }
 
 NAN_METHOD(FaceRecognizerWrap::GetMat) {
   SETUP_FUNCTION(FaceRecognizerWrap)
-  if (!info[0]->IsString()) {
+  if (!args[0]->IsString()) {
     JSTHROW("getMat takes a key")
   }
-  std::string key = std::string(*Nan::Utf8String(info[0]->ToString()));
+  std::string key = std::string(*NanAsciiString(args[0]->ToString()));
   cv::Mat m = self->rec->getMat(key);
 
-  Local<Object> im = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
-  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im);
+  Local<Object> im = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *img = ObjectWrap::Unwrap<Matrix>(im);
   img->mat = m;
 
-  info.GetReturnValue().Set(im);
+  NanReturnValue(im);
 }
 
 #endif // End version > 2.4

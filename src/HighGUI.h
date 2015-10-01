@@ -1,11 +1,11 @@
 #include "OpenCV.h"
 
-class NamedWindow: public Nan::ObjectWrap {
+class NamedWindow: public node::ObjectWrap {
 public:
   std::string winname;
   int flags;
 
-  static Nan::Persistent<FunctionTemplate> constructor;
+  static Persistent<FunctionTemplate> constructor;
   static void Init(Handle<Object> target);
   static NAN_METHOD(New);
 

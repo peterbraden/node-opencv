@@ -6,15 +6,15 @@
 #if ((CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >=4))
 
 void Features::Init(Handle<Object> target) {
-  Nan::HandleScope scope;
+  NanScope();
 
-  Nan::SetMethod(target, "ImageSimilarity", Similarity);
+  NODE_SET_METHOD(target, "ImageSimilarity", Similarity);
 }
 
-class AsyncDetectSimilarity: public Nan::AsyncWorker {
+class AsyncDetectSimilarity: public NanAsyncWorker {
 public:
-  AsyncDetectSimilarity(Nan::Callback *callback, cv::Mat image1, cv::Mat image2) :
-      Nan::AsyncWorker(callback),
+  AsyncDetectSimilarity(NanCallback *callback, cv::Mat image1, cv::Mat image2) :
+      NanAsyncWorker(callback),
       image1(image1),
       image2(image2),
       dissimilarity(0) {
@@ -80,12 +80,12 @@ public:
   }
 
   void HandleOKCallback() {
-    Nan::HandleScope scope;
+    NanScope();
 
     Handle<Value> argv[2];
 
-    argv[0] = Nan::Null();
-    argv[1] = Nan::New<Number>(dissimilarity);
+    argv[0] = NanNull();
+    argv[1] = NanNew<Number>(dissimilarity);
 
     callback->Call(2, argv);
   }
@@ -97,17 +97,17 @@ private:
 };
 
 NAN_METHOD(Features::Similarity) {
-  Nan::HandleScope scope;
+  NanScope();
 
   REQ_FUN_ARG(2, cb);
 
-  cv::Mat image1 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject())->mat;
-  cv::Mat image2 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject())->mat;
+  cv::Mat image1 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject())->mat;
+  cv::Mat image2 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject())->mat;
 
-  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+  NanCallback *callback = new NanCallback(cb.As<Function>());
 
-  Nan::AsyncQueueWorker( new AsyncDetectSimilarity(callback, image1, image2) );
-  return;
+  NanAsyncQueueWorker( new AsyncDetectSimilarity(callback, image1, image2) );
+  NanReturnUndefined();
 }
 
 #endif
