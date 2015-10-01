@@ -1,72 +1,72 @@
 #include "Point.h"
 #include "OpenCV.h"
 
-v8::Persistent<FunctionTemplate> Point::constructor;
+Nan::Persistent<FunctionTemplate> Point::constructor;
 
 void Point::Init(Handle<Object> target) {
-  NanScope();
+  Nan::HandleScope scope;
 
   // Constructor
-  Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(Point::New);
-  NanAssignPersistent(constructor, ctor);
+  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(Point::New);
+  constructor.Reset(ctor);
   ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(NanNew("Point"));
+  ctor->SetClassName(Nan::New("Point").ToLocalChecked());
 
   // Prototype
   Local<ObjectTemplate> proto = ctor->PrototypeTemplate();
-  proto->SetAccessor(NanNew("x"), GetX, RaiseImmutable);
-  proto->SetAccessor(NanNew("y"), GetY, RaiseImmutable);
+  Nan::SetAccessor(proto, Nan::New("x").ToLocalChecked(), GetX, RaiseImmutable);
+  Nan::SetAccessor(proto, Nan::New("y").ToLocalChecked(), GetY, RaiseImmutable);
 
-  NODE_SET_PROTOTYPE_METHOD(ctor, "dot", Dot);
+  Nan::SetPrototypeMethod(ctor, "dot", Dot);
 
-  target->Set(NanNew("Point"), ctor->GetFunction());
+  target->Set(Nan::New("Point").ToLocalChecked(), ctor->GetFunction());
 };
 
 NAN_METHOD(Point::New) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  if (args.This()->InternalFieldCount() == 0) {
-    return NanThrowTypeError("Cannot Instantiate without new");
+  if (info.This()->InternalFieldCount() == 0) {
+    return Nan::ThrowTypeError("Cannot Instantiate without new");
   }
 
   double x = 0, y = 0;
-  if (args[0]->IsNumber()) {
-    x = args[0]->NumberValue();
+  if (info[0]->IsNumber()) {
+    x = info[0]->NumberValue();
   }
-  if (args[1]->IsNumber()) {
-    y = args[1]->NumberValue();
+  if (info[1]->IsNumber()) {
+    y = info[1]->NumberValue();
   }
   Point *pt = new Point(x, y);
-  pt->Wrap(args.This());
-  NanReturnValue(args.This());
+  pt->Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_GETTER(Point::GetX) {
-  NanScope();
-  Point *pt = ObjectWrap::Unwrap<Point>(args.This());
-  NanReturnValue(NanNew<Number>(pt->point.x));
+  Nan::HandleScope scope;
+  Point *pt = Nan::ObjectWrap::Unwrap<Point>(info.This());
+  info.GetReturnValue().Set(Nan::New<Number>(pt->point.x));
 }
 
 NAN_GETTER(Point::GetY) {
-  NanScope();
-  Point *pt = ObjectWrap::Unwrap<Point>(args.This());
-  NanReturnValue(NanNew<Number>(pt->point.y));
+  Nan::HandleScope scope;
+  Point *pt = Nan::ObjectWrap::Unwrap<Point>(info.This());
+  info.GetReturnValue().Set(Nan::New<Number>(pt->point.y));
 }
 
 NAN_SETTER(Point::RaiseImmutable) {
-  NanThrowTypeError("Point is immutable");
+  Nan::ThrowTypeError("Point is immutable");
 }
 
 NAN_METHOD(Point::Dot) {
-  NanScope();
-  Point *p1 = ObjectWrap::Unwrap<Point>(args.This());
-  Point *p2 = ObjectWrap::Unwrap<Point>(args[0]->ToObject());
+  Nan::HandleScope scope;
+  Point *p1 = Nan::ObjectWrap::Unwrap<Point>(info.This());
+  Point *p2 = Nan::ObjectWrap::Unwrap<Point>(info[0]->ToObject());
 
   // Since V 2.3 Native Dot no longer supported
-  NanReturnValue(NanNew<Number>(p1->point.x * p2->point.x + p1->point.y * p2->point.y));
+  info.GetReturnValue().Set(Nan::New<Number>(p1->point.x * p2->point.x + p1->point.y * p2->point.y));
 }
 
 Point::Point(double x, double y) :
-    ObjectWrap() {
+    Nan::ObjectWrap() {
   point = cvPoint2D32f(x, y);
 }
