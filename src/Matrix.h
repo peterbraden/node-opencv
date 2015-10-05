@@ -5,7 +5,7 @@ public:
 
   cv::Mat mat;
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
   Matrix();
   Matrix(cv::Mat other, cv::Rect roi);

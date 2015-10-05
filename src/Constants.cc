@@ -7,7 +7,7 @@
 #define CONST_ENUM(C) \
   obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)(cv::C)));
 
-void Constants::Init(Handle<Object> target) {
+void Constants::Init(Local<Object> target) {
   Nan::Persistent<Object> inner;
   Local<Object> obj = Nan::New<Object>();
   inner.Reset(obj);

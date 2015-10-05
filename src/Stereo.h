@@ -8,7 +8,7 @@ public:
   cv::StereoBM stereo;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   StereoBM(int preset = cv::StereoBM::BASIC_PRESET, int ndisparities = 0,
@@ -23,7 +23,7 @@ public:
   cv::StereoSGBM stereo;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   StereoSGBM();
@@ -42,7 +42,7 @@ public:
   CvStereoGCState *stereo;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   StereoGC(int numberOfDisparities = 16, int maxIterations = 2);

@@ -6,7 +6,7 @@ public:
   int flags;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   NamedWindow(const std::string& winname, int flags);

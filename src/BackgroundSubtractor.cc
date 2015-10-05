@@ -7,7 +7,7 @@
 
 Nan::Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
 
-void BackgroundSubtractorWrap::Init(Handle<Object> target) {
+void BackgroundSubtractorWrap::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   // Constructor

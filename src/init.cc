@@ -15,7 +15,7 @@
 #include "Stereo.h"
 #include "BackgroundSubtractor.h"
 
-extern "C" void init(Handle<Object> target) {
+extern "C" void init(Local<Object> target) {
   Nan::HandleScope scope;
   OpenCV::Init(target);
 

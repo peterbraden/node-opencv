@@ -13,7 +13,7 @@ public:
   cv::Rect prev_rect;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   TrackedObject(cv::Mat image, cv::Rect rect, int channel);

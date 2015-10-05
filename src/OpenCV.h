@@ -44,7 +44,7 @@ using namespace node;
 
 class OpenCV: public Nan::ObjectWrap {
 public:
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
 
   static NAN_METHOD(ReadImage);
 };

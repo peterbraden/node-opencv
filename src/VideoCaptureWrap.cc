@@ -16,7 +16,7 @@ struct videocapture_baton {
   uv_work_t request;
 };
 
-void VideoCaptureWrap::Init(Handle<Object> target) {
+void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   //Class

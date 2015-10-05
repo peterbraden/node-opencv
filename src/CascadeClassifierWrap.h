@@ -5,7 +5,7 @@ public:
   cv::CascadeClassifier cc;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   CascadeClassifierWrap(v8::Value* fileName);

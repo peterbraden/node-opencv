@@ -2,7 +2,7 @@
 #include "Matrix.h"
 #include <nan.h>
 
-void OpenCV::Init(Handle<Object> target) {
+void OpenCV::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   // Version string.

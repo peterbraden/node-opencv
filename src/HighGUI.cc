@@ -4,7 +4,7 @@
 
 Nan::Persistent<FunctionTemplate> NamedWindow::constructor;
 
-void NamedWindow::Init(Handle<Object> target) {
+void NamedWindow::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   // Constructor

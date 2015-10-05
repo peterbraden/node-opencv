@@ -9,7 +9,7 @@ public:
   cv::Ptr<cv::BackgroundSubtractor> subtractor;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   BackgroundSubtractorWrap(cv::Ptr<cv::BackgroundSubtractor> bg);

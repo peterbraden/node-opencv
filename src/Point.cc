@@ -3,7 +3,7 @@
 
 Nan::Persistent<FunctionTemplate> Point::constructor;
 
-void Point::Init(Handle<Object> target) {
+void Point::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   // Constructor

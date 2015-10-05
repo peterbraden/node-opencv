@@ -1,7 +1,7 @@
 #include "ImgProc.h"
 #include "Matrix.h"
 
-void ImgProc::Init(Handle<Object> target) {
+void ImgProc::Init(Local<Object> target) {
   Nan::Persistent<Object> inner;
   Local<Object> obj = Nan::New<Object>();
   inner.Reset(obj);

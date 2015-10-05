@@ -5,7 +5,7 @@
 
 Nan::Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
 
-void CascadeClassifierWrap::Init(Handle<Object> target) {
+void CascadeClassifierWrap::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate> (CascadeClassifierWrap::New);

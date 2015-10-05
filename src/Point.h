@@ -6,7 +6,7 @@ class Point: public Nan::ObjectWrap {
 public:
   CvPoint2D32f point;
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
   Point(double x, double y);
 

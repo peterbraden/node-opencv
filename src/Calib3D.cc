@@ -10,12 +10,12 @@ inline Local<Object> matrixFromMat(cv::Mat &input) {
   return matrixWrap;
 }
 
-inline cv::Mat matFromMatrix(Handle<Value> matrix) {
+inline cv::Mat matFromMatrix(Local<Value> matrix) {
   Matrix* m = Nan::ObjectWrap::Unwrap<Matrix>(matrix->ToObject());
   return m->mat;
 }
 
-inline cv::Size sizeFromArray(Handle<Value> jsArray) {
+inline cv::Size sizeFromArray(Local<Value> jsArray) {
   cv::Size patternSize;
 
   if (jsArray->IsArray()) {
@@ -30,7 +30,7 @@ inline cv::Size sizeFromArray(Handle<Value> jsArray) {
   return patternSize;
 }
 
-inline std::vector<cv::Point2f> points2fFromArray(Handle<Value> array) {
+inline std::vector<cv::Point2f> points2fFromArray(Local<Value> array) {
   std::vector<cv::Point2f> points;
   if (array->IsArray()) {
     Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
@@ -48,7 +48,7 @@ inline std::vector<cv::Point2f> points2fFromArray(Handle<Value> array) {
   return points;
 }
 
-inline std::vector<cv::Point3f> points3fFromArray(Handle<Value> array) {
+inline std::vector<cv::Point3f> points3fFromArray(Local<Value> array) {
   std::vector<cv::Point3f> points;
   if (array->IsArray()) {
     Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
@@ -68,7 +68,7 @@ inline std::vector<cv::Point3f> points3fFromArray(Handle<Value> array) {
 }
 
 inline std::vector<std::vector<cv::Point2f> > points2fFromArrayOfArrays(
-    Handle<Value> array) {
+    Local<Value> array) {
   std::vector<std::vector<cv::Point2f> > points;
   if (array->IsArray()) {
     Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
@@ -84,7 +84,7 @@ inline std::vector<std::vector<cv::Point2f> > points2fFromArrayOfArrays(
 }
 
 inline std::vector<std::vector<cv::Point3f> > points3fFromArrayOfArrays(
-    Handle<Value> array) {
+    Local<Value> array) {
   std::vector<std::vector<cv::Point3f> > points;
   if (array->IsArray()) {
     Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
@@ -99,7 +99,7 @@ inline std::vector<std::vector<cv::Point3f> > points3fFromArrayOfArrays(
   return points;
 }
 
-void Calib3D::Init(Handle<Object> target) {
+void Calib3D::Init(Local<Object> target) {
   Nan::Persistent<Object> inner;
   Local<Object> obj = Nan::New<Object>();
   inner.Reset(obj);

@@ -8,7 +8,7 @@
  */
 class Calib3D: public Nan::ObjectWrap {
 public:
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(FindChessboardCorners);
   static NAN_METHOD(DrawChessboardCorners);
   static NAN_METHOD(CalibrateCamera);

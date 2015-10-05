@@ -8,7 +8,7 @@
 class Features: public Nan::ObjectWrap {
 public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
 
   static NAN_METHOD(Similarity);
 };

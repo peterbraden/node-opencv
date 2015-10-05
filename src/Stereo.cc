@@ -6,7 +6,7 @@
 
 Nan::Persistent<FunctionTemplate> StereoBM::constructor;
 
-void StereoBM::Init(Handle<Object> target) {
+void StereoBM::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(StereoBM::New);
@@ -98,7 +98,7 @@ NAN_METHOD(StereoBM::Compute) {
 // Semi-Global Block matching
 Nan::Persistent<FunctionTemplate> StereoSGBM::constructor;
 
-void StereoSGBM::Init(Handle<Object> target) {
+void StereoSGBM::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(StereoSGBM::New);
@@ -233,7 +233,7 @@ NAN_METHOD(StereoSGBM::Compute) {
 
 Nan::Persistent<FunctionTemplate> StereoGC::constructor;
 
-void StereoGC::Init(Handle<Object> target) {
+void StereoGC::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(StereoGC::New);

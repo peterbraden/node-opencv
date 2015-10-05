@@ -9,7 +9,7 @@ public:
   vector<cv::Vec4i> hierarchy;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   Contour();

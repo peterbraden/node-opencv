@@ -6,7 +6,7 @@
 
 Nan::Persistent<FunctionTemplate> Contour::constructor;
 
-void Contour::Init(Handle<Object> target) {
+void Contour::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   // Class/contructor
@@ -331,21 +331,21 @@ NAN_METHOD(Contour::Deserialize) {
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
 
-  Handle<Object> data = Handle<Object>::Cast(info[0]);
+  Local<Object> data = Local<Object>::Cast(info[0]);
 
-  Handle<Array> contours_data = Handle<Array>::Cast(data->Get(Nan::New<String>("contours").ToLocalChecked()));
-  Handle<Array> hierarchy_data = Handle<Array>::Cast(data->Get(Nan::New<String>("hierarchy").ToLocalChecked()));
+  Local<Array> contours_data = Local<Array>::Cast(data->Get(Nan::New<String>("contours").ToLocalChecked()));
+  Local<Array> hierarchy_data = Local<Array>::Cast(data->Get(Nan::New<String>("hierarchy").ToLocalChecked()));
 
   vector<vector<cv::Point> > contours_res;
   int contours_length = contours_data->Length();
 
   for (int i = 0; i < contours_length; i++) {
-    Handle<Array> contour_data = Handle<Array>::Cast(contours_data->Get(i));
+    Local<Array> contour_data = Local<Array>::Cast(contours_data->Get(i));
     vector<cv::Point> points;
 
     int contour_length = contour_data->Length();
     for (int j = 0; j < contour_length; j++) {
-      Handle<Array> point_data = Handle<Array>::Cast(contour_data->Get(j));
+      Local<Array> point_data = Local<Array>::Cast(contour_data->Get(j));
       int x = point_data->Get(0)->IntegerValue();
       int y = point_data->Get(1)->IntegerValue();
       points.push_back(cv::Point(x, y));
@@ -358,7 +358,7 @@ NAN_METHOD(Contour::Deserialize) {
   int hierarchy_length = hierarchy_data->Length();
 
   for (int i = 0; i < hierarchy_length; i++) {
-    Handle<Array> contour_data = Handle<Array>::Cast(hierarchy_data->Get(i));
+    Local<Array> contour_data = Local<Array>::Cast(hierarchy_data->Get(i));
     int a = contour_data->Get(0)->IntegerValue();
     int b = contour_data->Get(1)->IntegerValue();
     int c = contour_data->Get(2)->IntegerValue();

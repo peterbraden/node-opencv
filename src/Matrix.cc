@@ -9,7 +9,7 @@ cv::Scalar setColor(Local<Object> objColor);
 cv::Point setPoint(Local<Object> objPoint);
 cv::Rect* setRect(Local<Object> objRect, cv::Rect &result);
 
-void Matrix::Init(Handle<Object> target) {
+void Matrix::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   //Class
@@ -312,7 +312,7 @@ NAN_METHOD(Matrix::GetData) {
 
   v8::Local<v8::Object> globalObj = Nan::GetCurrentContext()->Global();
   v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
-  v8::Handle<v8::Value> constructorArgs[3] = {buf, Nan::New<v8::Integer>((unsigned) size), Nan::New<v8::Integer>(0)};
+  v8::Local<v8::Value> constructorArgs[3] = {buf, Nan::New<v8::Integer>((unsigned) size), Nan::New<v8::Integer>(0)};
   v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
   info.GetReturnValue().Set(actualBuffer);
@@ -566,7 +566,7 @@ NAN_METHOD(Matrix::ToBuffer) {
   // See if the options argument is passed
   if ((info.Length() > 0) && (info[0]->IsObject())) {
     // Get this options argument
-    v8::Handle < v8::Object > options = v8::Handle<v8::Object>::Cast(info[0]);
+    v8::Handle < v8::Object > options = v8::Local<v8::Object>::Cast(info[0]);
     // If the extension (image format) is provided
     if (options->Has(Nan::New<String>("ext").ToLocalChecked())) {
       v8::String::Utf8Value str(
@@ -600,7 +600,7 @@ NAN_METHOD(Matrix::ToBuffer) {
   v8::Local < v8::Object > globalObj = Nan::GetCurrentContext()->Global();
   v8::Local < v8::Function > bufferConstructor = v8::Local < v8::Function
       > ::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
-  v8::Handle<v8::Value> constructorArgs[3] =
+  v8::Local<v8::Value> constructorArgs[3] =
       {buf, Nan::New<v8::Integer>((unsigned)vec.size()), Nan::New<v8::Integer>(0)};
   v8::Local < v8::Object > actualBuffer = bufferConstructor->NewInstance(3,
       constructorArgs);
@@ -637,7 +637,7 @@ public:
 
     v8::Local<v8::Object> globalObj = Nan::GetCurrentContext()->Global();
     v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
-    v8::Handle<v8::Value> constructorArgs[3] = {buf, Nan::New<v8::Integer>((unsigned)res.size()), Nan::New<v8::Integer>(0)};
+    v8::Local<v8::Value> constructorArgs[3] = {buf, Nan::New<v8::Integer>((unsigned)res.size()), Nan::New<v8::Integer>(0)};
     v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
 
     Local<Value> argv[] = {
@@ -671,7 +671,7 @@ NAN_METHOD(Matrix::ToBufferAsync) {
   // See if the options argument is passed
   if ((info.Length() > 1) && (info[1]->IsObject())) {
     // Get this options argument
-    v8::Handle < v8::Object > options = v8::Handle<v8::Object>::Cast(info[1]);
+    v8::Handle < v8::Object > options = v8::Local<v8::Object>::Cast(info[1]);
     // If the extension (image format) is provided
     if (options->Has(Nan::New<String>("ext").ToLocalChecked())) {
       v8::String::Utf8Value str(
@@ -715,7 +715,7 @@ NAN_METHOD(Matrix::Ellipse) {
   int shift = 0;
 
   if (info[0]->IsObject()) {
-    v8::Handle < v8::Object > options = v8::Handle<v8::Object>::Cast(info[0]);
+    v8::Handle < v8::Object > options = v8::Local<v8::Object>::Cast(info[0]);
     if (options->Has(Nan::New<String>("center").ToLocalChecked())) {
       Local < Object > center =
           options->Get(Nan::New<String>("center").ToLocalChecked())->ToObject();
@@ -1818,7 +1818,7 @@ NAN_METHOD(Matrix::Merge) {
   if (!info[0]->IsArray()) {
     Nan::ThrowTypeError("The argument must be an array");
   }
-  v8::Handle<v8::Array> jsChannels = v8::Handle<v8::Array>::Cast(info[0]);
+  v8::Local<v8::Array> jsChannels = v8::Local<v8::Array>::Cast(info[0]);
 
   unsigned int L = jsChannels->Length();
   vector<cv::Mat> vChannels(L);

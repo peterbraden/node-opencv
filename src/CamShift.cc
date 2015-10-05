@@ -10,7 +10,7 @@
 
 Nan::Persistent<FunctionTemplate> TrackedObject::constructor;
 
-void TrackedObject::Init(Handle<Object> target) {
+void TrackedObject::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   // Constructor
