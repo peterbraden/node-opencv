@@ -82,7 +82,7 @@ public:
   void HandleOKCallback() {
     Nan::HandleScope scope;
 
-    Handle<Value> argv[2];
+    Local<Value> argv[2];
 
     argv[0] = Nan::Null();
     argv[1] = Nan::New<Number>(dissimilarity);

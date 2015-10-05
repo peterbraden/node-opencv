@@ -10,7 +10,7 @@ public:
   int typ;
 
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f, int type);

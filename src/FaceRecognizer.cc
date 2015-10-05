@@ -29,7 +29,7 @@ void AfterAsyncPredict(uv_work_t *req);
 
 Nan::Persistent<FunctionTemplate> FaceRecognizerWrap::constructor;
 
-void FaceRecognizerWrap::Init(Handle<Object> target) {
+void FaceRecognizerWrap::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
   // Constructor
@@ -135,7 +135,7 @@ FaceRecognizerWrap::FaceRecognizerWrap(cv::Ptr<cv::FaceRecognizer> f,
   typ = type;
 }
 
-Handle<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
+Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
     cv::vector<cv::Mat>* images, cv::vector<int>* labels) {
 
   if (info.Length() < 1 || !info[0]->IsArray()) {
@@ -176,7 +176,7 @@ NAN_METHOD(FaceRecognizerWrap::TrainSync) {
   cv::vector<cv::Mat> images;
   cv::vector<int> labels;
 
-  Handle<Value> exception = UnwrapTrainingData(info, &images, &labels);
+  Local<Value> exception = UnwrapTrainingData(info, &images, &labels);
   if (!exception->IsUndefined()) {
     info.GetReturnValue().Set(exception);  // FIXME: not too sure about returning exceptions like this
   }
@@ -199,7 +199,7 @@ NAN_METHOD(FaceRecognizerWrap::UpdateSync) {
   cv::vector<cv::Mat> images;
   cv::vector<int> labels;
 
-  Handle<Value> exception = UnwrapTrainingData(info, &images, &labels);
+  Local<Value> exception = UnwrapTrainingData(info, &images, &labels);
   if (!exception->IsUndefined()) {
     JSTHROW(exception);
   }

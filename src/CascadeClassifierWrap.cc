@@ -82,7 +82,7 @@ public:
     Nan::HandleScope scope;
     //  this->matrix->Unref();
 
-    Handle < Value > argv[2];
+    Local < Value > argv[2];
     v8::Local < v8::Array > arr = Nan::New < v8::Array > (this->res.size());
 
     for (unsigned int i = 0; i < this->res.size(); i++) {
