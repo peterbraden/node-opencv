@@ -97,10 +97,10 @@ public:
     argv[0] = Nan::Null();
     argv[1] = arr;
 
-    TryCatch try_catch;
+    Nan::TryCatch try_catch;
     callback->Call(2, argv);
     if (try_catch.HasCaught()) {
-      FatalException(try_catch);
+      Nan::FatalException(try_catch);
     }
   }
 

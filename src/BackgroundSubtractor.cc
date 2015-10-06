@@ -104,11 +104,11 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     argv[0] = Nan::Null();
     argv[1] = fgMask;
 
-    TryCatch try_catch;
+    Nan::TryCatch try_catch;
     cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
 
     if (try_catch.HasCaught()) {
-      FatalException(try_catch);
+      Nan::FatalException(try_catch);
     }
     return;
   } catch (cv::Exception& e) {

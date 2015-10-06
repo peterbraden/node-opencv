@@ -57,11 +57,11 @@ NAN_METHOD(OpenCV::ReadImage) {
     argv[1] = Nan::Null();
   }
 
-  TryCatch try_catch;
+  Nan::TryCatch try_catch;
   cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
 
   if (try_catch.HasCaught()) {
-    FatalException(try_catch);
+    Nan::FatalException(try_catch);
   }
 
   return;
