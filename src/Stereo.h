@@ -3,12 +3,12 @@
 
 #include "OpenCV.h"
 
-class StereoBM: public node::ObjectWrap {
+class StereoBM: public Nan::ObjectWrap {
 public:
   cv::StereoBM stereo;
 
-  static Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   StereoBM(int preset = cv::StereoBM::BASIC_PRESET, int ndisparities = 0,
@@ -18,12 +18,12 @@ public:
   ;
 };
 
-class StereoSGBM: public node::ObjectWrap {
+class StereoSGBM: public Nan::ObjectWrap {
 public:
   cv::StereoSGBM stereo;
 
-  static Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   StereoSGBM();
@@ -37,12 +37,12 @@ public:
 
 struct CvStereoGCState;
 
-class StereoGC: public node::ObjectWrap {
+class StereoGC: public Nan::ObjectWrap {
 public:
   CvStereoGCState *stereo;
 
-  static Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   StereoGC(int numberOfDisparities = 16, int maxIterations = 2);

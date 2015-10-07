@@ -1,7 +1,7 @@
 #include "OpenCV.h"
 
 
-class TrackedObject: public node::ObjectWrap {
+class TrackedObject: public Nan::ObjectWrap {
 public:
   int channel;
   cv::Mat hsv;
@@ -12,8 +12,8 @@ public:
   cv::Mat hist;
   cv::Rect prev_rect;
 
-  static Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   TrackedObject(cv::Mat image, cv::Rect rect, int channel);

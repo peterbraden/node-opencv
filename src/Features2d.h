@@ -5,10 +5,10 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
-class Features: public node::ObjectWrap {
+class Features: public Nan::ObjectWrap {
 public:
-  static Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void Init(Local<Object> target);
 
   static NAN_METHOD(Similarity);
 };
