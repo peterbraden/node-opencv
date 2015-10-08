@@ -1638,7 +1638,7 @@ NAN_METHOD(Matrix::Threshold) {
     Nan::Utf8String typstr(info[2]);
 
     if (strcmp(*typstr, "Binary") == 0) {
-      typ = 0;
+      // Uses default value
     }
     else if (strcmp(*typstr, "Binary Inverted") == 0) {
       typ = 1;
