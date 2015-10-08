@@ -1635,7 +1635,7 @@ NAN_METHOD(Matrix::Threshold) {
   double maxVal = info[1]->NumberValue();
   int typ = cv::THRESH_BINARY;
 
-  if (info.Length() == 3) {
+  if (info.Length() >= 3) {
     Nan::Utf8String typstr(info[2]);
 
     if (strcmp(*typstr, "Binary") == 0) {
@@ -1662,6 +1662,29 @@ NAN_METHOD(Matrix::Threshold) {
       char errorMessage[strlen(typeString) + strlen(text) + 2];
       strcpy(errorMessage, "\"");
       strcat(errorMessage, typeString);
+      strcat(errorMessage, text);
+
+      Nan::ThrowError(errorMessage);
+      return;
+    }
+  }
+
+  if (info.Length() >= 4) {
+    Nan::Utf8String algorithm(info[3]);
+
+    if (strcmp(*algorithm, "Simple") == 0) {
+        // Uses default
+    }
+    else if (strcmp(*algorithm, "Otsu") == 0) {
+      typ += 8;
+    }
+    else {
+      char *algo = *algorithm;
+      char text[] = "\" is no supported threshold algorithm. "
+        "Use \"Simple\" (default) or \"Otsu\".";
+      char errorMessage[strlen(algo) + strlen(text) + 2];
+      strcpy(errorMessage, "\"");
+      strcat(errorMessage, algo);
       strcat(errorMessage, text);
 
       Nan::ThrowError(errorMessage);
