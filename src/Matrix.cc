@@ -1785,6 +1785,8 @@ NAN_METHOD(Matrix::CvtColor) {
     iTransform = CV_BayerRG2BGR;
   } else if (!strcmp(sTransform, "CV_BayerGR2BGR")) {
     iTransform = CV_BayerGR2BGR;
+  } else if (!strcmp(sTransform, "CV_BGR2RGB")) {
+    iTransform = CV_BGR2RGB;
   } else {
     iTransform = 0;  // to avoid compiler warning
     Nan::ThrowTypeError("Conversion code is unsupported");
