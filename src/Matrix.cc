@@ -1632,24 +1632,24 @@ NAN_METHOD(Matrix::Threshold) {
 
   double threshold = info[0]->NumberValue();
   double maxVal = info[1]->NumberValue();
-
   int typ = cv::THRESH_BINARY;
+
   if (info.Length() == 3) {
-    //    typ = info[2]->IntegerValue();
     Nan::Utf8String typstr(info[2]);
+
     if (strcmp(*typstr, "Binary") == 0) {
       typ = 0;
     }
-    if (strcmp(*typstr, "Binary Inverted") == 0) {
+    else if (strcmp(*typstr, "Binary Inverted") == 0) {
       typ = 1;
     }
-    if (strcmp(*typstr, "Threshold Truncated") == 0) {
+    else if (strcmp(*typstr, "Threshold Truncated") == 0) {
       typ = 2;
     }
-    if (strcmp(*typstr, "Threshold to Zero") == 0) {
+    else if (strcmp(*typstr, "Threshold to Zero") == 0) {
       typ = 3;
     }
-    if (strcmp(*typstr, "Threshold to Zero Inverted") == 0) {
+    else if (strcmp(*typstr, "Threshold to Zero Inverted") == 0) {
       typ = 4;
     }
   }
