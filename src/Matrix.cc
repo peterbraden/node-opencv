@@ -998,10 +998,7 @@ NAN_METHOD(Matrix::ConvertGrayscale) {
     Nan::ThrowError("Image is no 3-channel");
   }
 
-  cv::Mat gray;
-
-  cv::cvtColor(self->mat, gray, CV_BGR2GRAY);
-  gray.copyTo(self->mat);
+  cv::cvtColor(self->mat, self->mat, CV_BGR2GRAY);
 
   info.GetReturnValue().Set(Nan::Null());
 }
