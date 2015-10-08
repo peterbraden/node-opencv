@@ -3,7 +3,7 @@
 [![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.png)](http://travis-ci.org/peterbraden/node-opencv)
 
 
-[OpenCV](http://opencv.willowgarage.com/wiki/) bindings for Node.js. OpenCV is
+[OpenCV](http://opencv.org) bindings for Node.js. OpenCV is
 the defacto computer vision library - by interfacing with it natively in node,
 we get powerful real time vision in js.
 
