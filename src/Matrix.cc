@@ -1642,16 +1642,16 @@ NAN_METHOD(Matrix::Threshold) {
       // Uses default value
     }
     else if (strcmp(*typstr, "Binary Inverted") == 0) {
-      typ = 1;
+      typ = cv::THRESH_BINARY_INV;
     }
     else if (strcmp(*typstr, "Threshold Truncated") == 0) {
-      typ = 2;
+      typ = cv::THRESH_TRUNC;
     }
     else if (strcmp(*typstr, "Threshold to Zero") == 0) {
-      typ = 3;
+      typ = cv::THRESH_TOZERO;
     }
     else if (strcmp(*typstr, "Threshold to Zero Inverted") == 0) {
-      typ = 4;
+      typ = cv::THRESH_TOZERO_INV;
     }
     else {
       char *typeString = *typstr;
