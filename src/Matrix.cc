@@ -1,6 +1,7 @@
 #include "Contours.h"
 #include "Matrix.h"
 #include "OpenCV.h"
+#include <string.h>
 #include <nan.h>
 
 Nan::Persistent<FunctionTemplate> Matrix::constructor;
@@ -1651,6 +1652,19 @@ NAN_METHOD(Matrix::Threshold) {
     }
     else if (strcmp(*typstr, "Threshold to Zero Inverted") == 0) {
       typ = 4;
+    }
+    else {
+      char *typeString = *typstr;
+      char text[] = "\" is no supported binarization technique. "
+        "Use \"Binary\", \"Binary Inverted\", \"Threshold Truncated\", "
+        "\"Threshold to Zero\" or \"Threshold to Zero Inverted\"";
+      char errorMessage[strlen(typeString) + strlen(text) + 2];
+      strcpy(errorMessage, "\"");
+      strcat(errorMessage, typeString);
+      strcat(errorMessage, text);
+
+      Nan::ThrowError(errorMessage);
+      return;
     }
   }
 
