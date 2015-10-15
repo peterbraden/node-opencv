@@ -24,9 +24,6 @@ cv::Mat fromMatrixOrFilename(Local<Value> v) {
   return im;
 }
 
-void AsyncPredict(uv_work_t *req);
-void AfterAsyncPredict(uv_work_t *req);
-
 Nan::Persistent<FunctionTemplate> FaceRecognizerWrap::constructor;
 
 void FaceRecognizerWrap::Init(Local<Object> target) {
@@ -43,8 +40,10 @@ void FaceRecognizerWrap::Init(Local<Object> target) {
   Nan::SetMethod(ctor, "createFisherFaceRecognizer", CreateFisher);
 
   Nan::SetPrototypeMethod(ctor, "trainSync", TrainSync);
+  Nan::SetPrototypeMethod(ctor, "train", Train);
   Nan::SetPrototypeMethod(ctor, "updateSync", UpdateSync);
   Nan::SetPrototypeMethod(ctor, "predictSync", PredictSync);
+  Nan::SetPrototypeMethod(ctor, "predict", Predict);
   Nan::SetPrototypeMethod(ctor, "saveSync", SaveSync);
   Nan::SetPrototypeMethod(ctor, "loadSync", LoadSync);
 
@@ -147,7 +146,7 @@ Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
   const Local<Array> tuples = Local<Array>::Cast(info[0]);
 
   const uint32_t length = tuples->Length();
-  for (uint32_t i=0; i<length; ++i) {
+  for (uint32_t i = 0; i < length; ++i) {
     const Local<Value> val = tuples->Get(i);
 
     if (!val->IsArray()) {
@@ -178,10 +177,58 @@ NAN_METHOD(FaceRecognizerWrap::TrainSync) {
 
   Local<Value> exception = UnwrapTrainingData(info, &images, &labels);
   if (!exception->IsUndefined()) {
-    info.GetReturnValue().Set(exception);  // FIXME: not too sure about returning exceptions like this
+    // FIXME: not too sure about returning exceptions like this
+    info.GetReturnValue().Set(exception);
   }
 
   self->rec->train(images, labels);
+
+  return;
+}
+
+class TrainASyncWorker: public Nan::AsyncWorker {
+public:
+  TrainASyncWorker(Nan::Callback *callback, cv::Ptr<cv::FaceRecognizer> rec,
+      cv::vector<cv::Mat> images, cv::vector<int> labels) :
+      Nan::AsyncWorker(callback),
+      rec(rec),
+      images(images),
+      labels(labels) {
+  }
+
+  ~TrainASyncWorker() {
+  }
+
+  void Execute() {
+    this->rec->train(this->images, this->labels);
+  }
+
+private:
+  cv::Ptr<cv::FaceRecognizer> rec;
+  cv::vector<cv::Mat> images;
+  cv::vector<int> labels;
+};
+
+NAN_METHOD(FaceRecognizerWrap::Train) {
+  SETUP_FUNCTION(FaceRecognizerWrap)
+
+  if (info.Length() < 2 || !(info[1]->IsFunction())) {
+    Nan::ThrowTypeError("Invalid number of arguments or invalid callback");
+  }
+
+  cv::vector<cv::Mat> images;
+  cv::vector<int> labels;
+
+  REQ_FUN_ARG(1, cb);
+
+  Local<Value> exception = UnwrapTrainingData(info, &images, &labels);
+  if (!exception->IsUndefined()) {
+    // FIXME: not too sure about returning exceptions like this
+    info.GetReturnValue().Set(exception);
+  }
+
+  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+  Nan::AsyncQueueWorker(new TrainASyncWorker(callback, self->rec, images, labels));
 
   return;
 }
@@ -212,12 +259,14 @@ NAN_METHOD(FaceRecognizerWrap::UpdateSync) {
 NAN_METHOD(FaceRecognizerWrap::PredictSync) {
   SETUP_FUNCTION(FaceRecognizerWrap)
 
+  if (info.Length() < 1) {
+    Nan::ThrowTypeError("Invalid number of arguments");
+  }
+
   cv::Mat im = fromMatrixOrFilename(info[0]);  // TODO CHECK!
   if (im.channels() == 3) {
     cv::cvtColor(im, im, CV_RGB2GRAY);
   }
-
-  // int predictedLabel = self->rec->predict(im);
 
   int predictedLabel = -1;
   double confidence = 0.0;
@@ -228,6 +277,68 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
   res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
 
   info.GetReturnValue().Set(res);
+}
+
+class PredictASyncWorker: public Nan::AsyncWorker {
+public:
+  PredictASyncWorker(Nan::Callback *callback, cv::Ptr<cv::FaceRecognizer> rec, cv::Mat im) :
+      Nan::AsyncWorker(callback),
+      rec(rec),
+      im(im) {
+    predictedLabel = -1;
+    confidence = 0.0;
+  }
+
+  ~PredictASyncWorker() {
+  }
+
+  void Execute() {
+     this->rec->predict(this->im, this->predictedLabel, this->confidence);
+  }
+
+  void HandleOKCallback() {
+    Nan::HandleScope scope;
+
+    v8::Local<v8::Object> res = Nan::New<Object>();
+    res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
+    res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
+
+    Local<Value> argv[] = {
+      res
+    };
+
+    Nan::TryCatch try_catch;
+    callback->Call(1, argv);
+    if (try_catch.HasCaught()) {
+      Nan::FatalException(try_catch);
+    }
+  }
+
+private:
+  cv::Ptr<cv::FaceRecognizer> rec;
+  cv::Mat im;
+  int predictedLabel;
+  double confidence;
+};
+
+NAN_METHOD(FaceRecognizerWrap::Predict) {
+  SETUP_FUNCTION(FaceRecognizerWrap)
+
+  if (info.Length() < 2 || !(info[1]->IsFunction())) {
+    Nan::ThrowTypeError("Invalid number of arguments or invalid callback");
+  }
+
+  REQ_FUN_ARG(1, cb);
+
+  cv::Mat im = fromMatrixOrFilename(info[0]);
+  if (im.channels() == 3) {
+    cv::cvtColor(im, im, CV_RGB2GRAY);
+  }
+
+  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+  Nan::AsyncQueueWorker(new PredictASyncWorker(callback, self->rec, im));
+
+  return;
 }
 
 NAN_METHOD(FaceRecognizerWrap::SaveSync) {
