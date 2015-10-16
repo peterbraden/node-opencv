@@ -20,12 +20,12 @@ public:
   JSFUNC(CreateFisher)
 
   JSFUNC(TrainSync)
-  //JSFUNC(Train)
+  JSFUNC(Train)
   JSFUNC(UpdateSync)
   //JSFUNC(Update)
 
   JSFUNC(PredictSync)
-  // JSFUNC(Predict)
+  JSFUNC(Predict)
   //static void EIO_Predict(eio_req *req);
   //static int EIO_AfterPredict(eio_req *req);
 
