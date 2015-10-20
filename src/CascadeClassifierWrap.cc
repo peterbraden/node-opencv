@@ -81,7 +81,7 @@ class AsyncDetectMultiScale : public Nan::AsyncWorker {
     v8::Local<v8::Array> arr = Nan::New<v8::Array>(this->res.size());
 
     for(unsigned int i = 0; i < this->res.size(); i++ ){
-      v8::Local<v8::Object> x = Nan::New<v8::Object>();
+      v8::Local<v8::Object> x = Nan::New<v8::Object>().ToLocalChecked();
       x->Set(Nan::New("x").ToLocalChecked(), Nan::New<Number>(this->res[i].x));
       x->Set(Nan::New("y").ToLocalChecked(), Nan::New<Number>(this->res[i].y));
       x->Set(Nan::New("width").ToLocalChecked(), Nan::New<Number>(this->res[i].width));
