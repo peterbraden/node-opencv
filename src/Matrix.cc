@@ -47,6 +47,8 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "saveAsync", SaveAsync);
   Nan::SetPrototypeMethod(ctor, "resize", Resize);
   Nan::SetPrototypeMethod(ctor, "rotate", Rotate);
+  Nan::SetPrototypeMethod(ctor, "getRotationMatrix2D", GetRotationMatrix2D);
+  Nan::SetPrototypeMethod(ctor, "warpAffine", WarpAffine);
   Nan::SetPrototypeMethod(ctor, "copyTo", CopyTo);
   Nan::SetPrototypeMethod(ctor, "pyrDown", PyrDown);
   Nan::SetPrototypeMethod(ctor, "pyrUp", PyrUp);
@@ -1551,6 +1553,48 @@ NAN_METHOD(Matrix::Rotate) {
   rotMatrix = getRotationMatrix2D(center, angle, 1.0);
 
   cv::warpAffine(self->mat, res, rotMatrix, self->mat.size());
+  ~self->mat;
+  self->mat = res;
+
+  return;
+}
+
+NAN_METHOD(Matrix::GetRotationMatrix2D) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  cv::Mat res;
+
+  float angle = info[0]->ToNumber()->Value();
+  int x = info[1]->IsUndefined() ? round(self->mat.size().width / 2) :
+      info[1]->Uint32Value();
+  int y = info[2]->IsUndefined() ? round(self->mat.size().height / 2) :
+      info[2]->Uint32Value();
+  double scale = info[3]->IsUndefined() ? 1.0 : info[3]->NumberValue();
+
+  cv::Point center = cv::Point(x,y);
+  res = getRotationMatrix2D(center, angle, scale);
+
+  ~self->mat;
+  self->mat = res;
+
+  return;
+}
+
+NAN_METHOD(Matrix::WarpAffine) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  cv::Mat res;
+
+  Matrix *rotMatrix = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  // Resize the image if size is specified
+  int dstRows = info[1]->IsUndefined() ? self->mat.rows : info[1]->Uint32Value();
+  int dstCols = info[2]->IsUndefined() ? self->mat.cols : info[2]->Uint32Value();
+  cv::Size resSize = cv::Size(dstRows, dstCols);
+
+  cv::warpAffine(self->mat, res, rotMatrix->mat, resSize);
   ~self->mat;
   self->mat = res;
 

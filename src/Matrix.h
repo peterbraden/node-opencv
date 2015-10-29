@@ -51,6 +51,8 @@ public:
 
   JSFUNC(Resize)
   JSFUNC(Rotate)
+  JSFUNC(GetRotationMatrix2D)
+  JSFUNC(WarpAffine)
   JSFUNC(PyrDown)
   JSFUNC(PyrUp)
 
