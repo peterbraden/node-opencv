@@ -126,6 +126,8 @@ NAN_METHOD(Matrix::New) {
         info[2]->IntegerValue());
   } else if (info.Length() == 4 && info[0]->IsInt32() && info[1]->IsInt32() &&
         info[2]->IsInt32() && info[3]->IsArray()) {
+    mat = new Matrix(info[0]->IntegerValue(), info[1]->IntegerValue(),
+        info[2]->IntegerValue(), info[3]->ToObject());
   } else {  // if (info.Length() == 5) {
     Matrix *other = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
     int x = info[1]->IntegerValue();
