@@ -1702,7 +1702,8 @@ NAN_METHOD(Matrix::Threshold) {
         "Use \"Binary\" (default), \"Binary Inverted\", "
         "\"Threshold Truncated\", \"Threshold to Zero\" "
         "or \"Threshold to Zero Inverted\"";
-      char errorMessage[strlen(typeString) + strlen(text) + 2];
+      char *errorMessage;
+      errorMessage = new char[strlen(typeString) + strlen(text) + 2];
       strcpy(errorMessage, "\"");
       strcat(errorMessage, typeString);
       strcat(errorMessage, text);
@@ -1725,7 +1726,8 @@ NAN_METHOD(Matrix::Threshold) {
       char *algo = *algorithm;
       char text[] = "\" is no supported threshold algorithm. "
         "Use \"Simple\" (default) or \"Otsu\".";
-      char errorMessage[strlen(algo) + strlen(text) + 2];
+      char *errorMessage;
+      errorMessage = new char[strlen(algo) + strlen(text) + 2];
       strcpy(errorMessage, "\"");
       strcat(errorMessage, algo);
       strcat(errorMessage, text);
