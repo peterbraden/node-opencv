@@ -30,6 +30,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "put", Put);
   Nan::SetPrototypeMethod(ctor, "brightness", Brightness);
   Nan::SetPrototypeMethod(ctor, "normalize", Normalize);
+  Nan::SetPrototypeMethod(ctor, "norm", Norm);
   Nan::SetPrototypeMethod(ctor, "getData", GetData);
   Nan::SetPrototypeMethod(ctor, "pixel", Pixel);
   Nan::SetPrototypeMethod(ctor, "width", Width);
@@ -373,6 +374,19 @@ NAN_METHOD(Matrix::Brightness) {
   info.GetReturnValue().Set(Nan::Null());
 }
 
+int getNormType(int type) {
+  if ((type != cv::NORM_MINMAX) && (type != cv::NORM_INF)
+      && (type != cv::NORM_L1) && (type != cv::NORM_L2)
+      && (type != cv::NORM_L2SQR) && (type != cv::NORM_HAMMING)
+      && (type != cv::NORM_HAMMING2) && (type != cv::NORM_RELATIVE)
+      && (type != cv::NORM_TYPE_MASK)) {
+    Nan::ThrowTypeError("type value must be NORM_INF=1, NORM_L1=2, NORM_L2=4,"
+        " NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, "
+        "NORM_RELATIVE=8, NORM_MINMAX=32 ");
+  }
+  return type;
+}
+
 // @author tualo
 // normalize wrapper
 NAN_METHOD(Matrix::Normalize) {
@@ -386,16 +400,7 @@ NAN_METHOD(Matrix::Normalize) {
 
   int type = cv::NORM_MINMAX;
   if (info[2]->IsNumber()) {
-    type = info[2]->Uint32Value();
-    if ((type != cv::NORM_MINMAX) || (type != cv::NORM_INF)
-        || (type != cv::NORM_L1) || (type != cv::NORM_L2)
-        || (type != cv::NORM_L2SQR) || (type != cv::NORM_HAMMING)
-        || (type != cv::NORM_HAMMING2) || (type != cv::NORM_RELATIVE)
-        || (type != cv::NORM_TYPE_MASK)) {
-      Nan::ThrowTypeError("type value must be NORM_INF=1, NORM_L1=2, NORM_L2=4,"
-          " NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, "
-          "NORM_RELATIVE=8, NORM_MINMAX=32 ");
-    }
+    type = getNormType(info[2]->Uint32Value());
   }
   int dtype = -1;
   if (info[3]->IsNumber()) {
@@ -419,6 +424,50 @@ NAN_METHOD(Matrix::Normalize) {
   norm.copyTo(self->mat);
 
   info.GetReturnValue().Set(Nan::Null());
+}
+
+/**
+ * Calculates an absolute array norm, an absolute difference norm, or a relative
+ * difference norm.
+ *
+ * Reference: http://docs.opencv.org/2.4/modules/core/doc/
+ *            operations_on_arrays.html?highlight=normalize#norm
+ */
+NAN_METHOD(Matrix::Norm) {
+  Matrix *src2 = NULL;
+  int normType = cv::NORM_L2;
+  cv::Mat mask;
+  int infoCount = 0;
+
+  Matrix *src1 = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+
+  // If src2 is specified calculate absolute or relative difference norm
+  if (!info[infoCount]->IsUndefined() && info[infoCount]->IsObject()) {
+    src2 = Nan::ObjectWrap::Unwrap<Matrix>(info[infoCount]->ToObject());
+    infoCount++;
+  }
+
+  // NORM_TYPE
+  if (!info[infoCount]->IsUndefined() && info[infoCount]->IsInt32()) {
+    normType = getNormType(info[infoCount]->Uint32Value());
+    infoCount++;
+  }
+
+  // Mask
+  if (!info[infoCount]->IsUndefined() && info[infoCount]->IsObject()) {
+    Matrix *mmask = Nan::ObjectWrap::Unwrap<Matrix>(info[infoCount]->ToObject());
+    mask = mmask->mat;
+    infoCount++;
+  }
+
+  double res = 0;
+  if (src2) {
+    res = cv::norm(src1->mat, src2->mat, normType, mask);
+  } else {
+    res = cv::norm(src1->mat, normType, mask);
+  }
+
+  info.GetReturnValue().Set(Nan::New<Number>(res));
 }
 
 NAN_METHOD(Matrix::Size) {

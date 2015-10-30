@@ -26,6 +26,7 @@ public:
   JSFUNC(GetData)
   JSFUNC(Normalize)
   JSFUNC(Brightness)
+  JSFUNC(Norm)
 
   JSFUNC(Row)
   JSFUNC(PixelRow)
