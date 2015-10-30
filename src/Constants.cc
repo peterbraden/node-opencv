@@ -4,6 +4,9 @@
 #define CONST(C) \
   obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>(C));
 
+#define CONST_DOUBLE(C) \
+  obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Number>(C));
+
 #define CONST_ENUM(C) \
   obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)(cv::C)));
 
@@ -55,6 +58,9 @@ void Constants::Init(Local<Object> target) {
   CONST(CV_64FC2);
   CONST(CV_64FC3);
   CONST(CV_64FC4);
+
+  CONST_DOUBLE(CV_PI);
+  CONST(CV_FILLED);
 
   CONST_ENUM(INTER_NEAREST);
   CONST_ENUM(INTER_LINEAR);
