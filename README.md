@@ -15,6 +15,41 @@ cool, I'd love to hear about it!
 
 You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.
 
+## Specific for Windows
+1. Download Install opencv @ - (I used version 2.4.4)
+http://opencv.org/downloads.html
+Put it in c:\opencv
+
+2. Install python version 2.7 @
+http://www.python.org/download/releases/2.7/
+put it in c:\python27
+
+3. install pkg-config by downloading the all in one bundle @ - (I used Gtk+ 3.6.4)
+http://www.gtk.org/download/win64.php
+put it in c:\pkg-config
+
+4. Add the following to your path variables
+C:\pkg-config\bin;C:\OpenCV\build\x64\vc11\bin;
+
+5. Install visual-studio in 4 steps
+
+  - install Visual C++ 2010 Express
+  
+  - install Windows SDK for windows 7 and .net framework 4
+  
+  - install Visual Studio 2010 Service Pack 1
+  
+  - install Visual C++ 2010 Service Pack 1 Compiler
+
+
+6. Download npeterbraden/node-opencv fork
+git clone https://github.com/peterbraden/node-opencv
+
+7. edit file src/Matrix.cpp
+put "inline double round( double d ) { return floor( d + 0.5);}" below "cv::Rect* setRect(Local<Object> objRect, cv::Rect &result);"
+
+8. run npm install
+
 Then:
 
 ```bash
