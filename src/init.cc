@@ -14,6 +14,7 @@
 #include "ImgProc.h"
 #include "Stereo.h"
 #include "BackgroundSubtractor.h"
+#include "LDAWrap.h"
 
 extern "C" void init(Local<Object> target) {
   Nan::HandleScope scope;
@@ -37,6 +38,7 @@ extern "C" void init(Local<Object> target) {
   BackgroundSubtractorWrap::Init(target);
   Features::Init(target);
   FaceRecognizerWrap::Init(target);
+  LDAWrap::Init(target);
 #endif
 };
 
