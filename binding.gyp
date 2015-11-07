@@ -19,7 +19,14 @@
         "src/Constants.cc",
         "src/Calib3D.cc",
         "src/ImgProc.cc",
-        "src/Stereo.cc"
+        "src/Stereo.cc",
+        "src/CMT/CMT.cpp",
+        "src/CMT/Matcher.cpp",
+        "src/CMT/common.cpp",
+        "src/CMT/Consensus.cpp",
+        "src/CMT/fastcluster/fastcluster.cpp",
+        "src/CMT/Tracker.cpp",
+        "src/CMT/Fusion.cpp"
       ],
 
       "libraries": [
