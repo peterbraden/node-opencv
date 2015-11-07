@@ -14,30 +14,34 @@
 #include "ImgProc.h"
 #include "Stereo.h"
 #include "BackgroundSubtractor.h"
+#include "CMT/CMT.h"
 
-extern "C" void init(Local<Object> target) {
-  Nan::HandleScope scope;
-  OpenCV::Init(target);
+extern "C" void
+init(Handle<Object> target) {
+    NanScope();
+    OpenCV::Init(target);
 
-  Point::Init(target);
-  Matrix::Init(target);
-  CascadeClassifierWrap::Init(target);
-  VideoCaptureWrap::Init(target);
-  Contour::Init(target);
-  TrackedObject::Init(target);
-  NamedWindow::Init(target);
-  Constants::Init(target);
-  Calib3D::Init(target);
-  ImgProc::Init(target);
-  StereoBM::Init(target);
-  StereoSGBM::Init(target);
-  StereoGC::Init(target);
+    Point::Init(target);
+    Matrix::Init(target);
+    CascadeClassifierWrap::Init(target);
+    VideoCaptureWrap::Init(target);
+    Contour::Init(target);
+    TrackedObject::Init(target);
+    NamedWindow::Init(target);
+    Constants::Init(target);
+    Calib3D::Init(target);
+    ImgProc::Init(target);
+    StereoBM::Init(target);
+    StereoSGBM::Init(target);
+    StereoGC::Init(target);
+    CMT::Init(target);
 
-#if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
-  BackgroundSubtractorWrap::Init(target);
-  Features::Init(target);
-  FaceRecognizerWrap::Init(target);
-#endif
+   #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
+      BackgroundSubtractorWrap::Init(target);
+      Features::Init(target);
+      FaceRecognizerWrap::Init(target);
+   #endif
+
 };
 
 NODE_MODULE(opencv, init)
