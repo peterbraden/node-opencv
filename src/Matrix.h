@@ -119,6 +119,7 @@ public:
   JSFUNC(SetWithMask)
   JSFUNC(MeanWithMask)
   JSFUNC(Shift)
+  JSFUNC(Reshape)
 
   JSFUNC(Release)
   /*
