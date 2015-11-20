@@ -51,6 +51,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "getRotationMatrix2D", GetRotationMatrix2D);
   Nan::SetPrototypeMethod(ctor, "warpAffine", WarpAffine);
   Nan::SetPrototypeMethod(ctor, "copyTo", CopyTo);
+  Nan::SetPrototypeMethod(ctor, "convertTo", ConvertTo);
   Nan::SetPrototypeMethod(ctor, "pyrDown", PyrDown);
   Nan::SetPrototypeMethod(ctor, "pyrUp", PyrUp);
   Nan::SetPrototypeMethod(ctor, "channels", Channels);
@@ -1860,6 +1861,41 @@ NAN_METHOD(Matrix::CopyTo) {
 
   cv::Mat dstROI = cv::Mat(dest->mat, cv::Rect(x, y, width, height));
   self->mat.copyTo(dstROI);
+
+  return;
+}
+
+/**
+ * Converts an array to another data type with optional scaling
+ * Reference: http://docs.opencv.org/2.4/modules/core/doc/basic_structures.html#mat-convertto
+ */
+NAN_METHOD(Matrix::ConvertTo) {
+  SETUP_FUNCTION(Matrix)
+
+  if (info.Length() < 2) {
+    JSTHROW("Invalid number of arguments");
+  }
+
+  // param 0 - destination image
+  Matrix *dest = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  // param 1 - desired matrix type
+  int rtype = -1;
+  INT_FROM_ARGS(rtype, 1);
+
+  // param 2 - alpha
+  double alpha = 1;
+  if (info.Length() >= 3) {
+    DOUBLE_FROM_ARGS(alpha, 2);
+  }
+
+  // param 3 - beta
+  double beta = 0;
+  if (info.Length() >= 4) {
+    DOUBLE_FROM_ARGS(alpha, 3);
+  }
+
+  self->mat.convertTo(dest->mat, rtype, alpha, beta);
 
   return;
 }

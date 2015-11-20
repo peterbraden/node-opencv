@@ -98,6 +98,7 @@ public:
   JSFUNC(MeanStdDev)
 
   JSFUNC(CopyTo)
+  JSFUNC(ConvertTo)
   JSFUNC(CvtColor)
   JSFUNC(Split)
   JSFUNC(Merge)
