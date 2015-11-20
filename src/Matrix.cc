@@ -1893,7 +1893,7 @@ NAN_METHOD(Matrix::ConvertTo) {
   // param 3 - beta
   double beta = 0;
   if (info.Length() >= 4) {
-    DOUBLE_FROM_ARGS(alpha, 3);
+    DOUBLE_FROM_ARGS(beta, 3);
   }
 
   self->mat.convertTo(dest->mat, rtype, alpha, beta);
