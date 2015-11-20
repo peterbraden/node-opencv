@@ -105,6 +105,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "setWithMask", SetWithMask);
   Nan::SetPrototypeMethod(ctor, "meanWithMask", MeanWithMask);
   Nan::SetPrototypeMethod(ctor, "shift", Shift);
+  Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
   Nan::SetPrototypeMethod(ctor, "release", Release);
 
   target->Set(Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction());
@@ -2409,6 +2410,32 @@ NAN_METHOD(Matrix::Shift) {
   cv::Rect roi = cv::Rect(std::max(-deltai.x, 0), std::max(-deltai.y, 0), 0, 0)
       + self->mat.size();
   res = padded(roi);
+  ~self->mat;
+  self->mat = res;
+
+  return;
+}
+
+/**
+ * Changes the shape and/or the number of channels of a 2D matrix without
+ * copying the data.
+ * Reference:http://docs.opencv.org/2.4/modules/core/doc/basic_structures.html#mat-reshape
+ */
+NAN_METHOD(Matrix::Reshape) {
+  SETUP_FUNCTION(Matrix)
+
+  int cn = 0;
+  int rows = 0;
+  if (info.Length() == 2) {
+    INT_FROM_ARGS(cn, 0);
+    INT_FROM_ARGS(rows, 1);
+  } else if (info.Length() == 1) {
+    INT_FROM_ARGS(cn, 0);
+  } else {
+    JSTHROW("Invalid number of arguments");
+  }
+
+  cv::Mat res = self->mat.reshape(cn, rows);
   ~self->mat;
   self->mat = res;
 
