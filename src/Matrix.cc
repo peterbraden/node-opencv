@@ -1893,7 +1893,7 @@ NAN_METHOD(Matrix::ConvertTo) {
   // param 3 - beta
   double beta = 0;
   if (info.Length() >= 4) {
-    DOUBLE_FROM_ARGS(alpha, 3);
+    DOUBLE_FROM_ARGS(beta, 3);
   }
 
   self->mat.convertTo(dest->mat, rtype, alpha, beta);
@@ -2435,11 +2435,13 @@ NAN_METHOD(Matrix::Reshape) {
     JSTHROW("Invalid number of arguments");
   }
 
-  cv::Mat res = self->mat.reshape(cn, rows);
-  ~self->mat;
-  self->mat = res;
+  Local<Object> img_to_return =
+      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
 
-  return;
+  img->mat = self->mat.reshape(cn, rows);
+
+  info.GetReturnValue().Set(img_to_return);
 }
 
 NAN_METHOD(Matrix::Release) {
