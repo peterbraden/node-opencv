@@ -1341,7 +1341,13 @@ NAN_METHOD(Matrix::Dilate) {
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
   int niters = info[0]->NumberValue();
 
-  cv::dilate(self->mat, self->mat, cv::Mat(), cv::Point(-1, -1), niters);
+  cv::Mat kernel = cv::Mat();
+  if (info.Length() == 2) {
+    Matrix *kernelMatrix = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+    kernel = kernelMatrix->mat;
+  }
+
+  cv::dilate(self->mat, self->mat, kernel, cv::Point(-1, -1), niters);
 
   info.GetReturnValue().Set(Nan::Null());
 }
@@ -1352,7 +1358,12 @@ NAN_METHOD(Matrix::Erode) {
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
   int niters = info[0]->NumberValue();
 
-  cv::erode(self->mat, self->mat, cv::Mat(), cv::Point(-1, -1), niters);
+  cv::Mat kernel = cv::Mat();
+  if (info.Length() == 2) {
+    Matrix *kernelMatrix = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+    kernel = kernelMatrix->mat;
+  }
+  cv::erode(self->mat, self->mat, kernel, cv::Point(-1, -1), niters);
 
   info.GetReturnValue().Set(Nan::Null());
 }
