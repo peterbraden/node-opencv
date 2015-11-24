@@ -172,14 +172,14 @@ NAN_METHOD(ImgProc::GetStructuringElement) {
 
     // Arg 0 is the element shape
     if (!info[0]->IsNumber()) {
-      Nan::ThrowTypeError("'shape' argument must be a number");
+      JSTHROW_TYPE("'shape' argument must be a number");
     }
     int shape = info[0]->NumberValue();
 
     // Arg 1 is the size of the structuring element
     cv::Size ksize;
     if (!info[1]->IsArray()) {
-      Nan::ThrowTypeError("'ksize' argument must be a 2 double array");
+      JSTHROW_TYPE("'ksize' argument must be a 2 double array");
     }
     Local<Object> v8sz = info[1]->ToObject();
     ksize = cv::Size(v8sz->Get(0)->IntegerValue(), v8sz->Get(1)->IntegerValue());
@@ -196,7 +196,7 @@ NAN_METHOD(ImgProc::GetStructuringElement) {
     info.GetReturnValue().Set(outMatrixWrap);
   } catch (cv::Exception &e) {
     const char *err_msg = e.what();
-    Nan::ThrowError(err_msg);
+    JSTHROW(err_msg);
     return;
   }
 }

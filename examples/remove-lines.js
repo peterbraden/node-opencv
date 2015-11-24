@@ -2,9 +2,12 @@ var cv = require('../lib/opencv');
 
 // Load the image
 cv.readImage('./files/note.png', function(err, im) {
-  console.log('plop');
-  if (err) { throw err; }
-  if (im.width() < 1 || im.height() < 1) { throw new Error('Image has no size'); }
+  if (err) {
+    throw err;
+  }
+  if (im.width() < 1 || im.height() < 1) {
+    throw new Error('Image has no size');
+  }
 
   im.cvtColor('CV_BGR2GRAY');
   var bw = im.adaptiveThreshold(255, 0, 0, 15, 2);
