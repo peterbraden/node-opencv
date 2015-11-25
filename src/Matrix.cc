@@ -247,25 +247,13 @@ NAN_METHOD(Matrix::Pixel) {
 
 NAN_METHOD(Matrix::PackPixels) {
 	SETUP_FUNCTION(Matrix)
+	int size = self->mat.size().area() * self->mat.channels();
 
-	int channels = self->mat.channels();
-	if (args.Length() == 1) {
-		v8::String::Utf8Value str(args[0]->ToString());
-		string f = *str;
-		if (f == "RGB") {
-			if (channels >= 3) {
-				NanReturnValue(PixelPacker::BGRToRGB(&self->mat));
-			} else if (channels == 1) {
-				NanReturnValue(PixelPacker::grayscaleToRGB(&self->mat));
-			} else {
-				NanReturnValue(NanNew<String>("Error: wrong number of channels"));
-			}
-		} else {
-			NanReturnValue(NanNew<String>("Unrecognized format"));
-		}
-	} else {
-		NanReturnValue(NanNew<String>("Need a format"));
-	}
+	Isolate * gi = NanGetCurrentContext()->GetIsolate();
+	self->mat.size().area();
+	Local<ArrayBuffer> ab = ArrayBuffer::New(gi, self->mat.data, size);
+	Local<Uint8Array> ui = Uint8Array::New(ab, 0, size);
+	NanReturnValue(ui);
 }
 
 NAN_METHOD(Matrix::Get) {

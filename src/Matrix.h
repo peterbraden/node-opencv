@@ -1,5 +1,4 @@
 #include "OpenCV.h"
-#include "PixelPacker.h"
 
 class Matrix: public node::ObjectWrap {
 public:

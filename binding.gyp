@@ -19,8 +19,7 @@
         "src/Constants.cc",
         "src/Calib3D.cc",
         "src/ImgProc.cc",
-        "src/Stereo.cc",
-		"src/PixelPacker.cc"
+        "src/Stereo.cc"
       ],
 
       "libraries": [
