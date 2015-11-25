@@ -14,9 +14,10 @@
 #include "ImgProc.h"
 #include "Stereo.h"
 #include "BackgroundSubtractor.h"
+#include "LDAWrap.h"
 
-extern "C" void init(Handle<Object> target) {
-  NanScope();
+extern "C" void init(Local<Object> target) {
+  Nan::HandleScope scope;
   OpenCV::Init(target);
 
   Point::Init(target);
@@ -37,6 +38,7 @@ extern "C" void init(Handle<Object> target) {
   BackgroundSubtractorWrap::Init(target);
   Features::Init(target);
   FaceRecognizerWrap::Init(target);
+  LDAWrap::Init(target);
 #endif
 };
 

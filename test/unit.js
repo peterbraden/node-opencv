@@ -53,7 +53,9 @@ test('Point', function(t){
 test('Matrix constructor', function(assert){
   assert.ok(cv.Matrix);
   assert.ok(new cv.Matrix);
-  assert.ok(new cv.Matrix(1,2));
+  assert.ok(new cv.Matrix(1, 2));
+  assert.ok(new cv.Matrix(1, 2, cv.Constants.CV_8U));
+  assert.ok(new cv.Matrix(1, 2, cv.Constants.CV_8U, [1]));
   assert.end()
 })
 
@@ -91,9 +93,43 @@ test('Matrix accessors', function(assert){
 
   assert.equal(new cv.Matrix().empty(), true);
 
+  mat = new cv.Matrix(1, 2, cv.Constants.CV_8UC3, [1, 2, 3]);
+  assert.deepEqual(mat.pixelRow(0), [1, 2, 3, 1, 2, 3]);
+
   assert.end()
 })
 
+test('Matrix functions', function(assert) {
+  // convertTo
+  var mat = new cv.Matrix(75, 75, cv.Constants.CV_32F, [2.0]);
+  var matNew = new cv.Matrix(75, 75, cv.Constants.CV_8U);
+  mat.convertTo(matNew, cv.Constants.CV_8U, 2, 1);
+  assert.equal(matNew.pixel(0, 0), 5);
+
+  // reshape
+  mat = new cv.Matrix(75, 75, cv.Constants.CV_8UC1);
+  matNew = mat.reshape(1, 1);
+  assert.equal(matNew.height(), 1);
+  assert.equal(matNew.width(), 5625);
+
+  assert.end();
+})
+
+test(".norm", function(assert){
+  cv.readImage("./examples/files/coin1.jpg", function(err, im) {
+    cv.readImage("./examples/files/coin2.jpg", function(err, im2){
+      assert.ok(im);
+      assert.ok(im2);
+
+      var errorL2 = im.norm(im2, cv.Constants.NORM_L2);
+      assert.equal(errorL2, 7295.591339980605);
+      
+      errorL2 = im.norm(im, cv.Constants.NORM_L2);
+      assert.equal(errorL2, 0);
+      assert.end();
+    });
+  });
+})
 
 test("Matrix toBuffer", function(assert){
   var buf = fs.readFileSync('./examples/files/mona.png')
@@ -104,8 +140,6 @@ test("Matrix toBuffer", function(assert){
     assert.end()
   })
 })
-
-
 
 test("Matrix toBuffer Async", function(assert){
   var buf = fs.readFileSync('./examples/files/mona.png')

@@ -1,11 +1,11 @@
 #include "OpenCV.h"
 
-class CascadeClassifierWrap: public node::ObjectWrap {
+class CascadeClassifierWrap: public Nan::ObjectWrap {
 public:
   cv::CascadeClassifier cc;
 
-  static Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   CascadeClassifierWrap(v8::Value* fileName);

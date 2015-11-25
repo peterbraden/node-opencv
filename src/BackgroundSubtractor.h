@@ -4,12 +4,12 @@
 
 #include <opencv2/video/background_segm.hpp>
 
-class BackgroundSubtractorWrap: public node::ObjectWrap {
+class BackgroundSubtractorWrap: public Nan::ObjectWrap {
 public:
   cv::Ptr<cv::BackgroundSubtractor> subtractor;
 
-  static Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
 
   BackgroundSubtractorWrap(cv::Ptr<cv::BackgroundSubtractor> bg);

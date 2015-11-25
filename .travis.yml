@@ -29,7 +29,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   - sudo apt-get update
-  - sudo apt-get install --force-yes libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
+  - sudo apt-get install --force-yes --yes libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
   # get commit message
   - COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
   # put local node-pre-gyp on PATH
@@ -64,9 +64,9 @@ before_script:
   # cleanup
   - node-pre-gyp clean
   - node-gyp clean
-  - sudo apt-get purge libcv-dev
-  - sudo apt-get purge libopencv-dev
-  - sudo apt-get purge libhighgui-dev
+  - sudo apt-get purge --yes libcv-dev
+  - sudo apt-get purge --yes libopencv-dev
+  - sudo apt-get purge --yes libhighgui-dev
 
 script:
   # if publishing, test installing from remote

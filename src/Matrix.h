@@ -1,11 +1,11 @@
 #include "OpenCV.h"
 
-class Matrix: public node::ObjectWrap {
+class Matrix: public Nan::ObjectWrap {
 public:
 
   cv::Mat mat;
-  static Persistent<FunctionTemplate> constructor;
-  static void Init(Handle<Object> target);
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void Init(Local<Object> target);
   static NAN_METHOD(New);
   Matrix();
   Matrix(cv::Mat other, cv::Rect roi);
@@ -26,6 +26,7 @@ public:
   JSFUNC(GetData)
   JSFUNC(Normalize)
   JSFUNC(Brightness)
+  JSFUNC(Norm)
 
   JSFUNC(Row)
   JSFUNC(PixelRow)
@@ -52,6 +53,8 @@ public:
 
   JSFUNC(Resize)
   JSFUNC(Rotate)
+  JSFUNC(GetRotationMatrix2D)
+  JSFUNC(WarpAffine)
   JSFUNC(PyrDown)
   JSFUNC(PyrUp)
 
@@ -96,6 +99,7 @@ public:
   JSFUNC(MeanStdDev)
 
   JSFUNC(CopyTo)
+  JSFUNC(ConvertTo)
   JSFUNC(CvtColor)
   JSFUNC(Split)
   JSFUNC(Merge)
@@ -117,37 +121,38 @@ public:
   JSFUNC(SetWithMask)
   JSFUNC(MeanWithMask)
   JSFUNC(Shift)
+  JSFUNC(Reshape)
 
   JSFUNC(Release)
   /*
-   static Handle<Value> Val(const Arguments& args);
-   static Handle<Value> RowRange(const Arguments& args);
-   static Handle<Value> ColRange(const Arguments& args);
-   static Handle<Value> Diag(const Arguments& args);
-   static Handle<Value> Clone(const Arguments& args);
-   static Handle<Value> CopyTo(const Arguments& args);
-   static Handle<Value> ConvertTo(const Arguments& args);
-   static Handle<Value> AssignTo(const Arguments& args);
-   static Handle<Value> SetTo(const Arguments& args);
-   static Handle<Value> Reshape(const Arguments& args);
-   static Handle<Value> Transpose(const Arguments& args);
-   static Handle<Value> Invert(const Arguments& args);
-   static Handle<Value> Multiply(const Arguments& args);
-   static Handle<Value> Cross(const Arguments& args);
-   static Handle<Value> Dot(const Arguments& args);
-   static Handle<Value> Zeroes(const Arguments& args);
-   static Handle<Value> Ones(const Arguments& args);
+   static Handle<Value> Val(const Arguments& info);
+   static Handle<Value> RowRange(const Arguments& info);
+   static Handle<Value> ColRange(const Arguments& info);
+   static Handle<Value> Diag(const Arguments& info);
+   static Handle<Value> Clone(const Arguments& info);
+   static Handle<Value> CopyTo(const Arguments& info);
+   static Handle<Value> ConvertTo(const Arguments& info);
+   static Handle<Value> AssignTo(const Arguments& info);
+   static Handle<Value> SetTo(const Arguments& info);
+   static Handle<Value> Reshape(const Arguments& info);
+   static Handle<Value> Transpose(const Arguments& info);
+   static Handle<Value> Invert(const Arguments& info);
+   static Handle<Value> Multiply(const Arguments& info);
+   static Handle<Value> Cross(const Arguments& info);
+   static Handle<Value> Dot(const Arguments& info);
+   static Handle<Value> Zeroes(const Arguments& info);
+   static Handle<Value> Ones(const Arguments& info);
    // create, increment, release
-   static Handle<Value> PushBack(const Arguments& args);
-   static Handle<Value> PopBack(const Arguments& args);
-   static Handle<Value> Total(const Arguments& args);
-   static Handle<Value> IsContinous(const Arguments& args);
-   static Handle<Value> Type(const Arguments& args);
-   static Handle<Value> Depth(const Arguments& args);
-   static Handle<Value> Channels(const Arguments& args);
-   static Handle<Value> StepOne(const Arguments& args);
-   static Handle<Value> GetPerspectiveTransform(const Arguments& args);
-   static Handle<Value> WarpPerspective(const Arguments& args);
+   static Handle<Value> PushBack(const Arguments& info);
+   static Handle<Value> PopBack(const Arguments& info);
+   static Handle<Value> Total(const Arguments& info);
+   static Handle<Value> IsContinous(const Arguments& info);
+   static Handle<Value> Type(const Arguments& info);
+   static Handle<Value> Depth(const Arguments& info);
+   static Handle<Value> Channels(const Arguments& info);
+   static Handle<Value> StepOne(const Arguments& info);
+   static Handle<Value> GetPerspectiveTransform(const Arguments& info);
+   static Handle<Value> WarpPerspective(const Arguments& info);
 
    */
 };
