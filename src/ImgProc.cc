@@ -9,6 +9,7 @@ void ImgProc::Init(Local<Object> target) {
   Nan::SetMethod(obj, "undistort", Undistort);
   Nan::SetMethod(obj, "initUndistortRectifyMap", InitUndistortRectifyMap);
   Nan::SetMethod(obj, "remap", Remap);
+  Nan::SetMethod(obj, "getStructuringElement", GetStructuringElement);
 
   target->Set(Nan::New("imgproc").ToLocalChecked(), obj);
 }
@@ -154,6 +155,48 @@ NAN_METHOD(ImgProc::Remap) {
   } catch (cv::Exception &e) {
     const char *err_msg = e.what();
     Nan::ThrowError(err_msg);
+    return;
+  }
+}
+
+// cv::getStructuringElement
+NAN_METHOD(ImgProc::GetStructuringElement) {
+  Nan::EscapableHandleScope scope;
+
+  try {
+    // Get the arguments
+
+    if (info.Length() != 2) {
+      Nan::ThrowTypeError("Invalid number of arguments");
+    }
+
+    // Arg 0 is the element shape
+    if (!info[0]->IsNumber()) {
+      JSTHROW_TYPE("'shape' argument must be a number");
+    }
+    int shape = info[0]->NumberValue();
+
+    // Arg 1 is the size of the structuring element
+    cv::Size ksize;
+    if (!info[1]->IsArray()) {
+      JSTHROW_TYPE("'ksize' argument must be a 2 double array");
+    }
+    Local<Object> v8sz = info[1]->ToObject();
+    ksize = cv::Size(v8sz->Get(0)->IntegerValue(), v8sz->Get(1)->IntegerValue());
+
+    // GetStructuringElement
+    cv::Mat mat = cv::getStructuringElement(shape, ksize);
+
+    // Wrap the output image
+    Local<Object> outMatrixWrap = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+    Matrix *outMatrix = ObjectWrap::Unwrap<Matrix>(outMatrixWrap);
+    outMatrix->mat = mat;
+
+    // Return the image
+    info.GetReturnValue().Set(outMatrixWrap);
+  } catch (cv::Exception &e) {
+    const char *err_msg = e.what();
+    JSTHROW(err_msg);
     return;
   }
 }
