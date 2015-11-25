@@ -257,7 +257,7 @@ NAN_METHOD(Matrix::PackPixels) {
 	SETUP_FUNCTION(Matrix)
 	int size = self->mat.size().area() * self->mat.channels();
 
-	Isolate * gi = NanGetCurrentContext()->GetIsolate();
+	Isolate * gi = Nan::GetCurrentContext()->GetIsolate();
 	self->mat.size().area();
 	Local<ArrayBuffer> ab = ArrayBuffer::New(gi, self->mat.data, size);
 	Local<Uint8Array> ui = Uint8Array::New(ab, 0, size);
