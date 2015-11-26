@@ -1,5 +1,6 @@
 {
   "name": "opencv",
+  "version": "4.0.0",
   "description": "Node Bindings to OpenCV",
   "author": "Peter Braden <peterbraden@peterbraden.co.uk>",
   "dependencies": {
@@ -7,7 +8,6 @@
     "nan": "^2.0.9",
     "node-pre-gyp": "^0.6.11"
   },
-  "version": "3.2.0",
   "devDependencies": {
     "tape": "^3.0.0",
     "aws-sdk": "~2.1.20",
