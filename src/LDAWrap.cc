@@ -17,8 +17,8 @@ void LDAWrap::Init(Local<Object> target) {
   ctor->InstanceTemplate()->SetInternalFieldCount(1);
   ctor->SetClassName(Nan::New("LDA").ToLocalChecked());
 
-  Nan::SetPrototypeMethod(ctor, "subspaceProject", SubspaceProject);
-  Nan::SetPrototypeMethod(ctor, "subspaceReconstruct", SubspaceReconstruct);
+  Nan::SetMethod(ctor, "subspaceProject", SubspaceProject);
+  Nan::SetMethod(ctor, "subspaceReconstruct", SubspaceReconstruct);
 
   target->Set(Nan::New("LDA").ToLocalChecked(), ctor->GetFunction());
 };

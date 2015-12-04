@@ -310,6 +310,18 @@ test("fonts", function(t) {
   });
 })
 
+test('LDA Wrap', function(assert) {
+  // subspaceProject
+  var mat = cv.LDA.subspaceProject(new cv.Matrix(1, 2, cv.Constants.CV_64F), new cv.Matrix(), new cv.Matrix(2, 1, cv.Constants.CV_8UC1));
+  assert.deepEqual(mat.size(), [2,2], 'subspaceProject');
+
+  // subspaceReconstruct
+  mat = cv.LDA.subspaceReconstruct(new cv.Matrix(1, 2, cv.Constants.CV_64F), new cv.Matrix(), new cv.Matrix(1, 2, cv.Constants.CV_8UC1));
+  assert.deepEqual(mat.size(), [1,1], 'subspaceReconstruct');
+
+  assert.end();
+})
+
 // Test the examples folder.
 require('./examples')()
 
