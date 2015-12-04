@@ -48,7 +48,6 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "saveAsync", SaveAsync);
   Nan::SetPrototypeMethod(ctor, "resize", Resize);
   Nan::SetPrototypeMethod(ctor, "rotate", Rotate);
-  Nan::SetPrototypeMethod(ctor, "getRotationMatrix2D", GetRotationMatrix2D);
   Nan::SetPrototypeMethod(ctor, "warpAffine", WarpAffine);
   Nan::SetPrototypeMethod(ctor, "copyTo", CopyTo);
   Nan::SetPrototypeMethod(ctor, "convertTo", ConvertTo);
@@ -101,6 +100,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetMethod(ctor, "Zeros", Zeros);
   Nan::SetMethod(ctor, "Ones", Ones);
   Nan::SetMethod(ctor, "Eye", Eye);
+  Nan::SetMethod(ctor, "getRotationMatrix2D", GetRotationMatrix2D);
   Nan::SetPrototypeMethod(ctor, "copyWithMask", CopyWithMask);
   Nan::SetPrototypeMethod(ctor, "setWithMask", SetWithMask);
   Nan::SetPrototypeMethod(ctor, "meanWithMask", MeanWithMask);
@@ -1625,24 +1625,23 @@ NAN_METHOD(Matrix::Rotate) {
 
 NAN_METHOD(Matrix::GetRotationMatrix2D) {
   Nan::HandleScope scope;
-
-  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
-  cv::Mat res;
+  if (info.Length() < 3) {
+    JSTHROW("Invalid number of arguments");
+  }
 
   float angle = info[0]->ToNumber()->Value();
-  int x = info[1]->IsUndefined() ? round(self->mat.size().width / 2) :
-      info[1]->Uint32Value();
-  int y = info[2]->IsUndefined() ? round(self->mat.size().height / 2) :
-      info[2]->Uint32Value();
+  int x = info[1]->Uint32Value();
+  int y = info[2]->Uint32Value();
   double scale = info[3]->IsUndefined() ? 1.0 : info[3]->NumberValue();
 
+  Local<Object> img_to_return =
+      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
+
   cv::Point center = cv::Point(x,y);
-  res = getRotationMatrix2D(center, angle, scale);
+  img->mat = getRotationMatrix2D(center, angle, scale);
 
-  ~self->mat;
-  self->mat = res;
-
-  return;
+  info.GetReturnValue().Set(img_to_return);
 }
 
 NAN_METHOD(Matrix::WarpAffine) {

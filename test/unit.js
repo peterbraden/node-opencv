@@ -112,6 +112,10 @@ test('Matrix functions', function(assert) {
   assert.equal(matNew.height(), 1);
   assert.equal(matNew.width(), 5625);
 
+  // GetRotationMatrix2D
+  mat = cv.Matrix.getRotationMatrix2D(0, 0, 90, 1.0);
+  assert.deepEqual(mat.size(), [2,3], 'GetRotationMatrix2D');
+
   assert.end();
 })
 
