@@ -20,14 +20,7 @@
         "src/Calib3D.cc",
         "src/ImgProc.cc",
         "src/Stereo.cc",
-        "src/LDAWrap.cc",
-	"src/CMT/CMT.cpp",
-	"src/CMT/Consensus.cpp",
-	"src/CMT/fastcluster/fastcluster.cpp",
-	"src/CMT/Fusion.cpp",
-	"src/CMT/Matcher.cpp",
-	"src/CMT/Tracker.cpp",
-	"src/CMT/common.cpp"
+        "src/LDAWrap.cc"
       ],
 
       "libraries": [
