@@ -24,12 +24,12 @@
       ],
 
       "libraries": [
-        "<!@(pkg-config --libs opencv)"
+        "<!@(node utils/find-opencv.js --libs)"
       ],
       # For windows
 
       "include_dirs": [
-        "<!@(pkg-config --cflags opencv)",
+        "<!@(node utils/find-opencv.js --cflags)",
         "<!(node -e \"require('nan')\")"
       ],
 
@@ -45,8 +45,10 @@
         }],
         [ "OS==\"win\"", {
             "cflags": [
-              "<!@(pkg-config --cflags \"opencv >= 2.4.9\" )",
               "-Wall"
+            ],
+            "defines": [
+                "WIN"
             ],
             "msvs_settings": {
               "VCCLCompilerTool": {

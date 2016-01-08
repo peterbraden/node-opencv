@@ -1,6 +1,16 @@
 #ifndef __NODE_OPENCV_H__
 #define __NODE_OPENCV_H__
 
+#ifdef WIN
+    /*
+        This is needed on Windows for Visual Studio to not throw an error in the
+        build/include/opencv2/flann/any.h file in OpenCV.
+    */
+    namespace std{ typedef type_info type_info; }
+#endif
+
+
+
 #include <v8.h>
 #include <node.h>
 #include <node_object_wrap.h>
