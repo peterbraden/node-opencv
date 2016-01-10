@@ -16,16 +16,18 @@ cool, I'd love to hear about it!
 You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.
 
 ## Specific for Windows
-1. Download and install opencv (Be sure to use a 2.4 version) @
+1. Download and install OpenCV (Be sure to use a 2.4 version) @
 http://opencv.org/downloads.html
 For these instructions we will assume OpenCV is put at C:\OpenCV, but you can
 adjust accordingly.
 
-2. Add the following to your PATH variable
-    C:\OpenCV\build\x64\vc12\bin;
-   The "x64" needs to match the version of NodeJS you are using.
+2. If you haven't already, create a system variable called OPENCV_DIR and set it
+   to C:\OpenCV\build\x64\vc12
 
-   Also set OPENCV_DIR to C:\OpenCV\build
+   Make sure the "x64" part matches the version of NodeJS you are using.
+
+   Also add the following to your system PATH
+        ;%OPENCV_DIR%\bin
 
 3. Install Visual Studio 2013. Make sure to get the C++ components.
    You can use a different edition, just make sure OpenCV supports it, and you
