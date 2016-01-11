@@ -192,7 +192,7 @@ functions for accessing, computing with, and altering the contours contained in 
 See [relevant source code](src/Contours.cc) and [examples](examples/)
 
 ```javascript
-var contours = im.findContours;
+var contours = im.findContours();
 
 // Count of contours in the Contours object
 contours.size();
