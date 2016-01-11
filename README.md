@@ -1,4 +1,4 @@
-# node-opencv 
+# node-opencv
 
 [![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.png)](http://travis-ci.org/peterbraden/node-opencv)
 
@@ -16,41 +16,27 @@ cool, I'd love to hear about it!
 You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.
 
 ## Specific for Windows
-1. Download Install opencv @ - (I used version 2.4.4)
+1. Download and install OpenCV (Be sure to use a 2.4 version) @
 http://opencv.org/downloads.html
-Put it in c:\opencv
+For these instructions we will assume OpenCV is put at C:\OpenCV, but you can
+adjust accordingly.
 
-2. Install python version 2.7 @
-http://www.python.org/download/releases/2.7/
-put it in c:\python27
+2. If you haven't already, create a system variable called OPENCV_DIR and set it
+   to C:\OpenCV\build\x64\vc12
 
-3. install pkg-config by downloading the all in one bundle @ - (I used Gtk+ 3.6.4)
-http://www.gtk.org/download/win64.php
-put it in c:\pkg-config
+   Make sure the "x64" part matches the version of NodeJS you are using.
 
-4. Add the following to your path variables
-C:\pkg-config\bin;C:\OpenCV\build\x64\vc11\bin;
+   Also add the following to your system PATH
+        ;%OPENCV_DIR%\bin
 
-5. Install visual-studio in 4 steps
+3. Install Visual Studio 2013. Make sure to get the C++ components.
+   You can use a different edition, just make sure OpenCV supports it, and you
+   set the "vcxx" part of the variables above to match.
 
-  - install Visual C++ 2010 Express
-  
-  - install Windows SDK for windows 7 and .net framework 4
-  
-  - install Visual Studio 2010 Service Pack 1
-  
-  - install Visual C++ 2010 Service Pack 1 Compiler
-
-
-6. Download npeterbraden/node-opencv fork
+4. Download peterbraden/node-opencv fork
 git clone https://github.com/peterbraden/node-opencv
 
-7. edit file src/Matrix.cpp
-put "inline double round( double d ) { return floor( d + 0.5);}" below "cv::Rect* setRect(Local<Object> objRect, cv::Rect &result);"
-
-8. run npm install
-
-Then:
+5. run npm install
 
 ```bash
 $ npm install opencv
@@ -175,8 +161,8 @@ im.line([x1,y1], [x2, y2])
 
 #### Object Detection
 
-There is a shortcut method for 
-[Viola-Jones Haar Cascade](http://www.cognotics.com/opencv/servo_2007_series/part_2/sidebar.html) object 
+There is a shortcut method for
+[Viola-Jones Haar Cascade](http://www.cognotics.com/opencv/servo_2007_series/part_2/sidebar.html) object
 detection. This can be used for face detection etc.
 
 ```javascript
@@ -239,4 +225,3 @@ contours.convexHull(index, clockwise);
 ## MIT License
 The library is distributed under the MIT License - if for some reason that
 doesn't work for you please get in touch.
-
