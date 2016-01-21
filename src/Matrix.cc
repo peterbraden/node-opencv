@@ -145,22 +145,22 @@ NAN_METHOD(Matrix::New) {
 }
 
 Matrix::Matrix() :
-    Nan::ObjectWrap() {
+    node_opencv::Matrix() {
   mat = cv::Mat();
 }
 
 Matrix::Matrix(int rows, int cols) :
-    Nan::ObjectWrap() {
+    node_opencv::Matrix() {
   mat = cv::Mat(rows, cols, CV_32FC3);
 }
 
 Matrix::Matrix(int rows, int cols, int type) :
-    Nan::ObjectWrap() {
+    node_opencv::Matrix() {
   mat = cv::Mat(rows, cols, type);
 }
 
 Matrix::Matrix(cv::Mat m, cv::Rect roi) :
-    Nan::ObjectWrap() {
+    node_opencv::Matrix() {
   mat = cv::Mat(m, roi);
 }
 
