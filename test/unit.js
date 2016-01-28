@@ -326,6 +326,16 @@ test('LDA Wrap', function(assert) {
   assert.end();
 })
 
+
+test('Native Matrix', function(assert) {
+  var nativemat = require('../build/Release/test_nativemat.node');
+  var mat = new cv.Matrix(42, 8);
+
+  assert.deepEqual(mat.size(), nativemat.size(mat), 'nativemat');
+  assert.end();
+})
+
+
 // Test the examples folder.
 require('./examples')()
 
