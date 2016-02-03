@@ -59,6 +59,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "gaussianBlur", GaussianBlur);
   Nan::SetPrototypeMethod(ctor, "medianBlur", MedianBlur);
   Nan::SetPrototypeMethod(ctor, "bilateralFilter", BilateralFilter);
+  Nan::SetPrototypeMethod(ctor, "sobel", Sobel);
   Nan::SetPrototypeMethod(ctor, "copy", Copy);
   Nan::SetPrototypeMethod(ctor, "flip", Flip);
   Nan::SetPrototypeMethod(ctor, "roi", ROI);
@@ -1153,6 +1154,36 @@ NAN_METHOD(Matrix::BilateralFilter) {
   filtered.copyTo(self->mat);
 
   info.GetReturnValue().Set(Nan::Null());
+}
+
+NAN_METHOD(Matrix::Sobel) {
+  Nan::HandleScope scope;
+
+  if (info.Length() < 3)
+    Nan::ThrowError("Need more arguments: sobel(ddepth, xorder, yorder, ksize=3, scale=1.0, delta=0.0, borderType=CV_BORDER_DEFAULT)");
+
+  int ddepth = info[0]->IntegerValue();
+  int xorder = info[1]->IntegerValue();
+  int yorder = info[2]->IntegerValue();
+
+  int ksize = 3;
+  if (info.Length() > 3) ksize = info[3]->IntegerValue();
+  double scale = 1;
+  if (info.Length() > 4) scale = info[4]->NumberValue();
+  double delta = 0;
+  if (info.Length() > 5) delta = info[5]->NumberValue();
+  int borderType = cv::BORDER_DEFAULT;
+  if (info.Length() > 6) borderType = info[6]->IntegerValue();
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+
+  Local<Object> result_to_return =
+      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *result = Nan::ObjectWrap::Unwrap<Matrix>(result_to_return);
+
+  cv::Sobel(self->mat, result->mat, ddepth, xorder, yorder, ksize, scale, delta, borderType);
+
+  info.GetReturnValue().Set(result_to_return);
 }
 
 NAN_METHOD(Matrix::Copy) {
