@@ -2,11 +2,12 @@
 #define __NODE_STEREO_H
 
 #include "OpenCV.h"
-#include <opencv2/calib3d.hpp>
 
 class StereoBM: public Nan::ObjectWrap {
 public:
+
   cv::Ptr<cv::StereoBM> stereo;
+
 
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Local<Object> target);
@@ -21,7 +22,7 @@ public:
 
 class StereoSGBM: public Nan::ObjectWrap {
 public:
-  cv::Ptr<cv::StereoSGBM> stereo;
+  cv::Ptr<cv::StereoBM> stereo;
 
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Local<Object> target);
@@ -44,7 +45,7 @@ public:
 
 };
 
-#if CV_VERSION_MAJOR < 3
+#if CV_MAJOR_VERSION < 3
 
 struct CvStereoGCState;
 
@@ -61,4 +62,5 @@ public:
   JSFUNC(Compute);
 };
 #endif
+
 #endif

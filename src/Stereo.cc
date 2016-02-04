@@ -1,10 +1,9 @@
 #include "Stereo.h"
 #include "Matrix.h"
-#if CV_MAJOR_VERSION < 3
-#include <opencv2/legacy.hpp>
-#endif
 
 #if CV_MAJOR_VERSION >= 3
+#include <opencv2/calib3d.hpp>
+#include <opencv2/legacy.hpp>
 #include <opencv2/ml.hpp>
 #endif
 // Block matching
@@ -60,22 +59,27 @@ StereoBM::StereoBM(int preset, int ndisparities, int SADWindowSize) :
     Nan::ObjectWrap(),
     stereo(preset, ndisparities, SADWindowSize) {
 }
+
+// TODO make this async
+NAN_METHOD(StereoBM::Compute) {
+   SETUP_FUNCTION(StereoBM)
+
     try {
         // Get the arguments
 
         // Arg 0, the 'left' image
-        Matrix* m0 = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+        Matrix* m0 = ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
         cv::Mat left = m0->mat;
 
         // Arg 1, the 'right' image
-        Matrix* m1 = ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+        Matrix* m1 = ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
         cv::Mat right = m1->mat;
 
         // Optional 3rd arg, the disparty depth
         int type = CV_16S;
-        if(args.Length() > 2)
+        if(info.Length() > 2)
         {
-            type = args[2]->IntegerValue();
+            type = info[2]->IntegerValue();
         }
 
         // Compute stereo using the block matching algorithm

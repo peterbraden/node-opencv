@@ -123,7 +123,7 @@ NAN_METHOD(Matrix::New) {
     Nan::ThrowTypeError("Cannot instantiate without new");
   }
 
-  Matrix *mat;
+  Matrix *mat=0;
 
   if (info.Length() == 0) {
     mat = new Matrix;
