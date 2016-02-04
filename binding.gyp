@@ -37,7 +37,7 @@
       "cflags_cc!": [ "-fno-rtti",  "-fno-exceptions"],
 
       "conditions": [
-        [ "OS==\"linux\"", {
+        [ "OS==\"linux\" or OS==\"freebsd\" or OS==\"openbsd\" or OS==\"solaris\" or OS==\"aix\"", {
             "cflags": [
               "<!@(pkg-config --cflags \"opencv >= 2.3.1\" )",
               "-Wall"
