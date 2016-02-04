@@ -3,17 +3,16 @@
 
 #include "OpenCV.h"
 
-// Implementation of imgproc.hpp functions
-
-class ImgProc: public node::ObjectWrap {
+/**
+ * Implementation of imgproc.hpp functions
+ */
+class ImgProc: public Nan::ObjectWrap {
 public:
-    static void Init(Handle<Object> target);
-
-    static NAN_METHOD(Undistort);
-
-    static NAN_METHOD(InitUndistortRectifyMap);
-
-    static NAN_METHOD(Remap);
+  static void Init(Local<Object> target);
+  static NAN_METHOD(Undistort);
+  static NAN_METHOD(InitUndistortRectifyMap);
+  static NAN_METHOD(Remap);
+  static NAN_METHOD(GetStructuringElement);
 };
 
 #endif

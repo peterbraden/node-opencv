@@ -14,10 +14,10 @@
 #include "ImgProc.h"
 #include "Stereo.h"
 #include "BackgroundSubtractor.h"
+#include "LDAWrap.h"
 
-extern "C" void
-init(Handle<Object> target) {
-    NanScope();
+extern "C" void init(Local<Object> target) {
+    Nan::HandleScope scope;
     OpenCV::Init(target);
 
     Point::Init(target);
@@ -36,12 +36,12 @@ init(Handle<Object> target) {
     StereoGC::Init(target);
 #endif
 
-   #if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
-      BackgroundSubtractorWrap::Init(target);
-      Features::Init(target);
-      FaceRecognizerWrap::Init(target);
-   #endif
-
+#if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
+    BackgroundSubtractorWrap::Init(target);
+    Features::Init(target);
+    FaceRecognizerWrap::Init(target);
+    LDAWrap::Init(target);
+#endif
 };
 
 NODE_MODULE(opencv, init)

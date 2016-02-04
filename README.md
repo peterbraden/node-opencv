@@ -1,9 +1,9 @@
-# node-opencv 
+# node-opencv
 
 [![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.png)](http://travis-ci.org/peterbraden/node-opencv)
 
 
-[OpenCV](http://opencv.willowgarage.com/wiki/) bindings for Node.js. OpenCV is
+[OpenCV](http://opencv.org) bindings for Node.js. OpenCV is
 the defacto computer vision library - by interfacing with it natively in node,
 we get powerful real time vision in js.
 
@@ -15,7 +15,28 @@ cool, I'd love to hear about it!
 
 You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.
 
-Then:
+## Specific for Windows
+1. Download and install OpenCV (Be sure to use a 2.4 version) @
+http://opencv.org/downloads.html
+For these instructions we will assume OpenCV is put at C:\OpenCV, but you can
+adjust accordingly.
+
+2. If you haven't already, create a system variable called OPENCV_DIR and set it
+   to C:\OpenCV\build\x64\vc12
+
+   Make sure the "x64" part matches the version of NodeJS you are using.
+
+   Also add the following to your system PATH
+        ;%OPENCV_DIR%\bin
+
+3. Install Visual Studio 2013. Make sure to get the C++ components.
+   You can use a different edition, just make sure OpenCV supports it, and you
+   set the "vcxx" part of the variables above to match.
+
+4. Download peterbraden/node-opencv fork
+git clone https://github.com/peterbraden/node-opencv
+
+5. run npm install
 
 ```bash
 $ npm install opencv
@@ -140,15 +161,15 @@ im.line([x1,y1], [x2, y2])
 
 #### Object Detection
 
-There is a shortcut method for 
-[Viola-Jones Haar Cascade](http://www.cognotics.com/opencv/servo_2007_series/part_2/sidebar.html) object 
+There is a shortcut method for
+[Viola-Jones Haar Cascade](http://www.cognotics.com/opencv/servo_2007_series/part_2/sidebar.html) object
 detection. This can be used for face detection etc.
 
 ```javascript
 mat.detectObject(haar_cascade_xml, opts, function(err, matches){})
 ```
 
-For convenience in face recognition, cv.FACE_CASCADE is a cascade that can be used for frontal face recognition.
+For convenience in face detection, cv.FACE_CASCADE is a cascade that can be used for frontal face detection.
 
 Also:
 
@@ -171,7 +192,7 @@ functions for accessing, computing with, and altering the contours contained in 
 See [relevant source code](src/Contours.cc) and [examples](examples/)
 
 ```javascript
-var contours = im.findContours;
+var contours = im.findContours();
 
 // Count of contours in the Contours object
 contours.size();
@@ -204,4 +225,3 @@ contours.convexHull(index, clockwise);
 ## MIT License
 The library is distributed under the MIT License - if for some reason that
 doesn't work for you please get in touch.
-

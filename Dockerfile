@@ -4,15 +4,16 @@
 # 2) Build: wget https://raw.github.com/dotcloud/docker/v0.1.6/contrib/docker-build/docker-build && python docker-build $USER/node-opencv < Dockerfile
 # 3) Test: docker run $USER/node-opencv node -e "console.log(require('opencv').version)"
 #
-# VERSION		0.1
-# DOCKER-VERSION	0.1.6
+# VERSION		0.2
+# DOCKER-VERSION	8.1.2
 
-from	ubuntu:12.04
-run	echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
-run	apt-get update
-run	apt-get install -q -y libcv-dev
-run	apt-get install -q -y libopencv-dev
-run	apt-get install -q -y libhighgui-dev
-run	apt-get install wget
-run	wget -O - http://nodejs.org/dist/v0.8.23/node-v0.8.23-linux-x64.tar.gz | tar -C /usr/local/ --strip-components=1 -zxv
-run	npm install opencv
+# update to 14.04
+from	ubuntu:14.04
+run apt-get update -qq
+run apt-get install -y software-properties-common python-software-properties
+run add-apt-repository -y ppa:kubuntu-ppa/backports
+run apt-get update
+run apt-get install -y libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
+run curl -sL https://deb.nodesource.com/setup | bash -
+run apt-get install -y nodejs
+run	npm install opencv || cat npm-debug.log

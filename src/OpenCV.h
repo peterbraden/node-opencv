@@ -1,6 +1,16 @@
 #ifndef __NODE_OPENCV_H__
 #define __NODE_OPENCV_H__
 
+#ifdef WIN
+    /*
+        This is needed on Windows for Visual Studio to not throw an error in the
+        build/include/opencv2/flann/any.h file in OpenCV.
+    */
+    namespace std{ typedef type_info type_info; }
+#endif
+
+
+
 #include <v8.h>
 #include <node.h>
 #include <node_object_wrap.h>
@@ -21,43 +31,38 @@ using namespace v8;
 using namespace node;
 
 #define REQ_FUN_ARG(I, VAR)                                             \
-  if (args.Length() <= (I) || !args[I]->IsFunction())                   \
-    return NanThrowTypeError("Argument " #I " must be a function");  \
-  Local<Function> VAR = Local<Function>::Cast(args[I]);
-
+  if (info.Length() <= (I) || !info[I]->IsFunction())                   \
+    return Nan::ThrowTypeError("Argument " #I " must be a function");  \
+  Local<Function> VAR = Local<Function>::Cast(info[I]);
 
 #define SETUP_FUNCTION(TYP)	\
-	NanScope();		\
-	TYP *self = ObjectWrap::Unwrap<TYP>(args.This());
+	Nan::HandleScope scope;		\
+	TYP *self = Nan::ObjectWrap::Unwrap<TYP>(info.This());
 
 #define JSFUNC(NAME) \
   static NAN_METHOD(NAME);
 
 #define JSTHROW_TYPE(ERR) \
-  NanThrowTypeError( ERR );
-
+  Nan::ThrowTypeError( ERR );
 
 #define JSTHROW(ERR) \
-  NanThrowError( ERR );
-
+  Nan::ThrowError( ERR );
 
 #define INT_FROM_ARGS(NAME, IND) \
-  if (args[IND]->IsInt32()){ \
-    NAME = args[IND]->Uint32Value(); \
+  if (info[IND]->IsInt32()){ \
+    NAME = info[IND]->Uint32Value(); \
   }
 
 #define DOUBLE_FROM_ARGS(NAME, IND) \
-  if (args[IND]->IsInt32()){ \
-    NAME = args[IND]->NumberValue(); \
+  if (info[IND]->IsInt32()){ \
+    NAME = info[IND]->NumberValue(); \
   }
 
-class OpenCV: public node::ObjectWrap{
-  public:
-    static void Init(Handle<Object> target);
+class OpenCV: public Nan::ObjectWrap {
+public:
+  static void Init(Local<Object> target);
 
-    static NAN_METHOD(ReadImage);
+  static NAN_METHOD(ReadImage);
 };
-
-
 
 #endif

@@ -3,137 +3,125 @@
 #include <iostream>
 #include <nan.h>
 
-#if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
+#if ((CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >=4))
 
-Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
+Nan::Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
 
-void
-BackgroundSubtractorWrap::Init(Handle<Object> target) {
-    NanScope();
+void BackgroundSubtractorWrap::Init(Local<Object> target) {
+  Nan::HandleScope scope;
 
-    // Constructor
-    Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(BackgroundSubtractorWrap::New);
-    NanAssignPersistent(constructor, ctor);
-    ctor->InstanceTemplate()->SetInternalFieldCount(1);
-    ctor->SetClassName(NanNew("BackgroundSubtractor"));
+  // Constructor
+  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(BackgroundSubtractorWrap::New);
+  constructor.Reset(ctor);
+  ctor->InstanceTemplate()->SetInternalFieldCount(1);
+  ctor->SetClassName(Nan::New("BackgroundSubtractor").ToLocalChecked());
 
-    NODE_SET_METHOD(ctor, "createMOG", CreateMOG);
-    NODE_SET_PROTOTYPE_METHOD(ctor, "applyMOG", ApplyMOG);
+  Nan::SetMethod(ctor, "createMOG", CreateMOG);
+  Nan::SetPrototypeMethod(ctor, "applyMOG", ApplyMOG);
 
-    target->Set(NanNew("BackgroundSubtractor"), ctor->GetFunction());
-
-};
+  target->Set(Nan::New("BackgroundSubtractor").ToLocalChecked(), ctor->GetFunction());
+}
 
 NAN_METHOD(BackgroundSubtractorWrap::New) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  if (args.This()->InternalFieldCount() == 0)
+  if (info.This()->InternalFieldCount() == 0) {
     JSTHROW_TYPE("Cannot Instantiate without new")
+  }
 
-  //Create MOG by default
+  // Create MOG by default
   cv::Ptr<cv::BackgroundSubtractor> bg;
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+  pt->Wrap(info.This());
 
-  pt->Wrap(args.This());
-
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
-  NanScope();
+  Nan::HandleScope scope;
 
   // int history = 200;
   // int nmixtures = 5;
   // double backgroundRatio = 0.7;
   // double noiseSigma = 0;
   //
-  // if(args.Length() > 1){
+  // if(info.Length() > 1){
   //   INT_FROM_ARGS(history, 0)
   //   INT_FROM_ARGS(nmixtures, 1)
   //   DOUBLE_FROM_ARGS(backgroundRatio, 2)
   //   DOUBLE_FROM_ARGS(noiseSigma, 3)
   // }
 
-  Local<Object> n = NanNew(BackgroundSubtractorWrap::constructor)->GetFunction()->NewInstance();
+  Local<Object> n = Nan::New(BackgroundSubtractorWrap::constructor)->GetFunction()->NewInstance();
 
   cv::Ptr<cv::BackgroundSubtractor> bg;
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
-  NanReturnValue( n );
-};
+  info.GetReturnValue().Set( n );
+}
 
-//Fetch foreground mask
+// Fetch foreground mask
 NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
-
-  SETUP_FUNCTION(BackgroundSubtractorWrap)
-
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
   REQ_FUN_ARG(1, cb);
 
   Local<Value> argv[2];
-
-  if(args.Length() == 0){
-    argv[0] = NanNew("Input image missing");
-    argv[1] = NanNull();
-    cb->Call(NanGetCurrentContext()->Global(), 2, argv);
-    NanReturnUndefined();
+  if (info.Length() == 0) {
+    argv[0] = Nan::New("Input image missing").ToLocalChecked();
+    argv[1] = Nan::Null();
+    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+    return;
   }
 
-  try{
-
-    Local<Object> fgMask = NanNew(Matrix::constructor)->GetFunction()->NewInstance();
-    Matrix *img = ObjectWrap::Unwrap<Matrix>(fgMask);
-
+  try {
+    Local<Object> fgMask =
+        Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(fgMask);
 
     cv::Mat mat;
-
-    if(Buffer::HasInstance(args[0])){
-      uint8_t *buf = (uint8_t *) Buffer::Data(args[0]->ToObject());
-      unsigned len = Buffer::Length(args[0]->ToObject());
+    if (Buffer::HasInstance(info[0])) {
+      uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
+      unsigned len = Buffer::Length(info[0]->ToObject());
       cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
       mat = cv::imdecode(*mbuf, -1);
       //mbuf->release();
-    }
-    else{
-      Matrix *_img = ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+    } else {
+      Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
       mat = (_img->mat).clone();
     }
 
-    if (mat.empty()){
-      return NanThrowTypeError("Error loading file");
+    if (mat.empty()) {
+      return Nan::ThrowTypeError("Error loading file");
     }
 
     cv::Mat _fgMask;
     self->subtractor->operator()(mat, _fgMask);
 
     img->mat = _fgMask;
-
     mat.release();
 
-    argv[0] = NanNull();
+    argv[0] = Nan::Null();
     argv[1] = fgMask;
 
-    TryCatch try_catch;
-
-    cb->Call(NanGetCurrentContext()->Global(), 2, argv);
+    Nan::TryCatch try_catch;
+    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
 
     if (try_catch.HasCaught()) {
-        FatalException(try_catch);
-      }
-
-      NanReturnUndefined();
-  }
-  catch( cv::Exception& e ){
+      Nan::FatalException(try_catch);
+    }
+    return;
+  } catch (cv::Exception& e) {
     const char* err_msg = e.what();
-    NanThrowError(err_msg);
-    NanReturnUndefined();
+    Nan::ThrowError(err_msg);
+    return;
   }
+}
 
-};
-
-BackgroundSubtractorWrap::BackgroundSubtractorWrap(cv::Ptr<cv::BackgroundSubtractor> _subtractor){
+BackgroundSubtractorWrap::BackgroundSubtractorWrap(
+    cv::Ptr<cv::BackgroundSubtractor> _subtractor) {
   subtractor = _subtractor;
-};
+}
 
 #endif
 

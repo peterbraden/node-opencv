@@ -1,13 +1,13 @@
 {
   "name": "opencv",
+  "version": "4.0.0",
   "description": "Node Bindings to OpenCV",
   "author": "Peter Braden <peterbraden@peterbraden.co.uk>",
   "dependencies": {
-    "buffers": "0.1.1",
-    "nan": "^1.7.0",
-    "node-pre-gyp": "^0.6.4"
+    "buffers": "^0.1.1",
+    "nan": "^2.0.9",
+    "node-pre-gyp": "^0.6.11"
   },
-  "version": "3.0.1",
   "devDependencies": {
     "tape": "^3.0.0",
     "aws-sdk": "~2.1.20",
@@ -35,7 +35,7 @@
     "url": "https://github.com/peterbraden/node-opencv.git"
   },
   "engines": {
-    "node": ">=0.10"
+    "node": ">=0.12"
   },
   "binary": {
     "module_name": "opencv",

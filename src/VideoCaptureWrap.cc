@@ -5,208 +5,268 @@
 #include  <iostream>
 using namespace std;
 
-
-v8::Persistent<FunctionTemplate> VideoCaptureWrap::constructor;
+Nan::Persistent<FunctionTemplate> VideoCaptureWrap::constructor;
 
 struct videocapture_baton {
 
-	Persistent<Function> cb;
-	VideoCaptureWrap *vc;
-	Matrix *im;
+  Nan::Persistent<Function> cb;
+  VideoCaptureWrap *vc;
+  Matrix *im;
 
-	uv_work_t request;
+  uv_work_t request;
 };
 
+void VideoCaptureWrap::Init(Local<Object> target) {
+  Nan::HandleScope scope;
 
-void
-VideoCaptureWrap::Init(Handle<Object> target) {
-  NanScope();
-
-	//Class
-  Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(VideoCaptureWrap::New);
-  NanAssignPersistent(constructor, ctor);
+  //Class
+  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(VideoCaptureWrap::New);
+  constructor.Reset(ctor);
   ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(NanNew("VideoCapture"));
-  
+  ctor->SetClassName(Nan::New("VideoCapture").ToLocalChecked());
+
   // Prototype
-	//Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
+  //Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
 
-	NODE_SET_PROTOTYPE_METHOD(ctor, "read", Read);
-	NODE_SET_PROTOTYPE_METHOD(ctor, "setWidth", SetWidth);
-	NODE_SET_PROTOTYPE_METHOD(ctor, "setHeight", SetHeight);
-	NODE_SET_PROTOTYPE_METHOD(ctor, "setPosition", SetPosition);
-  NODE_SET_PROTOTYPE_METHOD(ctor, "close", Close);
-  NODE_SET_PROTOTYPE_METHOD(ctor, "ReadSync", ReadSync);
+  Nan::SetPrototypeMethod(ctor, "read", Read);
+  Nan::SetPrototypeMethod(ctor, "setWidth", SetWidth);
+  Nan::SetPrototypeMethod(ctor, "setHeight", SetHeight);
+  Nan::SetPrototypeMethod(ctor, "setPosition", SetPosition);
+  Nan::SetPrototypeMethod(ctor, "getFrameAt", GetFrameAt);
+  Nan::SetPrototypeMethod(ctor, "close", Close);
+  Nan::SetPrototypeMethod(ctor, "ReadSync", ReadSync);
+  Nan::SetPrototypeMethod(ctor, "grab", Grab);
+  Nan::SetPrototypeMethod(ctor, "retrieve", Retrieve);
 
-	target->Set(NanNew("VideoCapture"), ctor->GetFunction());
-};    
+  target->Set(Nan::New("VideoCapture").ToLocalChecked(), ctor->GetFunction());
+}
 
 NAN_METHOD(VideoCaptureWrap::New) {
-	NanScope();
+  Nan::HandleScope scope;
 
-  if (args.This()->InternalFieldCount() == 0)
-		return NanThrowTypeError("Cannot Instantiate without new");
+  if (info.This()->InternalFieldCount() == 0)
+  return Nan::ThrowTypeError("Cannot Instantiate without new");
 
-	VideoCaptureWrap *v;
+  VideoCaptureWrap *v;
 
-	if (args[0]->IsNumber()){
-		v = new VideoCaptureWrap(args[0]->NumberValue());
-	} else {
+  if (info[0]->IsNumber()) {
+    v = new VideoCaptureWrap(info[0]->NumberValue());
+  } else {
     //TODO - assumes that we have string, verify
-    v = new VideoCaptureWrap(std::string(*NanAsciiString(args[0]->ToString())));
+    v = new VideoCaptureWrap(std::string(*Nan::Utf8String(info[0]->ToString())));
   }
 
+  v->Wrap(info.This());
 
-	v->Wrap(args.This());
-
-	NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-VideoCaptureWrap::VideoCaptureWrap(int device){
+VideoCaptureWrap::VideoCaptureWrap(int device) {
+  Nan::HandleScope scope;
+  cap.open(device);
 
-	NanScope();
-	cap.open(device);
-
-	if(!cap.isOpened()){
-    NanThrowError("Camera could not be opened");
-	}
+  if(!cap.isOpened()) {
+    Nan::ThrowError("Camera could not be opened");
+  }
 }
 
-VideoCaptureWrap::VideoCaptureWrap(const std::string& filename){
-  NanScope();
-	cap.open(filename);
+VideoCaptureWrap::VideoCaptureWrap(const std::string& filename) {
+  Nan::HandleScope scope;
+  cap.open(filename);
   // TODO! At the moment this only takes a full path - do relative too.
-	if(!cap.isOpened()){
-    NanThrowError("Video file could not be opened (opencv reqs. non relative paths)");
-	}
-
+  if(!cap.isOpened()) {
+    Nan::ThrowError("Video file could not be opened (opencv reqs. non relative paths)");
+  }
 }
 
-NAN_METHOD(VideoCaptureWrap::SetWidth){
+NAN_METHOD(VideoCaptureWrap::SetWidth) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
-	NanScope();
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+  if(info.Length() != 1)
+  return;
 
-	if(args.Length() != 1)
-		NanReturnUndefined();
-	
-	int w = args[0]->IntegerValue();
+  int w = info[0]->IntegerValue();
 
-	if(v->cap.isOpened())
-		v->cap.set(CV_CAP_PROP_FRAME_WIDTH, w);
+  if(v->cap.isOpened())
+  v->cap.set(CV_CAP_PROP_FRAME_WIDTH, w);
 
-	NanReturnUndefined();
+  return;
 }
 
-NAN_METHOD(VideoCaptureWrap::SetHeight){
+NAN_METHOD(VideoCaptureWrap::SetHeight) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
-	NanScope();
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+  if(info.Length() != 1)
+  return;
 
-	if(args.Length() != 1)
-		NanReturnUndefined();
-	
-	int h = args[0]->IntegerValue();
+  int h = info[0]->IntegerValue();
 
-	v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, h);
+  v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, h);
 
-	NanReturnUndefined();
+  return;
 }
 
-NAN_METHOD(VideoCaptureWrap::SetPosition){
+NAN_METHOD(VideoCaptureWrap::SetPosition) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
-	NanScope();
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+  if(info.Length() != 1)
+  return;
 
-	if(args.Length() != 1)
-		NanReturnUndefined();
-	
-	int pos = args[0]->IntegerValue();
+  int pos = info[0]->IntegerValue();
 
-	v->cap.set(CV_CAP_PROP_POS_FRAMES, pos);
+  v->cap.set(CV_CAP_PROP_POS_FRAMES, pos);
 
-	NanReturnUndefined();
+  return;
 }
 
-NAN_METHOD(VideoCaptureWrap::Close){
+NAN_METHOD(VideoCaptureWrap::GetFrameAt) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
-	NanScope();
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+  if(info.Length() != 1)
+  return;
 
-	v->cap.release();
+  int pos = info[0]->IntegerValue();
 
-	NanReturnUndefined();
+  v->cap.set(CV_CAP_PROP_POS_MSEC, pos);
+
+  return;
 }
 
+NAN_METHOD(VideoCaptureWrap::Close) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
-class AsyncVCWorker : public NanAsyncWorker {
- public:
-  AsyncVCWorker(NanCallback *callback, VideoCaptureWrap* vc, Matrix* matrix)
-    : NanAsyncWorker(callback), vc(vc), matrix(matrix) {}
-  ~AsyncVCWorker() {}
+  v->cap.release();
+
+  return;
+}
+
+class AsyncVCWorker: public Nan::AsyncWorker {
+public:
+  AsyncVCWorker(Nan::Callback *callback, VideoCaptureWrap* vc,
+  bool retrieve = false, int channel = 0) :
+      Nan::AsyncWorker(callback),
+      vc(vc),
+      retrieve(retrieve),
+      channel(channel) {
+  }
+
+  ~AsyncVCWorker() {
+  }
 
   // Executed inside the worker-thread.
   // It is not safe to access V8, or V8 data structures
   // here, so everything we need for input and output
   // should go on `this`.
-  void Execute () {
-	  this->vc->cap.read(matrix->mat);
+  void Execute() {
+    if (retrieve) {
+      if (!this->vc->cap.retrieve(mat, channel)) {
+        SetErrorMessage("retrieve failed");
+      }
+      return;
+    }
+    this->vc->cap.read(mat);
   }
 
   // Executed when the async work is complete
   // this function will be run inside the main event loop
   // so it is safe to use V8 again
-  void HandleOKCallback () {
-    NanScope();
-    
-    Local<Object> im_to_return= NanNew(Matrix::constructor)->GetFunction()->NewInstance();
-	  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_to_return);
-	  cv::Mat mat;
-	  mat = this->matrix->mat;
-	  img->mat = mat;
+  void HandleOKCallback() {
+    Nan::HandleScope scope;
+
+    Local<Object> im_to_return= Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
+    img->mat = mat;
 
     Local<Value> argv[] = {
-        NanNull()
+      Nan::Null()
       , im_to_return
     };
-    
-    TryCatch try_catch;
+
+    Nan::TryCatch try_catch;
     callback->Call(2, argv);
     if (try_catch.HasCaught()) {
-      FatalException(try_catch);
+      Nan::FatalException(try_catch);
     }
   }
 
- private:
+private:
   VideoCaptureWrap *vc;
-  Matrix* matrix;
+  cv::Mat mat;
+  bool retrieve;
+  int channel;
 };
 
-
-
 NAN_METHOD(VideoCaptureWrap::Read) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
-	NanScope();
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
+  REQ_FUN_ARG(0, cb);
 
-	REQ_FUN_ARG(0, cb);
+  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+  Nan::AsyncQueueWorker(new AsyncVCWorker(callback, v));
 
-  NanCallback *callback = new NanCallback(cb.As<Function>());
-  NanAsyncQueueWorker(new AsyncVCWorker(callback, v, new Matrix()));	
-	
-	NanReturnUndefined();
+  return;
 }
 
-
 NAN_METHOD(VideoCaptureWrap::ReadSync) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
-	NanScope();
-	VideoCaptureWrap *v = ObjectWrap::Unwrap<VideoCaptureWrap>(args.This());
-
-  Local<Object> im_to_return= NanNew(Matrix::constructor)->GetFunction()->NewInstance();
-  Matrix *img = ObjectWrap::Unwrap<Matrix>(im_to_return);
+  Local<Object> im_to_return= Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
 
   v->cap.read(img->mat);
 
-	NanReturnValue(im_to_return);
+  info.GetReturnValue().Set(im_to_return);
+}
+
+class AsyncGrabWorker: public Nan::AsyncWorker {
+public:
+  AsyncGrabWorker(Nan::Callback *callback, VideoCaptureWrap* vc) :
+      Nan::AsyncWorker(callback),
+      vc(vc) {
+  }
+
+  ~AsyncGrabWorker() {
+  }
+
+  void Execute() {
+    if (!this->vc->cap.grab()) {
+      SetErrorMessage("grab failed");
+    }
+  }
+
+private:
+  VideoCaptureWrap *vc;
+};
+
+NAN_METHOD(VideoCaptureWrap::Grab) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  REQ_FUN_ARG(0, cb);
+
+  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+  Nan::AsyncQueueWorker(new AsyncGrabWorker(callback, v));
+
+  return;
+}
+
+NAN_METHOD(VideoCaptureWrap::Retrieve) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int channel = 0;
+  REQ_FUN_ARG(0, cb);
+  INT_FROM_ARGS(channel, 1);
+
+  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+  Nan::AsyncQueueWorker(new AsyncVCWorker(callback, v, true, channel));
+
+  return;
 }

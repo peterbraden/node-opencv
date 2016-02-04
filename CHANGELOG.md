@@ -1,6 +1,25 @@
 
 # Changelog
 
+## 4.0.0
+
+I've been super slow releasing this one, and there's a ton of new stuff.
+
+Importantly, @keeganbrown managed to upgrade nan to 2.0.9 so this should
+work with newer versions of node.
+
+Also a ton of new bindings from @jainanshul
+
+Thanks to the many contributors I haven't named too.
+
+## 3.2.0
+
+Bugfixes from @mvines and @dropfen. Thanks!
+
+### 3.1.0
+Many bugfixes from @queuecumber, @emanuelandrada, @thomashoffmann1979,
+@paulmorrishill, @zankich, @morganrallen and @AVVS.
+
 ### 3.0.0
 
 You wait ages for a release, and 2 come along at once...

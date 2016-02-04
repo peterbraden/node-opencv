@@ -1,0 +1,13 @@
+# This is a dockerfile to test the build on ubuntu 12.04
+from	ubuntu:12.04
+run apt-get update -qq
+run apt-get install -y software-properties-common python-software-properties
+run add-apt-repository -y ppa:kubuntu-ppa/backports
+run apt-get update
+run apt-get install -y libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
+run curl -sL https://deb.nodesource.com/setup | bash -
+run apt-get install -y nodejs
+WORKDIR /root/node-opencv
+add . /root/node-opencv
+run	npm install --unsafe-perm --build-from-source || cat npm-debug.log
+run make test

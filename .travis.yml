@@ -1,9 +1,20 @@
 language: node_js
 
+os:
+  - linux
+#  - osx
+
+matrix:
+  allow_failures:
+    - os: osx
+
 node_js:
-  - '0.10'
-  - '0.11'
   - '0.12'
+#  - "iojs-v1.0.4"
+
+sudo: required
+services:
+  - docker
 
 compiler: clang
 
@@ -18,7 +29,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   - sudo apt-get update
-  - sudo apt-get install --force-yes libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
+  - sudo apt-get install --force-yes --yes libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
   # get commit message
   - COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
   # put local node-pre-gyp on PATH
@@ -43,6 +54,8 @@ install:
   # test our module
   - npm test
   - node lib/opencv.js
+  - docker build -t peterbraden/node-opencv-ubuntu-12-04 -f test/Dockerfile-ubuntu-12-04 .
+  - docker build -t peterbraden/node-opencv-ubuntu-14-04 -f test/Dockerfile-ubuntu-14-04 .
 
 before_script:
   - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
@@ -51,9 +64,9 @@ before_script:
   # cleanup
   - node-pre-gyp clean
   - node-gyp clean
-  - sudo apt-get purge libcv-dev
-  - sudo apt-get purge libopencv-dev
-  - sudo apt-get purge libhighgui-dev
+  - sudo apt-get purge --yes libcv-dev
+  - sudo apt-get purge --yes libopencv-dev
+  - sudo apt-get purge --yes libhighgui-dev
 
 script:
   # if publishing, test installing from remote
