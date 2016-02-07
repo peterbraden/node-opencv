@@ -33,7 +33,7 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "setHeight", SetHeight);
   Nan::SetPrototypeMethod(ctor, "setPosition", SetPosition);
   Nan::SetPrototypeMethod(ctor, "getFrameAt", GetFrameAt);
-  Nan::SetPrototypeMethod(ctor, "nFrames", NumFrames);
+  Nan::SetPrototypeMethod(ctor, "getFrameCount", GetFrameCount);
   Nan::SetPrototypeMethod(ctor, "close", Close);
   Nan::SetPrototypeMethod(ctor, "ReadSync", ReadSync);
   Nan::SetPrototypeMethod(ctor, "grab", Grab);
@@ -95,7 +95,7 @@ NAN_METHOD(VideoCaptureWrap::SetWidth) {
   return;
 }
 
-NAN_METHOD(VideoCaptureWrap::NumFrames) {
+NAN_METHOD(VideoCaptureWrap::GetFrameCount) {
   Nan::HandleScope scope;
   VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
