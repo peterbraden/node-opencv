@@ -23,6 +23,7 @@ public:
 
   // to set frame position
   static NAN_METHOD(SetPosition);
+  static NAN_METHOD(NumFrames);
 
   static NAN_METHOD(GetFrameAt);
 
