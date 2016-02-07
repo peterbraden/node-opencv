@@ -1,5 +1,10 @@
 var cv = require('../lib/opencv');
 
+if (cv.ImageSimilarity === undefined) {
+  console.log('TODO: Please port Features2d.cc to OpenCV 3')
+  process.exit(0);
+}
+
 cv.readImage("./examples/files/car1.jpg", function(err, car1) {
   if (err) throw err;
 

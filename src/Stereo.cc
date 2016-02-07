@@ -1,4 +1,11 @@
+
 #include "Stereo.h"
+
+#if CV_MAJOR_VERSION >= 3
+#warning TODO: port me to OpenCV 3
+#endif
+
+#if CV_MAJOR_VERSION < 3
 #include "Matrix.h"
 #include <opencv2/legacy/legacy.hpp>
 
@@ -312,3 +319,5 @@ NAN_METHOD(StereoGC::Compute) {
     return;
   }
 }
+
+#endif

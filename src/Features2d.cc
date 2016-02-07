@@ -1,9 +1,10 @@
+#include "OpenCV.h"
+
+#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4))
 #include "Features2d.h"
 #include "Matrix.h"
 #include <nan.h>
 #include <stdio.h>
-
-#if ((CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >=4))
 
 void Features::Init(Local<Object> target) {
   Nan::HandleScope scope;

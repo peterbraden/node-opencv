@@ -39,7 +39,7 @@
       "conditions": [
         [ "OS==\"linux\" or OS==\"freebsd\" or OS==\"openbsd\" or OS==\"solaris\" or OS==\"aix\"", {
             "cflags": [
-              "<!@(pkg-config --cflags \"opencv >= 2.3.1\" )",
+              "<!@(node utils/find-opencv.js --cflags)",
               "-Wall"
             ]
         }],
@@ -64,7 +64,7 @@
               "-mmacosx-version-min=10.7",
             "-std=c++11",
             "-stdlib=libc++",
-            "<!@(pkg-config --cflags opencv)"
+            "<!@(node utils/find-opencv.js --cflags)",
               ],
             "GCC_ENABLE_CPP_RTTI": "YES",
             "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
@@ -80,7 +80,7 @@
       ],
 
       "libraries": [
-        "<!@(node utils/find-opencv.js --libs)"
+        "<!@(node utils/find-opencv.js --libs)",
       ],
       # For windows
 
@@ -96,7 +96,7 @@
       "conditions": [
         [ "OS==\"linux\"", {
             "cflags": [
-              "<!@(pkg-config --cflags \"opencv >= 2.3.1\" )",
+              "<!@(node utils/find-opencv.js --cflags)",
               "-Wall"
             ]
         }],
@@ -121,7 +121,7 @@
               "-mmacosx-version-min=10.7",
             "-std=c++11",
             "-stdlib=libc++",
-            "<!@(pkg-config --cflags opencv)"
+            "<!@(node utils/find-opencv.js --cflags)",
               ],
             "GCC_ENABLE_CPP_RTTI": "YES",
             "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
