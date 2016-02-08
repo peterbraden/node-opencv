@@ -1,8 +1,11 @@
-#include "LDAWrap.h"
 #include "OpenCV.h"
 
-#if ((CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >=4) && (CV_SUBMINOR_VERSION>=4))
+#if CV_MAJOR_VERSION >= 3
+#warning TODO: port me to OpenCV 3
+#endif
 
+#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4) && (CV_SUBMINOR_VERSION>=4))
+#include "LDAWrap.h"
 #include "Matrix.h"
 #include <nan.h>
 
