@@ -1,6 +1,16 @@
 
 # Changelog
 
+## 5.0.0 (Feb 9 2016)
+
+- @mvines and @svogl started working on OpenCV 3.x support.
+- @sirotenko added a getFrameCount method
+- @vaceta implemented getFrameAt
+- @jainanshul improved some methods
+- @cascade256 improved the windows build
+
+Plus fixes from @banterability, @punnerud, @vargad  etc. Thanks all.
+
 ## 4.0.0
 
 I've been super slow releasing this one, and there's a ton of new stuff.
