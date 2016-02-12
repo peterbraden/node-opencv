@@ -295,7 +295,7 @@ NAN_METHOD(Contour::Serialize) {
   Local<Array> contours_data = Nan::New<Array>(self->contours.size());
 
   for (std::vector<int>::size_type i = 0; i != self->contours.size(); i++) {
-	  std::vector<cv::Point> points = self->contours[i];
+    std::vector<cv::Point> points = self->contours[i];
     Local<Array> contour_data = Nan::New<Array>(points.size());
 
     for (std::vector<int>::size_type j = 0; j != points.size(); j++) {
@@ -341,7 +341,7 @@ NAN_METHOD(Contour::Deserialize) {
 
   for (int i = 0; i < contours_length; i++) {
     Local<Array> contour_data = Local<Array>::Cast(contours_data->Get(i));
-	std::vector<cv::Point> points;
+    std::vector<cv::Point> points;
 
     int contour_length = contour_data->Length();
     for (int j = 0; j < contour_length; j++) {

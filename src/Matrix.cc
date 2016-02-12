@@ -669,7 +669,7 @@ NAN_METHOD(Matrix::ToBuffer) {
 class AsyncToBufferWorker: public Nan::AsyncWorker {
 public:
   AsyncToBufferWorker(Nan::Callback *callback, Matrix* matrix, std::string ext,
-	  std::vector<int> params) :
+    std::vector<int> params) :
       Nan::AsyncWorker(callback),
       matrix(matrix),
       ext(ext),
@@ -2203,13 +2203,13 @@ NAN_METHOD(Matrix::TemplateMatches) {
       int max_x = maxSize.width - 1;
       int max_y = maxSize.height - 1;
       cv::Point top_left = cv::Point(std::max(0, pt.x - min_x_distance),
-		  std::max(0, pt.y - min_y_distance));
+        std::max(0, pt.y - min_y_distance));
       cv::Point top_right = cv::Point(std::min(max_x, pt.x + min_x_distance),
-		  std::max(0, pt.y - min_y_distance));
+        std::max(0, pt.y - min_y_distance));
       cv::Point bottom_left = cv::Point(std::max(0, pt.x - min_x_distance),
-		  std::min(max_y, pt.y + min_y_distance));
+        std::min(max_y, pt.y + min_y_distance));
       cv::Point bottom_right = cv::Point(std::min(max_x, pt.x + min_x_distance),
-		  std::min(max_y, pt.y + min_y_distance));
+        std::min(max_y, pt.y + min_y_distance));
       if (hit_mask.at<double>(top_left.y, top_left.x) > 0)
         continue;
       if (hit_mask.at<double>(top_right.y, top_right.x) > 0)
