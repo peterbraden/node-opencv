@@ -85,6 +85,11 @@ void Constants::Init(Local<Object> target) {
   CONST_ENUM(NORM_RELATIVE);
   CONST_ENUM(NORM_TYPE_MASK);
 
+  CONST_ENUM(RETR_EXTERNAL);
+  CONST_ENUM(RETR_LIST);
+  CONST_ENUM(RETR_CCOMP);
+  CONST_ENUM(RETR_TREE);
+
   target->Set(Nan::New("Constants").ToLocalChecked(), obj);
 }
 

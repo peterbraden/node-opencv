@@ -74,6 +74,7 @@ public:
   JSFUNC(BitwiseAnd)
   JSFUNC(CountNonZero)
   //JSFUNC(Split)
+  JSFUNC(Moments)
   JSFUNC(Canny)
   JSFUNC(Dilate)
   JSFUNC(Erode)

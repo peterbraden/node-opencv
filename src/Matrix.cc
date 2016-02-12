@@ -70,6 +70,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "bitwiseNot", BitwiseNot);
   Nan::SetPrototypeMethod(ctor, "bitwiseAnd", BitwiseAnd);
   Nan::SetPrototypeMethod(ctor, "countNonZero", CountNonZero);
+  Nan::SetPrototypeMethod(ctor, "moments", Moments);
   Nan::SetPrototypeMethod(ctor, "canny", Canny);
   Nan::SetPrototypeMethod(ctor, "dilate", Dilate);
   Nan::SetPrototypeMethod(ctor, "erode", Erode);
@@ -1353,6 +1354,45 @@ NAN_METHOD(Matrix::Split) {
 
   info.GetReturnValue().Set(Nan::Null());
 } */
+
+NAN_METHOD(Matrix::Moments) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+
+  cv::Moments mo = moments( self->mat, false );
+
+  Local<Object> res = Nan::New<Object>();
+
+  res->Set(Nan::New("m00").ToLocalChecked(), Nan::New<Number>(mo.m00));
+  res->Set(Nan::New("m10").ToLocalChecked(), Nan::New<Number>(mo.m10));
+  res->Set(Nan::New("m01").ToLocalChecked(), Nan::New<Number>(mo.m01));
+  res->Set(Nan::New("m20").ToLocalChecked(), Nan::New<Number>(mo.m20));
+  res->Set(Nan::New("m11").ToLocalChecked(), Nan::New<Number>(mo.m11));
+  res->Set(Nan::New("m02").ToLocalChecked(), Nan::New<Number>(mo.m02));
+  res->Set(Nan::New("m30").ToLocalChecked(), Nan::New<Number>(mo.m30));
+  res->Set(Nan::New("m21").ToLocalChecked(), Nan::New<Number>(mo.m21));
+  res->Set(Nan::New("m12").ToLocalChecked(), Nan::New<Number>(mo.m12));
+  res->Set(Nan::New("m03").ToLocalChecked(), Nan::New<Number>(mo.m03));
+
+  res->Set(Nan::New("mu20").ToLocalChecked(), Nan::New<Number>(mo.mu20));
+  res->Set(Nan::New("mu11").ToLocalChecked(), Nan::New<Number>(mo.mu11));
+  res->Set(Nan::New("mu02").ToLocalChecked(), Nan::New<Number>(mo.mu02));
+  res->Set(Nan::New("mu30").ToLocalChecked(), Nan::New<Number>(mo.mu30));
+  res->Set(Nan::New("mu21").ToLocalChecked(), Nan::New<Number>(mo.mu21));
+  res->Set(Nan::New("mu12").ToLocalChecked(), Nan::New<Number>(mo.mu12));
+  res->Set(Nan::New("mu03").ToLocalChecked(), Nan::New<Number>(mo.mu03));
+
+  res->Set(Nan::New("nu20").ToLocalChecked(), Nan::New<Number>(mo.nu20));
+  res->Set(Nan::New("nu11").ToLocalChecked(), Nan::New<Number>(mo.nu11));
+  res->Set(Nan::New("nu02").ToLocalChecked(), Nan::New<Number>(mo.nu02));
+  res->Set(Nan::New("nu30").ToLocalChecked(), Nan::New<Number>(mo.nu30));
+  res->Set(Nan::New("nu21").ToLocalChecked(), Nan::New<Number>(mo.nu21));
+  res->Set(Nan::New("nu12").ToLocalChecked(), Nan::New<Number>(mo.nu12));
+  res->Set(Nan::New("nu03").ToLocalChecked(), Nan::New<Number>(mo.nu03));
+
+  info.GetReturnValue().Set(res);
+}
 
 NAN_METHOD(Matrix::Canny) {
   Nan::HandleScope scope;
