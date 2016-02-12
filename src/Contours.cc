@@ -75,7 +75,7 @@ NAN_METHOD(Contour::Points) {
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
   int pos = info[0]->NumberValue();
 
-  vector<cv::Point> points = self->contours[pos];
+  std::vector<cv::Point> points = self->contours[pos];
   Local<Array> data = Nan::New<Array>(points.size());
 
   for (std::vector<int>::size_type i = 0; i != points.size(); i++) {
@@ -295,7 +295,7 @@ NAN_METHOD(Contour::Serialize) {
   Local<Array> contours_data = Nan::New<Array>(self->contours.size());
 
   for (std::vector<int>::size_type i = 0; i != self->contours.size(); i++) {
-    vector<cv::Point> points = self->contours[i];
+	  std::vector<cv::Point> points = self->contours[i];
     Local<Array> contour_data = Nan::New<Array>(points.size());
 
     for (std::vector<int>::size_type j = 0; j != points.size(); j++) {
@@ -336,12 +336,12 @@ NAN_METHOD(Contour::Deserialize) {
   Local<Array> contours_data = Local<Array>::Cast(data->Get(Nan::New<String>("contours").ToLocalChecked()));
   Local<Array> hierarchy_data = Local<Array>::Cast(data->Get(Nan::New<String>("hierarchy").ToLocalChecked()));
 
-  vector<vector<cv::Point> > contours_res;
+  std::vector<std::vector<cv::Point> > contours_res;
   int contours_length = contours_data->Length();
 
   for (int i = 0; i < contours_length; i++) {
     Local<Array> contour_data = Local<Array>::Cast(contours_data->Get(i));
-    vector<cv::Point> points;
+	std::vector<cv::Point> points;
 
     int contour_length = contour_data->Length();
     for (int j = 0; j < contour_length; j++) {
@@ -354,7 +354,7 @@ NAN_METHOD(Contour::Deserialize) {
     contours_res.push_back(points);
   }
 
-  vector<cv::Vec4i> hierarchy_res;
+  std::vector<cv::Vec4i> hierarchy_res;
   int hierarchy_length = hierarchy_data->Length();
 
   for (int i = 0; i < hierarchy_length; i++) {

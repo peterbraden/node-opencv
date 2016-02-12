@@ -668,8 +668,8 @@ NAN_METHOD(Matrix::ToBuffer) {
 
 class AsyncToBufferWorker: public Nan::AsyncWorker {
 public:
-  AsyncToBufferWorker(Nan::Callback *callback, Matrix* matrix, string ext,
-      vector<int> params) :
+  AsyncToBufferWorker(Nan::Callback *callback, Matrix* matrix, std::string ext,
+	  std::vector<int> params) :
       Nan::AsyncWorker(callback),
       matrix(matrix),
       ext(ext),
@@ -2055,7 +2055,7 @@ NAN_METHOD(Matrix::Split) {
   Matrix * self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
 
   unsigned int size = self->mat.channels();
-  vector<cv::Mat> channels;
+  std::vector<cv::Mat> channels;
 
   // Split doesn't seem to work on empty vectors
   for (unsigned int i = 0; i < size; i++) {
@@ -2088,7 +2088,7 @@ NAN_METHOD(Matrix::Merge) {
   v8::Local<v8::Array> jsChannels = v8::Local<v8::Array>::Cast(info[0]);
 
   unsigned int L = jsChannels->Length();
-  vector<cv::Mat> vChannels(L);
+  std::vector<cv::Mat> vChannels(L);
   for (unsigned int i = 0; i < L; i++) {
     Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
     vChannels[i] = matObject->mat;
@@ -2202,14 +2202,14 @@ NAN_METHOD(Matrix::TemplateMatches) {
       cv::Size maxSize = hit_mask.size();
       int max_x = maxSize.width - 1;
       int max_y = maxSize.height - 1;
-      cv::Point top_left = cv::Point(max(0, pt.x - min_x_distance),
-          max(0, pt.y - min_y_distance));
-      cv::Point top_right = cv::Point(min(max_x, pt.x + min_x_distance),
-          max(0, pt.y - min_y_distance));
-      cv::Point bottom_left = cv::Point(max(0, pt.x - min_x_distance),
-          min(max_y, pt.y + min_y_distance));
-      cv::Point bottom_right = cv::Point(min(max_x, pt.x + min_x_distance),
-          min(max_y, pt.y + min_y_distance));
+      cv::Point top_left = cv::Point(std::max(0, pt.x - min_x_distance),
+		  std::max(0, pt.y - min_y_distance));
+      cv::Point top_right = cv::Point(std::min(max_x, pt.x + min_x_distance),
+		  std::max(0, pt.y - min_y_distance));
+      cv::Point bottom_left = cv::Point(std::max(0, pt.x - min_x_distance),
+		  std::min(max_y, pt.y + min_y_distance));
+      cv::Point bottom_right = cv::Point(std::min(max_x, pt.x + min_x_distance),
+		  std::min(max_y, pt.y + min_y_distance));
       if (hit_mask.at<double>(top_left.y, top_left.x) > 0)
         continue;
       if (hit_mask.at<double>(top_right.y, top_right.x) > 0)
