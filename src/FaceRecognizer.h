@@ -1,8 +1,15 @@
 #include "OpenCV.h"
 
-#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4) && (CV_SUBMINOR_VERSION>=4))
+#ifdef HAVE_OPENCV_FACE
 
+#if CV_MAJOR_VERSION >= 3
+#include <opencv2/face.hpp>
+namespace cv {
+  using cv::face::FaceRecognizer;
+}
+#else
 #include "opencv2/contrib/contrib.hpp"
+#endif
 
 class FaceRecognizerWrap: public Nan::ObjectWrap {
 public:

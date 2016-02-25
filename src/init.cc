@@ -38,10 +38,10 @@ extern "C" void init(Local<Object> target) {
   BackgroundSubtractorWrap::Init(target);
   Features::Init(target);
   LDAWrap::Init(target);
-#if CV_SUBMINOR_VERSION>=4
+#endif
+#endif
+#ifdef HAVE_OPENCV_FACE
   FaceRecognizerWrap::Init(target);
-#endif
-#endif
 #endif
 };
 
