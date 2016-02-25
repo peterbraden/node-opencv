@@ -282,6 +282,17 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
   double confidence = 0.0;
   self->rec->predict(im, predictedLabel, confidence);
 
+#if CV_MAJOR_VERSION >= 3
+  // Older versions of OpenCV3 incorrectly returned label=0 at
+  // confidence=DBL_MAX instead of label=-1 on failure.  This can be removed
+  // once the fix* becomes more widespread.
+  //
+  // * https://github.com/Itseez/opencv_contrib/commit/0aa58ae9b30a017b356a86d29453c0b56ed9e625#diff-d9c561bf45c255c5951ff1ab55e80473
+  if (predictedLabel == 0 && confidence == DBL_MAX) {
+    predictedLabel = -1;
+  }
+#endif
+
   v8::Local<v8::Object> res = Nan::New<Object>();
   res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
   res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
@@ -304,6 +315,16 @@ public:
 
   void Execute() {
      this->rec->predict(this->im, this->predictedLabel, this->confidence);
+#if CV_MAJOR_VERSION >= 3
+    // Older versions of OpenCV3 incorrectly returned label=0 at
+    // confidence=DBL_MAX instead of label=-1 on failure.  This can be removed
+    // once the fix* becomes more widespread.
+    //
+    // * https://github.com/Itseez/opencv_contrib/commit/0aa58ae9b30a017b356a86d29453c0b56ed9e625#diff-d9c561bf45c255c5951ff1ab55e80473
+    if (this->predictedLabel == 0 && this->confidence == DBL_MAX) {
+      this->predictedLabel = -1;
+    }
+#endif
   }
 
   void HandleOKCallback() {
