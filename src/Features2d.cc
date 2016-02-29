@@ -47,7 +47,7 @@ public:
     extractor->compute(image2, keypoints2, descriptors2);
 
 
-    if (descriptors1.type() == descriptors2.type() && descriptors1.cols() == descriptors2.cols()) {
+    if (descriptors1.type() == descriptors2.type() && descriptors1.cols == descriptors2.cols) {
       matcher->match(descriptors1, descriptors2, matches);
 
       double max_dist = 0;
@@ -83,7 +83,7 @@ public:
 
     }
     else {
-      dissimilarity = std::numeric_limits<T>::quiet_NaN();
+      dissimilarity = Nan::Null();
     }
     
   }
