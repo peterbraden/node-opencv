@@ -47,7 +47,8 @@ public:
     extractor->compute(image1, keypoints1, descriptors1);
     extractor->compute(image2, keypoints2, descriptors2);
 
-
+    //fix for 'Assertion failed...' error
+    //source: http://stackoverflow.com/questions/15650371/matcher-assertions-failed-error-opencv-android
     if (descriptors1.type() == descriptors2.type() && descriptors1.cols == descriptors2.cols) {
       matcher->match(descriptors1, descriptors2, matches);
 
@@ -84,14 +85,7 @@ public:
 
     }
     else {
-      Nan::HandleScope scope;
-      
-      Local<Value> argv[2];
-
-      argv[0] = Nan::Null();
-      argv[1] = Nan::Null();
-
-      callback->Call(2, argv);
+      dissimilarity = std::numeric_limits<double>::quiet_NaN();
     }
     
   }
@@ -102,7 +96,9 @@ public:
     Local<Value> argv[2];
 
     argv[0] = Nan::Null();
-    argv[1] = Nan::New<Number>(dissimilarity);
+
+    if (dissimilarity != dissimilarity) argv[1] = Nan::Null();
+    else argv[1] = Nan::New<Number>(dissimilarity);
 
     callback->Call(2, argv);
   }
