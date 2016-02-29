@@ -83,7 +83,7 @@ public:
 
     }
     else {
-      dissimilarity = Nan::Null();
+      dissimilarity = null;
     }
     
   }
