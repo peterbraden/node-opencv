@@ -84,7 +84,14 @@ public:
 
     }
     else {
-      dissimilarity = std::numeric_limits<double>::quiet_NaN();
+      Nan::HandleScope scope;
+      
+      Local<Value> argv[2];
+
+      argv[0] = Nan::Null();
+      argv[1] = Nan::Null();
+
+      callback->Call(2, argv);
     }
     
   }
