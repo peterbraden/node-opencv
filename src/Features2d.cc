@@ -5,6 +5,7 @@
 #include "Matrix.h"
 #include <nan.h>
 #include <stdio.h>
+#include <limits>
 
 void Features::Init(Local<Object> target) {
   Nan::HandleScope scope;
@@ -83,7 +84,7 @@ public:
 
     }
     else {
-      dissimilarity = null;
+      dissimilarity = std::numeric_limits<double>::quiet_NaN();
     }
     
   }
