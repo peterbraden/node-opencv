@@ -2249,7 +2249,7 @@ NAN_METHOD(Matrix::MatchTemplate) {
   v8::String::Utf8Value args0(info[0]->ToString());
   std::string filename = std::string(*args0);
   cv::Mat templ;
-  templ = cv::imread(filename, CV_8S);
+  templ = cv::imread(filename, -1);
 
   Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
@@ -2268,8 +2268,44 @@ NAN_METHOD(Matrix::MatchTemplate) {
 
   int method = (info.Length() < 2) ? (int)cv::TM_CCORR_NORMED : info[1]->Uint32Value();
   cv::matchTemplate(self->mat, templ, m_out->mat, method);
+  cv::normalize(m_out->mat, m_out->mat, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+  double minVal; 
+  double maxVal; 
+  cv::Point minLoc; 
+  cv::Point maxLoc;
+  cv::Point matchLoc;
 
-  info.GetReturnValue().Set(out);
+  minMaxLoc(m_out->mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
+
+  if(method  == CV_TM_SQDIFF || method == CV_TM_SQDIFF_NORMED) { 
+    matchLoc = minLoc; 
+  }
+  else { 
+    matchLoc = maxLoc; 
+  }
+
+  //detected ROI
+  unsigned int roi_x = matchLoc.x;
+  unsigned int roi_y = matchLoc.y;
+  unsigned int roi_width = templ.cols;
+  unsigned int roi_height = templ.rows;
+
+  //draw rectangle
+  if(info.Length() >= 3) {
+    cv::Rect roi(roi_x,roi_y,roi_width,roi_height);
+    cv::rectangle(self->mat, roi, cv::Scalar(0,0,255));
+  }
+
+  m_out->mat.convertTo(m_out->mat, CV_8UC1, 255, 0);
+
+  v8::Local <v8::Array> arr = Nan::New<v8::Array>(5);
+  arr->Set(0, out);
+  arr->Set(1, Nan::New<Number>(roi_x));
+  arr->Set(2, Nan::New<Number>(roi_y));
+  arr->Set(3, Nan::New<Number>(roi_width));
+  arr->Set(4, Nan::New<Number>(roi_height));
+
+  info.GetReturnValue().Set(arr);
 }
 
 // @author ytham
