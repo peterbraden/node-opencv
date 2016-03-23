@@ -3,6 +3,7 @@
 #include "OpenCV.h"
 #include <string.h>
 #include <nan.h>
+#include <opencv2/photo/photo.hpp>
 
 Nan::Persistent<FunctionTemplate> Matrix::constructor;
 
@@ -109,6 +110,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "shift", Shift);
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
   Nan::SetPrototypeMethod(ctor, "release", Release);
+  Nan::SetPrototypeMethod(ctor, "inpaint", Inpaint);
 
   target->Set(Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction());
 };
@@ -2269,19 +2271,19 @@ NAN_METHOD(Matrix::MatchTemplate) {
   int method = (info.Length() < 2) ? (int)cv::TM_CCORR_NORMED : info[1]->Uint32Value();
   cv::matchTemplate(self->mat, templ, m_out->mat, method);
   cv::normalize(m_out->mat, m_out->mat, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
-  double minVal; 
-  double maxVal; 
-  cv::Point minLoc; 
+  double minVal;
+  double maxVal;
+  cv::Point minLoc;
   cv::Point maxLoc;
   cv::Point matchLoc;
 
   minMaxLoc(m_out->mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
 
-  if(method  == CV_TM_SQDIFF || method == CV_TM_SQDIFF_NORMED) { 
-    matchLoc = minLoc; 
+  if(method  == CV_TM_SQDIFF || method == CV_TM_SQDIFF_NORMED) {
+    matchLoc = minLoc;
   }
-  else { 
-    matchLoc = maxLoc; 
+  else {
+    matchLoc = maxLoc;
   }
 
   //detected ROI
@@ -2568,4 +2570,23 @@ NAN_METHOD(Matrix::Release) {
   self->mat.release();
 
   return;
+}
+
+NAN_METHOD(Matrix::Inpaint) {
+  SETUP_FUNCTION(Matrix)
+
+  if (!info[0]->IsObject()) {
+    Nan::ThrowTypeError("The argument must be an object");
+  }
+
+  Matrix *mask = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  cv::inpaint(self->mat, mask->mat, self->mat, 3, cv::INPAINT_TELEA);
+
+  Local < Object > img_to_return =
+      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
+  self->mat.copyTo(img->mat);
+
+  info.GetReturnValue().Set(img_to_return);
 }
