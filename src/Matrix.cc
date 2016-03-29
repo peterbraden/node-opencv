@@ -2580,6 +2580,7 @@ NAN_METHOD(Matrix::Inpaint) {
   }
 
   Matrix *mask = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  mask->mat.convertTo(mask->mat, CV_8U);
 
   cv::inpaint(self->mat, mask->mat, self->mat, 3, cv::INPAINT_TELEA);
 
