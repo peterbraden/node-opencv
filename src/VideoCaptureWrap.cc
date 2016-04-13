@@ -3,7 +3,6 @@
 #include "OpenCV.h"
 
 #include  <iostream>
-using namespace std;
 
 Nan::Persistent<FunctionTemplate> VideoCaptureWrap::constructor;
 
