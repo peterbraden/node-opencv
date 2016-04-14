@@ -109,6 +109,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "shift", Shift);
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
   Nan::SetPrototypeMethod(ctor, "release", Release);
+  Nan::SetPrototypeMethod(ctor, "subtract", Subtract);
 
   target->Set(Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction());
 };
@@ -2566,6 +2567,20 @@ NAN_METHOD(Matrix::Release) {
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
   self->mat.release();
+
+  return;
+}
+
+NAN_METHOD(Matrix::Subtract) {
+  SETUP_FUNCTION(Matrix)
+
+  if (info.Length() < 1) {
+    Nan::ThrowTypeError("Invalid number of arguments");
+  }
+
+  Matrix *other = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  self->mat -= other->mat;
 
   return;
 }
