@@ -1,12 +1,11 @@
 #include "OpenCV.h"
 
-using namespace std;
 
 class Contour: public Nan::ObjectWrap {
 public:
   cv::Mat mat;
-  vector<vector<cv::Point> > contours;
-  vector<cv::Vec4i> hierarchy;
+  std::vector<std::vector<cv::Point> > contours;
+  std::vector<cv::Vec4i> hierarchy;
 
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Local<Object> target);
