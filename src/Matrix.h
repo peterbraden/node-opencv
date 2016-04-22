@@ -121,6 +121,7 @@ public:
   JSFUNC(CopyWithMask)
   JSFUNC(SetWithMask)
   JSFUNC(MeanWithMask)
+  JSFUNC(Mean)
   JSFUNC(Shift)
   JSFUNC(Reshape)
 
