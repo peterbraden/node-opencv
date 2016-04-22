@@ -106,6 +106,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "copyWithMask", CopyWithMask);
   Nan::SetPrototypeMethod(ctor, "setWithMask", SetWithMask);
   Nan::SetPrototypeMethod(ctor, "meanWithMask", MeanWithMask);
+  Nan::SetPrototypeMethod(ctor, "mean", Mean);
   Nan::SetPrototypeMethod(ctor, "shift", Shift);
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
   Nan::SetPrototypeMethod(ctor, "release", Release);
@@ -2484,10 +2485,24 @@ NAN_METHOD(Matrix::MeanWithMask) {
   Matrix *mask = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
 
   cv::Scalar means = cv::mean(self->mat, mask->mat);
-  v8::Local < v8::Array > arr = Nan::New<Array>(3);
+  v8::Local < v8::Array > arr = Nan::New<Array>(4);
   arr->Set(0, Nan::New<Number>(means[0]));
   arr->Set(1, Nan::New<Number>(means[1]));
   arr->Set(2, Nan::New<Number>(means[2]));
+  arr->Set(3, Nan::New<Number>(means[3]));
+
+  info.GetReturnValue().Set(arr);
+}
+
+NAN_METHOD(Matrix::Mean) {
+  SETUP_FUNCTION(Matrix)
+
+  cv::Scalar means = cv::mean(self->mat);
+  v8::Local<v8::Array> arr = Nan::New<Array>(4);
+  arr->Set(0, Nan::New<Number>(means[0]));
+  arr->Set(1, Nan::New<Number>(means[1]));
+  arr->Set(2, Nan::New<Number>(means[2]));
+  arr->Set(3, Nan::New<Number>(means[3]));
 
   info.GetReturnValue().Set(arr);
 }

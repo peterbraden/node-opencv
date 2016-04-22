@@ -351,6 +351,19 @@ test('Subtract', function(assert) {
   assert.end();
 });
 
+test('Mean', function(assert) {
+  var a = new cv.Matrix.Zeros(2, 2, cv.Constants.CV_8UC3);
+
+  // Set [0, 0] element to 1 for all three channels
+  a.set(0, 0, 1, 0);
+  a.set(0, 0, 1, 1);
+  a.set(0, 0, 1, 2);
+
+  var means = a.mean();
+  assert.deepEqual(means, [0.25, 0.25, 0.25, 0]);
+  assert.end();
+});
+
 // Test the examples folder.
 require('./examples')()
 
