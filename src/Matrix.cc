@@ -983,7 +983,7 @@ public:
 
 private:
   Matrix* matrix;
-  char* filename;
+  std::string filename;
   int res;
 };
 
