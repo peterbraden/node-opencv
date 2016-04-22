@@ -125,6 +125,8 @@ public:
   JSFUNC(Reshape)
 
   JSFUNC(Release)
+
+  JSFUNC(Subtract)
   /*
    static Handle<Value> Val(const Arguments& info);
    static Handle<Value> RowRange(const Arguments& info);
