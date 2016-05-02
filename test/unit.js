@@ -127,7 +127,7 @@ test(".norm", function(assert){
 
       var errorL2 = im.norm(im2, cv.Constants.NORM_L2);
       assert.equal(errorL2, 7295.591339980605);
-      
+
       errorL2 = im.norm(im, cv.Constants.NORM_L2);
       assert.equal(errorL2, 0);
       assert.end();
@@ -205,23 +205,25 @@ test(".bitwiseXor", function(assert){
 
 
 test("Image read from file", function(assert){
-  cv.readImage("./examples/files/mona.png", function(err, im){
+  cv.readImage("./examples/files/opencv.png", function(err, im){
     assert.ok(im);
-    assert.equal(im.width(), 500);
-    assert.equal(im.height(), 756)
-    assert.equal(im.empty(), false)
-    assert.end()
+    assert.equal(im.width(), 82);
+    assert.equal(im.height(), 99);
+    assert.equal(im.channels(), 4);
+    assert.equal(im.empty(), false);
+    assert.end();
   })
 })
 
 
 test("read Image from buffer", function(assert){
-  cv.readImage(fs.readFileSync('./examples/files/mona.png'), function(err, im){
+  cv.readImage(fs.readFileSync('./examples/files/opencv.png'), function(err, im){
     assert.ok(im);
-    assert.equal(im.width(), 500);
-    assert.equal(im.height(), 756)
-    assert.equal(im.empty(), false)
-    assert.end()
+    assert.equal(im.width(), 82);
+    assert.equal(im.height(), 99);
+    assert.equal(im.channels(), 4);
+    assert.equal(im.empty(), false);
+    assert.end();
   })
 })
 
@@ -242,7 +244,7 @@ test("Cascade Classifier", function(assert){
 
 test("ImageDataStream", function(assert){
   var s = new cv.ImageDataStream()
-  s.on('load', function(im){ 
+  s.on('load', function(im){
     assert.ok(im)
     assert.equal(im.empty(), false);
     assert.end()
