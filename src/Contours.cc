@@ -18,6 +18,7 @@ void Contour::Init(Local<Object> target) {
   // Prototype
   // Local<ObjectTemplate> proto = constructor->PrototypeTemplate();
   Nan::SetPrototypeMethod(ctor, "point", Point);
+  Nan::SetPrototypeMethod(ctor, "points", Points);
   Nan::SetPrototypeMethod(ctor, "size", Size);
   Nan::SetPrototypeMethod(ctor, "cornerCount", CornerCount);
   Nan::SetPrototypeMethod(ctor, "area", Area);
