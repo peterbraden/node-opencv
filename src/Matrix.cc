@@ -111,11 +111,8 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "shift", Shift);
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
   Nan::SetPrototypeMethod(ctor, "release", Release);
-<<<<<<< HEAD
   Nan::SetPrototypeMethod(ctor, "inpaint", Inpaint);
-=======
   Nan::SetPrototypeMethod(ctor, "subtract", Subtract);
->>>>>>> df9959ae7dbfa57fb39147dcb745e67775154b11
 
   target->Set(Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction());
 };
