@@ -127,7 +127,7 @@ test(".norm", function(assert){
 
       var errorL2 = im.norm(im2, cv.Constants.NORM_L2);
       assert.equal(errorL2, 7295.591339980605);
-      
+
       errorL2 = im.norm(im, cv.Constants.NORM_L2);
       assert.equal(errorL2, 0);
       assert.end();
@@ -205,23 +205,25 @@ test(".bitwiseXor", function(assert){
 
 
 test("Image read from file", function(assert){
-  cv.readImage("./examples/files/mona.png", function(err, im){
+  cv.readImage("./examples/files/opencv.png", function(err, im){
     assert.ok(im);
-    assert.equal(im.width(), 500);
-    assert.equal(im.height(), 756)
-    assert.equal(im.empty(), false)
-    assert.end()
+    assert.equal(im.width(), 82);
+    assert.equal(im.height(), 99);
+    assert.equal(im.channels(), 4);
+    assert.equal(im.empty(), false);
+    assert.end();
   })
 })
 
 
 test("read Image from buffer", function(assert){
-  cv.readImage(fs.readFileSync('./examples/files/mona.png'), function(err, im){
+  cv.readImage(fs.readFileSync('./examples/files/opencv.png'), function(err, im){
     assert.ok(im);
-    assert.equal(im.width(), 500);
-    assert.equal(im.height(), 756)
-    assert.equal(im.empty(), false)
-    assert.end()
+    assert.equal(im.width(), 82);
+    assert.equal(im.height(), 99);
+    assert.equal(im.channels(), 4);
+    assert.equal(im.empty(), false);
+    assert.end();
   })
 })
 
@@ -242,7 +244,7 @@ test("Cascade Classifier", function(assert){
 
 test("ImageDataStream", function(assert){
   var s = new cv.ImageDataStream()
-  s.on('load', function(im){ 
+  s.on('load', function(im){
     assert.ok(im)
     assert.equal(im.empty(), false);
     assert.end()
@@ -341,6 +343,28 @@ test('Native Matrix', function(assert) {
   assert.end();
 })
 
+test('Subtract', function(assert) {
+  var a = new cv.Matrix.Zeros(1,1);
+  a.set(0, 0, 3);
+  var b = new cv.Matrix.Zeros(1,1);
+  b.set(0, 0, 1);
+  a.subtract(b);
+  assert.deepEqual(a.get(0, 0), 2);
+  assert.end();
+});
+
+test('Mean', function(assert) {
+  var a = new cv.Matrix.Zeros(2, 2, cv.Constants.CV_8UC3);
+
+  // Set [0, 0] element to 1 for all three channels
+  a.set(0, 0, 1, 0);
+  a.set(0, 0, 1, 1);
+  a.set(0, 0, 1, 2);
+
+  var means = a.mean();
+  assert.deepEqual(means, [0.25, 0.25, 0.25, 0]);
+  assert.end();
+});
 
 // Test the examples folder.
 require('./examples')()

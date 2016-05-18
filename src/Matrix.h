@@ -121,12 +121,15 @@ public:
   JSFUNC(CopyWithMask)
   JSFUNC(SetWithMask)
   JSFUNC(MeanWithMask)
+  JSFUNC(Mean)
   JSFUNC(Shift)
   JSFUNC(Reshape)
 
   JSFUNC(Release)
 
   JSFUNC(Inpaint)
+
+  JSFUNC(Subtract)
   /*
    static Handle<Value> Val(const Arguments& info);
    static Handle<Value> RowRange(const Arguments& info);
