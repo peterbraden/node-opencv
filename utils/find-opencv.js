@@ -2,6 +2,7 @@
 
 var exec = require("child_process").exec;
 var fs = require("fs");
+var path = require("path");
 var flag = process.argv[2] || "--exists";
 
 // Normally |pkg-config opencv ...| could report either OpenCV 2.x or OpenCV 3.y
@@ -45,12 +46,16 @@ function fallback(){
 }
 
 function printPaths(opencvPath){
+    if (opencvPath){
+        opencvPath = opencvPath.replace(/^\"|[\"\n]*$/g, "");
+    }
     if(flag === "--cflags") {
-        console.log("\"" + opencvPath + "\\..\\..\\include\"");
-        console.log("\"" + opencvPath + "\\..\\..\\include\\opencv\"");
+
+        console.log("\"" +  path.join(opencvPath, "..", '..', 'include') + "\"");
+        console.log("\"" + path.join(opencvPath, "..", '..', 'include', 'opencv') + "\"");
     }
     else if(flag === "--libs") {
-        var libPath = opencvPath + "\\lib\\";
+        var libPath = path.join(opencvPath, "staticlib");
 
         fs.readdir(libPath, function(err, files){
             if(err){
@@ -60,7 +65,7 @@ function printPaths(opencvPath){
             var libs = "";
             for(var i = 0; i < files.length; i++){
                 if(getExtension(files[i]) === "lib"){
-                    libs = libs + " \"" + libPath + files[i] + "\" \r\n ";
+                    libs = libs + " \"" + path.join(libPath, files[i]) + "\" \r\n ";
                 }
             }
             console.log(libs);
