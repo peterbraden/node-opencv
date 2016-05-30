@@ -62,7 +62,7 @@ function printPaths(opencvPath){
                 throw new Error("ERROR: couldn't read the lib directory " + err);
             }
 
-            var libs = "";
+            var libs = "\"vfw32.lib\"\r\n \"comctl32.lib\"\r\n ";
             for(var i = 0; i < files.length; i++){
                 if(getExtension(files[i]) === "lib"){
                     libs = libs + " \"" + path.join(libPath, files[i]) + "\" \r\n ";
