@@ -127,7 +127,7 @@
             "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
           }
         }]
-    ]
+    # ]
   # },
   #   {
   #     "target_name": "action_after_build",
@@ -139,5 +139,5 @@
   #       "destination": "<(module_path)"
   #     }
   #     ]
-  #   }]
+    }]
 }
