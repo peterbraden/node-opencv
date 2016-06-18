@@ -2200,7 +2200,7 @@ NAN_METHOD(Matrix::TemplateMatches) {
 
 // @author ytham
 // Match Template filter
-// Usage: output = input.matchTemplate("templateFileString", method);
+// Usage: output = input.matchTemplate("templateFileString"[, "method"][, "maskPath"]);
 NAN_METHOD(Matrix::MatchTemplate) {
   Nan::HandleScope scope;
 
@@ -2228,6 +2228,19 @@ NAN_METHOD(Matrix::MatchTemplate) {
 
   int method = (info.Length() < 2) ? (int)cv::TM_CCORR_NORMED : info[1]->Uint32Value();
   cv::matchTemplate(self->mat, templ, m_out->mat, method);
+
+  if (info.Length() < 3) {
+    cv::matchTemplate(self->mat, templ, m_out->mat, method);
+  } else {
+    v8::String::Utf8Value args2(info[2]->ToString());
+    std::string maskFilename = std::string(*args2);
+    cv::Mat mask;
+    mask = cv::imread(maskFilename, CV_8S);
+    if (mask.size().height == 0 && mask.size().width == 0) {
+      throw std::runtime_error(("Failed to load mask file: " + maskFilename).c_str());
+    }
+    cv::matchTemplate(self->mat, templ, m_out->mat, method, mask);
+  }
 
   info.GetReturnValue().Set(out);
 }
