@@ -2266,9 +2266,8 @@ NAN_METHOD(Matrix::MatchTemplateByMatrix) {
    */
 
   int method = (info.Length() < 2) ? (int)cv::TM_CCORR_NORMED : info[1]->Uint32Value();
+  if (!(method >= 0 && method <= 5)) method = (int)cv::TM_CCORR_NORMED;
   cv::matchTemplate(self->mat, templ->mat, m_out->mat, method);
-  cv::normalize(m_out->mat, m_out->mat, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
-
   info.GetReturnValue().Set(out);
 }
 
