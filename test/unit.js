@@ -127,7 +127,6 @@ test(".norm", function(assert){
 
       var errorL2 = im.norm(im2, cv.Constants.NORM_L2);
       assert.equal(errorL2, 7295.591339980605);
-
       errorL2 = im.norm(im, cv.Constants.NORM_L2);
       assert.equal(errorL2, 0);
       assert.end();
@@ -368,15 +367,29 @@ test('Mean', function(assert) {
 
 test('MatchTemplateByMatrix', function(assert) {
   var cv = require('../lib/opencv');
-  cv.readImage("./examples/files/car1.jpg", function(err, target){
-    cv.readImage("./examples/files/car1_template.jpg", function(err, template){
-      var res = target.matchTemplateByMatrix(template, cv.Constants.TM_CCORR_NORMED);
+  var targetFilename = "./examples/files/car1.jpg";
+  var templateFilename = "./examples/files/car1_template.jpg";
+  cv.readImage(targetFilename, function(err, target){
+    cv.readImage(templateFilename, function(err, template){
+      var TM_CCORR_NORMED = 3;
+      var res = target.matchTemplateByMatrix(template, TM_CCORR_NORMED);
       var minMax = res.minMaxLoc();
       var topLeft = minMax.maxLoc;
-      assert.ok(topLeft, "Found Match");
-      console.log(topLeft.x === 717);
-      assert.equal(topLeft.x, 717, "match location x === 717");
-      assert.equal(topLeft.y, 0, "match location y === 717");
+      assert.ok(topLeft, "RGB Found Match");
+      assert.equal(topLeft.x, 42, "match location x === 42");
+      assert.equal(topLeft.y, 263, "match location y === 263");
+      target.canny(5,300);
+      template.canny(5,300);
+      res = target.matchTemplateByMatrix(template, TM_CCORR_NORMED);
+      minMax = res.minMaxLoc();
+      topLeft = minMax.maxLoc;
+      target.save("./target.png");
+      template.save("./template.png");
+      // res.rectangle([topLeft.x, topLeft.y], [template.width(), template.height()], [0, 255,0], 2);
+      res.save("./result.png");
+      assert.ok(topLeft, "Canny edge Found Match");
+      assert.equal(topLeft.x, 42, "match location x === 42");
+      assert.equal(topLeft.y, 263, "match location y === 263");
       assert.end();
     });
   })
