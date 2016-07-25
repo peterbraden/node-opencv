@@ -366,7 +366,21 @@ test('Mean', function(assert) {
   assert.end();
 });
 
+test('MatchTemplateByMatrix', function(assert) {
+  var cv = require('../lib/opencv');
+  cv.readImage("./examples/files/car1.jpg", function(err, target){
+    cv.readImage("./examples/files/car1_template.jpg", function(err, template){
+      var res = target.matchTemplateByMatrix(template, cv.Constants.TM_CCORR_NORMED);
+      var minMax = res.minMaxLoc();
+      var topLeft = minMax.maxLoc;
+      assert.ok(topLeft, "Found Match");
+      console.log(topLeft.x === 717);
+      assert.equal(topLeft.x, 717, "match location x === 717");
+      assert.equal(topLeft.y, 0, "match location y === 717");
+      assert.end();
+    });
+  })
+});
+
 // Test the examples folder.
 require('./examples')()
-
-
