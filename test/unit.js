@@ -383,10 +383,6 @@ test('MatchTemplateByMatrix', function(assert) {
       res = target.matchTemplateByMatrix(template, TM_CCORR_NORMED);
       minMax = res.minMaxLoc();
       topLeft = minMax.maxLoc;
-      target.save("./target.png");
-      template.save("./template.png");
-      // res.rectangle([topLeft.x, topLeft.y], [template.width(), template.height()], [0, 255,0], 2);
-      res.save("./result.png");
       assert.ok(topLeft, "Canny edge Found Match");
       assert.equal(topLeft.x, 42, "match location x === 42");
       assert.equal(topLeft.y, 263, "match location y === 263");
