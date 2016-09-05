@@ -320,7 +320,13 @@ NAN_METHOD(Matrix::GetData) {
   int size = self->mat.rows * self->mat.cols * self->mat.elemSize1();
   Local<Object> buf = Nan::NewBuffer(size).ToLocalChecked();
   uchar* data = (uchar*) Buffer::Data(buf);
-  memcpy(data, self->mat.data, size);
+  // if there is padding after each row, clone first to get rid of it
+  if (self->mat.dims == 2 && self->mat.step[0] != self->mat.size[1]) {
+    cv::Mat copy = self->mat.clone();
+    memcpy(data, copy.data, size);
+  } else {
+    memcpy(data, self->mat.data, size);
+  }
 
   v8::Local<v8::Object> globalObj = Nan::GetCurrentContext()->Global();
   v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
