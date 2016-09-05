@@ -321,7 +321,7 @@ NAN_METHOD(Matrix::GetData) {
   Local<Object> buf = Nan::NewBuffer(size).ToLocalChecked();
   uchar* data = (uchar*) Buffer::Data(buf);
   // if there is padding after each row, clone first to get rid of it
-  if (self->mat.dims == 2 && self->mat.step[0] != self->mat.size[1]) {
+  if (self->mat.dims == 2 && self->mat.step[0] != size_t(self->mat.size[1])) {
     cv::Mat copy = self->mat.clone();
     memcpy(data, copy.data, size);
   } else {
