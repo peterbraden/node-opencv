@@ -317,7 +317,7 @@ NAN_METHOD(Matrix::GetData) {
   Nan::HandleScope scope;
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
-  int size = self->mat.rows * self->mat.cols * self->mat.elemSize1();
+  int size = self->mat.rows * self->mat.cols * self->mat.elemSize();
   Local<Object> buf = Nan::NewBuffer(size).ToLocalChecked();
   uchar* data = (uchar*) Buffer::Data(buf);
   // if there is padding after each row, clone first to get rid of it
