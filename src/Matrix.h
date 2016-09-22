@@ -109,6 +109,7 @@ public:
   JSFUNC(FloodFill)
 
   JSFUNC(MatchTemplate)
+  JSFUNC(MatchTemplateByMatrix)
   JSFUNC(TemplateMatches)
   JSFUNC(MinMaxLoc)
 

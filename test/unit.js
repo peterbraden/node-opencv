@@ -127,7 +127,6 @@ test(".norm", function(assert){
 
       var errorL2 = im.norm(im2, cv.Constants.NORM_L2);
       assert.equal(errorL2, 7295.591339980605);
-
       errorL2 = im.norm(im, cv.Constants.NORM_L2);
       assert.equal(errorL2, 0);
       assert.end();
@@ -366,7 +365,31 @@ test('Mean', function(assert) {
   assert.end();
 });
 
+test('MatchTemplateByMatrix', function(assert) {
+  var cv = require('../lib/opencv');
+  var targetFilename = "./examples/files/car1.jpg";
+  var templateFilename = "./examples/files/car1_template.jpg";
+  cv.readImage(targetFilename, function(err, target){
+    cv.readImage(templateFilename, function(err, template){
+      var TM_CCORR_NORMED = 3;
+      var res = target.matchTemplateByMatrix(template, TM_CCORR_NORMED);
+      var minMax = res.minMaxLoc();
+      var topLeft = minMax.maxLoc;
+      assert.ok(topLeft, "RGB Found Match");
+      assert.equal(topLeft.x, 42, "match location x === 42");
+      assert.equal(topLeft.y, 263, "match location y === 263");
+      target.canny(5,300);
+      template.canny(5,300);
+      res = target.matchTemplateByMatrix(template, TM_CCORR_NORMED);
+      minMax = res.minMaxLoc();
+      topLeft = minMax.maxLoc;
+      assert.ok(topLeft, "Canny edge Found Match");
+      assert.equal(topLeft.x, 42, "match location x === 42");
+      assert.equal(topLeft.y, 263, "match location y === 263");
+      assert.end();
+    });
+  })
+});
+
 // Test the examples folder.
 require('./examples')()
-
-

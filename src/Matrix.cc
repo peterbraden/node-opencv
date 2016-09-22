@@ -93,6 +93,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "equalizeHist", EqualizeHist);
   Nan::SetPrototypeMethod(ctor, "floodFill", FloodFill);
   Nan::SetPrototypeMethod(ctor, "matchTemplate", MatchTemplate);
+  Nan::SetPrototypeMethod(ctor, "matchTemplateByMatrix", MatchTemplateByMatrix);
   Nan::SetPrototypeMethod(ctor, "templateMatches", TemplateMatches);
   Nan::SetPrototypeMethod(ctor, "minMaxLoc", MinMaxLoc);
   Nan::SetPrototypeMethod(ctor, "pushBack", PushBack);
@@ -2246,6 +2247,36 @@ NAN_METHOD(Matrix::TemplateMatches) {
   info.GetReturnValue().Set(probabilites_array);
 }
 
+// @author Evilcat325
+// MatchTemplate accept a Matrix
+// Usage: output = input.matchTemplateByMatrix(matrix. method);
+NAN_METHOD(Matrix::MatchTemplateByMatrix) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  Matrix *templ = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  int cols = self->mat.cols - templ->mat.cols + 1;
+  int rows = self->mat.rows - templ->mat.rows + 1;
+  m_out->mat.create(cols, rows, CV_32FC1);
+
+  /*
+   TM_SQDIFF        =0
+   TM_SQDIFF_NORMED =1
+   TM_CCORR         =2
+   TM_CCORR_NORMED  =3
+   TM_CCOEFF        =4
+   TM_CCOEFF_NORMED =5
+   */
+
+  int method = (info.Length() < 2) ? (int)cv::TM_CCORR_NORMED : info[1]->Uint32Value();
+  if (!(method >= 0 && method <= 5)) method = (int)cv::TM_CCORR_NORMED;
+  cv::matchTemplate(self->mat, templ->mat, m_out->mat, method);
+  info.GetReturnValue().Set(out);
+}
+
 // @author ytham
 // Match Template filter
 // Usage: output = input.matchTemplate("templateFileString", method);
@@ -2277,19 +2308,19 @@ NAN_METHOD(Matrix::MatchTemplate) {
   int method = (info.Length() < 2) ? (int)cv::TM_CCORR_NORMED : info[1]->Uint32Value();
   cv::matchTemplate(self->mat, templ, m_out->mat, method);
   cv::normalize(m_out->mat, m_out->mat, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
-  double minVal; 
-  double maxVal; 
-  cv::Point minLoc; 
+  double minVal;
+  double maxVal;
+  cv::Point minLoc;
   cv::Point maxLoc;
   cv::Point matchLoc;
 
   minMaxLoc(m_out->mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
 
-  if(method  == CV_TM_SQDIFF || method == CV_TM_SQDIFF_NORMED) { 
-    matchLoc = minLoc; 
+  if(method  == CV_TM_SQDIFF || method == CV_TM_SQDIFF_NORMED) {
+    matchLoc = minLoc;
   }
-  else { 
-    matchLoc = maxLoc; 
+  else {
+    matchLoc = maxLoc;
   }
 
   //detected ROI
