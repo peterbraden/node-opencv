@@ -60,20 +60,17 @@
         [ # cflags on OS X are stupid and have to be defined like this
           "OS==\"mac\"", {
             "xcode_settings": {
-            "OTHER_CFLAGS": [
-              "-mmacosx-version-min=10.7",
-              " -fprofile-arcs -ftest-coverage ",
-              "-std=c++11",
-              "-stdlib=libc++",
-              "<!@(node utils/find-opencv.js --cflags)",
-            ],
-            "OTHER_LDFLAGS": [
-              "--coverage"
-            ],
-            "GCC_ENABLE_CPP_RTTI": "YES",
-            "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
+              "OTHER_CFLAGS": [
+                "-mmacosx-version-min=10.7",
+                "-std=c++11",
+                "-stdlib=libc++",
+                "<!@(node utils/find-opencv.js --cflags)",
+              ],
+              "GCC_ENABLE_CPP_RTTI": "YES",
+              "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
+            }
           }
-        }]
+        ]
     ],
 
     "configurations": {
@@ -83,7 +80,18 @@
             ['OS=="linux"', {
               "cflags": ["-coverage"],
               "ldflags": ["-coverage"]
+            }],
+            ['OS=="mac"', {
+              "xcode_settings": {
+                "OTHER_CFLAGS": [
+                  "-fprofile-arcs -ftest-coverage",
+                ],
+                "OTHER_LDFLAGS": [
+                  "--coverage"
+                ]
+              }
             }]
+
           ]
         },
     }
