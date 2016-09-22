@@ -61,8 +61,8 @@ test('Matrix constructor', function(assert){
 
 test('Matrix accessors', function(assert){
   var mat = new cv.Matrix(1, 2);
-  mat.set(0,0,3)
-  mat.set(0,1,5000)
+  mat.set(0,0,3);
+  mat.set(0,1,5000);
   assert.deepEqual(mat.row(0), [3,5000]);
 
   mat = new cv.Matrix(1,2);
@@ -335,7 +335,7 @@ test('LDA Wrap', function(assert) {
 
 
 test('Native Matrix', function(assert) {
-  var nativemat = require('../build/Release/test_nativemat.node');
+  var nativemat = require('../build/' + (!!process.env.DEBUG ? 'Debug' : 'Release') + '/test_nativemat.node');
   var mat = new cv.Matrix(42, 8);
 
   assert.deepEqual(mat.size(), nativemat.size(mat), 'nativemat');

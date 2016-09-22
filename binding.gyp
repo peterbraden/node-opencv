@@ -62,15 +62,31 @@
             "xcode_settings": {
             "OTHER_CFLAGS": [
               "-mmacosx-version-min=10.7",
-            "-std=c++11",
-            "-stdlib=libc++",
-            "<!@(node utils/find-opencv.js --cflags)",
-              ],
+              " -fprofile-arcs -ftest-coverage ",
+              "-std=c++11",
+              "-stdlib=libc++",
+              "<!@(node utils/find-opencv.js --cflags)",
+            ],
+            "OTHER_LDFLAGS": [
+              "--coverage"
+            ],
             "GCC_ENABLE_CPP_RTTI": "YES",
             "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
           }
         }]
-    ]
+    ],
+
+    "configurations": {
+        # This is used for generating code coverage with the `--debug` argument
+        "Debug": {
+          "conditions": [
+            ['OS=="linux"', {
+              "cflags": ["-coverage"],
+              "ldflags": ["-coverage"]
+            }]
+          ]
+        },
+    }
   },
   {
       "target_name": "test_nativemat",
@@ -119,10 +135,10 @@
             "xcode_settings": {
             "OTHER_CFLAGS": [
               "-mmacosx-version-min=10.7",
-            "-std=c++11",
-            "-stdlib=libc++",
-            "<!@(node utils/find-opencv.js --cflags)",
-              ],
+              "-std=c++11",
+              "-stdlib=libc++",
+              "<!@(node utils/find-opencv.js --cflags)",
+            ],
             "GCC_ENABLE_CPP_RTTI": "YES",
             "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
           }
