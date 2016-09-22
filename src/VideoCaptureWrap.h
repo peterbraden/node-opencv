@@ -27,7 +27,6 @@ public:
 
   static NAN_METHOD(GetFrameAt);
 
-  //close the stream
-  static NAN_METHOD(Close);
+  // release the stream
+  static NAN_METHOD(Release);
 };
-
