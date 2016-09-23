@@ -30,6 +30,8 @@ before_install:
   - sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   - sudo apt-get update
   - sudo apt-get install --force-yes --yes libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
+  # for code coverage
+  - sudo apt-get install lcov
   # get commit message
   - COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
   # put local node-pre-gyp on PATH
@@ -49,11 +51,11 @@ before_install:
   - platform=$(uname -s | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
 
 install:
-  # ensure source install works
-  - npm install --build-from-source
-  # test our module
-  - npm test
-  - node lib/opencv.js
+  # install dependencies first
+  - npm install
+  # build from source, run test and generate code coverage
+  - make cover
+  - DEBUG=true node lib/opencv.js
   - docker build -t peterbraden/node-opencv-ubuntu-12-04 -f test/Dockerfile-ubuntu-12-04 .
   - docker build -t peterbraden/node-opencv-ubuntu-14-04 -f test/Dockerfile-ubuntu-14-04 .
 
@@ -81,3 +83,5 @@ script:
 after_success:
   # if success then query and display all published binaries
   - node-pre-gyp info
+  # Upload coverage to codecov
+  - bash <(curl -s https://codecov.io/bash) -s coverage -f *.info

@@ -198,7 +198,7 @@ double Matrix::DblGet(cv::Mat mat, int i, int j) {
 
   switch (mat.type()) {
     case CV_32FC3:
-      pix = mat.at<cv::Vec3b>(i, j);
+      pix = mat.at<cv::Vec3f>(i, j);
       pint |= (uchar) pix.val[2];
       pint |= ((uchar) pix.val[1]) << 8;
       pint |= ((uchar) pix.val[0]) << 16;
@@ -281,9 +281,9 @@ NAN_METHOD(Matrix::Set) {
     switch (self->mat.type()) {
       case CV_32FC3:
         vint = static_cast<unsigned int>(val + 0.5);
-        self->mat.at<cv::Vec3b>(i, j)[0] = (uchar) (vint >> 16) & 0xff;
-        self->mat.at<cv::Vec3b>(i, j)[1] = (uchar) (vint >> 8) & 0xff;
-        self->mat.at<cv::Vec3b>(i, j)[2] = (uchar) (vint) & 0xff;
+        self->mat.at<cv::Vec3f>(i, j)[0] = (uchar) (vint >> 16) & 0xff;
+        self->mat.at<cv::Vec3f>(i, j)[1] = (uchar) (vint >> 8) & 0xff;
+        self->mat.at<cv::Vec3f>(i, j)[2] = (uchar) (vint) & 0xff;
         // printf("!!!i %x, %x, %x", (vint >> 16) & 0xff, (vint >> 8) & 0xff, (vint) & 0xff);
         break;
       default:
