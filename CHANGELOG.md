@@ -25,7 +25,8 @@
 - @dxprog changed readImage to load image with `CV_LOAD_IMAGE_UNCHANGED` instead of `CV_LOAD_IMAGE_COLOR`. The latter returned the image as 3-channel.
 - @danschultzer changed `VideoCapture.close` to `VideoCapture.release`.
 
-Thanks all.
+Thanks to all, also a massive thanks to @danschultzer for helping get the open
+tickets and PR's under control.
 
 ## 5.0.0 (Feb 9 2016)
 
