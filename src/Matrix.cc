@@ -1597,12 +1597,39 @@ NAN_METHOD(Matrix::HoughCircles) {
 }
 
 cv::Scalar setColor(Local<Object> objColor) {
-  Local<Value> valB = objColor->Get(0);
-  Local<Value> valG = objColor->Get(1);
-  Local<Value> valR = objColor->Get(2);
+  cv::Scalar color;
+  Local<Value> val1;
+  Local<Value> val2;
+  Local<Value> val3;
+  Local<Value> val4;
 
-  cv::Scalar color = cv::Scalar(valB->IntegerValue(), valG->IntegerValue(),
-      valR->IntegerValue());
+  // We'll accomodate a channel count up to 4 and fall back to the old
+  // "assume it's always 3" in the default case
+  if (!objColor->HasRealIndexedProperty(1)) {
+    val1 = objColor->Get(0);
+    color = cv::Scalar(val1->IntegerValue());
+  } else if (!objColor->HasRealIndexedProperty(2)) {
+    val1 = objColor->Get(0);
+    val2 = objColor->Get(1);
+    color = cv::Scalar(val1->IntegerValue(), val2->IntegerValue());
+  } else if (!objColor->HasRealIndexedProperty(4)) {
+    val1 = objColor->Get(0);
+    val2 = objColor->Get(1);
+    val3 = objColor->Get(2);
+    val4 = objColor->Get(3);
+    color = cv::Scalar(val1->IntegerValue(),
+                        val2->IntegerValue(),
+                        val3->IntegerValue(),
+                        val4->IntegerValue());
+  } else {
+    val1 = objColor->Get(0);
+    val2 = objColor->Get(1);
+    val3 = objColor->Get(2);
+    color = cv::Scalar(val1->IntegerValue(),
+                        val2->IntegerValue(),
+                        val3->IntegerValue());
+  }
+
   return color;
 }
 
