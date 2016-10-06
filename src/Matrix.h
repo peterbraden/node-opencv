@@ -27,6 +27,7 @@ public:
   JSFUNC(Normalize)
   JSFUNC(Brightness)
   JSFUNC(Norm)
+  JSFUNC(CopyMakeBorder)
 
   JSFUNC(Row)
   JSFUNC(PixelRow)

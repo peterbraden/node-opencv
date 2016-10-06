@@ -20,6 +20,7 @@ void Matrix::Init(Local<Object> target) {
   ctor->SetClassName(Nan::New("Matrix").ToLocalChecked());
 
   // Prototype
+  Nan::SetPrototypeMethod(ctor, "copyMakeBorder", CopyMakeBorder);
   Nan::SetPrototypeMethod(ctor, "row", Row);
   Nan::SetPrototypeMethod(ctor, "col", Col);
   Nan::SetPrototypeMethod(ctor, "pixelRow", PixelRow);
@@ -2542,6 +2543,54 @@ NAN_METHOD(Matrix::Mean) {
   arr->Set(3, Nan::New<Number>(means[3]));
 
   info.GetReturnValue().Set(arr);
+}
+
+NAN_METHOD(Matrix::CopyMakeBorder) {
+  SETUP_FUNCTION(Matrix)
+
+  double t = info[0]->NumberValue();
+  double b = info[1]->NumberValue();
+  double l = info[2]->NumberValue();
+  double r = info[3]->NumberValue();
+
+  int fill = cv::BORDER_DEFAULT;
+  cv::Scalar color;
+  if (info.Length() > 4) {
+    fill = info[4]->IntegerValue();
+    color = cv::Scalar(0, 0, 0, 0);
+    if (fill == cv::BORDER_CONSTANT && info[5]->IsArray()) {
+      Local<Object> objColor = info[5]->ToObject();
+
+      Local<Value> valB = objColor->Get(0);
+      Local<Value> valG = objColor->Get(1);
+      Local<Value> valR = objColor->Get(2);
+      Local<Value> valA = objColor->Get(3);
+
+      color = cv::Scalar(
+        valB->IntegerValue(),
+        valG->IntegerValue(),
+        valR->IntegerValue(),
+        valA->IntegerValue()
+      );
+    }
+  }
+
+  // if (info[6]->IsArray()) {
+  //   Local<Object> objColor = info[4]->ToObject();
+  //   color = setColor(objColor);
+  //
+  //   cv::Scalar color = cv::Scalar(valB->IntegerValue(), valG->IntegerValue(),
+  //     valR->IntegerValue());
+  // }
+
+  //
+  cv::Mat padded;
+  cv::copyMakeBorder(self->mat, padded, t, b, l, r, fill, color);
+  //
+  ~self->mat;
+  self->mat = padded;
+
+  return;
 }
 
 NAN_METHOD(Matrix::Shift) {
