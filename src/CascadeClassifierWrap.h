@@ -1,6 +1,9 @@
 #include "OpenCV.h"
+
+#ifdef HAVE_OPENCV_OBJDETECT
+
 #if CV_MAJOR_VERSION >= 3
-#include <opencv2/objdetect.hpp>
+  #include <opencv2/objdetect.hpp>
 #endif
 
 class CascadeClassifierWrap: public Nan::ObjectWrap {
@@ -20,3 +23,5 @@ public:
   static void EIO_DetectMultiScale(uv_work_t *req);
   static int EIO_AfterDetectMultiScale(uv_work_t *req);
 };
+
+#endif

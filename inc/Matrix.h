@@ -11,7 +11,7 @@
  */
 #ifndef NODE_OPENCV_MATRIX_H
 #define NODE_OPENCV_MATRIX_H
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
 #include <node_object_wrap.h>
 
 namespace node_opencv {

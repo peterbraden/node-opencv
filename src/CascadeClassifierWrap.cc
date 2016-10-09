@@ -3,6 +3,8 @@
 #include "Matrix.h"
 #include <nan.h>
 
+#ifdef HAVE_OPENCV_OBJDETECT
+
 Nan::Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
 
 void CascadeClassifierWrap::Init(Local<Object> target) {
@@ -54,7 +56,7 @@ public:
       minw(minw),
       minh(minh) {
   }
-  
+
   ~AsyncDetectMultiScale() {
   }
 
@@ -149,3 +151,5 @@ NAN_METHOD(CascadeClassifierWrap::DetectMultiScale) {
           neighbors, minw, minh));
   return;
 }
+
+#endif

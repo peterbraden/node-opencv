@@ -24,23 +24,39 @@ extern "C" void init(Local<Object> target) {
 
   Point::Init(target);
   Matrix::Init(target);
+#ifdef HAVE_OPENCV_OBJDETECT
   CascadeClassifierWrap::Init(target);
+#endif
+#ifdef HAVE_OPENCV_VIDEOIO
   VideoCaptureWrap::Init(target);
   VideoWriterWrap::Init(target);
+#endif
   Contour::Init(target);
+#ifdef HAVE_OPENCV_VIDEO
   TrackedObject::Init(target);
+#endif
+#ifdef HAVE_OPENCV_HIGHGUI
   NamedWindow::Init(target);
+#endif
   Constants::Init(target);
+#ifdef HAVE_OPENCV_CALIB3D
   Calib3D::Init(target);
+#endif
+#ifdef HAVE_OPENCV_IMGPROC
   ImgProc::Init(target);
   Histogram::Init(target);
+#endif
 #if CV_MAJOR_VERSION < 3
   StereoBM::Init(target);
   StereoSGBM::Init(target);
   StereoGC::Init(target);
 #if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION >=4
-  BackgroundSubtractorWrap::Init(target);
-  Features::Init(target);
+  #ifdef HAVE_OPENCV_VIDEO
+    BackgroundSubtractorWrap::Init(target);
+  #endif
+  #ifdef HAVE_OPENCV_FEATURES2D
+    Features::Init(target);
+  #endif
   LDAWrap::Init(target);
 #endif
 #endif

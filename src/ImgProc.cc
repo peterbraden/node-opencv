@@ -1,6 +1,8 @@
 #include "ImgProc.h"
 #include "Matrix.h"
 
+#ifdef HAVE_OPENCV_IMGPROC
+
 void ImgProc::Init(Local<Object> target) {
   Nan::Persistent<Object> inner;
   Local<Object> obj = Nan::New<Object>();
@@ -233,3 +235,5 @@ NAN_METHOD(ImgProc::GetStructuringElement) {
     return;
   }
 }
+
+#endif

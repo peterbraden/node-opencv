@@ -1,6 +1,8 @@
 #include "Calib3D.h"
 #include "Matrix.h"
 
+#ifdef HAVE_OPENCV_CALIB3D
+
 inline Local<Object> matrixFromMat(cv::Mat &input) {
   Local<Object> matrixWrap =
       Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
@@ -564,3 +566,5 @@ NAN_METHOD(Calib3D::ReprojectImageTo3D) {
     return;
   }
 }
+
+#endif

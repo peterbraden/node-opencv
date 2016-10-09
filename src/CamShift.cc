@@ -2,6 +2,8 @@
 #include "OpenCV.h"
 #include "Matrix.h"
 
+#ifdef HAVE_OPENCV_VIDEO
+
 #if CV_MAJOR_VERSION >= 3
 #include <opencv2/video/tracking.hpp>
 #endif
@@ -176,3 +178,5 @@ NAN_METHOD(TrackedObject::Track) {
 
   info.GetReturnValue().Set(arr);
 }
+
+#endif

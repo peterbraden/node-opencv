@@ -10,22 +10,41 @@
 #endif
 
 
+#include <opencv2/core/version.hpp>
+#if !((((CV_MAJOR_VERSION <= 2) && (CV_MINOR_VERSION <= 4)) && (CV_MINOR_VERSION < 13)) || ((CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION < 1)))
+  #define INCLUDE_AVAILABLE_MODULES_ONLY
+#endif
 
 #include <v8.h>
 #include <node.h>
 #include <node_object_wrap.h>
 #include <node_version.h>
 #include <node_buffer.h>
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
+
+#if ((CV_MAJOR_VERSION <= 2) && (CV_MINOR_VERSION <= 4) && (CV_MINOR_VERSION < 10))
 #include <opencv/highgui.h>
-#if CV_MAJOR_VERSION >= 3
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/opencv_modules.hpp>
+#else
+#include <opencv2/imgcodecs/imgcodecs_c.h>
 #endif
-#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4) && (CV_SUBMINOR_VERSION>=4))
-#define HAVE_OPENCV_FACE
+
+#ifndef INCLUDE_AVAILABLE_MODULES_ONLY
+  #define HAVE_OPENCV_CALIB3D
+  #define HAVE_OPENCV_FEATURES2D
+  #define HAVE_OPENCV_FLANN
+  #define HAVE_OPENCV_HIGHGUI
+  // #define HAVE_OPENCV_IMGCODECS
+  #define HAVE_OPENCV_IMGPROC
+  #define HAVE_OPENCV_ML
+  #define HAVE_OPENCV_OBJDETECT
+  #define HAVE_OPENCV_PHOTO
+  #define HAVE_OPENCV_SHAPE
+  #define HAVE_OPENCV_STITCHING
+  #define HAVE_OPENCV_SUPERRES
+  #define HAVE_OPENCV_VIDEO
+  #define HAVE_OPENCV_VIDEOIO
+  #define HAVE_OPENCV_VIDEOSTAB
+  #define HAVE_OPENCV_VIZ
 #endif
 
 #include <string.h>

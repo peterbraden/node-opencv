@@ -3,6 +3,8 @@
 #include <iostream>
 #include <nan.h>
 
+#ifdef HAVE_OPENCV_VIDEO
+
 #if CV_MAJOR_VERSION >= 3
 #warning TODO: port me to OpenCV 3
 #endif
@@ -129,3 +131,4 @@ BackgroundSubtractorWrap::BackgroundSubtractorWrap(
 
 #endif
 
+#endif
