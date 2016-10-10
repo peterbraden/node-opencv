@@ -2545,6 +2545,7 @@ NAN_METHOD(Matrix::Mean) {
   info.GetReturnValue().Set(arr);
 }
 
+// http://docs.opencv.org/2.4/modules/imgproc/doc/filtering.html#copymakeborder
 NAN_METHOD(Matrix::CopyMakeBorder) {
   SETUP_FUNCTION(Matrix)
 
@@ -2553,40 +2554,46 @@ NAN_METHOD(Matrix::CopyMakeBorder) {
   double l = info[2]->NumberValue();
   double r = info[3]->NumberValue();
 
-  int fill = cv::BORDER_DEFAULT;
-  cv::Scalar color;
+  int borderType = cv::BORDER_DEFAULT;
+  cv::Scalar value;
   if (info.Length() > 4) {
-    fill = info[4]->IntegerValue();
-    color = cv::Scalar(0, 0, 0, 0);
-    if (fill == cv::BORDER_CONSTANT && info[5]->IsArray()) {
-      Local<Object> objColor = info[5]->ToObject();
+    borderType = info[4]->IntegerValue();
+    value = cv::Scalar(0, 0, 0, 0);
+    if (borderType == cv::BORDER_CONSTANT) {
+      if (!info[5]->IsArray()) {
+        Nan::ThrowTypeError("The argument must be an array");
+      }
+      v8::Local<v8::Array> objColor = v8::Local<v8::Array>::Cast(info[5]);
+      unsigned int length = objColor->Length();
 
       Local<Value> valB = objColor->Get(0);
       Local<Value> valG = objColor->Get(1);
       Local<Value> valR = objColor->Get(2);
-      Local<Value> valA = objColor->Get(3);
 
-      color = cv::Scalar(
-        valB->IntegerValue(),
-        valG->IntegerValue(),
-        valR->IntegerValue(),
-        valA->IntegerValue()
-      );
+      if (length == 3) {
+        value = cv::Scalar(
+          valB->IntegerValue(),
+          valG->IntegerValue(),
+          valR->IntegerValue()
+        );
+      } else if (length == 4) {
+        Local<Value> valA = objColor->Get(3);
+
+        value = cv::Scalar(
+          valB->IntegerValue(),
+          valG->IntegerValue(),
+          valR->IntegerValue(),
+          valA->IntegerValue()
+        );
+      } else {
+        Nan::ThrowError("Fill must include 3 or 4 colors");
+      }
     }
   }
 
-  // if (info[6]->IsArray()) {
-  //   Local<Object> objColor = info[4]->ToObject();
-  //   color = setColor(objColor);
-  //
-  //   cv::Scalar color = cv::Scalar(valB->IntegerValue(), valG->IntegerValue(),
-  //     valR->IntegerValue());
-  // }
-
-  //
   cv::Mat padded;
-  cv::copyMakeBorder(self->mat, padded, t, b, l, r, fill, color);
-  //
+  cv::copyMakeBorder(self->mat, padded, t, b, l, r, borderType, value);
+
   ~self->mat;
   self->mat = padded;
 
