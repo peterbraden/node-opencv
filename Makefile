@@ -84,7 +84,7 @@ coverage/addon.info: coverage/lcov.info
 	lcov --capture --base-directory build/ --directory . --output-file coverage/addon.info
 # This generates the JS lcov info as well as gcov `*.gcda` files:
 coverage/lcov.info: $(test_deps) $(ISTANBUL)
-	DEBUG=true $(NODE) --nouse_idle_notification --expose-gc \
+	NODE_OPENCV_DEBUG=true $(NODE) --nouse_idle_notification --expose-gc \
 	$(ISTANBUL) cover --report lcovonly -- test/unit.js
 
 $(NODE_PRE_GYP):
