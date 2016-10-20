@@ -1486,7 +1486,16 @@ NAN_METHOD(Matrix::DrawContour) {
   }
 
   int thickness = info.Length() < 4 ? 1 : info[3]->NumberValue();
-  cv::drawContours(self->mat, cont->contours, pos, color, thickness);
+  int lineType = info.Length() < 5 ? 8 : info[4]->NumberValue();
+  int maxLevel = 0;
+
+  cv::Point offset;
+  if (info.Length() == 6) {
+    Local<Array> _offset = Local<Array>::Cast(info[5]);
+    offset = cv::Point(_offset->Get(0)->ToNumber()->Value(), _offset->Get(1)->ToNumber()->Value());
+  }
+
+  cv::drawContours(self->mat, cont->contours, pos, color, thickness, lineType, cv::noArray(), maxLevel, offset);
 
   return;
 }
