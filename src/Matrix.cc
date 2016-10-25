@@ -1487,7 +1487,7 @@ NAN_METHOD(Matrix::DrawContour) {
 
   int thickness = info.Length() < 4 ? 1 : info[3]->NumberValue();
   int lineType = info.Length() < 5 ? 8 : info[4]->NumberValue();
-  int maxLevel = 0;
+  int maxLevel = info.Length() < 6 ? 0 : info[5]->NumberValue();
 
   cv::Point offset;
   if (info.Length() == 6) {
