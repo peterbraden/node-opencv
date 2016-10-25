@@ -1495,7 +1495,7 @@ NAN_METHOD(Matrix::DrawContour) {
     offset = cv::Point(_offset->Get(0)->ToNumber()->Value(), _offset->Get(1)->ToNumber()->Value());
   }
 
-  cv::drawContours(self->mat, cont->contours, pos, color, thickness, lineType, cv::noArray(), maxLevel, offset);
+  cv::drawContours(self->mat, cont->contours, pos, color, thickness, lineType, cont->hierarchy, maxLevel, offset);
 
   return;
 }
