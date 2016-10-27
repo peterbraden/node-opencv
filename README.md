@@ -66,7 +66,7 @@ cv.readImage("./examples/files/mona.png", function(err, im){
 ### Matrix
 
 The [matrix](http://opencv.jp/opencv-2svn_org/cpp/core_basic_structures.html#mat) is the most useful
-base datastructure in OpenCV. Things like images are just matrices of pixels.
+base data structure in OpenCV. Things like images are just matrices of pixels.
 
 #### Creation
 
