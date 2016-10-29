@@ -1606,13 +1606,27 @@ NAN_METHOD(Matrix::HoughCircles) {
 }
 
 cv::Scalar setColor(Local<Object> objColor) {
-  Local<Value> valB = objColor->Get(0);
-  Local<Value> valG = objColor->Get(1);
-  Local<Value> valR = objColor->Get(2);
+  int64_t channels[4] = { 0, 0, 0, 0 };
 
-  cv::Scalar color = cv::Scalar(valB->IntegerValue(), valG->IntegerValue(),
-      valR->IntegerValue());
-  return color;
+  // We'll accomodate a channel count up to 4 and fall back to the old
+  // "assume it's always 3" in the default case
+  if (!objColor->HasRealIndexedProperty(1)) {
+    channels[0] = objColor->Get(0)->IntegerValue();
+  } else if (!objColor->HasRealIndexedProperty(2)) {
+    channels[0] = objColor->Get(0)->IntegerValue();
+    channels[1] = objColor->Get(1)->IntegerValue();
+  } else if (!objColor->HasRealIndexedProperty(4)) {
+    channels[0] = objColor->Get(0)->IntegerValue();
+    channels[1] = objColor->Get(1)->IntegerValue();
+    channels[2] = objColor->Get(2)->IntegerValue();
+    channels[3] = objColor->Get(3)->IntegerValue();
+  } else {
+    channels[0] = objColor->Get(0)->IntegerValue();
+    channels[1] = objColor->Get(1)->IntegerValue();
+    channels[2] = objColor->Get(2)->IntegerValue();
+  }
+
+  return cv::Scalar(channels[0], channels[1], channels[2], channels[3]);
 }
 
 cv::Point setPoint(Local<Object> objPoint) {

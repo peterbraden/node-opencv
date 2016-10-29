@@ -391,5 +391,31 @@ test('MatchTemplateByMatrix', function(assert) {
   })
 });
 
+test('setColor works will alpha channels', function(assert) {
+  var cv = require('../lib/opencv');
+  var mat = new cv.Matrix(100, 100, cv.Constants.CV_8UC4);
+
+  var SQUARE = [ 50, 50 ];
+  mat.rectangle([ 0, 0 ], SQUARE, [ 0, 187, 255, 255 ], -1);
+  mat.rectangle([ 0, 50 ], SQUARE, [ 0, 187, 124, 200 ], -1);
+  mat.rectangle([ 50, 0 ], SQUARE, [ 241, 161, 0, 128 ], -1);
+  mat.rectangle([ 50, 50 ], SQUARE, [ 20, 83, 246, 70 ], -1);
+
+  cv.readImage('./examples/files/alpha-test.png', function(err, imgMat) {
+    if (!err) {
+      var diff = new cv.Matrix();
+      diff.absDiff(mat, imgMat);
+      // We'll verify that each channel is 0
+      var channels = diff.split();
+      for (var i = 0; i < 4; i++) {
+        assert.equal(channels[i].countNonZero(), 0);
+      }
+    } else {
+      throw err;
+    }
+    assert.end();
+  });
+});
+
 // Test the examples folder.
 require('./examples')()
