@@ -1597,7 +1597,6 @@ NAN_METHOD(Matrix::HoughCircles) {
 }
 
 cv::Scalar setColor(Local<Object> objColor) {
-  cv::Scalar color;
   int64_t channels[4] = { 0, 0, 0, 0 };
 
   // We'll accomodate a channel count up to 4 and fall back to the old
