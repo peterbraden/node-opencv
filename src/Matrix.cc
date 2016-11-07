@@ -65,6 +65,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "roi", ROI);
   Nan::SetPrototypeMethod(ctor, "ptr", Ptr);
   Nan::SetPrototypeMethod(ctor, "absDiff", AbsDiff);
+  Nan::SetPrototypeMethod(ctor, "dct", Dct);
   Nan::SetPrototypeMethod(ctor, "addWeighted", AddWeighted);
   Nan::SetPrototypeMethod(ctor, "bitwiseXor", BitwiseXor);
   Nan::SetPrototypeMethod(ctor, "bitwiseNot", BitwiseNot);
@@ -1275,6 +1276,24 @@ NAN_METHOD(Matrix::AbsDiff) {
   cv::absdiff(src1->mat, src2->mat, self->mat);
 
   info.GetReturnValue().Set(Nan::Null());
+}
+
+NAN_METHOD(Matrix::Dct) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  int cols = self->mat.cols;
+  int rows = self->mat.rows;
+
+  bool inverse = info[1]->ToBoolean()->Value();
+
+  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  m_out->mat.create(rows, cols, CV_32F);
+
+  cv::dct(self->mat, m_out->mat, inverse ? 1 : 0);
+
+  info.GetReturnValue().Set(out);
 }
 
 NAN_METHOD(Matrix::AddWeighted) {

@@ -68,6 +68,7 @@ public:
   JSFUNC(ROI)
   JSFUNC(Ptr)
   JSFUNC(AbsDiff)
+  JSFUNC(Dct)  
   JSFUNC(AddWeighted)
   JSFUNC(BitwiseXor)
   JSFUNC(BitwiseNot)
