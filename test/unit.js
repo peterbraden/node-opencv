@@ -105,6 +105,7 @@ test('Matrix functions', function(assert) {
   var matNew = new cv.Matrix(75, 75, cv.Constants.CV_8U);
   mat.convertTo(matNew, cv.Constants.CV_8U, 2, 1);
   assert.equal(matNew.pixel(0, 0), 5);
+  assert.equal(mat.get(0, 0), 5)
 
   // reshape
   mat = new cv.Matrix(75, 75, cv.Constants.CV_8UC1);
