@@ -103,8 +103,10 @@ test('Matrix functions', function(assert) {
   // convertTo
   var mat = new cv.Matrix(75, 75, cv.Constants.CV_32F, [2.0]);
   var matNew = new cv.Matrix(75, 75, cv.Constants.CV_8U);
-  mat.convertTo(matNew, cv.Constants.CV_8U, 2, 1);
-  assert.equal(matNew.pixel(0, 0), 5);
+  var alpha = 2;
+  var beta = 1;
+  mat.convertTo(matNew, cv.Constants.CV_8U, alpha, beta);
+  assert.equal(matNew.pixel(0, 0), mat.get(0, 0)*alpha + beta);
 
   // reshape
   mat = new cv.Matrix(75, 75, cv.Constants.CV_8UC1);
