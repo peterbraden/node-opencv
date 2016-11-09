@@ -68,6 +68,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "dct", Dct);
   Nan::SetPrototypeMethod(ctor, "idct", Idct);
   Nan::SetPrototypeMethod(ctor, "addWeighted", AddWeighted);
+  Nan::SetPrototypeMethod(ctor, "add", Add);  
   Nan::SetPrototypeMethod(ctor, "bitwiseXor", BitwiseXor);
   Nan::SetPrototypeMethod(ctor, "bitwiseNot", BitwiseNot);
   Nan::SetPrototypeMethod(ctor, "bitwiseAnd", BitwiseAnd);
@@ -1340,6 +1341,29 @@ NAN_METHOD(Matrix::AddWeighted) {
   }
 
   info.GetReturnValue().Set(Nan::Null());
+}
+
+NAN_METHOD(Matrix::Add) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  int cols = self->mat.cols;
+  int rows = self->mat.rows;
+
+  Matrix *src1 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  m_out->mat.create(cols, rows, self->mat.type());
+
+  try {
+    cv::add(self->mat, src1->mat, m_out->mat);
+  } catch(cv::Exception& e ) {
+    const char* err_msg = e.what();
+    Nan::ThrowError(err_msg);
+  }
+
+  info.GetReturnValue().Set(out);
 }
 
 NAN_METHOD(Matrix::BitwiseXor) {
