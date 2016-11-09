@@ -66,6 +66,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "ptr", Ptr);
   Nan::SetPrototypeMethod(ctor, "absDiff", AbsDiff);
   Nan::SetPrototypeMethod(ctor, "dct", Dct);
+  Nan::SetPrototypeMethod(ctor, "idct", Idct);
   Nan::SetPrototypeMethod(ctor, "addWeighted", AddWeighted);
   Nan::SetPrototypeMethod(ctor, "bitwiseXor", BitwiseXor);
   Nan::SetPrototypeMethod(ctor, "bitwiseNot", BitwiseNot);
@@ -289,6 +290,9 @@ NAN_METHOD(Matrix::Set) {
         self->mat.at<cv::Vec3f>(i, j)[1] = (uchar) (vint >> 8) & 0xff;
         self->mat.at<cv::Vec3f>(i, j)[2] = (uchar) (vint) & 0xff;
         // printf("!!!i %x, %x, %x", (vint >> 16) & 0xff, (vint >> 8) & 0xff, (vint) & 0xff);
+        break;
+      case CV_32FC1:
+        self->mat.at<float>(i, j) = val;
         break;
       default:
         self->mat.at<double>(i, j) = val;
@@ -1288,13 +1292,27 @@ NAN_METHOD(Matrix::Dct) {
   int cols = self->mat.cols;
   int rows = self->mat.rows;
 
-  bool inverse = info[1]->ToBoolean()->Value();
+  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  m_out->mat.create(cols, rows, CV_32F);
+
+  cv::dct(self->mat, m_out->mat);
+
+  info.GetReturnValue().Set(out);
+}
+
+NAN_METHOD(Matrix::Idct) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  int cols = self->mat.cols;
+  int rows = self->mat.rows;
 
   Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
-  m_out->mat.create(rows, cols, CV_32F);
+  m_out->mat.create(cols, rows, CV_32F);
 
-  cv::dct(self->mat, m_out->mat, inverse ? 1 : 0);
+  cv::idct(self->mat, m_out->mat);
 
   info.GetReturnValue().Set(out);
 }
