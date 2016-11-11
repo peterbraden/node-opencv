@@ -208,6 +208,9 @@ double Matrix::DblGet(cv::Mat mat, int i, int j) {
     case CV_64FC1:
       val = mat.at<double>(i, j);
       break;
+    case CV_32FC1:
+      val = mat.at<float>(i, j);
+      break;
     default:
       val = mat.at<double>(i, j);
       break;
