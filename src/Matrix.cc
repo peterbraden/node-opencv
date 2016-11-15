@@ -80,7 +80,6 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "drawAllContours", DrawAllContours);
   Nan::SetPrototypeMethod(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
   Nan::SetPrototypeMethod(ctor, "houghLinesP", HoughLinesP);
-  Nan::SetPrototypeMethod(ctor, "crop", Crop);
   Nan::SetPrototypeMethod(ctor, "houghCircles", HoughCircles);
   Nan::SetPrototypeMethod(ctor, "inRange", inRange);
   Nan::SetPrototypeMethod(ctor, "adjustROI", AdjustROI);
