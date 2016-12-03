@@ -24,6 +24,9 @@ extern "C" void init(Local<Object> target) {
   Matrix::Init(target);
   CascadeClassifierWrap::Init(target);
   VideoCaptureWrap::Init(target);
+#ifdef HAVE_BACKGROUNDSUBTRACTOR
+  BackgroundSubtractorWrap::Init(target);
+#endif
   Contour::Init(target);
   TrackedObject::Init(target);
   NamedWindow::Init(target);
@@ -35,7 +38,6 @@ extern "C" void init(Local<Object> target) {
   StereoSGBM::Init(target);
   StereoGC::Init(target);
 #if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION >=4
-  BackgroundSubtractorWrap::Init(target);
   Features::Init(target);
   LDAWrap::Init(target);
 #endif

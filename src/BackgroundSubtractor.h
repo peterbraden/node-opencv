@@ -1,6 +1,7 @@
 #include "OpenCV.h"
 
-#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4))
+#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4)) || (CV_MAJOR_VERSION >= 3)
+#define HAVE_BACKGROUNDSUBTRACTOR
 
 #include <opencv2/video/background_segm.hpp>
 
