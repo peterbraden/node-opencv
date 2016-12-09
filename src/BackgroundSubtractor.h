@@ -17,6 +17,11 @@ public:
 
   static NAN_METHOD(CreateMOG);
   static NAN_METHOD(ApplyMOG);
+  
+  static NAN_METHOD(History);
+  //static NAN_METHOD(Mixtures);
+  //static NAN_METHOD(NoiseSigma);
+  //static NAN_METHOD(BackgroundRatio);
 };
 
 #endif

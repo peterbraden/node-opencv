@@ -22,6 +22,7 @@ void BackgroundSubtractorWrap::Init(Local<Object> target) {
 
   Nan::SetMethod(ctor, "createMOG", CreateMOG);
   Nan::SetPrototypeMethod(ctor, "applyMOG", ApplyMOG);
+  Nan::SetPrototypeMethod(ctor, "history", History);
 
   target->Set(Nan::New("BackgroundSubtractor").ToLocalChecked(), ctor->GetFunction());
 }
@@ -133,6 +134,25 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     Nan::ThrowError(err_msg);
     return;
   }
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::History) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+
+#if CV_MAJOR_VERSION >= 3
+  auto mog = dynamic_cast<cv::bgsegm::BackgroundSubtractorMOG *>(self->subtractor.get());
+#else
+  auto mog = dynamic_cast<cv::BackgroundSubtractorMOG *>(self->subtractor.get());
+#endif
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+
+  if (info.Length() > 0) {
+    mog->setHistory(info[0]->NumberValue());
+  }
+
+  info.GetReturnValue().Set(mog->getHistory());
 }
 
 BackgroundSubtractorWrap::BackgroundSubtractorWrap(
