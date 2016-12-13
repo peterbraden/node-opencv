@@ -115,9 +115,10 @@ NAN_METHOD(Contour::Area) {
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
   int pos = info[0]->NumberValue();
+  bool orientation = (info.Length() > 1 && info[1]->BooleanValue());
 
   // info.GetReturnValue().Set(Nan::New<Number>(contourArea(self->contours)));
-  info.GetReturnValue().Set(Nan::New<Number>(contourArea(cv::Mat(self->contours[pos]))));
+  info.GetReturnValue().Set(Nan::New<Number>(contourArea(cv::Mat(self->contours[pos]), orientation)));
 }
 
 NAN_METHOD(Contour::ArcLength) {
