@@ -163,7 +163,7 @@ im.line([x1,y1], [x2, y2])
 #### Object Detection
 
 There is a shortcut method for
-[Viola-Jones Haar Cascade](http://www.cognotics.com/opencv/servo_2007_series/part_2/sidebar.html) object
+[Viola-Jones Haar Cascade](http://docs.opencv.org/trunk/d7/d8b/tutorial_py_face_detection.html) object
 detection. This can be used for face detection etc.
 
 ```javascript
