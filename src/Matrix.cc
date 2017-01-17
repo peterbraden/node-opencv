@@ -35,6 +35,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "pixel", Pixel);
   Nan::SetPrototypeMethod(ctor, "width", Width);
   Nan::SetPrototypeMethod(ctor, "height", Height);
+  Nan::SetPrototypeMethod(ctor, "type", Type);
   Nan::SetPrototypeMethod(ctor, "size", Size);
   Nan::SetPrototypeMethod(ctor, "clone", Clone);
   Nan::SetPrototypeMethod(ctor, "crop", Crop);
@@ -495,6 +496,12 @@ NAN_METHOD(Matrix::Size) {
   arr->Set(1, Nan::New<Number>(self->mat.size().width));
 
   info.GetReturnValue().Set(arr);
+}
+
+NAN_METHOD(Matrix::Type) {
+  SETUP_FUNCTION(Matrix)
+
+  info.GetReturnValue().Set(Nan::New<Int32>(self->mat.type()));
 }
 
 NAN_METHOD(Matrix::Clone) {
