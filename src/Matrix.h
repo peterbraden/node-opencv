@@ -36,6 +36,7 @@ public:
   JSFUNC(Size)
   JSFUNC(Width)
   JSFUNC(Height)
+  JSFUNC(Type)
   JSFUNC(Channels)
   JSFUNC(Clone)
   JSFUNC(Ellipse)
