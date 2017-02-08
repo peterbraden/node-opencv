@@ -67,7 +67,9 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "ptr", Ptr);
   Nan::SetPrototypeMethod(ctor, "absDiff", AbsDiff);
   Nan::SetPrototypeMethod(ctor, "dct", Dct);
+  Nan::SetPrototypeMethod(ctor, "idct", Idct);
   Nan::SetPrototypeMethod(ctor, "addWeighted", AddWeighted);
+  Nan::SetPrototypeMethod(ctor, "add", Add);  
   Nan::SetPrototypeMethod(ctor, "bitwiseXor", BitwiseXor);
   Nan::SetPrototypeMethod(ctor, "bitwiseNot", BitwiseNot);
   Nan::SetPrototypeMethod(ctor, "bitwiseAnd", BitwiseAnd);
@@ -289,6 +291,9 @@ NAN_METHOD(Matrix::Set) {
         self->mat.at<cv::Vec3f>(i, j)[1] = (uchar) (vint >> 8) & 0xff;
         self->mat.at<cv::Vec3f>(i, j)[2] = (uchar) (vint) & 0xff;
         // printf("!!!i %x, %x, %x", (vint >> 16) & 0xff, (vint >> 8) & 0xff, (vint) & 0xff);
+        break;
+      case CV_32FC1:
+        self->mat.at<float>(i, j) = val;
         break;
       default:
         self->mat.at<double>(i, j) = val;
@@ -1102,6 +1107,7 @@ NAN_METHOD(Matrix::GaussianBlur) {
   cv::Mat blurred;
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  double sigma = 0;
 
   if (info.Length() < 1) {
     ksize = cv::Size(5, 5);
@@ -1118,9 +1124,12 @@ NAN_METHOD(Matrix::GaussianBlur) {
       Nan::ThrowTypeError("'ksize' argument must be a 2 double array");
     }
     ksize = cv::Size(x->NumberValue(), y->NumberValue());
+    if (info[1]->IsNumber()) {
+      sigma = info[1]->ToNumber()->Value();
+    }
   }
 
-  cv::GaussianBlur(self->mat, blurred, ksize, 0);
+  cv::GaussianBlur(self->mat, blurred, ksize, sigma);
   blurred.copyTo(self->mat);
 
   info.GetReturnValue().Set(Nan::Null());
@@ -1294,13 +1303,27 @@ NAN_METHOD(Matrix::Dct) {
   int cols = self->mat.cols;
   int rows = self->mat.rows;
 
-  bool inverse = info[1]->ToBoolean()->Value();
+  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  m_out->mat.create(cols, rows, CV_32F);
+
+  cv::dct(self->mat, m_out->mat);
+
+  info.GetReturnValue().Set(out);
+}
+
+NAN_METHOD(Matrix::Idct) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  int cols = self->mat.cols;
+  int rows = self->mat.rows;
 
   Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
-  m_out->mat.create(rows, cols, CV_32F);
+  m_out->mat.create(cols, rows, CV_32F);
 
-  cv::dct(self->mat, m_out->mat, inverse ? 1 : 0);
+  cv::idct(self->mat, m_out->mat);
 
   info.GetReturnValue().Set(out);
 }
@@ -1324,6 +1347,29 @@ NAN_METHOD(Matrix::AddWeighted) {
   }
 
   info.GetReturnValue().Set(Nan::Null());
+}
+
+NAN_METHOD(Matrix::Add) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  int cols = self->mat.cols;
+  int rows = self->mat.rows;
+
+  Matrix *src1 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  m_out->mat.create(cols, rows, self->mat.type());
+
+  try {
+    cv::add(self->mat, src1->mat, m_out->mat);
+  } catch(cv::Exception& e ) {
+    const char* err_msg = e.what();
+    Nan::ThrowError(err_msg);
+  }
+
+  info.GetReturnValue().Set(out);
 }
 
 NAN_METHOD(Matrix::BitwiseXor) {
