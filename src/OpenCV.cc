@@ -87,7 +87,9 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
     argv[1] = Nan::Null();
   }
 
-  Local <v8::Array> output = Nan::New<v8::Array>(mats.size());
+  Local <Array> output = Nan::New<Array>(mats.size());
+  argv[1] = output;
+
   for (std::vector<cv::Mat>::size_type i = 0; i < mats.size(); i ++) {
     Local<Object> im_h = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
     Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
@@ -95,8 +97,6 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
 
     output->Set(i, im_h);
   }
-
-  argv[1] = output;
 
   Nan::TryCatch try_catch;
   cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
