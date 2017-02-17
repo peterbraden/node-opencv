@@ -81,6 +81,10 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
     if (info[0]->IsString()) {
       std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
       cv::imreadmulti(filename, mats);
+
+      if (mats.empty()) {
+        argv[0] = Nan::Error("Error loading file");
+      }
     }
   } catch (cv::Exception& e) {
     argv[0] = Nan::Error(e.what());
