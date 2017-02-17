@@ -216,6 +216,20 @@ test("Image read from file", function(assert){
   })
 })
 
+test("Multi-page image read from file", function(assert){
+  cv.readImageMulti("./examples/files/multipage.tif", function(err, imgs){
+    assert.ok(imgs);
+    assert.equal(imgs.length, 10);
+    for (var i = 0; i < imgs.length; i++) {
+      assert.ok(imgs[i]);
+      assert.equal(imgs[i].width(), 800);
+      assert.equal(imgs[i].height(), 600);
+      assert.equal(imgs[i].channels(), 3);
+      assert.equal(imgs[i].empty(), false);
+    }
+    assert.end();
+  })
+})
 
 test("read Image from buffer", function(assert){
   cv.readImage(fs.readFileSync('./examples/files/opencv.png'), function(err, im){
