@@ -231,7 +231,6 @@ test("Multi-page image read from file", function(assert){
       assert.end();
     })
   } else {
-    console.log(cv.Constants);
     assert.equal(cv.readImageMulti("./examples/files/multipage.tif"), false);
     assert.end();
   }
