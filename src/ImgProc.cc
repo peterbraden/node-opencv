@@ -9,9 +9,42 @@ void ImgProc::Init(Local<Object> target) {
   Nan::SetMethod(obj, "undistort", Undistort);
   Nan::SetMethod(obj, "initUndistortRectifyMap", InitUndistortRectifyMap);
   Nan::SetMethod(obj, "remap", Remap);
+  Nan::SetMethod(obj, "distanceTransform", DistanceTransform);
   Nan::SetMethod(obj, "getStructuringElement", GetStructuringElement);
 
   target->Set(Nan::New("imgproc").ToLocalChecked(), obj);
+}
+
+// cv::distanceTransform
+NAN_METHOD(ImgProc::DistanceTransform) {
+  Nan::EscapableHandleScope scope;
+
+  try {
+    // Arg 0 is the image
+    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+    cv::Mat inputImage = m0->mat;
+
+    // Arg 1 is the distance type (CV_DIST_L1, CV_DIST_L2, etc.)
+    int distType = info[1]->IntegerValue();;
+
+    // Make a mat to hold the result image
+    cv::Mat outputImage;
+
+    // Perform distance transform
+    cv::distanceTransform(inputImage, outputImage, distType, 0);
+
+    // Wrap the output image
+    Local<Object> outMatrixWrap = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+    Matrix *outMatrix = Nan::ObjectWrap::Unwrap<Matrix>(outMatrixWrap);
+    outMatrix->mat = outputImage;
+
+    // Return the output image
+    info.GetReturnValue().Set(outMatrixWrap);
+  } catch (cv::Exception &e) {
+    const char *err_msg = e.what();
+    Nan::ThrowError(err_msg);
+    return;
+  }
 }
 
 // cv::undistort

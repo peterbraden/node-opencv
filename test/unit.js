@@ -217,16 +217,33 @@ test("Image read from file", function(assert){
 })
 
 test("Multi-page image read from file", function(assert){
-  cv.readImageMulti("./examples/files/multipage.tif", function(err, imgs){
-    assert.ok(imgs);
-    assert.equal(imgs.length, 10);
-    for (var i = 0; i < imgs.length; i++) {
-      assert.ok(imgs[i]);
-      assert.equal(imgs[i].width(), 800);
-      assert.equal(imgs[i].height(), 600);
-      assert.equal(imgs[i].channels(), 3);
-      assert.equal(imgs[i].empty(), false);
-    }
+  if (parseInt(cv.version) >= 3) {
+    cv.readImageMulti("./examples/files/multipage.tif", function(err, imgs){
+      assert.ok(imgs);
+      assert.equal(imgs.length, 10);
+      for (var i = 0; i < imgs.length; i++) {
+        assert.ok(imgs[i]);
+        assert.equal(imgs[i].width(), 800);
+        assert.equal(imgs[i].height(), 600);
+        assert.equal(imgs[i].channels(), 3);
+        assert.equal(imgs[i].empty(), false);
+      }
+      assert.end();
+    })
+  } else {
+    console.log(cv.Constants);
+    assert.equal(cv.readImageMulti("./examples/files/multipage.tif"), false);
+    assert.end();
+  }
+})
+
+test("Distance transform", function(assert){
+  cv.readImage("./examples/files/distanceTransform.png", function(err, img){
+    assert.ok(img);
+
+    // 50px image with single black pixel on right side
+    var result = cv.imgproc.distanceTransform(img, cv.Constants.CV_DIST_L2, cv.Constants.CV_DIST_MASK_PRECISE);
+    assert.equal(result.get(0,0), 49);
     assert.end();
   })
 })

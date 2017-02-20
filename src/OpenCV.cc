@@ -68,6 +68,7 @@ NAN_METHOD(OpenCV::ReadImage) {
   return;
 }
 
+#if CV_MAJOR_VERSION >= 3
 NAN_METHOD(OpenCV::ReadImageMulti) {
   Nan::EscapableHandleScope scope;
 
@@ -111,3 +112,9 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
 
   return;
 }
+#else
+NAN_METHOD(OpenCV::ReadImageMulti) {
+  info.GetReturnValue().Set(Nan::New<Boolean>(false));
+  return;
+}
+#endif
