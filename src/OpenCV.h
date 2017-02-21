@@ -67,6 +67,7 @@ public:
   static void Init(Local<Object> target);
 
   static NAN_METHOD(ReadImage);
+  static NAN_METHOD(ReadImageMulti);
 };
 
 #endif

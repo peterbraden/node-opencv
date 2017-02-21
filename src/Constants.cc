@@ -4,6 +4,9 @@
 #define CONST(C) \
   obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>(C));
 
+#define CONST_INT(C) \
+  obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)C));
+
 #define CONST_DOUBLE(C) \
   obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Number>(C));
 
@@ -89,6 +92,14 @@ void Constants::Init(Local<Object> target) {
   CONST_ENUM(RETR_LIST);
   CONST_ENUM(RETR_CCOMP);
   CONST_ENUM(RETR_TREE);
+
+  CONST_INT(CV_DIST_C);
+  CONST_INT(CV_DIST_L1);
+  CONST_INT(CV_DIST_L2);
+
+  CONST_INT(CV_DIST_MASK_3);
+  CONST_INT(CV_DIST_MASK_5);
+  CONST_INT(CV_DIST_MASK_PRECISE);
 
   target->Set(Nan::New("Constants").ToLocalChecked(), obj);
 }
