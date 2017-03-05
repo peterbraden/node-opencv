@@ -24,7 +24,7 @@ cv.readImage('./files/stuff.png', function(err, im) {
   im_canny.canny(lowThresh, highThresh);
   im_canny.dilate(nIters);
 
-  contours = im_canny.findContours();
+  var contours = im_canny.findContours();
   const lineType = 8;
   const maxLevel = 0;
   const thickness = 1;
