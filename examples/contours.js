@@ -19,12 +19,12 @@ cv.readImage('./files/stuff.png', function(err, im) {
   var all = new cv.Matrix(height, width);
 
   im.convertGrayscale();
-  im_canny = im.copy();
+  var im_canny = im.copy();
 
   im_canny.canny(lowThresh, highThresh);
   im_canny.dilate(nIters);
 
-  contours = im_canny.findContours();
+  var contours = im_canny.findContours();
   const lineType = 8;
   const maxLevel = 0;
   const thickness = 1;
