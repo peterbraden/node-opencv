@@ -1,6 +1,45 @@
 
 # Changelog
 
+
+## 6.0.0
+
+# Enhancements
+- @wenq added `contour.moments` method.
+- @andreasgal added `matrix.substract` method.
+- @jainanshul added `matrix.mean` method.
+- @idubinskiy restored `contour.points` method.
+- @danschultzer updated node-pre-gyp to fix load of node-opencv in electron runtime.
+- @andreasgal made `matrix.getData` work with RGB images.
+- @Evilcat325 added `matrix.MatchTemplateByMatrix` method.
+- @danschultzer added code coverage.
+
+# Bug fixes
+- @dominikdolancic fixed image load issue in `matrix.matchTemplate()`.
+- @AwooOOoo fixed `type_info` errors in Visual Studio with std namespace pollution.
+- @mvines fixed issue that prevented `AsyncSaveWorker` from using de-allocated memory.
+- @mcwhittemore fixed dissimilarity example image load.
+- @saoron fixed dead index.html documentup source.
+- @andreasgal fixed an issue with `matrix.crop` (and potentially others), where `matrix.getData` ends up returning less than full matrix.
+- @danschultzer fixed `examples/test.js` channel issue, and problematic Vec3b casting (instead of Vec3f) in `matrix.set`.
+
+## Backwards incompatible changes
+- @dxprog changed readImage to load image with `CV_LOAD_IMAGE_UNCHANGED` instead of `CV_LOAD_IMAGE_COLOR`. The latter returned the image as 3-channel.
+- @danschultzer changed `VideoCapture.close` to `VideoCapture.release`.
+
+Thanks to all, also a massive thanks to @danschultzer for helping get the open
+tickets and PR's under control.
+
+## 5.0.0 (Feb 9 2016)
+
+- @mvines and @svogl started working on OpenCV 3.x support.
+- @sirotenko added a getFrameCount method
+- @vaceta implemented getFrameAt
+- @jainanshul improved some methods
+- @cascade256 improved the windows build
+
+Plus fixes from @banterability, @punnerud, @vargad  etc. Thanks all.
+
 ## 4.0.0
 
 I've been super slow releasing this one, and there's a ton of new stuff.

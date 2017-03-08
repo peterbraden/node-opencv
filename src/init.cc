@@ -30,15 +30,18 @@ extern "C" void init(Local<Object> target) {
   Constants::Init(target);
   Calib3D::Init(target);
   ImgProc::Init(target);
+#if CV_MAJOR_VERSION < 3
   StereoBM::Init(target);
   StereoSGBM::Init(target);
   StereoGC::Init(target);
-
-#if CV_MAJOR_VERSION >= 2 && CV_MINOR_VERSION >=4
+#if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION >=4
   BackgroundSubtractorWrap::Init(target);
   Features::Init(target);
-  FaceRecognizerWrap::Init(target);
   LDAWrap::Init(target);
+#endif
+#endif
+#ifdef HAVE_OPENCV_FACE
+  FaceRecognizerWrap::Init(target);
 #endif
 };
 

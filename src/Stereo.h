@@ -3,6 +3,8 @@
 
 #include "OpenCV.h"
 
+#if CV_MAJOR_VERSION < 3
+
 class StereoBM: public Nan::ObjectWrap {
 public:
   cv::StereoBM stereo;
@@ -51,3 +53,4 @@ public:
 };
 
 #endif
+#endif // __NODE_STEREO_H

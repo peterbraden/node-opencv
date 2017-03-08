@@ -4,6 +4,9 @@
 #define CONST(C) \
   obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>(C));
 
+#define CONST_INT(C) \
+  obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)C));
+
 #define CONST_DOUBLE(C) \
   obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Number>(C));
 
@@ -62,6 +65,13 @@ void Constants::Init(Local<Object> target) {
   CONST_DOUBLE(CV_PI);
   CONST(CV_FILLED);
 
+  CONST_ENUM(BORDER_DEFAULT);
+  CONST_ENUM(BORDER_REPLICATE);
+  CONST_ENUM(BORDER_REFLECT);
+  CONST_ENUM(BORDER_REFLECT_101);
+  CONST_ENUM(BORDER_WRAP);
+  CONST_ENUM(BORDER_CONSTANT);
+
   CONST_ENUM(INTER_NEAREST);
   CONST_ENUM(INTER_LINEAR);
   CONST_ENUM(INTER_AREA);
@@ -77,6 +87,19 @@ void Constants::Init(Local<Object> target) {
   CONST_ENUM(NORM_HAMMING2);
   CONST_ENUM(NORM_RELATIVE);
   CONST_ENUM(NORM_TYPE_MASK);
+
+  CONST_ENUM(RETR_EXTERNAL);
+  CONST_ENUM(RETR_LIST);
+  CONST_ENUM(RETR_CCOMP);
+  CONST_ENUM(RETR_TREE);
+
+  CONST_INT(CV_DIST_C);
+  CONST_INT(CV_DIST_L1);
+  CONST_INT(CV_DIST_L2);
+
+  CONST_INT(CV_DIST_MASK_3);
+  CONST_INT(CV_DIST_MASK_5);
+  CONST_INT(CV_DIST_MASK_PRECISE);
 
   target->Set(Nan::New("Constants").ToLocalChecked(), obj);
 }

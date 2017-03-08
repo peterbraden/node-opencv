@@ -1,12 +1,13 @@
 {
   "name": "opencv",
-  "version": "4.0.0",
+  "version": "6.0.0",
   "description": "Node Bindings to OpenCV",
   "author": "Peter Braden <peterbraden@peterbraden.co.uk>",
   "dependencies": {
     "buffers": "^0.1.1",
+    "istanbul": "0.4.5",
     "nan": "^2.0.9",
-    "node-pre-gyp": "^0.6.11"
+    "node-pre-gyp": "^0.6.30"
   },
   "devDependencies": {
     "tape": "^3.0.0",

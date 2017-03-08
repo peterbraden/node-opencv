@@ -61,8 +61,8 @@ test('Matrix constructor', function(assert){
 
 test('Matrix accessors', function(assert){
   var mat = new cv.Matrix(1, 2);
-  mat.set(0,0,3)
-  mat.set(0,1,5000)
+  mat.set(0,0,3);
+  mat.set(0,1,5000);
   assert.deepEqual(mat.row(0), [3,5000]);
 
   mat = new cv.Matrix(1,2);
@@ -103,14 +103,20 @@ test('Matrix functions', function(assert) {
   // convertTo
   var mat = new cv.Matrix(75, 75, cv.Constants.CV_32F, [2.0]);
   var matNew = new cv.Matrix(75, 75, cv.Constants.CV_8U);
-  mat.convertTo(matNew, cv.Constants.CV_8U, 2, 1);
-  assert.equal(matNew.pixel(0, 0), 5);
+  var alpha = 2;
+  var beta = 1;
+  mat.convertTo(matNew, cv.Constants.CV_8U, alpha, beta);
+  assert.equal(matNew.pixel(0, 0), mat.get(0, 0)*alpha + beta);
 
   // reshape
   mat = new cv.Matrix(75, 75, cv.Constants.CV_8UC1);
   matNew = mat.reshape(1, 1);
   assert.equal(matNew.height(), 1);
   assert.equal(matNew.width(), 5625);
+
+  // GetRotationMatrix2D
+  mat = cv.Matrix.getRotationMatrix2D(0, 0, 90, 1.0);
+  assert.deepEqual(mat.size(), [2,3], 'GetRotationMatrix2D');
 
   assert.end();
 })
@@ -123,7 +129,6 @@ test(".norm", function(assert){
 
       var errorL2 = im.norm(im2, cv.Constants.NORM_L2);
       assert.equal(errorL2, 7295.591339980605);
-      
       errorL2 = im.norm(im, cv.Constants.NORM_L2);
       assert.equal(errorL2, 0);
       assert.end();
@@ -201,23 +206,55 @@ test(".bitwiseXor", function(assert){
 
 
 test("Image read from file", function(assert){
-  cv.readImage("./examples/files/mona.png", function(err, im){
+  cv.readImage("./examples/files/opencv.png", function(err, im){
     assert.ok(im);
-    assert.equal(im.width(), 500);
-    assert.equal(im.height(), 756)
-    assert.equal(im.empty(), false)
-    assert.end()
+    assert.equal(im.width(), 82);
+    assert.equal(im.height(), 99);
+    assert.equal(im.channels(), 4);
+    assert.equal(im.empty(), false);
+    assert.end();
   })
 })
 
+test("Multi-page image read from file", function(assert){
+  if (parseInt(cv.version) >= 3) {
+    cv.readImageMulti("./examples/files/multipage.tif", function(err, imgs){
+      assert.ok(imgs);
+      assert.equal(imgs.length, 10);
+      for (var i = 0; i < imgs.length; i++) {
+        assert.ok(imgs[i]);
+        assert.equal(imgs[i].width(), 800);
+        assert.equal(imgs[i].height(), 600);
+        assert.equal(imgs[i].channels(), 3);
+        assert.equal(imgs[i].empty(), false);
+      }
+      assert.end();
+    })
+  } else {
+    assert.equal(cv.readImageMulti("./examples/files/multipage.tif"), false);
+    assert.end();
+  }
+})
+
+test("Distance transform", function(assert){
+  cv.readImage("./examples/files/distanceTransform.png", function(err, img){
+    assert.ok(img);
+
+    // 50px image with single black pixel on right side
+    var result = cv.imgproc.distanceTransform(img, cv.Constants.CV_DIST_L2, cv.Constants.CV_DIST_MASK_PRECISE);
+    assert.equal(result.get(0,0), 49);
+    assert.end();
+  })
+})
 
 test("read Image from buffer", function(assert){
-  cv.readImage(fs.readFileSync('./examples/files/mona.png'), function(err, im){
+  cv.readImage(fs.readFileSync('./examples/files/opencv.png'), function(err, im){
     assert.ok(im);
-    assert.equal(im.width(), 500);
-    assert.equal(im.height(), 756)
-    assert.equal(im.empty(), false)
-    assert.end()
+    assert.equal(im.width(), 82);
+    assert.equal(im.height(), 99);
+    assert.equal(im.channels(), 4);
+    assert.equal(im.empty(), false);
+    assert.end();
   })
 })
 
@@ -238,7 +275,7 @@ test("Cascade Classifier", function(assert){
 
 test("ImageDataStream", function(assert){
   var s = new cv.ImageDataStream()
-  s.on('load', function(im){ 
+  s.on('load', function(im){
     assert.ok(im)
     assert.equal(im.empty(), false);
     assert.end()
@@ -310,7 +347,107 @@ test("fonts", function(t) {
   });
 })
 
+test('LDA Wrap', function(assert) {
+  if (cv.LDA === undefined) {
+    console.log('TODO: Please port LDAWrap.cc to OpenCV 3')
+    assert.end();
+    return;
+  }
+
+  // subspaceProject
+  var mat = cv.LDA.subspaceProject(new cv.Matrix(1, 2, cv.Constants.CV_64F), new cv.Matrix(), new cv.Matrix(2, 1, cv.Constants.CV_8UC1));
+  assert.deepEqual(mat.size(), [2,2], 'subspaceProject');
+
+  // subspaceReconstruct
+  mat = cv.LDA.subspaceReconstruct(new cv.Matrix(1, 2, cv.Constants.CV_64F), new cv.Matrix(), new cv.Matrix(1, 2, cv.Constants.CV_8UC1));
+  assert.deepEqual(mat.size(), [1,1], 'subspaceReconstruct');
+
+  assert.end();
+})
+
+
+test('Native Matrix', function(assert) {
+  var nativemat = require('../build/' + (!!process.env.NODE_OPENCV_DEBUG ? 'Debug' : 'Release') + '/test_nativemat.node');
+  var mat = new cv.Matrix(42, 8);
+
+  assert.deepEqual(mat.size(), nativemat.size(mat), 'nativemat');
+  assert.end();
+})
+
+test('Subtract', function(assert) {
+  var a = new cv.Matrix.Zeros(1,1);
+  a.set(0, 0, 3);
+  var b = new cv.Matrix.Zeros(1,1);
+  b.set(0, 0, 1);
+  a.subtract(b);
+  assert.deepEqual(a.get(0, 0), 2);
+  assert.end();
+});
+
+test('Mean', function(assert) {
+  var a = new cv.Matrix.Zeros(2, 2, cv.Constants.CV_8UC3);
+
+  // Set [0, 0] element to 1 for all three channels
+  a.set(0, 0, 1, 0);
+  a.set(0, 0, 1, 1);
+  a.set(0, 0, 1, 2);
+
+  var means = a.mean();
+  assert.deepEqual(means, [0.25, 0.25, 0.25, 0]);
+  assert.end();
+});
+
+test('MatchTemplateByMatrix', function(assert) {
+  var cv = require('../lib/opencv');
+  var targetFilename = "./examples/files/car1.jpg";
+  var templateFilename = "./examples/files/car1_template.jpg";
+  cv.readImage(targetFilename, function(err, target){
+    cv.readImage(templateFilename, function(err, template){
+      var TM_CCORR_NORMED = 3;
+      var res = target.matchTemplateByMatrix(template, TM_CCORR_NORMED);
+      var minMax = res.minMaxLoc();
+      var topLeft = minMax.maxLoc;
+      assert.ok(topLeft, "RGB Found Match");
+      assert.equal(topLeft.x, 42, "match location x === 42");
+      assert.equal(topLeft.y, 263, "match location y === 263");
+      target.canny(5,300);
+      template.canny(5,300);
+      res = target.matchTemplateByMatrix(template, TM_CCORR_NORMED);
+      minMax = res.minMaxLoc();
+      topLeft = minMax.maxLoc;
+      assert.ok(topLeft, "Canny edge Found Match");
+      assert.equal(topLeft.x, 42, "match location x === 42");
+      assert.equal(topLeft.y, 263, "match location y === 263");
+      assert.end();
+    });
+  })
+});
+
+test('setColor works will alpha channels', function(assert) {
+  var cv = require('../lib/opencv');
+  var mat = new cv.Matrix(100, 100, cv.Constants.CV_8UC4);
+
+  var SQUARE = [ 50, 50 ];
+  mat.rectangle([ 0, 0 ], SQUARE, [ 0, 187, 255, 255 ], -1);
+  mat.rectangle([ 0, 50 ], SQUARE, [ 0, 187, 124, 200 ], -1);
+  mat.rectangle([ 50, 0 ], SQUARE, [ 241, 161, 0, 128 ], -1);
+  mat.rectangle([ 50, 50 ], SQUARE, [ 20, 83, 246, 70 ], -1);
+
+  cv.readImage('./examples/files/alpha-test.png', function(err, imgMat) {
+    if (!err) {
+      var diff = new cv.Matrix();
+      diff.absDiff(mat, imgMat);
+      // We'll verify that each channel is 0
+      var channels = diff.split();
+      for (var i = 0; i < 4; i++) {
+        assert.equal(channels[i].countNonZero(), 0);
+      }
+    } else {
+      throw err;
+    }
+    assert.end();
+  });
+});
+
 // Test the examples folder.
 require('./examples')()
-
-

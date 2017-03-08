@@ -1,10 +1,18 @@
-#include "FaceRecognizer.h"
 #include "OpenCV.h"
 
-#if ((CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >=4) && (CV_SUBMINOR_VERSION>=4))
-
+#ifdef HAVE_OPENCV_FACE
+#include "FaceRecognizer.h"
 #include "Matrix.h"
 #include <nan.h>
+
+#if CV_MAJOR_VERSION >= 3
+namespace cv {
+  using std::vector;
+  using cv::face::createEigenFaceRecognizer;
+  using cv::face::createFisherFaceRecognizer;
+  using cv::face::createLBPHFaceRecognizer;
+}
+#endif
 
 #define EIGEN 0
 #define LBPH 1
@@ -274,6 +282,17 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
   double confidence = 0.0;
   self->rec->predict(im, predictedLabel, confidence);
 
+#if CV_MAJOR_VERSION >= 3
+  // Older versions of OpenCV3 incorrectly returned label=0 at
+  // confidence=DBL_MAX instead of label=-1 on failure.  This can be removed
+  // once the fix* becomes more widespread.
+  //
+  // * https://github.com/Itseez/opencv_contrib/commit/0aa58ae9b30a017b356a86d29453c0b56ed9e625#diff-d9c561bf45c255c5951ff1ab55e80473
+  if (predictedLabel == 0 && confidence == DBL_MAX) {
+    predictedLabel = -1;
+  }
+#endif
+
   v8::Local<v8::Object> res = Nan::New<Object>();
   res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
   res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
@@ -296,6 +315,16 @@ public:
 
   void Execute() {
      this->rec->predict(this->im, this->predictedLabel, this->confidence);
+#if CV_MAJOR_VERSION >= 3
+    // Older versions of OpenCV3 incorrectly returned label=0 at
+    // confidence=DBL_MAX instead of label=-1 on failure.  This can be removed
+    // once the fix* becomes more widespread.
+    //
+    // * https://github.com/Itseez/opencv_contrib/commit/0aa58ae9b30a017b356a86d29453c0b56ed9e625#diff-d9c561bf45c255c5951ff1ab55e80473
+    if (this->predictedLabel == 0 && this->confidence == DBL_MAX) {
+      this->predictedLabel = -1;
+    }
+#endif
   }
 
   void HandleOKCallback() {
@@ -369,7 +398,27 @@ NAN_METHOD(FaceRecognizerWrap::GetMat) {
     JSTHROW("getMat takes a key")
   }
   std::string key = std::string(*Nan::Utf8String(info[0]->ToString()));
-  cv::Mat m = self->rec->getMat(key);
+  cv::Mat m;
+#if CV_MAJOR_VERSION >= 3
+  cv::face::BasicFaceRecognizer *bfr =
+    dynamic_cast<cv::face::BasicFaceRecognizer*>(self->rec.get());
+  if (bfr == NULL) {
+    Nan::ThrowTypeError("getMat not supported");
+    return;
+  }
+  if (key.compare("mean") == 0) {
+    m = bfr->getMean();
+  } else if (key.compare("eigenvectors") == 0) {
+    m = bfr->getEigenVectors();
+  } else if (key.compare("eigenvalues") == 0) {
+    m = bfr->getEigenValues();
+  } else {
+    Nan::ThrowTypeError("Unknown getMat keyname");
+    return;
+  }
+#else
+  m = self->rec->getMat(key);
+#endif
 
   Local<Object> im = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im);

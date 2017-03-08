@@ -1,9 +1,9 @@
+
 #include "OpenCV.h"
+#include "../inc/Matrix.h"
 
-class Matrix: public Nan::ObjectWrap {
+class Matrix: public node_opencv::Matrix{
 public:
-
-  cv::Mat mat;
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Local<Object> target);
   static NAN_METHOD(New);
@@ -36,6 +36,7 @@ public:
   JSFUNC(Size)
   JSFUNC(Width)
   JSFUNC(Height)
+  JSFUNC(Type)
   JSFUNC(Channels)
   JSFUNC(Clone)
   JSFUNC(Ellipse)
@@ -62,17 +63,22 @@ public:
   JSFUNC(GaussianBlur)
   JSFUNC(MedianBlur)
   JSFUNC(BilateralFilter)
+  JSFUNC(Sobel)
   JSFUNC(Copy)
   JSFUNC(Flip)
   JSFUNC(ROI)
   JSFUNC(Ptr)
   JSFUNC(AbsDiff)
+  JSFUNC(Dct)
+  JSFUNC(Idct)
   JSFUNC(AddWeighted)
+  JSFUNC(Add)
   JSFUNC(BitwiseXor)
   JSFUNC(BitwiseNot)
   JSFUNC(BitwiseAnd)
   JSFUNC(CountNonZero)
   //JSFUNC(Split)
+  JSFUNC(Moments)
   JSFUNC(Canny)
   JSFUNC(Dilate)
   JSFUNC(Erode)
@@ -107,6 +113,7 @@ public:
   JSFUNC(FloodFill)
 
   JSFUNC(MatchTemplate)
+  JSFUNC(MatchTemplateByMatrix)
   JSFUNC(TemplateMatches)
   JSFUNC(MinMaxLoc)
 
@@ -119,10 +126,13 @@ public:
   JSFUNC(CopyWithMask)
   JSFUNC(SetWithMask)
   JSFUNC(MeanWithMask)
+  JSFUNC(Mean)
   JSFUNC(Shift)
   JSFUNC(Reshape)
 
   JSFUNC(Release)
+
+  JSFUNC(Subtract)
   /*
    static Handle<Value> Val(const Arguments& info);
    static Handle<Value> RowRange(const Arguments& info);

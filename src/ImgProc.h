@@ -9,6 +9,7 @@
 class ImgProc: public Nan::ObjectWrap {
 public:
   static void Init(Local<Object> target);
+  static NAN_METHOD(DistanceTransform);
   static NAN_METHOD(Undistort);
   static NAN_METHOD(InitUndistortRectifyMap);
   static NAN_METHOD(Remap);

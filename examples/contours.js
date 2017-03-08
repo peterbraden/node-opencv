@@ -19,19 +19,22 @@ cv.readImage('./files/stuff.png', function(err, im) {
   var all = new cv.Matrix(height, width);
 
   im.convertGrayscale();
-  im_canny = im.copy();
+  var im_canny = im.copy();
 
   im_canny.canny(lowThresh, highThresh);
   im_canny.dilate(nIters);
 
-  contours = im_canny.findContours();
+  var contours = im_canny.findContours();
+  const lineType = 8;
+  const maxLevel = 0;
+  const thickness = 1;
 
   for(i = 0; i < contours.size(); i++) {
     if(contours.area(i) > maxArea) {
       var moments = contours.moments(i);
       var cgx = Math.round(moments.m10 / moments.m00);
       var cgy = Math.round(moments.m01 / moments.m00);
-      big.drawContour(contours, i, GREEN);
+      big.drawContour(contours, i, GREEN, thickness, lineType, maxLevel, [0, 0]);
       big.line([cgx - 5, cgy], [cgx + 5, cgy], RED);
       big.line([cgx, cgy - 5], [cgx, cgy + 5], RED);
     }

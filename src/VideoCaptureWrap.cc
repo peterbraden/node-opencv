@@ -3,7 +3,6 @@
 #include "OpenCV.h"
 
 #include  <iostream>
-using namespace std;
 
 Nan::Persistent<FunctionTemplate> VideoCaptureWrap::constructor;
 
@@ -32,7 +31,9 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "setWidth", SetWidth);
   Nan::SetPrototypeMethod(ctor, "setHeight", SetHeight);
   Nan::SetPrototypeMethod(ctor, "setPosition", SetPosition);
-  Nan::SetPrototypeMethod(ctor, "close", Close);
+  Nan::SetPrototypeMethod(ctor, "getFrameAt", GetFrameAt);
+  Nan::SetPrototypeMethod(ctor, "getFrameCount", GetFrameCount);
+  Nan::SetPrototypeMethod(ctor, "release", Release);
   Nan::SetPrototypeMethod(ctor, "ReadSync", ReadSync);
   Nan::SetPrototypeMethod(ctor, "grab", Grab);
   Nan::SetPrototypeMethod(ctor, "retrieve", Retrieve);
@@ -93,6 +94,15 @@ NAN_METHOD(VideoCaptureWrap::SetWidth) {
   return;
 }
 
+NAN_METHOD(VideoCaptureWrap::GetFrameCount) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int cnt = int(v->cap.get(CV_CAP_PROP_FRAME_COUNT));
+
+  info.GetReturnValue().Set(Nan::New<Number>(cnt));
+}
+
 NAN_METHOD(VideoCaptureWrap::SetHeight) {
   Nan::HandleScope scope;
   VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
@@ -121,7 +131,21 @@ NAN_METHOD(VideoCaptureWrap::SetPosition) {
   return;
 }
 
-NAN_METHOD(VideoCaptureWrap::Close) {
+NAN_METHOD(VideoCaptureWrap::GetFrameAt) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  if(info.Length() != 1)
+  return;
+
+  int pos = info[0]->IntegerValue();
+
+  v->cap.set(CV_CAP_PROP_POS_MSEC, pos);
+
+  return;
+}
+
+NAN_METHOD(VideoCaptureWrap::Release) {
   Nan::HandleScope scope;
   VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
