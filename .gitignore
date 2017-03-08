@@ -9,3 +9,4 @@ examples/*.avi
 examples/tmp/*
 vagrant/.vagrant
 coverage/
+.idea
