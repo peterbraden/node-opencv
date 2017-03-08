@@ -35,25 +35,31 @@ cap.read(function(err, firstFrame) {
     cap.read(function(err, newFrame) {
       if (err) throw err;
 
-      var goodFeatures = old_frame.goodFeaturesToTrack(feature_params.maxCorners, feature_params.qualityLevel, feature_params.minDistance);
+      var frameSize = newFrame.size();
 
-      // calculate optical flow
-      var flow = old_frame.calcOpticalFlowPyrLK(newFrame, goodFeatures, lk_params.winSize, lk_params.maxLevel, lk_params.criteria);
+      if ( frameSize[0] > 0 && frameSize[1] > 0) {
+        var goodFeatures = old_frame.goodFeaturesToTrack(feature_params.maxCorners, feature_params.qualityLevel, feature_params.minDistance);
 
-      // Select good points
+        // calculate optical flow
+        var flow = old_frame.calcOpticalFlowPyrLK(newFrame, goodFeatures, lk_params.winSize, lk_params.maxLevel, lk_params.criteria);
 
-      // draw the tracks
-      for(var i = 0; i < flow.old_points.length; i++){
-        if(flow.found[i]){
-          out.line(flow.old_points[i], flow.new_points[i], color);
+        // Select good points
+
+        // draw the tracks
+        for(var i = 0; i < flow.old_points.length; i++){
+          if(flow.found[i]){
+            out.line(flow.old_points[i], flow.new_points[i], color);
+          }
         }
-      }
+
 /*
-      window.show(out);
-      window.blockingWaitKey(0, 50);
+        window.show(out);
+        window.blockingWaitKey(0, 50);
 */
-      old_frame = newFrame.copy();
-      read();
+
+        old_frame = newFrame.copy();
+        read();
+      }
     });
   }
 
