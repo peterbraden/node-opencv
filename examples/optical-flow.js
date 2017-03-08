@@ -2,7 +2,6 @@ var cv = require('../lib/opencv');
 var path = require('path');
 
 var cap = new cv.VideoCapture(path.join(__dirname, 'files', 'motion.mov'));
-var window = new cv.NamedWindow('Video', 0);
 
 // Parameters for lucas kanade optical flow
 var lk_params = {
@@ -19,6 +18,10 @@ feature_params = {
 
 // Create some random colors
 var color = [255, 0, 0];
+
+/*
+var window = new cv.NamedWindow('Video', 0);
+*/
 
 // Take first frame and find corners in it
 cap.read(function(err, firstFrame) {
@@ -45,8 +48,10 @@ cap.read(function(err, firstFrame) {
           out.line(flow.old_points[i], flow.new_points[i], color);
         }
       }
+/*
       window.show(out);
       window.blockingWaitKey(0, 50);
+*/
       old_frame = newFrame.copy();
       read();
     });
