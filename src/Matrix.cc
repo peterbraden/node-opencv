@@ -82,6 +82,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "drawContour", DrawContour);
   Nan::SetPrototypeMethod(ctor, "drawAllContours", DrawAllContours);
   Nan::SetPrototypeMethod(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
+  Nan::SetPrototypeMethod(ctor, "calcOpticalFlowPyrLK", CalcOpticalFlowPyrLK);
   Nan::SetPrototypeMethod(ctor, "houghLinesP", HoughLinesP);
   Nan::SetPrototypeMethod(ctor, "houghCircles", HoughCircles);
   Nan::SetPrototypeMethod(ctor, "inRange", inRange);
@@ -1596,13 +1597,17 @@ NAN_METHOD(Matrix::GoodFeaturesToTrack) {
   Nan::HandleScope scope;
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  int maxCorners = info.Length() >= 1 ? info[0]->IntegerValue() : 500;
+  double qualityLevel = info.Length() >= 2 ? (double) info[1]->NumberValue() : 0.01;
+  double minDistance = info.Length() >= 3 ? (double) info[2]->NumberValue() : 10;
+
   std::vector<cv::Point2f> corners;
   cv::Mat gray;
 
   cvtColor(self->mat, gray, CV_BGR2GRAY);
   equalizeHist(gray, gray);
 
-  cv::goodFeaturesToTrack(gray, corners, 500, 0.01, 10);
+  cv::goodFeaturesToTrack(gray, corners, maxCorners, qualityLevel, minDistance);
   v8::Local<v8::Array> arr = Nan::New<Array>(corners.size());
 
   for (unsigned int i=0; i<corners.size(); i++) {
@@ -1613,6 +1618,83 @@ NAN_METHOD(Matrix::GoodFeaturesToTrack) {
   }
 
   info.GetReturnValue().Set(arr);
+}
+
+NAN_METHOD(Matrix::CalcOpticalFlowPyrLK) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  Matrix *newMatrix = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  Local<Array> points = Local<Array>::Cast(info[1]->ToObject());
+  std::vector<cv::Point2f> old_points;
+
+  for (unsigned int i=0; i<points->Length(); i++) {
+    Local<Object> pt = points->Get(i)->ToObject();
+    old_points.push_back(cv::Point2f(pt->Get(0)->NumberValue(), pt->Get(1)->NumberValue()));
+  }
+
+  cv::Size winSize;
+  if (info.Length() >= 3 && info[2]->IsArray()) {
+    Local<Object> winSizeObj = info[2]->ToObject();
+    winSize = cv::Size(winSizeObj->Get(0)->IntegerValue(), winSizeObj->Get(1)->IntegerValue());
+  } else {
+    winSize = cv::Size(21, 21);
+  }
+
+  int maxLevel = info.Length() >= 4 ? info[3]->IntegerValue() : 3;
+
+  cv::TermCriteria criteria;
+  if (info.Length() >= 5 && info[4]->IsArray()) {
+    Local<Object> criteriaObj = info[4]->ToObject();
+    criteria = cv::TermCriteria(criteriaObj->Get(0)->IntegerValue(), criteriaObj->Get(1)->IntegerValue(), (double) criteriaObj->Get(2)->NumberValue());
+  } else {
+    criteria = cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01);
+  }
+
+  int flags = info.Length() >= 6 ? info[5]->IntegerValue() : 0;
+  double minEigThreshold = info.Length() >= 7 ? info[6]->NumberValue() : 1e-4;
+
+  cv::Mat old_gray;
+  cv::cvtColor(self->mat, old_gray, CV_BGR2GRAY);
+
+  cv::Mat new_gray;
+  cv::cvtColor(newMatrix->mat, new_gray, CV_BGR2GRAY);
+
+  std::vector<cv::Point2f> new_points;
+  std::vector<uchar> status;
+  std::vector<float> err;
+
+  cv::calcOpticalFlowPyrLK(old_gray, new_gray, old_points, new_points, status, err, winSize, maxLevel, criteria, flags, minEigThreshold);
+
+  v8::Local<v8::Array> old_arr = Nan::New<Array>(old_points.size());
+  v8::Local<v8::Array> new_arr = Nan::New<Array>(new_points.size());
+  v8::Local<v8::Array> found = Nan::New<Array>(status.size());
+
+  for (unsigned int i=0; i<old_points.size(); i++) {
+    v8::Local<v8::Array> pt = Nan::New<Array>(2);
+    pt->Set(0, Nan::New<Number>((double) old_points[i].x));
+    pt->Set(1, Nan::New<Number>((double) old_points[i].y));
+    old_arr->Set(i, pt);
+  }
+
+  for (unsigned int i=0; i<new_points.size(); i++) {
+    v8::Local<v8::Array> pt = Nan::New<Array>(2);
+    pt->Set(0, Nan::New<Number>((double) new_points[i].x));
+    pt->Set(1, Nan::New<Number>((double) new_points[i].y));
+    new_arr->Set(i, pt);
+  }
+
+  for (unsigned int i=0; i<status.size(); i++) {
+    v8::Local<v8::Integer> pt = Nan::New<Integer>((int)status[i]);
+    found->Set(i, pt);
+  }
+
+  Local<Object> data = Nan::New<Object>();
+  data->Set(Nan::New<String>("old_points").ToLocalChecked(), old_arr);
+  data->Set(Nan::New<String>("new_points").ToLocalChecked(), new_arr);
+  data->Set(Nan::New<String>("found").ToLocalChecked(), found);
+
+  info.GetReturnValue().Set(data);
 }
 
 NAN_METHOD(Matrix::HoughLinesP) {

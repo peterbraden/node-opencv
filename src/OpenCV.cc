@@ -9,6 +9,8 @@ void OpenCV::Init(Local<Object> target) {
   char out [21];
   int n = sprintf(out, "%i.%i", CV_MAJOR_VERSION, CV_MINOR_VERSION);
   target->Set(Nan::New<String>("version").ToLocalChecked(), Nan::New<String>(out, n).ToLocalChecked());
+  target->Set(Nan::New("TERM_CRITERIA_EPS").ToLocalChecked(), Nan::New<Integer>((int)cv::TermCriteria::EPS));
+  target->Set(Nan::New("TERM_CRITERIA_COUNT").ToLocalChecked(), Nan::New<Integer>((int)cv::TermCriteria::COUNT));
 
   Nan::SetMethod(target, "readImage", ReadImage);
   Nan::SetMethod(target, "readImageMulti", ReadImageMulti);
