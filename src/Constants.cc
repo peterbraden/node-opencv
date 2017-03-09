@@ -101,6 +101,9 @@ void Constants::Init(Local<Object> target) {
   CONST_INT(CV_DIST_MASK_5);
   CONST_INT(CV_DIST_MASK_PRECISE);
 
+  target->Set(Nan::New("TERM_CRITERIA_EPS").ToLocalChecked(), Nan::New<Integer>((int)cv::TermCriteria::EPS));
+  target->Set(Nan::New("TERM_CRITERIA_COUNT").ToLocalChecked(), Nan::New<Integer>((int)cv::TermCriteria::COUNT));
+
   target->Set(Nan::New("Constants").ToLocalChecked(), obj);
 }
 

@@ -89,6 +89,7 @@ public:
 
   // Feature Detection
   JSFUNC(GoodFeaturesToTrack)
+  JSFUNC(CalcOpticalFlowPyrLK)
   JSFUNC(HoughLinesP)
   JSFUNC(HoughCircles)
 
