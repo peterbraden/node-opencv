@@ -37,6 +37,8 @@ extern "C" void init(Local<Object> target) {
 #if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION >=4
   BackgroundSubtractorWrap::Init(target);
   Features::Init(target);
+#endif
+#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4) && (CV_SUBMINOR_VERSION>=4))
   LDAWrap::Init(target);
 #endif
 #endif
