@@ -89,7 +89,7 @@ NAN_METHOD(StereoBM::Compute) {
 
     // Wrap the returned disparity map
     Local < Object > disparityWrap =
-        Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
     Matrix *disp = Nan::ObjectWrap::Unwrap<Matrix>(disparityWrap);
     disp->mat = disparity;
 
@@ -224,7 +224,7 @@ NAN_METHOD(StereoSGBM::Compute) {
 
     // Wrap the returned disparity map
     Local < Object > disparityWrap =
-        Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
     Matrix *disp = Nan::ObjectWrap::Unwrap<Matrix>(disparityWrap);
     disp->mat = disparity;
 
@@ -308,7 +308,7 @@ NAN_METHOD(StereoGC::Compute) {
 
     // Wrap the returned disparity map
     Local < Object > disparityWrap =
-        Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
     Matrix *disp = Nan::ObjectWrap::Unwrap<Matrix>(disparityWrap);
     disp->mat = disparity;
 
