@@ -227,6 +227,8 @@ contours.convexHull(index, clockwise);
 
 It requires to `train` then `predict`. For acceptable result, the face should be cropped, grayscaled and aligned, I ignore this part so that we may focus on the api usage.
 
+** Please ensure your OpenCV 3.2+ is configured with contrib. MacPorts user may `port install opencv +contrib` **
+
 ```javascript
 const fs = require('fs');
 const path = require('path');
