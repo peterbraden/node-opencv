@@ -223,6 +223,69 @@ contours.approxPolyDP(index, epsilon, isClosed);
 contours.convexHull(index, clockwise);
 ```
 
+#### Face Recognization
+
+It requires to `train` then `predict`. For acceptable result, the face should be cropped, grayscaled and aligned, I ignore this part so that we may focus on the api usage.
+
+** Please ensure your OpenCV 3.2+ is configured with contrib. MacPorts user may `port install opencv +contrib` **
+
+```javascript
+const fs = require('fs');
+const path = require('path');
+const cv = require('opencv');
+
+function forEachFileInDir(dir, cb) {
+  let f = fs.readdirSync(dir);
+  f.forEach(function (fpath, index, array) {
+    if (fpath != '.DS_Store')
+     cb(path.join(dir, fpath));
+  });
+}
+
+let dataDir = "./_training";
+function trainIt (fr) {
+  // if model existe, load it
+  if ( fs.existsSync('./trained.xml') ) {
+    fr.loadSync('./trained.xml');
+    return;
+  }
+
+  // else train a model
+  let samples = [];
+  forEachFileInDir(dataDir, (f)=>{
+      cv.readImage(f, function (err, im) {
+          // Assume all training photo are named as id_xxx.jpg
+          let labelNumber = parseInt(path.basename(f).substring(3));
+          samples.push([labelNumber, im]);
+      })
+  })
+
+  if ( samples.length > 3 ) {
+    // There are async and sync version of training method:
+    // .train(info, cb)
+    //     cb : standard Nan::Callback
+    //     info : [[intLabel,matrixImage],...])
+    // .trainSync(info)
+    fr.trainSync(samples);
+    fr.saveSync('./trained.xml');
+  }else {
+    console.log('Not enough images uploaded yet', cvImages)
+  }
+}
+
+function predictIt(fr, f){
+  cv.readImage(f, function (err, im) {
+    let result = fr.predictSync(im);
+    console.log(`recognize result:(${f}) id=${result.id} conf=${100.0-result.confidence}`);
+  });
+}
+
+//using defaults: .createLBPHFaceRecognizer(radius=1, neighbors=8, grid_x=8, grid_y=8, threshold=80)
+const fr = new cv.FaceRecognizer();
+trainIt(fr);
+forEachFileInDir('./_bench', (f) => predictIt(fr, f));
+```
+
 ## Test
 
 Using [tape](https://github.com/substack/tape). Run with command:
