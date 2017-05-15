@@ -61,7 +61,7 @@ NAN_METHOD(LDAWrap::SubspaceProject) {
 
   cv::Mat m = cv::subspaceProject(w->mat, mean->mat, src->mat);
 
-  Local<Object> im = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> im = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im);
   img->mat = m;
 
@@ -87,7 +87,7 @@ NAN_METHOD(LDAWrap::SubspaceReconstruct) {
 
   cv::Mat m = cv::subspaceReconstruct(w->mat, mean->mat, src->mat);
 
-  Local<Object> im = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> im = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im);
   img->mat = m;
 

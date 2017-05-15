@@ -56,7 +56,7 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
   //   DOUBLE_FROM_ARGS(noiseSigma, 3)
   // }
 
-  Local<Object> n = Nan::New(BackgroundSubtractorWrap::constructor)->GetFunction()->NewInstance();
+  Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(BackgroundSubtractorWrap::constructor)).ToLocalChecked()).ToLocalChecked();
 
   cv::Ptr<cv::BackgroundSubtractor> bg;
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
@@ -80,7 +80,7 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
 
   try {
     Local<Object> fgMask =
-        Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
     Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(fgMask);
 
     cv::Mat mat;

@@ -22,7 +22,7 @@ NAN_METHOD(OpenCV::ReadImage) {
   Local<Value> argv[2];
   argv[0] = Nan::Null();
 
-  Local<Object> im_h = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> im_h = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
   argv[1] = im_h;
 
@@ -96,7 +96,7 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
   argv[1] = output;
 
   for (std::vector<cv::Mat>::size_type i = 0; i < mats.size(); i ++) {
-    Local<Object> im_h = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+    Local<Object> im_h = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
     Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
     img->mat = mats[i];
 

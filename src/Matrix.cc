@@ -342,7 +342,7 @@ NAN_METHOD(Matrix::GetData) {
   v8::Local<v8::Object> globalObj = Nan::GetCurrentContext()->Global();
   v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
   v8::Local<v8::Value> constructorArgs[3] = {buf, Nan::New<v8::Integer>((unsigned) size), Nan::New<v8::Integer>(0)};
-  v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+  v8::Local<v8::Object> actualBuffer = Nan::NewInstance(bufferConstructor, 3, constructorArgs).ToLocalChecked();
 
   info.GetReturnValue().Set(actualBuffer);
 }
@@ -513,7 +513,7 @@ NAN_METHOD(Matrix::Clone) {
   SETUP_FUNCTION(Matrix)
 
   Local < Object > im_h =
-      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
 
   Matrix *m = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
   m->mat = self->mat.clone();
@@ -535,7 +535,7 @@ NAN_METHOD(Matrix::Crop) {
     cv::Rect roi(x, y, width, height);
 
     Local < Object > im_h =
-        Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
     Matrix *m = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
     m->mat = self->mat(roi);
 
@@ -685,8 +685,7 @@ NAN_METHOD(Matrix::ToBuffer) {
       > ::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
   v8::Local<v8::Value> constructorArgs[3] =
       {buf, Nan::New<v8::Integer>((unsigned)vec.size()), Nan::New<v8::Integer>(0)};
-  v8::Local < v8::Object > actualBuffer = bufferConstructor->NewInstance(3,
-      constructorArgs);
+  v8::Local < v8::Object > actualBuffer = Nan::NewInstance(bufferConstructor, 3, constructorArgs).ToLocalChecked();
 
   info.GetReturnValue().Set(actualBuffer);
 }
@@ -721,7 +720,7 @@ public:
     v8::Local<v8::Object> globalObj = Nan::GetCurrentContext()->Global();
     v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
     v8::Local<v8::Value> constructorArgs[3] = {buf, Nan::New<v8::Integer>((unsigned)res.size()), Nan::New<v8::Integer>(0)};
-    v8::Local<v8::Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+    v8::Local<v8::Object> actualBuffer = Nan::NewInstance(bufferConstructor, 3, constructorArgs).ToLocalChecked();;
 
     Local<Value> argv[] = {
       Nan::Null(),
@@ -1035,7 +1034,7 @@ NAN_METHOD(Matrix::Zeros) {
   int h = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
-  Local<Object> im_h = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> im_h = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
   cv::Mat mat = cv::Mat::zeros(w, h, type);
 
@@ -1050,7 +1049,7 @@ NAN_METHOD(Matrix::Ones) {
   int h = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
-  Local<Object> im_h = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> im_h = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
   cv::Mat mat = cv::Mat::ones(w, h, type);
 
@@ -1065,7 +1064,7 @@ NAN_METHOD(Matrix::Eye) {
   int h = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
-  Local<Object> im_h = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> im_h = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
   cv::Mat mat = cv::Mat::eye(w, h, type);
 
@@ -1126,7 +1125,7 @@ NAN_METHOD(Matrix::GaussianBlur) {
     }
     ksize = cv::Size(x->NumberValue(), y->NumberValue());
     if (info[1]->IsNumber()) {
-      sigma = info[1]->ToNumber()->Value();
+      sigma = Nan::To<double>(info[1]).FromJust();
     }
   }
 
@@ -1208,7 +1207,7 @@ NAN_METHOD(Matrix::Sobel) {
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
 
   Local<Object> result_to_return =
-      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *result = Nan::ObjectWrap::Unwrap<Matrix>(result_to_return);
 
   cv::Sobel(self->mat, result->mat, ddepth, xorder, yorder, ksize, scale, delta, borderType);
@@ -1222,7 +1221,7 @@ NAN_METHOD(Matrix::Copy) {
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
 
   Local<Object> img_to_return =
-      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
   self->mat.copyTo(img->mat);
 
@@ -1239,9 +1238,9 @@ NAN_METHOD(Matrix::Flip) {
         "(0 = X axis, positive = Y axis, negative = both axis)");
   }
 
-  int flipCode = info[0]->ToInt32()->Value();
+  int flipCode = Nan::To<int>(info[0]).FromJust();
 
-  Local<Object> img_to_return = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> img_to_return = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
   cv::flip(self->mat, img->mat, flipCode);
 
@@ -1258,7 +1257,7 @@ NAN_METHOD(Matrix::ROI) {
   }
 
   // Although it's an image to return, it is in fact a pointer to ROI of parent matrix
-  Local<Object> img_to_return = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> img_to_return = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
 
   int x = info[0]->IntegerValue();
@@ -1304,7 +1303,7 @@ NAN_METHOD(Matrix::Dct) {
   int cols = self->mat.cols;
   int rows = self->mat.rows;
 
-  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
   m_out->mat.create(cols, rows, CV_32F);
 
@@ -1320,7 +1319,7 @@ NAN_METHOD(Matrix::Idct) {
   int cols = self->mat.cols;
   int rows = self->mat.rows;
 
-  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
   m_out->mat.create(cols, rows, CV_32F);
 
@@ -1359,7 +1358,7 @@ NAN_METHOD(Matrix::Add) {
 
   Matrix *src1 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
 
-  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
   m_out->mat.create(cols, rows, self->mat.type());
 
@@ -1538,7 +1537,7 @@ NAN_METHOD(Matrix::FindContours) {
   }
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
-  Local<Object> conts_to_return= Nan::New(Contour::constructor)->GetFunction()->NewInstance();
+  Local<Object> conts_to_return = Nan::NewInstance(Nan::GetFunction(Nan::New(Contour::constructor)).ToLocalChecked()).ToLocalChecked();
   Contour *contours = Nan::ObjectWrap::Unwrap<Contour>(conts_to_return);
 
   cv::findContours(self->mat, contours->contours, contours->hierarchy, mode, chain);
@@ -1567,7 +1566,10 @@ NAN_METHOD(Matrix::DrawContour) {
   cv::Point offset;
   if (info.Length() == 6) {
     Local<Array> _offset = Local<Array>::Cast(info[5]);
-    offset = cv::Point(_offset->Get(0)->ToNumber()->Value(), _offset->Get(1)->ToNumber()->Value());
+    offset = cv::Point(
+            Nan::To<int>(Nan::Get(_offset, 0).ToLocalChecked()).FromJust(),
+            Nan::To<int>(Nan::Get(_offset, 1).ToLocalChecked()).FromJust()
+    );
   }
 
   cv::drawContours(self->mat, cont->contours, pos, color, thickness, lineType, cont->hierarchy, maxLevel, offset);
@@ -1838,7 +1840,7 @@ NAN_METHOD(Matrix::Rotate) {
   cv::Mat rotMatrix(2, 3, CV_32FC1);
   cv::Mat res;
 
-  float angle = info[0]->ToNumber()->Value();
+  float angle = Nan::To<double>(info[0]).FromJust();
 
   // Modification by SergeMv
   //-------------
@@ -1888,13 +1890,13 @@ NAN_METHOD(Matrix::GetRotationMatrix2D) {
     JSTHROW("Invalid number of arguments");
   }
 
-  float angle = info[0]->ToNumber()->Value();
-  int x = info[1]->Uint32Value();
-  int y = info[2]->Uint32Value();
-  double scale = info[3]->IsUndefined() ? 1.0 : info[3]->NumberValue();
+  float angle = Nan::To<double>(info[0]).FromJust();
+  int x = Nan::To<uint32_t>(info[1]).FromJust();
+  int y = Nan::To<uint32_t>(info[2]).FromJust();
+  double scale = Nan::To<double>(info[3]).FromMaybe(1.0);
 
   Local<Object> img_to_return =
-      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
 
   cv::Point center = cv::Point(x,y);
@@ -2058,7 +2060,7 @@ NAN_METHOD(Matrix::Threshold) {
   }
 
   Local < Object > img_to_return =
-      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
   self->mat.copyTo(img->mat);
 
@@ -2077,7 +2079,7 @@ NAN_METHOD(Matrix::AdaptiveThreshold) {
   double C = info[4]->NumberValue();
 
   Local < Object > img_to_return =
-      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
   self->mat.copyTo(img->mat);
 
@@ -2092,9 +2094,9 @@ NAN_METHOD(Matrix::MeanStdDev) {
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
 
-  Local<Object> mean = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> mean = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m_mean = Nan::ObjectWrap::Unwrap<Matrix>(mean);
-  Local<Object> stddev = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> stddev = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m_stddev = Nan::ObjectWrap::Unwrap<Matrix>(stddev);
 
   cv::meanStdDev(self->mat, m_mean->mat, m_stddev->mat);
@@ -2255,7 +2257,7 @@ NAN_METHOD(Matrix::Split) {
   v8::Local<v8::Array> arrChannels = Nan::New<Array>(size);
   for (unsigned int i = 0; i < size; i++) {
     Local<Object> matObject =
-        Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
     Matrix * m = Nan::ObjectWrap::Unwrap<Matrix>(matObject);
     m->mat = channels[i];
     arrChannels->Set(i, matObject);
@@ -2435,7 +2437,7 @@ NAN_METHOD(Matrix::MatchTemplateByMatrix) {
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
   Matrix *templ = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
 
-  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
   int cols = self->mat.cols - templ->mat.cols + 1;
   int rows = self->mat.rows - templ->mat.rows + 1;
@@ -2469,7 +2471,7 @@ NAN_METHOD(Matrix::MatchTemplate) {
   cv::Mat templ;
   templ = cv::imread(filename, -1);
 
-  Local<Object> out = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
   int cols = self->mat.cols - templ.cols + 1;
   int rows = self->mat.rows - templ.rows + 1;
@@ -2627,7 +2629,7 @@ NAN_METHOD(Matrix::GetPerspectiveTransform) {
     tgt_corners[i] = cvPoint(tgtArray->Get(i*2)->IntegerValue(),tgtArray->Get(i*2+1)->IntegerValue());
   }
 
-  Local<Object> xfrm = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> xfrm = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *xfrmmat = Nan::ObjectWrap::Unwrap<Matrix>(xfrm);
   xfrmmat->mat = cv::getPerspectiveTransform(src_corners, tgt_corners);
 
@@ -2785,7 +2787,7 @@ NAN_METHOD(Matrix::Reshape) {
   }
 
   Local<Object> img_to_return =
-      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
 
   img->mat = self->mat.reshape(cn, rows);

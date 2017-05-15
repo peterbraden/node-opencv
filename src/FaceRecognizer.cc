@@ -90,7 +90,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateLBPH) {
   INT_FROM_ARGS(grid_y, 3)
   DOUBLE_FROM_ARGS(threshold, 4)
 
-  Local<Object> n = Nan::New(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
+  Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
   cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(radius,
       neighbors, grid_x, grid_y, threshold);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
@@ -108,7 +108,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateEigen) {
   INT_FROM_ARGS(components, 0)
   DOUBLE_FROM_ARGS(threshold, 1)
 
-  Local<Object> n = Nan::New(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
+  Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
   cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer(components,
       threshold);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, EIGEN);
@@ -126,7 +126,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateFisher) {
   INT_FROM_ARGS(components, 0)
   DOUBLE_FROM_ARGS(threshold, 1)
 
-  Local<Object> n = Nan::New(FaceRecognizerWrap::constructor)->GetFunction()->NewInstance();
+  Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
 
   cv::Ptr<cv::FaceRecognizer> f = cv::createFisherFaceRecognizer(components,
       threshold);
@@ -420,7 +420,7 @@ NAN_METHOD(FaceRecognizerWrap::GetMat) {
   m = self->rec->getMat(key);
 #endif
 
-  Local<Object> im = Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Local<Object> im = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im);
   img->mat = m;
 

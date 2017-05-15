@@ -3,7 +3,7 @@
 
 inline Local<Object> matrixFromMat(cv::Mat &input) {
   Local<Object> matrixWrap =
-      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *matrix = Nan::ObjectWrap::Unwrap<Matrix>(matrixWrap);
   matrix->mat = input;
 
@@ -36,10 +36,13 @@ inline std::vector<cv::Point2f> points2fFromArray(Local<Value> array) {
     Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
 
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
-      Local<Object> pt = pointsArray->Get(i)->ToObject();
+      Local<Object> pt = Nan::Get(pointsArray, i).ToLocalChecked()->ToObject();
       points.push_back(
-          cv::Point2f(pt->Get(Nan::New<String>("x").ToLocalChecked())->ToNumber()->Value(),
-              pt->Get(Nan::New<String>("y").ToLocalChecked())->ToNumber()->Value()));
+          cv::Point2f(
+              Nan::To<double>(Nan::Get(pt, Nan::New<String>("x").ToLocalChecked()).ToLocalChecked()).FromJust(),
+              Nan::To<double>(Nan::Get(pt, Nan::New<String>("y").ToLocalChecked()).ToLocalChecked()).FromJust()
+          )
+      );
     }
   } else {
     JSTHROW_TYPE("Points not a valid array");
@@ -56,9 +59,12 @@ inline std::vector<cv::Point3f> points3fFromArray(Local<Value> array) {
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
       Local<Object> pt = pointsArray->Get(i)->ToObject();
       points.push_back(
-          cv::Point3f(pt->Get(Nan::New<String>("x").ToLocalChecked())->ToNumber()->Value(),
-              pt->Get(Nan::New<String>("y").ToLocalChecked())->ToNumber()->Value(),
-              pt->Get(Nan::New<String>("z").ToLocalChecked())->ToNumber()->Value()));
+          cv::Point3f(
+              Nan::To<double>(Nan::Get(pt, Nan::New<String>("x").ToLocalChecked()).ToLocalChecked()).FromJust(),
+              Nan::To<double>(Nan::Get(pt, Nan::New<String>("y").ToLocalChecked()).ToLocalChecked()).FromJust(),
+              Nan::To<double>(Nan::Get(pt, Nan::New<String>("z").ToLocalChecked()).ToLocalChecked()).FromJust()
+        )
+      );
     }
   } else {
     JSTHROW_TYPE("Must pass array of object points for each frame")
@@ -313,7 +319,7 @@ NAN_METHOD(Calib3D::GetOptimalNewCameraMatrix) {
     cv::Size imageSize = sizeFromArray(info[2]);
 
     // Arg 3 is the alpha free scaling parameter
-    double alpha = info[3]->ToNumber()->Value();
+    double alpha = Nan::To<double>(info[3]).FromJust();
 
     // Arg 4, the new image size
     cv::Size newImageSize = sizeFromArray(info[4]);
@@ -497,7 +503,7 @@ NAN_METHOD(Calib3D::ComputeCorrespondEpilines) {
     std::vector<cv::Point2f> points = points2fFromArray(info[0]);
 
     // Arg1, the image index (1 or 2)
-    int whichImage = int(info[1]->ToNumber()->Value());
+    int whichImage = Nan::To<int>(info[1]).FromJust();
 
     // Arg2, the fundamental matrix
     cv::Mat F = matFromMatrix(info[2]);
