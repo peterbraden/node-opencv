@@ -6,7 +6,7 @@ var highThresh = 100;
 var nIters = 2;
 var minArea = 2000;
 
-var BLUE  = [0, 255, 0]; // B, G, R
+var BLUE  = [255, 0, 0]; // B, G, R
 var RED   = [0, 0, 255]; // B, G, R
 var GREEN = [0, 255, 0]; // B, G, R
 var WHITE = [255, 255, 255]; // B, G, R
