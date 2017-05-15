@@ -565,14 +565,23 @@ NAN_METHOD(Matrix::PixelRow) {
 
   int width = self->mat.size().width;
   int y = info[0]->IntegerValue();
-  v8::Local < v8::Array > arr = Nan::New<Array>(width * 3);
+  v8::Local < v8::Array > arr;
 
-  for (int x = 0; x < width; x++) {
-    cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
-    int offset = x * 3;
-    arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
-    arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
-    arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
+  if (self->mat.channels() == 3) {
+    arr = Nan::New<Array>(width * 3);
+    for (int x = 0; x < width; x++) {
+      cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
+      int offset = x * 3;
+      arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
+      arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
+      arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
+    }
+  } else {
+    arr = Nan::New<Array>(width);
+    for (int x = 0; x < width; x++) {
+      int pixel = (int)self->mat.at<unsigned char>(y, x);
+      arr->Set(x, Nan::New<Number>(pixel));
+    }
   }
 
   info.GetReturnValue().Set(arr);
@@ -597,14 +606,23 @@ NAN_METHOD(Matrix::PixelCol) {
 
   int height = self->mat.size().height;
   int x = info[0]->IntegerValue();
-  v8::Local < v8::Array > arr = Nan::New<Array>(height * 3);
-
-  for (int y = 0; y < height; y++) {
-    cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
-    int offset = y * 3;
-    arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
-    arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
-    arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
+  v8::Local < v8::Array > arr;
+  
+  if (self->mat.channels() == 3) {
+    arr = Nan::New<Array>(height * 3);
+    for (int y = 0; y < height; y++) {
+      cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
+      int offset = y * 3;
+      arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
+      arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
+      arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
+    }
+  } else {
+    arr = Nan::New<Array>(height);
+    for (int y = 0; y < height; y++) {
+      int pixel = (int)self->mat.at<unsigned char>(y, x);
+      arr->Set(y, Nan::New<Number>(pixel));
+    }
   }
   info.GetReturnValue().Set(arr);
 }
