@@ -9,8 +9,8 @@ matrix:
     - os: osx
 
 node_js:
-  - '0.12'
-#  - "iojs-v1.0.4"
+  - '6'
+  - '7'
 
 sudo: required
 services:
