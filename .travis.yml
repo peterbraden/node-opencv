@@ -9,8 +9,8 @@ matrix:
     - os: osx
 
 node_js:
-  - '0.12'
-#  - "iojs-v1.0.4"
+  - '6'
+  - '7'
 
 sudo: required
 services:
@@ -56,7 +56,6 @@ install:
   # build from source, run test and generate code coverage
   - make cover
   - NODE_OPENCV_DEBUG=true node lib/opencv.js
-  - docker build -t peterbraden/node-opencv-ubuntu-12-04 -f test/Dockerfile-ubuntu-12-04 .
   - docker build -t peterbraden/node-opencv-ubuntu-14-04 -f test/Dockerfile-ubuntu-14-04 .
 
 before_script:
