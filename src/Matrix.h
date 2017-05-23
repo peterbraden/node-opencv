@@ -32,6 +32,7 @@ public:
   JSFUNC(PixelRow)
   JSFUNC(Col)
   JSFUNC(PixelCol)
+  JSFUNC(PackPixels)
 
   JSFUNC(Size)
   JSFUNC(Width)

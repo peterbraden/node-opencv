@@ -32,6 +32,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "normalize", Normalize);
   Nan::SetPrototypeMethod(ctor, "norm", Norm);
   Nan::SetPrototypeMethod(ctor, "getData", GetData);
+  Nan::SetPrototypeMethod(ctor, "packPixels", PackPixels);
   Nan::SetPrototypeMethod(ctor, "pixel", Pixel);
   Nan::SetPrototypeMethod(ctor, "width", Width);
   Nan::SetPrototypeMethod(ctor, "height", Height);
@@ -262,6 +263,17 @@ NAN_METHOD(Matrix::Pixel) {
   return;
   // double val = Matrix::DblGet(t, i, j);
   // info.GetReturnValue().Set(Nan::New<Number>(val));
+}
+
+NAN_METHOD(Matrix::PackPixels) {
+	SETUP_FUNCTION(Matrix)
+	int size = self->mat.size().area() * self->mat.channels();
+
+	Isolate * gi = Nan::GetCurrentContext()->GetIsolate();
+	self->mat.size().area();
+	Local<ArrayBuffer> ab = ArrayBuffer::New(gi, self->mat.data, size);
+	Local<Uint8Array> ui = Uint8Array::New(ab, 0, size);
+	info.GetReturnValue().Set(ui);
 }
 
 NAN_METHOD(Matrix::Get) {
