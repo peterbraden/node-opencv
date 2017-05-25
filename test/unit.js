@@ -369,8 +369,15 @@ test('LDA Wrap', function(assert) {
 test('Native Matrix', function(assert) {
   var nativemat = require('../build/' + (!!process.env.NODE_OPENCV_DEBUG ? 'Debug' : 'Release') + '/test_nativemat.node');
   var mat = new cv.Matrix(42, 8);
+  assert.deepEqual(mat.size(), nativemat.size(mat), 'nativemat size match');
 
-  assert.deepEqual(mat.size(), nativemat.size(mat), 'nativemat');
+  if (nativemat.zeros) { // Skip on Windows for now (see inc/Matrix.h)
+    var newmat = nativemat.zeros(2, 3);
+    assert.deepEqual(newmat.size(), [2, 3], 'new nativemat size');
+    assert.deepEqual(newmat.row(0), [0, 0, 0], 'new nativemat row 0');
+    assert.deepEqual(newmat.row(1), [0, 0, 0], 'new nativemat row 1');
+  }
+
   assert.end();
 })
 
