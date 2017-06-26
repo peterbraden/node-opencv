@@ -480,5 +480,42 @@ test('getPixel',function(assert){
   });
 });
 
+test('pixelRow pixelCol 4 channel image ',function(assert){
+  cv.readImage('./examples/files/alpha-small.png', function(err, imgMat) {
+    if (!err) {
+      assert.equal(imgMat.channels(),4);
+
+      assert.deepEqual(imgMat.pixelCol(0),
+        [ 0, 0,   0, 255,
+          0, 255, 0, 88,
+          0, 0,   0, 88 ]);
+
+      assert.deepEqual(imgMat.pixelCol(1),
+        [ 255, 255, 255, 255,
+          0,   0,   255, 88,
+          255, 255, 255, 88 ]);
+
+      assert.deepEqual(imgMat.pixelRow(0),
+        [ 0,   0,   0,   255,
+          255, 255, 255, 255,
+          0,   255, 0,   255,
+          255, 0,   0,   255,
+          0,   0,   255, 255,
+          229, 194, 201, 155 ]);
+
+      assert.deepEqual(imgMat.pixelRow(1),
+        [ 0,   255, 0,   88,
+          0,   0,   255, 88,
+          255, 0,   0,   88,
+          47,  40,  42,  155,
+          145, 66,  125, 227,
+          47,  100, 163, 72 ]);
+    } else {
+      throw err;
+    }
+    assert.end();
+  });
+});
+
 // Test the examples folder.
 require('./examples')()
