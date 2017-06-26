@@ -20,6 +20,7 @@ public:
   JSFUNC(Eye)  // factory
 
   JSFUNC(Get)  // at
+  JSFUNC(GetPixel)
   JSFUNC(Set)
   JSFUNC(Put)
 

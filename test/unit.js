@@ -449,5 +449,36 @@ test('setColor works will alpha channels', function(assert) {
   });
 });
 
+test('getPixel',function(assert){
+  cv.readImage('./examples/files/alpha-test.png', function(err, imgMat) {
+    if (!err) {
+      assert.equal(imgMat.channels(),4);
+      assert.deepEqual(imgMat.getPixel(10,10),[0,187,255,255]);
+      assert.deepEqual(imgMat.getPixel(30,80),[241,161,0,128]);
+      assert.deepEqual(imgMat.getPixel(80,30),[0,187,124,200]);
+      assert.deepEqual(imgMat.getPixel(80,80),[20,83,246,70]);
+
+      var channels = imgMat.split();
+      imgMat.merge([channels[0],channels[1],channels[2]]);
+      assert.equal(imgMat.channels(),3);
+      assert.deepEqual(imgMat.getPixel(10,10),[0,187,255]);
+      assert.deepEqual(imgMat.getPixel(30,80),[241,161,0]);
+      assert.deepEqual(imgMat.getPixel(80,30),[0,187,124]);
+      assert.deepEqual(imgMat.getPixel(80,80),[20,83,246]);
+
+      imgMat.merge([channels[3]]);
+      assert.equal(imgMat.channels(),1);
+      assert.deepEqual(imgMat.getPixel(0,0),255);
+      assert.deepEqual(imgMat.getPixel(30,80),128);
+      assert.deepEqual(imgMat.getPixel(80,30),200);
+      assert.deepEqual(imgMat.getPixel(80,80),70);
+
+    } else {
+      throw err;
+    }
+    assert.end();
+  });
+});
+
 // Test the examples folder.
 require('./examples')()
