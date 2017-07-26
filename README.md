@@ -18,7 +18,7 @@ that OpenCV 3.x is not yet fully supported.
 
 ## Specific for Windows
 1. Download and install OpenCV (Be sure to use a 2.4 version) @
-http://opencv.org/downloads.html
+http://opencv.org/releases.html
 For these instructions we will assume OpenCV is put at C:\OpenCV, but you can
 adjust accordingly.
 
