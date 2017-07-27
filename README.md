@@ -1,6 +1,6 @@
 # node-opencv
 
-[![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.png)](http://travis-ci.org/peterbraden/node-opencv)
+[![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.svg)](http://travis-ci.org/peterbraden/node-opencv)
 [![Coverage](http://codecov.io/github/peterbraden/node-opencv/coverage.svg?branch=master)](https://codecov.io/gh/peterbraden/node-opencv)
 
 [OpenCV](http://opencv.org) bindings for Node.js. OpenCV is
