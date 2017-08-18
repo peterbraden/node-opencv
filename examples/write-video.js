@@ -1,11 +1,13 @@
 var cv = require('../lib/opencv');
+var path = require('path');
 
-var vid = new cv.VideoCapture(0);
+var vid = new cv.VideoCapture(path.join(__dirname, 'files', 'motion.mov'));
 
 vid.read(function(err, mat) {
   if (err) throw err;
 
-  var writer = new cv.VideoWriter('./tmp/output.mp4', 'MP4V', vid.getFPS(), mat.size(), true);
+  var filename = './tmp/output-'+new Date().getTime()+'.mp4';
+  var writer = new cv.VideoWriter(filename, 'MP4V', vid.getFPS(), mat.size(), true);
   writer.writeSync(mat);
 
   var x = 0;
