@@ -6,8 +6,8 @@ var vid = new cv.VideoCapture(path.join(__dirname, 'files', 'motion.mov'));
 vid.read(function(err, mat) {
   if (err) throw err;
 
-  var filename = './tmp/output-'+new Date().getTime()+'.mov';
-  var writer = new cv.VideoWriter(filename, 'X264', vid.getFPS(), mat.size(), true);
+  var filename = './tmp/output-'+new Date().getTime()+'.avi';
+  var writer = new cv.VideoWriter(filename, 'DIVX', vid.getFPS(), mat.size(), true);
   writer.writeSync(mat);
 
   var x = 0;
