@@ -449,5 +449,24 @@ test('setColor works will alpha channels', function(assert) {
   });
 });
 
+test('toArray/fromArray working in both ways', function(assert) {
+  var cv = require('../lib/opencv');
+
+  cv.readImage("./examples/files/mona.png", function(err, orig) {
+    if (err) throw err;
+
+    var a = orig.toArray();
+    var type = orig.type();
+    var doubleConversion = cv.Matrix.fromArray(a, type).toArray();
+
+    var randomI = Math.floor(Math.random()*a.length)
+    var randomJ = Math.floor(Math.random()*a[randomI].length)
+    var randomK = Math.floor(Math.random()*a[randomI][randomJ].length)
+
+    assert.equal(a[randomI][randomJ][randomK], doubleConversion[randomI][randomJ][randomK]);
+    assert.end();
+  });
+});
+
 // Test the examples folder.
 require('./examples')()
