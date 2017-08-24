@@ -15,9 +15,10 @@ cv.readImage('./files/car1.jpg', function(err, im) {
       histFile = 'files/chart2.png';
 
 
-  /// Compute the histograms:
-  var hist64 = cv.histogram.calcHist( im, [0, 1, 2], [4, 4, 4], [[0, 256], [0, 256], [0, 256]], uniform, accumulate );
+  /// Compute a 3 dimension histogram
+  var hist64 = cv.histogram.calcHist( im, [0, 1, 2], [4, 4, 4], [[0, 256], [0, 256], [0, 256]], uniform);
 
+  /// Compute 3 histograms
   var bHist = cv.histogram.calcHist( im, [0], [size], [range], uniform);
   var gHist = cv.histogram.calcHist( im, [1], [size], [range], uniform);
   var rHist = cv.histogram.calcHist( im, [2], [size], [range], uniform);
