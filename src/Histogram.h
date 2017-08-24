@@ -10,6 +10,7 @@ class Histogram: public Nan::ObjectWrap {
 public:
   static void Init(Local<Object> target);
   static NAN_METHOD(CalcHist);
+  static NAN_METHOD(Emd);  
 };
 
 #endif

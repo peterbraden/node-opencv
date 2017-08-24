@@ -96,6 +96,7 @@ void Constants::Init(Local<Object> target) {
   CONST_INT(CV_DIST_C);
   CONST_INT(CV_DIST_L1);
   CONST_INT(CV_DIST_L2);
+  CONST_INT(CV_DIST_USER);
 
   CONST_INT(CV_DIST_MASK_3);
   CONST_INT(CV_DIST_MASK_5);

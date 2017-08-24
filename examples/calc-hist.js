@@ -12,16 +12,15 @@ cv.readImage('./files/car1.jpg', function(err, im) {
   var size = 256,
       range = [0, 256],
       uniform = true,
-      accumulate = true,
       histFile = 'files/chart2.png';
 
 
   /// Compute the histograms:
   var hist64 = cv.histogram.calcHist( im, [0, 1, 2], [4, 4, 4], [[0, 256], [0, 256], [0, 256]], uniform, accumulate );
 
-  var bHist = cv.histogram.calcHist( im, [0], [size], [range], uniform, accumulate );
-  var gHist = cv.histogram.calcHist( im, [1], [size], [range], uniform, accumulate );
-  var rHist = cv.histogram.calcHist( im, [2], [size], [range], uniform, accumulate );
+  var bHist = cv.histogram.calcHist( im, [0], [size], [range], uniform);
+  var gHist = cv.histogram.calcHist( im, [1], [size], [range], uniform);
+  var rHist = cv.histogram.calcHist( im, [2], [size], [range], uniform);
 
 //////
 //  Uncommentand run `npm install chartjs-node` to draw the histogram !

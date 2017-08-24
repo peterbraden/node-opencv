@@ -7,11 +7,11 @@ void Histogram::Init(Local<Object> target) {
   inner.Reset(obj);
 
   Nan::SetMethod(obj, "calcHist", CalcHist);
+  Nan::SetMethod(obj, "emd", Emd);
 
   target->Set(Nan::New("histogram").ToLocalChecked(), obj);
 }
 
-// cv::distanceTransform
 NAN_METHOD(Histogram::CalcHist) {
   Nan::EscapableHandleScope scope;
 
@@ -67,23 +67,17 @@ NAN_METHOD(Histogram::CalcHist) {
 
     const float* histRanges1[] = {first_range, second_range, third_range};
 
+
+    //const float** histRanges1 = const_cast<const float**>(histRanges);
+
     // Arg 4 is uniform flag
     bool uniform = info[4]->BooleanValue();
 
-    // Arg 5 is accumulate flag
-    bool accumulate = info[5]->BooleanValue();
-/*
-    float rranges[] = { 0, 256 };
-    float granges[] = { 0, 256 };
-    float branges[] = { 0, 256 };
-
-    const float* histRange[] = { rranges, granges, branges};
-*/
     // Make a mat to hold the result image
     cv::Mat outputHist;
 
     // Perform calcHist
-    cv::calcHist(&inputImage, 1, channels, cv::Mat(), outputHist, dims, histSize, histRanges1, uniform, accumulate);
+    cv::calcHist(&inputImage, 1, channels, cv::Mat(), outputHist, dims, histSize, histRanges1, uniform);
 
     // Wrap the output image
     /*Local<Object> outMatrixWrap = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
@@ -119,6 +113,64 @@ NAN_METHOD(Histogram::CalcHist) {
     }
 
     info.GetReturnValue().Set(arr);
+  } catch (cv::Exception &e) {
+    const char *err_msg = e.what();
+    Nan::ThrowError(err_msg);
+    return;
+  }
+}
+
+std::vector<std::vector<float>> nodeArrayToVec(Local<Object> input){
+    std::vector<std::vector<float>> ret;
+    Local<Array> nodeMatrix = Local<Array>::Cast(input);
+    const unsigned int size = nodeMatrix->Length();
+    for (unsigned int i = 0; i < size; i++) {
+      Local<Array> nodeRow = Local<Array>::Cast(nodeMatrix->Get(i)->ToObject());
+      std::vector<float> row;
+      const unsigned int size2 = nodeRow->Length();
+      for (unsigned int j = 0; j < size2; j++) {
+        row.push_back(nodeRow->Get(j)->NumberValue());
+      }
+      ret.push_back(row);
+    }
+
+    return ret;
+}
+
+// cv::distanceTransform
+NAN_METHOD(Histogram::Emd) {
+  Nan::EscapableHandleScope scope;
+
+  try {
+    // Arg 0 is the first signature
+    //std::vector<std::vector<float>> sig1 = nodeArrayToVec(info[0]->ToObject());
+    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+    cv::Mat sig1 = m0->mat;
+
+    // Arg 1 is the second signature
+    //std::vector<std::vector<float>> sig2 = nodeArrayToVec(info[1]->ToObject());
+    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+    cv::Mat sig2 = m1->mat;
+
+    // Arg 2 is the distance type
+    int distType = info[2]->IntegerValue();
+
+    float emd;
+
+    // Arg 3 is the cost matrix
+    if (info.Length() > 3) {
+      Matrix* m3 = Nan::ObjectWrap::Unwrap<Matrix>(info[3]->ToObject());
+      cv::Mat costs = m3->mat;
+
+      emd = cv::EMD(sig1, sig2, distType, costs);
+      info.GetReturnValue().Set(emd);
+    } else {
+      emd = cv::EMD(sig1, sig2, distType);
+    }
+
+    //printf("similarity %5.5f %%\n, DistanceType is %i\n", (1-emd)*100, distType);
+    info.GetReturnValue().Set(emd);
+
   } catch (cv::Exception &e) {
     const char *err_msg = e.what();
     Nan::ThrowError(err_msg);
