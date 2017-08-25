@@ -20,7 +20,6 @@ NAN_METHOD(Histogram::CalcHist) {
     Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
     cv::Mat inputImage = m0->mat;
 
-    //int dims = 3;
     // Arg 1 is the channel
     Local<Array> nodeChannels = Local<Array>::Cast(info[1]->ToObject());
     const unsigned int dims = nodeChannels->Length();
@@ -28,8 +27,6 @@ NAN_METHOD(Histogram::CalcHist) {
     for (unsigned int i = 0; i < dims; i++) {
       channels[i] = nodeChannels->Get(i)->IntegerValue();
     }
-
-    //int channels[] = {0, 1, 2};
 
     // Arg 2 is histogram sizes in each dimension
     Local<Array> nodeHistSizes = Local<Array>::Cast(info[2]->ToObject());
@@ -39,7 +36,6 @@ NAN_METHOD(Histogram::CalcHist) {
     }
 
     // Arg 3 is array of the histogram bin boundaries in each dimension
-
     Local<Array> nodeRanges = Local<Array>::Cast(info[3]->ToObject());
     /// Set the ranges ( for B,G,R) )
     float histRanges[dims][2];
@@ -54,8 +50,6 @@ NAN_METHOD(Histogram::CalcHist) {
       ranges[i] = histRanges[i];
     }
 
-    //const float** histRanges1 = const_cast<const float**>(histRanges);
-
     // Arg 4 is uniform flag
     bool uniform = info[4]->BooleanValue();
 
@@ -64,13 +58,6 @@ NAN_METHOD(Histogram::CalcHist) {
 
     // Perform calcHist
     cv::calcHist(&inputImage, 1, channels, cv::Mat(), outputHist, dims, histSize, ranges, uniform);
-
-    // Wrap the output image
-    /*Local<Object> outMatrixWrap = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *outMatrix = Nan::ObjectWrap::Unwrap<Matrix>(outMatrixWrap);
-    outMatrix->mat = outputHist;
-
-    info.GetReturnValue().Set(outMatrixWrap);*/
 
     v8::Local<v8::Array> arr = Nan::New<Array>(histSize[0]);
 
