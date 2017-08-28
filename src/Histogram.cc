@@ -93,23 +93,6 @@ NAN_METHOD(Histogram::CalcHist) {
   }
 }
 
-std::vector<std::vector<float>> nodeArrayToVec(Local<Object> input){
-    std::vector<std::vector<float>> ret;
-    Local<Array> nodeMatrix = Local<Array>::Cast(input);
-    const unsigned int size = nodeMatrix->Length();
-    for (unsigned int i = 0; i < size; i++) {
-      Local<Array> nodeRow = Local<Array>::Cast(nodeMatrix->Get(i)->ToObject());
-      std::vector<float> row;
-      const unsigned int size2 = nodeRow->Length();
-      for (unsigned int j = 0; j < size2; j++) {
-        row.push_back(nodeRow->Get(j)->NumberValue());
-      }
-      ret.push_back(row);
-    }
-
-    return ret;
-}
-
 // cv::distanceTransform
 NAN_METHOD(Histogram::Emd) {
   Nan::EscapableHandleScope scope;
