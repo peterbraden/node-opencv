@@ -69,7 +69,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "dct", Dct);
   Nan::SetPrototypeMethod(ctor, "idct", Idct);
   Nan::SetPrototypeMethod(ctor, "addWeighted", AddWeighted);
-  Nan::SetPrototypeMethod(ctor, "add", Add);  
+  Nan::SetPrototypeMethod(ctor, "add", Add);
   Nan::SetPrototypeMethod(ctor, "bitwiseXor", BitwiseXor);
   Nan::SetPrototypeMethod(ctor, "bitwiseNot", BitwiseNot);
   Nan::SetPrototypeMethod(ctor, "bitwiseAnd", BitwiseAnd);
@@ -116,6 +116,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
   Nan::SetPrototypeMethod(ctor, "release", Release);
   Nan::SetPrototypeMethod(ctor, "subtract", Subtract);
+  Nan::SetPrototypeMethod(ctor, "mul", Mul);
 
   target->Set(Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction());
 };
@@ -607,7 +608,7 @@ NAN_METHOD(Matrix::PixelCol) {
   int height = self->mat.size().height;
   int x = info[0]->IntegerValue();
   v8::Local < v8::Array > arr;
-  
+
   if (self->mat.channels() == 3) {
     arr = Nan::New<Array>(height * 3);
     for (int y = 0; y < height; y++) {
@@ -1936,6 +1937,8 @@ NAN_METHOD(Matrix::WarpAffine) {
   int dstCols = info[2]->IsUndefined() ? self->mat.cols : info[2]->Uint32Value();
   cv::Size resSize = cv::Size(dstRows, dstCols);
 
+  printf("dstRows %i", dstRows);
+
   cv::warpAffine(self->mat, res, rotMatrix->mat, resSize);
   ~self->mat;
   self->mat = res;
@@ -2833,5 +2836,24 @@ NAN_METHOD(Matrix::Subtract) {
 
   self->mat -= other->mat;
 
+  return;
+}
+
+NAN_METHOD(Matrix::Mul) {
+  SETUP_FUNCTION(Matrix)
+
+  if (info.Length() < 1) {
+    Nan::ThrowTypeError("Invalid number of arguments");
+  }
+
+  Matrix *other = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  cv::Mat res = self->mat.mul(other->mat);
+
+  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  m_out->mat = res;
+
+  info.GetReturnValue().Set(out);
   return;
 }
