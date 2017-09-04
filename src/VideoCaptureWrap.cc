@@ -79,6 +79,15 @@ VideoCaptureWrap::VideoCaptureWrap(const std::string& filename) {
   }
 }
 
+NAN_METHOD(VideoCaptureWrap::GetWidth) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int cnt = int(v->cap.get(CV_CAP_PROP_FRAME_WIDTH));
+
+  info.GetReturnValue().Set(Nan::New<Number>(cnt));
+}
+
 NAN_METHOD(VideoCaptureWrap::SetWidth) {
   Nan::HandleScope scope;
   VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
@@ -99,6 +108,15 @@ NAN_METHOD(VideoCaptureWrap::GetFrameCount) {
   VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
   int cnt = int(v->cap.get(CV_CAP_PROP_FRAME_COUNT));
+
+  info.GetReturnValue().Set(Nan::New<Number>(cnt));
+}
+
+NAN_METHOD(VideoCaptureWrap::GetHeight) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int cnt = int(v->cap.get(CV_CAP_PROP_FRAME_HEIGHT));
 
   info.GetReturnValue().Set(Nan::New<Number>(cnt));
 }
