@@ -397,6 +397,20 @@ test('Mean', function(assert) {
   assert.end();
 });
 
+test('Compare', function(assert) {
+  var b = new cv.Matrix.Zeros(2, 2, cv.Constants.CV_8UC1);
+  var a = new cv.Matrix.Zeros(2, 2, cv.Constants.CV_8UC1);
+
+  a.set(0, 0, 3);
+
+  var compare = a.compare(b, cv.Constants.CMP_EQ);
+  var buf = compare.getData();
+  compare.save("./test.png");
+  console.log(compare.norm());
+
+  assert.end();
+});
+
 test('MatchTemplateByMatrix', function(assert) {
   var cv = require('../lib/opencv');
   var targetFilename = "./examples/files/car1.jpg";
