@@ -1937,8 +1937,6 @@ NAN_METHOD(Matrix::WarpAffine) {
   int dstCols = info[2]->IsUndefined() ? self->mat.cols : info[2]->Uint32Value();
   cv::Size resSize = cv::Size(dstRows, dstCols);
 
-  printf("dstRows %i", dstRows);
-
   cv::warpAffine(self->mat, res, rotMatrix->mat, resSize);
   ~self->mat;
   self->mat = res;
