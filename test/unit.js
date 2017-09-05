@@ -398,15 +398,16 @@ test('Mean', function(assert) {
 });
 
 test('Compare', function(assert) {
-  var b = new cv.Matrix.Zeros(2, 2, cv.Constants.CV_8UC1);
-  var a = new cv.Matrix.Zeros(2, 2, cv.Constants.CV_8UC1);
+  var a = cv.Matrix.fromArray([[[0],[-20]],[[2],[-18]]], cv.Constants.CV_8SC1);
+  var b = cv.Matrix.fromArray([[[3],[-20]],[[0],[-16]]], cv.Constants.CV_8SC1);
 
-  a.set(0, 0, 3);
+  var compare1 = a.compare(b, cv.Constants.CMP_EQ);
+  var compare2 = a.compare(b, cv.Constants.CMP_GT);
+  var compare3 = a.compare(b, cv.Constants.CMP_LE);
 
-  var compare = a.compare(b, cv.Constants.CMP_EQ);
-  var buf = compare.getData();
-  compare.save("./test.png");
-  console.log(compare.norm());
+  assert.deepEqual(compare1.toArray(), [[[0],[255]],[[0],[0]]]);
+  assert.deepEqual(compare2.toArray(), [[[0],[0]],[[255],[0]]]);
+  assert.deepEqual(compare3.toArray(), [[[255],[255]],[[0],[255]]]);
 
   assert.end();
 });
@@ -459,6 +460,25 @@ test('setColor works will alpha channels', function(assert) {
     } else {
       throw err;
     }
+    assert.end();
+  });
+});
+
+test('toArray/fromArray working in both ways', function(assert) {
+  var cv = require('../lib/opencv');
+
+  cv.readImage("./examples/files/mona.png", function(err, orig) {
+    if (err) throw err;
+
+    var a = orig.toArray();
+    var type = orig.type();
+    var doubleConversion = cv.Matrix.fromArray(a, type).toArray();
+
+    var randomI = Math.floor(Math.random()*a.length)
+    var randomJ = Math.floor(Math.random()*a[randomI].length)
+    var randomK = Math.floor(Math.random()*a[randomI][randomJ].length)
+
+    assert.equal(a[randomI][randomJ][randomK], doubleConversion[randomI][randomJ][randomK]);
     assert.end();
   });
 });
