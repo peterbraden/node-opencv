@@ -32,8 +32,12 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "setHeight", SetHeight);
   Nan::SetPrototypeMethod(ctor, "getWidth", GetWidth);
   Nan::SetPrototypeMethod(ctor, "getHeight", GetHeight);
+  Nan::SetPrototypeMethod(ctor, "getPosition", GetPosition);
+  Nan::SetPrototypeMethod(ctor, "getPositionMS", GetPositionMS);
   Nan::SetPrototypeMethod(ctor, "setPosition", SetPosition);
-  Nan::SetPrototypeMethod(ctor, "getFrameAt", GetFrameAt);
+  Nan::SetPrototypeMethod(ctor, "setPositionMS", SetPositionMS);
+  Nan::SetPrototypeMethod(ctor, "getFPS", GetFPS);
+  Nan::SetPrototypeMethod(ctor, "getFourCC", GetFourCC);
   Nan::SetPrototypeMethod(ctor, "getFrameCount", GetFrameCount);
   Nan::SetPrototypeMethod(ctor, "release", Release);
   Nan::SetPrototypeMethod(ctor, "ReadSync", ReadSync);
@@ -41,6 +45,42 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "retrieve", Retrieve);
 
   target->Set(Nan::New("VideoCapture").ToLocalChecked(), ctor->GetFunction());
+}
+
+NAN_METHOD(VideoCaptureWrap::GetPosition) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int cnt = int(v->cap.get(CV_CAP_PROP_POS_FRAMES));
+
+  info.GetReturnValue().Set(Nan::New<Number>(cnt));
+}
+
+NAN_METHOD(VideoCaptureWrap::GetPositionMS) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int cnt = int(v->cap.get(CV_CAP_PROP_POS_MSEC));
+
+  info.GetReturnValue().Set(Nan::New<Number>(cnt));
+}
+
+NAN_METHOD(VideoCaptureWrap::GetFPS) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int cnt = int(v->cap.get(CV_CAP_PROP_FPS));
+
+  info.GetReturnValue().Set(Nan::New<Number>(cnt));
+}
+
+NAN_METHOD(VideoCaptureWrap::GetFourCC) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int cnt = int(v->cap.get(CV_CAP_PROP_FOURCC));
+
+  info.GetReturnValue().Set(Nan::New<Number>(cnt));
 }
 
 NAN_METHOD(VideoCaptureWrap::New) {
@@ -151,7 +191,7 @@ NAN_METHOD(VideoCaptureWrap::SetPosition) {
   return;
 }
 
-NAN_METHOD(VideoCaptureWrap::GetFrameAt) {
+NAN_METHOD(VideoCaptureWrap::SetPositionMS) {
   Nan::HandleScope scope;
   VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
