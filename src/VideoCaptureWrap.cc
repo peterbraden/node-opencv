@@ -30,6 +30,8 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "read", Read);
   Nan::SetPrototypeMethod(ctor, "setWidth", SetWidth);
   Nan::SetPrototypeMethod(ctor, "setHeight", SetHeight);
+  Nan::SetPrototypeMethod(ctor, "getWidth", GetWidth);
+  Nan::SetPrototypeMethod(ctor, "getHeight", GetHeight);
   Nan::SetPrototypeMethod(ctor, "setPosition", SetPosition);
   Nan::SetPrototypeMethod(ctor, "getFrameAt", GetFrameAt);
   Nan::SetPrototypeMethod(ctor, "getFrameCount", GetFrameCount);
