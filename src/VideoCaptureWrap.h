@@ -31,7 +31,7 @@ public:
   // to set frame position in milliseconds
   static NAN_METHOD(SetPositionMS);
 
-  // to get frame position
+  // to get 0-based index of the frame to be decoded/captured next
   static NAN_METHOD(GetPosition);
 
   // to get frame position in milliseconds
