@@ -15,6 +15,7 @@
 #include "Stereo.h"
 #include "BackgroundSubtractor.h"
 #include "LDAWrap.h"
+#include "Histogram.h"
 
 extern "C" void init(Local<Object> target) {
   Nan::HandleScope scope;
@@ -30,6 +31,7 @@ extern "C" void init(Local<Object> target) {
   Constants::Init(target);
   Calib3D::Init(target);
   ImgProc::Init(target);
+  Histogram::Init(target);
 #if CV_MAJOR_VERSION < 3
   StereoBM::Init(target);
   StereoSGBM::Init(target);
