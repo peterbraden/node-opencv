@@ -1,6 +1,6 @@
 # node-opencv
 
-[![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.png)](http://travis-ci.org/peterbraden/node-opencv)
+[![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.svg)](http://travis-ci.org/peterbraden/node-opencv)
 [![Coverage](http://codecov.io/github/peterbraden/node-opencv/coverage.svg?branch=master)](https://codecov.io/gh/peterbraden/node-opencv)
 
 [OpenCV](http://opencv.org) bindings for Node.js. OpenCV is
@@ -16,9 +16,17 @@ cool, I'd love to hear about it!
 You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.  Note
 that OpenCV 3.x is not yet fully supported.
 
+## Specific for macOS
+Install OpenCV using brew
+```bash
+brew tap homebrew/science
+brew install opencv
+```
+
+
 ## Specific for Windows
 1. Download and install OpenCV (Be sure to use a 2.4 version) @
-http://opencv.org/downloads.html
+http://opencv.org/releases.html
 For these instructions we will assume OpenCV is put at C:\OpenCV, but you can
 adjust accordingly.
 
