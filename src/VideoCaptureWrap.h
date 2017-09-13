@@ -17,6 +17,10 @@ public:
   static NAN_METHOD(Grab);
   static NAN_METHOD(Retrieve);
 
+  // For getting width and height of the input video stream
+  static NAN_METHOD(GetWidth);
+  static NAN_METHOD(GetHeight);
+
   // (Optional) For setting width and height of the input video stream
   static NAN_METHOD(SetWidth);
   static NAN_METHOD(SetHeight);
