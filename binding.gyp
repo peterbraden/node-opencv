@@ -11,6 +11,7 @@
         "src/Contours.cc",
         "src/Point.cc",
         "src/VideoCaptureWrap.cc",
+        "src/VideoWriterWrap.cc",
         "src/CamShift.cc",
         "src/HighGUI.cc",
         "src/FaceRecognizer.cc",
