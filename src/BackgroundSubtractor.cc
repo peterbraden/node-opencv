@@ -4,10 +4,21 @@
 #include <nan.h>
 
 #if CV_MAJOR_VERSION >= 3
-#warning TODO: port me to OpenCV 3
+#include <opencv2/bgsegm.hpp>
 #endif
 
-#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4))
+#ifdef HAVE_BACKGROUNDSUBTRACTOR
+
+
+#if CV_MAJOR_VERSION >= 3
+cv::bgsegm::BackgroundSubtractorMOG* getMOG(BackgroundSubtractorWrap *wrap) {
+  return dynamic_cast<cv::bgsegm::BackgroundSubtractorMOG *>(wrap->subtractor.get());
+}
+#else
+cv::BackgroundSubtractorMOG* getMOG(BackgroundSubtractorWrap *wrap) {
+  return dynamic_cast<cv::BackgroundSubtractorMOG *>(wrap->subtractor.get());
+}
+#endif
 
 Nan::Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
 
@@ -22,6 +33,10 @@ void BackgroundSubtractorWrap::Init(Local<Object> target) {
 
   Nan::SetMethod(ctor, "createMOG", CreateMOG);
   Nan::SetPrototypeMethod(ctor, "applyMOG", ApplyMOG);
+  Nan::SetPrototypeMethod(ctor, "history", History);
+  Nan::SetPrototypeMethod(ctor, "nmixtures", Mixtures);
+  Nan::SetPrototypeMethod(ctor, "noiseSigma", NoiseSigma);
+  Nan::SetPrototypeMethod(ctor, "backgroundRatio", BackgroundRatio);
 
   target->Set(Nan::New("BackgroundSubtractor").ToLocalChecked(), ctor->GetFunction());
 }
@@ -34,7 +49,12 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
   }
 
   // Create MOG by default
+#if CV_MAJOR_VERSION >= 3
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
+#else
   cv::Ptr<cv::BackgroundSubtractor> bg;
+#endif
+
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
   pt->Wrap(info.This());
 
@@ -58,7 +78,12 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(BackgroundSubtractorWrap::constructor)).ToLocalChecked()).ToLocalChecked();
 
+  // FIXME: actually respect arguments passed in
+#if CV_MAJOR_VERSION >= 3
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
+#else
   cv::Ptr<cv::BackgroundSubtractor> bg;
+#endif
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
@@ -100,8 +125,11 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     }
 
     cv::Mat _fgMask;
+#if CV_MAJOR_VERSION >= 3
+    self->subtractor->apply(mat, _fgMask);
+#else
     self->subtractor->operator()(mat, _fgMask);
-
+#endif
     img->mat = _fgMask;
     mat.release();
 
@@ -120,6 +148,54 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     Nan::ThrowError(err_msg);
     return;
   }
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::History) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  auto mog = getMOG(self);
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+  if (info.Length() > 0) {
+    mog->setHistory(info[0]->NumberValue());
+  }
+  info.GetReturnValue().Set(mog->getHistory());
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::BackgroundRatio) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  auto mog = getMOG(self);
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+  if (info.Length() > 0) {
+    mog->setBackgroundRatio(info[0]->NumberValue());
+  }
+  info.GetReturnValue().Set(mog->getBackgroundRatio());
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::NoiseSigma) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  auto mog = getMOG(self);
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+  if (info.Length() > 0) {
+    mog->setNoiseSigma(info[0]->NumberValue());
+  }
+  info.GetReturnValue().Set(mog->getNoiseSigma());
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::Mixtures) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  auto mog = getMOG(self);
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+  if (info.Length() > 0) {
+    mog->setNMixtures(info[0]->NumberValue());
+  }
+  info.GetReturnValue().Set(mog->getNMixtures());
 }
 
 BackgroundSubtractorWrap::BackgroundSubtractorWrap(
