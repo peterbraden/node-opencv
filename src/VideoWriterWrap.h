@@ -1,5 +1,7 @@
 #include "OpenCV.h"
 
+#ifdef HAVE_OPENCV_VIDEOIO
+
 class VideoWriterWrap: public Nan::ObjectWrap {
 public:
   cv::VideoWriter writer;
@@ -16,3 +18,5 @@ public:
   // release the stream
   static NAN_METHOD(Release);
 };
+
+#endif
