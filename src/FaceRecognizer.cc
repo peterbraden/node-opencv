@@ -8,9 +8,9 @@
 #if CV_MAJOR_VERSION >= 3
 namespace cv {
   using std::vector;
-  using cv::face::createEigenFaceRecognizer;
-  using cv::face::createFisherFaceRecognizer;
-  using cv::face::createLBPHFaceRecognizer;
+  using cv::face::EigenFaceRecognizer;
+  using cv::face::FisherFaceRecognizer;
+  using cv::face::LBPHFaceRecognizer;
 }
 #endif
 
@@ -68,7 +68,7 @@ NAN_METHOD(FaceRecognizerWrap::New) {
   }
 
   // By default initialize LBPH
-  cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(1, 8, 8, 8, 80.0);
+  cv::Ptr<cv::FaceRecognizer> f = cv::LBPHFaceRecognizer::create(1, 8, 8, 8, 80.0);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
 
   pt->Wrap(info.This());
@@ -91,7 +91,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateLBPH) {
   DOUBLE_FROM_ARGS(threshold, 4)
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
-  cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(radius,
+  cv::Ptr<cv::FaceRecognizer> f = cv::LBPHFaceRecognizer::create(radius,
       neighbors, grid_x, grid_y, threshold);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
   pt->Wrap(n);
@@ -109,7 +109,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateEigen) {
   DOUBLE_FROM_ARGS(threshold, 1)
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
-  cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer(components,
+  cv::Ptr<cv::FaceRecognizer> f = cv::EigenFaceRecognizer::create(components,
       threshold);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, EIGEN);
   pt->Wrap(n);
@@ -128,7 +128,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateFisher) {
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
 
-  cv::Ptr<cv::FaceRecognizer> f = cv::createFisherFaceRecognizer(components,
+  cv::Ptr<cv::FaceRecognizer> f = cv::FisherFaceRecognizer::create(components,
       threshold);
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, FISHER);
   pt->Wrap(n);
@@ -378,7 +378,7 @@ NAN_METHOD(FaceRecognizerWrap::SaveSync) {
     JSTHROW("Save takes a filename")
   }
   std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
-  self->rec->save(filename);
+  self->rec->write(filename);
   return;
 }
 
@@ -388,7 +388,7 @@ NAN_METHOD(FaceRecognizerWrap::LoadSync) {
     JSTHROW("Load takes a filename")
   }
   std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
-  self->rec->load(filename);
+  self->rec->read(filename);
   return;
 }
 
