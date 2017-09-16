@@ -83,7 +83,9 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "drawContour", DrawContour);
   Nan::SetPrototypeMethod(ctor, "drawAllContours", DrawAllContours);
   Nan::SetPrototypeMethod(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
+  #ifdef HAVE_OPENCV_VIDEO
   Nan::SetPrototypeMethod(ctor, "calcOpticalFlowPyrLK", CalcOpticalFlowPyrLK);
+  #endif
   Nan::SetPrototypeMethod(ctor, "houghLinesP", HoughLinesP);
   Nan::SetPrototypeMethod(ctor, "houghCircles", HoughCircles);
   Nan::SetPrototypeMethod(ctor, "inRange", inRange);
@@ -651,7 +653,7 @@ NAN_METHOD(Matrix::PixelCol) {
   int height = self->mat.size().height;
   int x = info[0]->IntegerValue();
   v8::Local < v8::Array > arr;
-  
+
   if (self->mat.channels() == 4) {
     arr = Nan::New<Array>(height * 4);
     for (int y = 0; y < height; y++) {
@@ -1697,6 +1699,7 @@ NAN_METHOD(Matrix::GoodFeaturesToTrack) {
   info.GetReturnValue().Set(arr);
 }
 
+#ifdef HAVE_OPENCV_VIDEO
 NAN_METHOD(Matrix::CalcOpticalFlowPyrLK) {
   Nan::HandleScope scope;
 
@@ -1773,6 +1776,7 @@ NAN_METHOD(Matrix::CalcOpticalFlowPyrLK) {
 
   info.GetReturnValue().Set(data);
 }
+#endif
 
 NAN_METHOD(Matrix::HoughLinesP) {
   Nan::HandleScope scope;

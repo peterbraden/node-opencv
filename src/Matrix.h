@@ -90,7 +90,9 @@ public:
 
   // Feature Detection
   JSFUNC(GoodFeaturesToTrack)
+  #ifdef HAVE_OPENCV_VIDEO
   JSFUNC(CalcOpticalFlowPyrLK)
+  #endif
   JSFUNC(HoughLinesP)
   JSFUNC(HoughCircles)
 
