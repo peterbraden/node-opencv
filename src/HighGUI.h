@@ -16,6 +16,7 @@ public:
   JSFUNC(Show)
   ;JSFUNC(Destroy)
   ;JSFUNC(BlockingWaitKey)
+  ;JSFUNC(ResizeWindow)
   ;
 
 };
