@@ -5,12 +5,20 @@
 #include "Matrix.h"
 #include <nan.h>
 
-#if CV_MAJOR_VERSION >= 3
+#if CV_MAJOR_VERSION < 3
+#elif CV_MINOR_VERSION < 3
 namespace cv {
   using std::vector;
   using cv::face::createEigenFaceRecognizer;
   using cv::face::createFisherFaceRecognizer;
   using cv::face::createLBPHFaceRecognizer;
+}
+#else // version 3.3 and higher
+namespace cv {
+  using std::vector;
+  using cv::face::EigenFaceRecognizer;
+  using cv::face::FisherFaceRecognizer;
+  using cv::face::LBPHFaceRecognizer;
 }
 #endif
 
@@ -68,7 +76,11 @@ NAN_METHOD(FaceRecognizerWrap::New) {
   }
 
   // By default initialize LBPH
+#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+  cv::Ptr<cv::FaceRecognizer> f = cv::LBPHFaceRecognizer::create(1, 8, 8, 8, 80.0);
+#else 
   cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(1, 8, 8, 8, 80.0);
+#endif
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
 
   pt->Wrap(info.This());
@@ -91,8 +103,11 @@ NAN_METHOD(FaceRecognizerWrap::CreateLBPH) {
   DOUBLE_FROM_ARGS(threshold, 4)
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
-  cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(radius,
-      neighbors, grid_x, grid_y, threshold);
+#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+  cv::Ptr<cv::FaceRecognizer> f = cv::LBPHFaceRecognizer::create(radius, neighbors, grid_x, grid_y, threshold);
+#else 
+  cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(radius, neighbors, grid_x, grid_y, threshold);
+#endif
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, LBPH);
   pt->Wrap(n);
 
@@ -109,8 +124,11 @@ NAN_METHOD(FaceRecognizerWrap::CreateEigen) {
   DOUBLE_FROM_ARGS(threshold, 1)
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
-  cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer(components,
-      threshold);
+#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+  cv::Ptr<cv::FaceRecognizer> f = cv::EigenFaceRecognizer::create(components, threshold);
+#else
+  cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer(components, threshold);
+#endif
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, EIGEN);
   pt->Wrap(n);
 
@@ -127,9 +145,11 @@ NAN_METHOD(FaceRecognizerWrap::CreateFisher) {
   DOUBLE_FROM_ARGS(threshold, 1)
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
-
-  cv::Ptr<cv::FaceRecognizer> f = cv::createFisherFaceRecognizer(components,
-      threshold);
+#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+  cv::Ptr<cv::FaceRecognizer> f = cv::FisherFaceRecognizer::create(components, threshold);
+#else
+  cv::Ptr<cv::FaceRecognizer> f = cv::createFisherFaceRecognizer(components, threshold);
+#endif
   FaceRecognizerWrap *pt = new FaceRecognizerWrap(f, FISHER);
   pt->Wrap(n);
 
@@ -387,8 +407,12 @@ NAN_METHOD(FaceRecognizerWrap::LoadSync) {
   if (!info[0]->IsString()) {
     JSTHROW("Load takes a filename")
   }
-  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));  
+#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3  
+  self->rec->read(filename);
+#else
   self->rec->load(filename);
+#endif  
   return;
 }
 

@@ -17,6 +17,7 @@ void NamedWindow::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "show", Show);
   Nan::SetPrototypeMethod(ctor, "destroy", Destroy);
   Nan::SetPrototypeMethod(ctor, "blockingWaitKey", BlockingWaitKey);
+  Nan::SetPrototypeMethod(ctor, "resizeWindow", ResizeWindow);
 
   target->Set(Nan::New("NamedWindow").ToLocalChecked(), ctor->GetFunction());
 };
@@ -32,7 +33,8 @@ NAN_METHOD(NamedWindow::New) {
   if (info.Length() == 1) {
     win = new NamedWindow(std::string(*Nan::Utf8String(info[0]->ToString())), 0);
   } else {  //if (info.Length() == 2){
-    win = new NamedWindow(std::string(*Nan::Utf8String(info[0]->ToString())), 0);
+    win = new NamedWindow(std::string(*Nan::Utf8String(info[0]->ToString())), 
+            info[1]->IntegerValue());
   }
 
   win->Wrap(info.Holder());
@@ -66,8 +68,6 @@ NAN_METHOD(NamedWindow::Destroy) {
 }
 
 NAN_METHOD(NamedWindow::BlockingWaitKey) {
-  Nan::HandleScope scope;
-  //SETUP_FUNCTION(NamedWindow)
   int time = 0;
 
   if (info.Length() > 1) {
@@ -81,4 +81,16 @@ NAN_METHOD(NamedWindow::BlockingWaitKey) {
   int res = cv::waitKey(time);
 
   info.GetReturnValue().Set(Nan::New<Number>(res));
+}
+
+NAN_METHOD(NamedWindow::ResizeWindow) {
+  SETUP_FUNCTION(NamedWindow)
+  
+  if (info.Length() != 2) {
+    throw "expected 2 argurments: width, height";
+  }//otherwise
+
+  int width = info[0]->IntegerValue();
+  int height = info[1]->IntegerValue();
+  cv::resizeWindow(self->winname, width, height);
 }
