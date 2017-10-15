@@ -11,7 +11,7 @@ cv.readImage('./files/mona.png', function(err, im) {
     if (err) throw err;
 
     for (var i = 0; i < faces.length; i++) {
-      face = faces[i];
+      var face = faces[i];
       im.rectangle([face.x, face.y], [face.width, face.height], COLOR, 2);
     }
 

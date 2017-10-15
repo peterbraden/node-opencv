@@ -20,6 +20,7 @@ public:
   JSFUNC(Eye)  // factory
 
   JSFUNC(Get)  // at
+  JSFUNC(GetPixel)
   JSFUNC(Set)
   JSFUNC(Put)
 
@@ -134,6 +135,8 @@ public:
   JSFUNC(Release)
 
   JSFUNC(Subtract)
+  JSFUNC(Compare)
+  JSFUNC(Mul)
   /*
    static Handle<Value> Val(const Arguments& info);
    static Handle<Value> RowRange(const Arguments& info);

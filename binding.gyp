@@ -11,6 +11,7 @@
         "src/Contours.cc",
         "src/Point.cc",
         "src/VideoCaptureWrap.cc",
+        "src/VideoWriterWrap.cc",
         "src/CamShift.cc",
         "src/HighGUI.cc",
         "src/FaceRecognizer.cc",
@@ -20,7 +21,8 @@
         "src/Calib3D.cc",
         "src/ImgProc.cc",
         "src/Stereo.cc",
-        "src/LDAWrap.cc"
+        "src/LDAWrap.cc",
+        "src/Histogram.cc",        
       ],
 
       "libraries": [

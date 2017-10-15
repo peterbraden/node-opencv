@@ -40,6 +40,7 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "getFPS", GetFPS);
   Nan::SetPrototypeMethod(ctor, "getFourCC", GetFourCC);
   Nan::SetPrototypeMethod(ctor, "getFrameCount", GetFrameCount);
+  Nan::SetPrototypeMethod(ctor, "getFPS", GetFPS);
   Nan::SetPrototypeMethod(ctor, "release", Release);
   Nan::SetPrototypeMethod(ctor, "ReadSync", ReadSync);
   Nan::SetPrototypeMethod(ctor, "grab", Grab);
@@ -154,6 +155,17 @@ NAN_METHOD(VideoCaptureWrap::GetFrameCount) {
 
   info.GetReturnValue().Set(Nan::New<Number>(cnt));
 }
+
+
+NAN_METHOD(VideoCaptureWrap::GetFPS) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  int fps = int(v->cap.get(CV_CAP_PROP_FPS));
+
+  info.GetReturnValue().Set(Nan::New<Number>(fps)); 
+}
+
 
 NAN_METHOD(VideoCaptureWrap::GetHeight) {
   Nan::HandleScope scope;

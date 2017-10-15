@@ -22,7 +22,7 @@
   "scripts": {
     "build": "node-gyp build",
     "test": "node test/unit.js",
-    "install": "node-pre-gyp install --fallback-to-build"
+    "install": "node-pre-gyp install --build-from-source"
   },
   "keywords": [
     "opencv",

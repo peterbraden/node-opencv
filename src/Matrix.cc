@@ -26,6 +26,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "pixelCol", PixelCol);
   Nan::SetPrototypeMethod(ctor, "empty", Empty);
   Nan::SetPrototypeMethod(ctor, "get", Get);
+  Nan::SetPrototypeMethod(ctor, "getPixel", GetPixel);
   Nan::SetPrototypeMethod(ctor, "set", Set);
   Nan::SetPrototypeMethod(ctor, "put", Put);
   Nan::SetPrototypeMethod(ctor, "brightness", Brightness);
@@ -69,7 +70,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "dct", Dct);
   Nan::SetPrototypeMethod(ctor, "idct", Idct);
   Nan::SetPrototypeMethod(ctor, "addWeighted", AddWeighted);
-  Nan::SetPrototypeMethod(ctor, "add", Add);  
+  Nan::SetPrototypeMethod(ctor, "add", Add);
   Nan::SetPrototypeMethod(ctor, "bitwiseXor", BitwiseXor);
   Nan::SetPrototypeMethod(ctor, "bitwiseNot", BitwiseNot);
   Nan::SetPrototypeMethod(ctor, "bitwiseAnd", BitwiseAnd);
@@ -116,6 +117,8 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
   Nan::SetPrototypeMethod(ctor, "release", Release);
   Nan::SetPrototypeMethod(ctor, "subtract", Subtract);
+  Nan::SetPrototypeMethod(ctor, "compare", Compare);
+  Nan::SetPrototypeMethod(ctor, "mul", Mul);
 
   target->Set(Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction());
 };
@@ -272,6 +275,35 @@ NAN_METHOD(Matrix::Get) {
 
   double val = Matrix::DblGet(self->mat, i, j);
   info.GetReturnValue().Set(Nan::New<Number>(val));
+}
+
+NAN_METHOD(Matrix::GetPixel) {
+  SETUP_FUNCTION(Matrix)
+
+  int y = info[0]->IntegerValue();
+  int x = info[1]->IntegerValue();
+
+  if (self->mat.channels() == 4) {
+    v8::Local < v8::Array > arr = Nan::New<Array>(4);
+    cv::Vec4b pixel = self->mat.at<cv::Vec4b>(y, x);
+    arr->Set(0, Nan::New<Number>((double) pixel.val[0]));
+    arr->Set(1, Nan::New<Number>((double) pixel.val[1]));
+    arr->Set(2, Nan::New<Number>((double) pixel.val[2]));
+    arr->Set(3, Nan::New<Number>((double) pixel.val[3]));
+    info.GetReturnValue().Set(arr);
+  } else if (self->mat.channels() == 3) {
+    v8::Local < v8::Array > arr = Nan::New<Array>(3);
+    cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
+    arr->Set(0, Nan::New<Number>((double) pixel.val[0]));
+    arr->Set(1, Nan::New<Number>((double) pixel.val[1]));
+    arr->Set(2, Nan::New<Number>((double) pixel.val[2]));
+    info.GetReturnValue().Set(arr);
+  } else if(self->mat.channels() == 1) {
+    int pixel = (int)self->mat.at<unsigned char>(y, x);
+    info.GetReturnValue().Set(pixel);
+  } else {
+    Nan::ThrowTypeError("Only 4, 3 and 1 channel matrix are supported");
+  }
 }
 
 NAN_METHOD(Matrix::Set) {
@@ -567,7 +599,17 @@ NAN_METHOD(Matrix::PixelRow) {
   int y = info[0]->IntegerValue();
   v8::Local < v8::Array > arr;
 
-  if (self->mat.channels() == 3) {
+  if (self->mat.channels() == 4) {
+    arr = Nan::New<Array>(width * 4);
+    for (int x = 0; x < width; x++) {
+      cv::Vec4b pixel = self->mat.at<cv::Vec4b>(y, x);
+      int offset = x * 4;
+      arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
+      arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
+      arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
+      arr->Set(offset + 3, Nan::New<Number>((double) pixel.val[3]));
+    }
+  } else if(self->mat.channels() == 3){
     arr = Nan::New<Array>(width * 3);
     for (int x = 0; x < width; x++) {
       cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
@@ -576,12 +618,14 @@ NAN_METHOD(Matrix::PixelRow) {
       arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
       arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
     }
-  } else {
+  } else if(self->mat.channels() == 1){
     arr = Nan::New<Array>(width);
     for (int x = 0; x < width; x++) {
       int pixel = (int)self->mat.at<unsigned char>(y, x);
       arr->Set(x, Nan::New<Number>(pixel));
     }
+  } else {
+      Nan::ThrowTypeError("Only 4, 3 and 1 channel matrix are supported");
   }
 
   info.GetReturnValue().Set(arr);
@@ -608,7 +652,17 @@ NAN_METHOD(Matrix::PixelCol) {
   int x = info[0]->IntegerValue();
   v8::Local < v8::Array > arr;
   
-  if (self->mat.channels() == 3) {
+  if (self->mat.channels() == 4) {
+    arr = Nan::New<Array>(height * 4);
+    for (int y = 0; y < height; y++) {
+      cv::Vec4b pixel = self->mat.at<cv::Vec4b>(y, x);
+      int offset = y * 4;
+      arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
+      arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
+      arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
+      arr->Set(offset + 3, Nan::New<Number>((double) pixel.val[3]));
+    }
+  } else if (self->mat.channels() == 3) {
     arr = Nan::New<Array>(height * 3);
     for (int y = 0; y < height; y++) {
       cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
@@ -617,13 +671,16 @@ NAN_METHOD(Matrix::PixelCol) {
       arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
       arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
     }
-  } else {
+  } else if(self->mat.channels() == 1) {
     arr = Nan::New<Array>(height);
     for (int y = 0; y < height; y++) {
       int pixel = (int)self->mat.at<unsigned char>(y, x);
       arr->Set(y, Nan::New<Number>(pixel));
     }
+  } else {
+    Nan::ThrowTypeError("Only 4, 3 and 1 channel matrix are supported");
   }
+
   info.GetReturnValue().Set(arr);
 }
 
@@ -2833,5 +2890,46 @@ NAN_METHOD(Matrix::Subtract) {
 
   self->mat -= other->mat;
 
+  return;
+}
+
+NAN_METHOD(Matrix::Compare) {
+  SETUP_FUNCTION(Matrix)
+
+  if (info.Length() < 2) {
+    Nan::ThrowTypeError("Invalid number of arguments");
+  }
+  Matrix *other = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  int cmpop = info[1]->IntegerValue();
+
+  int width = self->mat.size().width;
+  int height = self->mat.size().height;
+
+  cv::Mat res = cv::Mat(width, height, CV_8UC1);
+
+  cv::compare(self->mat, other->mat, res, cmpop);
+  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  m_out->mat = res;
+
+  info.GetReturnValue().Set(out);
+  return;
+}
+NAN_METHOD(Matrix::Mul) {
+  SETUP_FUNCTION(Matrix)
+
+  if (info.Length() < 1) {
+    Nan::ThrowTypeError("Invalid number of arguments");
+  }
+
+  Matrix *other = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  cv::Mat res = self->mat.mul(other->mat);
+  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
+  m_out->mat = res;
+
+  info.GetReturnValue().Set(out);
   return;
 }

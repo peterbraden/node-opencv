@@ -397,6 +397,21 @@ test('Mean', function(assert) {
   assert.end();
 });
 
+test('Compare', function(assert) {
+  var a = cv.Matrix.fromArray([[[0],[-20]],[[2],[-18]]], cv.Constants.CV_8SC1);
+  var b = cv.Matrix.fromArray([[[3],[-20]],[[0],[-16]]], cv.Constants.CV_8SC1);
+
+  var compare1 = a.compare(b, cv.Constants.CMP_EQ);
+  var compare2 = a.compare(b, cv.Constants.CMP_GT);
+  var compare3 = a.compare(b, cv.Constants.CMP_LE);
+
+  assert.deepEqual(compare1.toArray(), [[[0],[255]],[[0],[0]]]);
+  assert.deepEqual(compare2.toArray(), [[[0],[0]],[[255],[0]]]);
+  assert.deepEqual(compare3.toArray(), [[[255],[255]],[[0],[255]]]);
+
+  assert.end();
+});
+
 test('MatchTemplateByMatrix', function(assert) {
   var cv = require('../lib/opencv');
   var targetFilename = "./examples/files/car1.jpg";
@@ -445,6 +460,94 @@ test('setColor works will alpha channels', function(assert) {
     } else {
       throw err;
     }
+    assert.end();
+  });
+});
+
+test('getPixel',function(assert){
+  cv.readImage('./examples/files/alpha-test.png', function(err, imgMat) {
+    if (!err) {
+      assert.equal(imgMat.channels(),4);
+      assert.deepEqual(imgMat.getPixel(10,10),[0,187,255,255]);
+      assert.deepEqual(imgMat.getPixel(30,80),[241,161,0,128]);
+      assert.deepEqual(imgMat.getPixel(80,30),[0,187,124,200]);
+      assert.deepEqual(imgMat.getPixel(80,80),[20,83,246,70]);
+
+      var channels = imgMat.split();
+      imgMat.merge([channels[0],channels[1],channels[2]]);
+      assert.equal(imgMat.channels(),3);
+      assert.deepEqual(imgMat.getPixel(10,10),[0,187,255]);
+      assert.deepEqual(imgMat.getPixel(30,80),[241,161,0]);
+      assert.deepEqual(imgMat.getPixel(80,30),[0,187,124]);
+      assert.deepEqual(imgMat.getPixel(80,80),[20,83,246]);
+
+      imgMat.merge([channels[3]]);
+      assert.equal(imgMat.channels(),1);
+      assert.deepEqual(imgMat.getPixel(0,0),255);
+      assert.deepEqual(imgMat.getPixel(30,80),128);
+      assert.deepEqual(imgMat.getPixel(80,30),200);
+      assert.deepEqual(imgMat.getPixel(80,80),70);
+
+    } else {
+      throw err;
+    }
+    assert.end();
+  });
+});
+
+test('pixelRow pixelCol 4 channel image ',function(assert){
+  cv.readImage('./examples/files/alpha-small.png', function(err, imgMat) {
+    if (!err) {
+      assert.equal(imgMat.channels(),4);
+
+      assert.deepEqual(imgMat.pixelCol(0),
+        [ 0, 0,   0, 255,
+          0, 255, 0, 88,
+          0, 0,   0, 88 ]);
+
+      assert.deepEqual(imgMat.pixelCol(1),
+        [ 255, 255, 255, 255,
+          0,   0,   255, 88,
+          255, 255, 255, 88 ]);
+
+      assert.deepEqual(imgMat.pixelRow(0),
+        [ 0,   0,   0,   255,
+          255, 255, 255, 255,
+          0,   255, 0,   255,
+          255, 0,   0,   255,
+          0,   0,   255, 255,
+          229, 194, 201, 155 ]);
+
+      assert.deepEqual(imgMat.pixelRow(1),
+        [ 0,   255, 0,   88,
+          0,   0,   255, 88,
+          255, 0,   0,   88,
+          47,  40,  42,  155,
+          145, 66,  125, 227,
+          47,  100, 163, 72 ]);
+    } else {
+      throw err;
+    }
+    assert.end();
+  });
+});
+
+
+test('toArray/fromArray working in both ways', function(assert) {
+  var cv = require('../lib/opencv');
+
+  cv.readImage("./examples/files/mona.png", function(err, orig) {
+    if (err) throw err;
+
+    var a = orig.toArray();
+    var type = orig.type();
+    var doubleConversion = cv.Matrix.fromArray(a, type).toArray();
+
+    var randomI = Math.floor(Math.random()*a.length)
+    var randomJ = Math.floor(Math.random()*a[randomI].length)
+    var randomK = Math.floor(Math.random()*a[randomI][randomJ].length)
+
+    assert.equal(a[randomI][randomJ][randomK], doubleConversion[randomI][randomJ][randomK]);
     assert.end();
   });
 });
