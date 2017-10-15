@@ -35,6 +35,7 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "getPosition", GetPosition);
   Nan::SetPrototypeMethod(ctor, "getPositionMS", GetPositionMS);
   Nan::SetPrototypeMethod(ctor, "setPosition", SetPosition);
+  Nan::SetPrototypeMethod(ctor, "getFrameAt", GetFrameAt);
   Nan::SetPrototypeMethod(ctor, "setPositionMS", SetPositionMS);
   Nan::SetPrototypeMethod(ctor, "getFPS", GetFPS);
   Nan::SetPrototypeMethod(ctor, "getFourCC", GetFourCC);
@@ -187,6 +188,20 @@ NAN_METHOD(VideoCaptureWrap::SetPosition) {
   int pos = info[0]->IntegerValue();
 
   v->cap.set(CV_CAP_PROP_POS_FRAMES, pos);
+
+  return;
+}
+
+NAN_METHOD(VideoCaptureWrap::GetFrameAt) {
+  Nan::HandleScope scope;
+  VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
+
+  if(info.Length() != 1)
+  return;
+
+  int pos = info[0]->IntegerValue();
+
+  v->cap.set(CV_CAP_PROP_POS_MSEC, pos);
 
   return;
 }
