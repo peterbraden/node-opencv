@@ -30,6 +30,7 @@ public:
 
   // to set frame position in milliseconds
   static NAN_METHOD(SetPositionMS);
+  static NAN_METHOD(GetFrameAt); // would deprecate as naming is confusing
 
   // to get 0-based index of the frame to be decoded/captured next
   static NAN_METHOD(GetPosition);
