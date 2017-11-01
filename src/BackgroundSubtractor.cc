@@ -84,6 +84,63 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
   info.GetReturnValue().Set( n );
 }
 
+NAN_METHOD(BackgroundSubtractorWrap::CreateMOG2) {
+  Nan::HandleScope scope;
+
+  // int history = 200;
+  // int nmixtures = 5;
+  // double backgroundRatio = 0.7;
+  // double noiseSigma = 0;
+  //
+  // if(info.Length() > 1){
+  //   INT_FROM_ARGS(history, 0)
+  //   INT_FROM_ARGS(nmixtures, 1)
+  //   DOUBLE_FROM_ARGS(backgroundRatio, 2)
+  //   DOUBLE_FROM_ARGS(noiseSigma, 3)
+  // }
+
+  Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(BackgroundSubtractorWrap::constructor)).ToLocalChecked()).ToLocalChecked();
+
+#if CV_MAJOR_VERSION >= 3
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::createBackgroundSubtractorMOG2();
+#else
+  cv::Ptr<cv::BackgroundSubtractor> bg;
+#endif
+  BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+
+  pt->Wrap(n);
+  info.GetReturnValue().Set( n );
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::CreateGMG) {
+  Nan::HandleScope scope;
+
+  // int history = 200;
+  // int nmixtures = 5;
+  // double backgroundRatio = 0.7;
+  // double noiseSigma = 0;
+  //
+  // if(info.Length() > 1){
+  //   INT_FROM_ARGS(history, 0)
+  //   INT_FROM_ARGS(nmixtures, 1)
+  //   DOUBLE_FROM_ARGS(backgroundRatio, 2)
+  //   DOUBLE_FROM_ARGS(noiseSigma, 3)
+  // }
+
+  Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(BackgroundSubtractorWrap::constructor)).ToLocalChecked()).ToLocalChecked();
+
+#if CV_MAJOR_VERSION >= 3
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorGMG();
+#else
+  cv::Ptr<cv::BackgroundSubtractor> bg;
+#endif
+  BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+
+  pt->Wrap(n);
+  info.GetReturnValue().Set( n );
+}
+
+
 // Fetch foreground mask
 NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
   SETUP_FUNCTION(BackgroundSubtractorWrap);

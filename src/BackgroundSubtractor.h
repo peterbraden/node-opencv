@@ -19,6 +19,9 @@ public:
   BackgroundSubtractorWrap(cv::Ptr<cv::BackgroundSubtractor> bg);
 
   static NAN_METHOD(CreateMOG);
+  static NAN_METHOD(CreateMOG2);
+  static NAN_METHOD(CreateGMG);
+  
   static NAN_METHOD(ApplyMOG);
   static NAN_METHOD(History);
   static NAN_METHOD(Mixtures);
