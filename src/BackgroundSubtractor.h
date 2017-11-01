@@ -6,7 +6,10 @@
 #define HAVE_BACKGROUNDSUBTRACTOR
 
 #include <opencv2/video/background_segm.hpp>
+
+#ifdef HAVE_OPENCV_BGSEGM
 #include <opencv2/bgsegm.hpp>
+#endif
 
 class BackgroundSubtractorWrap: public Nan::ObjectWrap {
 public:
