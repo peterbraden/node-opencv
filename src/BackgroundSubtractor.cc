@@ -5,24 +5,17 @@
 
 #ifdef HAVE_BACKGROUNDSUBTRACTOR
 
-#if CV_MAJOR_VERSION >= 3
-
 #ifdef HAVE_OPENCV_BGSEGM
 cv::bgsegm::BackgroundSubtractorMOG* getMOG(BackgroundSubtractorWrap *wrap) {
   return dynamic_cast<cv::bgsegm::BackgroundSubtractorMOG *>(wrap->subtractor.get());
 }
 #else
-// without bgsem, it can;t be MOG anyway
+// without bgsem, it can't be MOG anyway
 void* getMOG(BackgroundSubtractorWrap *wrap) {
   return NULL;
 }
 #endif
 
-#else
-cv::BackgroundSubtractorMOG* getMOG(BackgroundSubtractorWrap *wrap) {
-  return dynamic_cast<cv::BackgroundSubtractorMOG *>(wrap->subtractor.get());
-}
-#endif
 
 Nan::Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
 
@@ -231,6 +224,7 @@ NAN_METHOD(BackgroundSubtractorWrap::History) {
   if (!mog) {
     Nan::ThrowError("Not using a BackgroundSubtractorMOG");
   }
+// only support  for V3+ with opencv-contrib
 #ifdef HAVE_OPENCV_BGSEGM
   if (info.Length() > 0) {
     mog->setHistory(info[0]->NumberValue());
@@ -247,6 +241,7 @@ NAN_METHOD(BackgroundSubtractorWrap::BackgroundRatio) {
   if (!mog) {
     Nan::ThrowError("Not using a BackgroundSubtractorMOG");
   }
+// only support  for V3+ with opencv-contrib
 #ifdef HAVE_OPENCV_BGSEGM
   if (info.Length() > 0) {
     mog->setBackgroundRatio(info[0]->NumberValue());
@@ -263,6 +258,7 @@ NAN_METHOD(BackgroundSubtractorWrap::NoiseSigma) {
   if (!mog) {
     Nan::ThrowError("Not using a BackgroundSubtractorMOG");
   }
+// only support  for V3+ with opencv-contrib
 #ifdef HAVE_OPENCV_BGSEGM
   if (info.Length() > 0) {
     mog->setNoiseSigma(info[0]->NumberValue());
@@ -279,6 +275,7 @@ NAN_METHOD(BackgroundSubtractorWrap::Mixtures) {
   if (!mog) {
     Nan::ThrowError("Not using a BackgroundSubtractorMOG");
   }
+// only support  for V3+ with opencv-contrib
 #ifdef HAVE_OPENCV_BGSEGM
   if (info.Length() > 0) {
     mog->setNMixtures(info[0]->NumberValue());
