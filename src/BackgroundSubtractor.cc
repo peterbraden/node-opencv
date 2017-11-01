@@ -29,7 +29,10 @@ void BackgroundSubtractorWrap::Init(Local<Object> target) {
   ctor->SetClassName(Nan::New("BackgroundSubtractor").ToLocalChecked());
 
   Nan::SetMethod(ctor, "createMOG", CreateMOG);
+  Nan::SetMethod(ctor, "createMOG2", CreateMOG2);
+  Nan::SetMethod(ctor, "createGMG", CreateGMG);
   Nan::SetPrototypeMethod(ctor, "applyMOG", ApplyMOG);
+  Nan::SetPrototypeMethod(ctor, "apply", Apply);
   Nan::SetPrototypeMethod(ctor, "history", History);
   Nan::SetPrototypeMethod(ctor, "nmixtures", Mixtures);
   Nan::SetPrototypeMethod(ctor, "noiseSigma", NoiseSigma);
@@ -217,6 +220,82 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     return;
   }
 }
+
+
+class AsyncBackgroundSubtractorWorker: public Nan::AsyncWorker {
+public:
+  AsyncBackgroundSubtractorWorker( 
+        Nan::Callback *callback, 
+        BackgroundSubtractorWrap *bg, 
+        Matrix *img) :
+      Nan::AsyncWorker(callback),
+      bg(bg),
+      img(img) {
+  }
+
+  ~AsyncBackgroundSubtractorWorker() {
+  }
+
+  // Executed inside the worker-thread.
+  // It is not safe to access V8, or V8 data structures
+  // here, so everything we need for input and output
+  // should go on `this`.
+  void Execute() {
+#if CV_MAJOR_VERSION >= 3
+    bg->subtractor->apply(this->img->mat, _fgMask);
+#else
+    bg->subtractor->operator()(this->img->mat, _fgMask);
+#endif
+  }
+
+  // Executed when the async work is complete
+  // this function will be run inside the main event loop
+  // so it is safe to use V8 again
+  void HandleOKCallback() {
+    Nan::HandleScope scope;
+
+    Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+    Matrix *imgout = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
+    imgout->mat = _fgMask;
+
+    Local<Value> argv[] = {
+      Nan::Null()
+      , im_to_return
+    };
+
+    Nan::TryCatch try_catch;
+    callback->Call(2, argv);
+    if (try_catch.HasCaught()) {
+      Nan::FatalException(try_catch);
+    }
+  }
+
+private:
+  BackgroundSubtractorWrap *bg;
+  Matrix *img;
+  cv::Mat _fgMask;
+};
+
+
+// Fetch foreground mask
+NAN_METHOD(BackgroundSubtractorWrap::Apply) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  REQ_FUN_ARG(1, cb);
+
+  Local<Value> argv[2];
+  if (info.Length() == 0) {
+    argv[0] = Nan::New("Input image missing").ToLocalChecked();
+    argv[1] = Nan::Null();
+    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+    return;
+  }
+
+  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+  Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img));
+  return;
+}
+
 
 NAN_METHOD(BackgroundSubtractorWrap::History) {
   SETUP_FUNCTION(BackgroundSubtractorWrap);
