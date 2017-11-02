@@ -32,6 +32,7 @@ public:
   static NAN_METHOD(GetFrameCount);
 
   static NAN_METHOD(GetFPS);
+  static NAN_METHOD(SetFPS);
 
   static NAN_METHOD(GetFrameAt);
 
