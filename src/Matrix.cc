@@ -1971,18 +1971,25 @@ NAN_METHOD(Matrix::Resize) {
     return Nan::ThrowError("Matrix.resize requires at least 2 argument2");
   }
 
-  // if we want async
-  int offset = 0;
-  if (info[0]->IsFunction()){
-      offset = 1;
+  //im.resize( width, height );
+  //im.resize( width, height, fx, fy );
+  //im.resize( width, height, interpolation );
+  //im.resize( width, height, fx, fy, interpolation );
+  // if fn is added on the end, makes it Async
+  
+  int numargs = info.Length();
+  int isAsync = 0;
+  
+  if (info[numargs-1]->IsFunction()){
+      isAsync = 1;
   }
 
-  if (info.Length() < 2+offset) {
+  if (info.Length() < 2+isAsync) {
     return Nan::ThrowError("Matrix.resize requires at least x and y size argument2");
   }
 
-  int x = info[offset+0]->Uint32Value();
-  int y = info[offset+1]->Uint32Value();
+  int x = info[0]->Uint32Value();
+  int y = info[1]->Uint32Value();
 
   cv::Size size(x, y);
   
@@ -1995,22 +2002,22 @@ NAN_METHOD(Matrix::Resize) {
   int interpolation = cv::INTER_LINEAR;
 
   // if 4 or more args, then expect fx, fy next
-  if (info.Length() >= 4+offset) {
-    DOUBLE_FROM_ARGS(fx, 2+offset)
-    DOUBLE_FROM_ARGS(fy, 3+offset)
+  if (numargs >= 4+isAsync) {
+    DOUBLE_FROM_ARGS(fx, 2)
+    DOUBLE_FROM_ARGS(fy, 3)
+    if (numargs == 5+isAsync) {
+      INT_FROM_ARGS(interpolation, 5)
+    }
+  } else {
+    // if 3 args after possible function, expect interpolation
+    if (numargs == 3+isAsync) {
+      INT_FROM_ARGS(interpolation, 3)
+    }
   }
   
-  // if 3 args after possible function, expect interpolation
-  if (info.Length() == 3+offset) {
-    INT_FROM_ARGS(interpolation, 3+offset)
-  }
-  if (info.Length() == 5+offset) {
-    INT_FROM_ARGS(interpolation, 5+offset)
-  }
-
   // if async
-  if (offset){
-    REQ_FUN_ARG(0, cb);
+  if (isAsync){
+    REQ_FUN_ARG(numargs-1, cb);
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
     Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, self, size, fx, fy, interpolation));
     info.GetReturnValue().Set(Nan::Null());
