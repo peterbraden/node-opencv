@@ -3,13 +3,19 @@
 #include <iostream>
 #include <nan.h>
 
-#ifdef HAVE_OPENCV_VIDEO
+#ifdef HAVE_BACKGROUNDSUBTRACTOR
 
-#if CV_MAJOR_VERSION >= 3
-#warning TODO: port me to OpenCV 3
+#ifdef HAVE_OPENCV_BGSEGM
+cv::bgsegm::BackgroundSubtractorMOG* getMOG(BackgroundSubtractorWrap *wrap) {
+  return dynamic_cast<cv::bgsegm::BackgroundSubtractorMOG *>(wrap->subtractor.get());
+}
+#else
+// without bgsem, it can't be MOG anyway
+void* getMOG(BackgroundSubtractorWrap *wrap) {
+  return NULL;
+}
 #endif
 
-#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4))
 
 Nan::Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
 
@@ -24,6 +30,10 @@ void BackgroundSubtractorWrap::Init(Local<Object> target) {
 
   Nan::SetMethod(ctor, "createMOG", CreateMOG);
   Nan::SetPrototypeMethod(ctor, "applyMOG", ApplyMOG);
+  Nan::SetPrototypeMethod(ctor, "history", History);
+  Nan::SetPrototypeMethod(ctor, "nmixtures", Mixtures);
+  Nan::SetPrototypeMethod(ctor, "noiseSigma", NoiseSigma);
+  Nan::SetPrototypeMethod(ctor, "backgroundRatio", BackgroundRatio);
 
   target->Set(Nan::New("BackgroundSubtractor").ToLocalChecked(), ctor->GetFunction());
 }
@@ -36,8 +46,19 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
   }
 
   // Create MOG by default
+#if CV_MAJOR_VERSION >= 3
+
+#ifdef HAVE_OPENCV_BGSEGM
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
+#else
+  JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib)")
+#endif
+  
+#else
   cv::Ptr<cv::BackgroundSubtractor> bg;
+#endif
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+
   pt->Wrap(info.This());
 
   info.GetReturnValue().Set(info.This());
@@ -60,12 +81,81 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(BackgroundSubtractorWrap::constructor)).ToLocalChecked()).ToLocalChecked();
 
+#if CV_MAJOR_VERSION >= 3
+#ifdef HAVE_OPENCV_BGSEGM
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
+#else
+  JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib)")
+#endif
+#else
   cv::Ptr<cv::BackgroundSubtractor> bg;
+#endif
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
   info.GetReturnValue().Set( n );
 }
+
+NAN_METHOD(BackgroundSubtractorWrap::CreateMOG2) {
+  Nan::HandleScope scope;
+
+  // int history = 200;
+  // int nmixtures = 5;
+  // double backgroundRatio = 0.7;
+  // double noiseSigma = 0;
+  //
+  // if(info.Length() > 1){
+  //   INT_FROM_ARGS(history, 0)
+  //   INT_FROM_ARGS(nmixtures, 1)
+  //   DOUBLE_FROM_ARGS(backgroundRatio, 2)
+  //   DOUBLE_FROM_ARGS(noiseSigma, 3)
+  // }
+
+  Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(BackgroundSubtractorWrap::constructor)).ToLocalChecked()).ToLocalChecked();
+
+#if CV_MAJOR_VERSION >= 3
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::createBackgroundSubtractorMOG2();
+#else
+  cv::Ptr<cv::BackgroundSubtractor> bg;
+#endif
+  BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+
+  pt->Wrap(n);
+  info.GetReturnValue().Set( n );
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::CreateGMG) {
+  Nan::HandleScope scope;
+
+  // int history = 200;
+  // int nmixtures = 5;
+  // double backgroundRatio = 0.7;
+  // double noiseSigma = 0;
+  //
+  // if(info.Length() > 1){
+  //   INT_FROM_ARGS(history, 0)
+  //   INT_FROM_ARGS(nmixtures, 1)
+  //   DOUBLE_FROM_ARGS(backgroundRatio, 2)
+  //   DOUBLE_FROM_ARGS(noiseSigma, 3)
+  // }
+
+  Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(BackgroundSubtractorWrap::constructor)).ToLocalChecked()).ToLocalChecked();
+
+#if CV_MAJOR_VERSION >= 3
+#ifdef HAVE_OPENCV_BGSEGM
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorGMG();
+#else
+  JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib) - use MOG2")
+#endif
+#else
+  cv::Ptr<cv::BackgroundSubtractor> bg;
+#endif
+  BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+
+  pt->Wrap(n);
+  info.GetReturnValue().Set( n );
+}
+
 
 // Fetch foreground mask
 NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
@@ -102,7 +192,11 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     }
 
     cv::Mat _fgMask;
+#if CV_MAJOR_VERSION >= 3
+    self->subtractor->apply(mat, _fgMask);
+#else
     self->subtractor->operator()(mat, _fgMask);
+#endif
 
     img->mat = _fgMask;
     mat.release();
@@ -124,6 +218,74 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
   }
 }
 
+NAN_METHOD(BackgroundSubtractorWrap::History) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  auto mog = getMOG(self);
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+// only support  for V3+ with opencv-contrib
+#ifdef HAVE_OPENCV_BGSEGM
+  if (info.Length() > 0) {
+    mog->setHistory(info[0]->NumberValue());
+  }
+  info.GetReturnValue().Set(mog->getHistory());
+#else
+  info.GetReturnValue().Set(Nan::Null());
+#endif    
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::BackgroundRatio) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  auto mog = getMOG(self);
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+// only support  for V3+ with opencv-contrib
+#ifdef HAVE_OPENCV_BGSEGM
+  if (info.Length() > 0) {
+    mog->setBackgroundRatio(info[0]->NumberValue());
+  }
+  info.GetReturnValue().Set(mog->getBackgroundRatio());
+#else
+  info.GetReturnValue().Set(Nan::Null());
+#endif    
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::NoiseSigma) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  auto mog = getMOG(self);
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+// only support  for V3+ with opencv-contrib
+#ifdef HAVE_OPENCV_BGSEGM
+  if (info.Length() > 0) {
+    mog->setNoiseSigma(info[0]->NumberValue());
+  }
+  info.GetReturnValue().Set(mog->getNoiseSigma());
+#else
+  info.GetReturnValue().Set(Nan::Null());
+#endif    
+}
+
+NAN_METHOD(BackgroundSubtractorWrap::Mixtures) {
+  SETUP_FUNCTION(BackgroundSubtractorWrap);
+  auto mog = getMOG(self);
+  if (!mog) {
+    Nan::ThrowError("Not using a BackgroundSubtractorMOG");
+  }
+// only support  for V3+ with opencv-contrib
+#ifdef HAVE_OPENCV_BGSEGM
+  if (info.Length() > 0) {
+    mog->setNMixtures(info[0]->NumberValue());
+  }
+  info.GetReturnValue().Set(mog->getNMixtures());
+#else
+  info.GetReturnValue().Set(Nan::Null());
+#endif    
+}
+
 BackgroundSubtractorWrap::BackgroundSubtractorWrap(
     cv::Ptr<cv::BackgroundSubtractor> _subtractor) {
   subtractor = _subtractor;
@@ -131,4 +293,3 @@ BackgroundSubtractorWrap::BackgroundSubtractorWrap(
 
 #endif
 
-#endif
