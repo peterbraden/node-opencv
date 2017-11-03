@@ -83,7 +83,9 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "drawContour", DrawContour);
   Nan::SetPrototypeMethod(ctor, "drawAllContours", DrawAllContours);
   Nan::SetPrototypeMethod(ctor, "goodFeaturesToTrack", GoodFeaturesToTrack);
+  #ifdef HAVE_OPENCV_VIDEO
   Nan::SetPrototypeMethod(ctor, "calcOpticalFlowPyrLK", CalcOpticalFlowPyrLK);
+  #endif
   Nan::SetPrototypeMethod(ctor, "houghLinesP", HoughLinesP);
   Nan::SetPrototypeMethod(ctor, "houghCircles", HoughCircles);
   Nan::SetPrototypeMethod(ctor, "inRange", inRange);
@@ -651,7 +653,7 @@ NAN_METHOD(Matrix::PixelCol) {
   int height = self->mat.size().height;
   int x = info[0]->IntegerValue();
   v8::Local < v8::Array > arr;
-  
+
   if (self->mat.channels() == 4) {
     arr = Nan::New<Array>(height * 4);
     for (int y = 0; y < height; y++) {
@@ -1697,6 +1699,7 @@ NAN_METHOD(Matrix::GoodFeaturesToTrack) {
   info.GetReturnValue().Set(arr);
 }
 
+#ifdef HAVE_OPENCV_VIDEO
 NAN_METHOD(Matrix::CalcOpticalFlowPyrLK) {
   Nan::HandleScope scope;
 
@@ -1773,6 +1776,7 @@ NAN_METHOD(Matrix::CalcOpticalFlowPyrLK) {
 
   info.GetReturnValue().Set(data);
 }
+#endif
 
 NAN_METHOD(Matrix::HoughLinesP) {
   Nan::HandleScope scope;
@@ -1885,27 +1889,145 @@ cv::Rect* setRect(Local<Object> objRect, cv::Rect &result) {
   return &result;
 }
 
+
+class ResizeASyncWorker: public Nan::AsyncWorker {
+public:
+  ResizeASyncWorker(Nan::Callback *callback, Matrix *image, cv::Size size, double fx, double fy, int interpolation) :
+      Nan::AsyncWorker(callback),
+      image(image),
+      size(size),
+      fx(fx),
+      fy(fy),
+      interpolation(interpolation),
+      success(0){
+  }
+
+  ~ResizeASyncWorker() {
+  }
+
+  void Execute() {
+    try {
+        dest = new Matrix();
+        cv::resize(image->mat, dest->mat, size, fx, fy, interpolation);
+        success = 1;
+    } catch(...){
+        success = 0;
+    }
+  }
+
+  void HandleOKCallback() {
+    Nan::HandleScope scope;
+    
+    if (success){
+        Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+        Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
+        img->mat = dest->mat;
+        delete dest;
+        
+        //delete dest;
+        
+        Local<Value> argv[] = {
+          Nan::Null(), // err
+          im_to_return //result
+        };
+
+        Nan::TryCatch try_catch;
+        callback->Call(2, argv);
+        if (try_catch.HasCaught()) {
+          Nan::FatalException(try_catch);
+        }
+    } else {
+        delete dest;
+        
+        Local<Value> argv[] = {
+          Nan::New("C++ exception").ToLocalChecked(), // err
+          Nan::Null() //result
+        };
+
+        Nan::TryCatch try_catch;
+        callback->Call(2, argv);
+        if (try_catch.HasCaught()) {
+          Nan::FatalException(try_catch);
+        }
+    }
+  }
+
+private:
+  Matrix *image;
+  Matrix *dest;
+  cv::Size size;
+  double fx;
+  double fy;
+  int interpolation;
+  int success;
+
+};
+
+
 NAN_METHOD(Matrix::Resize) {
-  Nan::HandleScope scope;
+  SETUP_FUNCTION(Matrix)
+
+  if (info.Length() < 2) {
+    return Nan::ThrowError("Matrix.resize requires at least 2 argument2");
+  }
+
+  //im.resize( width, height );
+  //im.resize( width, height, fx, fy );
+  //im.resize( width, height, interpolation );
+  //im.resize( width, height, fx, fy, interpolation );
+  // if fn is added on the end, makes it Async
+  
+  int numargs = info.Length();
+  int isAsync = 0;
+  
+  if (info[numargs-1]->IsFunction()){
+      isAsync = 1;
+  }
+
+  if (info.Length() < 2+isAsync) {
+    return Nan::ThrowError("Matrix.resize requires at least x and y size argument2");
+  }
 
   int x = info[0]->Uint32Value();
   int y = info[1]->Uint32Value();
-  /*
-   CV_INTER_NN        =0,
-   CV_INTER_LINEAR    =1,
-   CV_INTER_CUBIC     =2,
-   CV_INTER_AREA      =3,
-   CV_INTER_LANCZOS4  =4
-   */
-  int interpolation = (info.Length() < 3) ? (int)cv::INTER_LINEAR : info[2]->Uint32Value();
 
-  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
-  cv::Mat res = cv::Mat(x, y, CV_32FC3);
-  cv::resize(self->mat, res, cv::Size(x, y), 0, 0, interpolation);
-  ~self->mat;
-  self->mat = res;
+  cv::Size size(x, y);
+  
+  if (size.area() == 0) {
+    return Nan::ThrowError("Area of size must be > 0");
+  }
 
-  return;
+  double fx = 0;
+  double fy = 0;
+  int interpolation = cv::INTER_LINEAR;
+
+  // if 4 or more args, then expect fx, fy next
+  if (numargs >= 4+isAsync) {
+    DOUBLE_FROM_ARGS(fx, 2)
+    DOUBLE_FROM_ARGS(fy, 3)
+    if (numargs == 5+isAsync) {
+      INT_FROM_ARGS(interpolation, 5)
+    }
+  } else {
+    // if 3 args after possible function, expect interpolation
+    if (numargs == 3+isAsync) {
+      INT_FROM_ARGS(interpolation, 3)
+    }
+  }
+  
+  // if async
+  if (isAsync){
+    REQ_FUN_ARG(numargs-1, cb);
+    Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+    Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, self, size, fx, fy, interpolation));
+    info.GetReturnValue().Set(Nan::Null());
+  } else {
+    Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+    cv::Mat res = cv::Mat(x, y, CV_32FC3);
+    cv::resize(self->mat, res, cv::Size(x, y), 0, 0, interpolation);
+    ~self->mat;
+    self->mat = res;
+  }
 }
 
 NAN_METHOD(Matrix::Rotate) {

@@ -2,6 +2,8 @@
 
 #if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4))
 
+#ifdef HAVE_OPENCV_FEATURES2D
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
@@ -12,5 +14,7 @@ public:
 
   static NAN_METHOD(Similarity);
 };
+
+#endif
 
 #endif

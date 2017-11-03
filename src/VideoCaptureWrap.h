@@ -1,5 +1,7 @@
 #include "OpenCV.h"
 
+#ifdef HAVE_OPENCV_VIDEOIO
+
 class VideoCaptureWrap: public Nan::ObjectWrap {
 public:
   cv::VideoCapture cap;
@@ -30,9 +32,12 @@ public:
   static NAN_METHOD(GetFrameCount);
 
   static NAN_METHOD(GetFPS);
+  static NAN_METHOD(SetFPS);
 
   static NAN_METHOD(GetFrameAt);
 
   // release the stream
   static NAN_METHOD(Release);
 };
+
+#endif

@@ -4,6 +4,8 @@
 
 #include  <iostream>
 
+#ifdef HAVE_OPENCV_VIDEOIO
+
 Nan::Persistent<FunctionTemplate> VideoWriterWrap::constructor;
 
 struct videowriter_baton {
@@ -150,3 +152,4 @@ NAN_METHOD(VideoWriterWrap::WriteSync) {
     info.GetReturnValue().Set(Nan::Null());
 }
 
+#endif

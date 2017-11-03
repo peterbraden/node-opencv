@@ -2,6 +2,8 @@
 #include "OpenCV.h"
 #include "Matrix.h"
 
+#ifdef HAVE_OPENCV_HIGHGUI
+
 Nan::Persistent<FunctionTemplate> NamedWindow::constructor;
 
 void NamedWindow::Init(Local<Object> target) {
@@ -82,3 +84,5 @@ NAN_METHOD(NamedWindow::BlockingWaitKey) {
 
   info.GetReturnValue().Set(Nan::New<Number>(res));
 }
+
+#endif

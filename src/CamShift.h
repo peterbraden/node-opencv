@@ -1,5 +1,6 @@
 #include "OpenCV.h"
 
+#ifdef HAVE_OPENCV_VIDEO
 
 class TrackedObject: public Nan::ObjectWrap {
 public:
@@ -20,3 +21,5 @@ public:
 
   JSFUNC(Track);
 };
+
+#endif

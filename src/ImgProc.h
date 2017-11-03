@@ -3,6 +3,8 @@
 
 #include "OpenCV.h"
 
+#ifdef HAVE_OPENCV_IMGPROC
+
 /**
  * Implementation of imgproc.hpp functions
  */
@@ -15,5 +17,7 @@ public:
   static NAN_METHOD(Remap);
   static NAN_METHOD(GetStructuringElement);
 };
+
+#endif
 
 #endif

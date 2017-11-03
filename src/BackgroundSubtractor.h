@@ -1,5 +1,7 @@
 #include "OpenCV.h"
 
+#ifdef HAVE_OPENCV_VIDEO
+
 #if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4))
 
 #include <opencv2/video/background_segm.hpp>
@@ -17,5 +19,7 @@ public:
   static NAN_METHOD(CreateMOG);
   static NAN_METHOD(ApplyMOG);
 };
+
+#endif
 
 #endif

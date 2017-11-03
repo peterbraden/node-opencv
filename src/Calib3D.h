@@ -3,6 +3,8 @@
 
 #include "OpenCV.h"
 
+#ifdef HAVE_OPENCV_CALIB3D
+
 #if CV_MAJOR_VERSION >= 3
 #include <opencv2/calib3d.hpp>
 #endif
@@ -24,4 +26,5 @@ public:
   static NAN_METHOD(ReprojectImageTo3D);
 };
 
+#endif
 #endif

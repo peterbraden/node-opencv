@@ -6,6 +6,8 @@
 #include <nan.h>
 #include <stdio.h>
 
+#ifdef HAVE_OPENCV_FEATURES2D
+
 void Features::Init(Local<Object> target) {
   Nan::HandleScope scope;
 
@@ -111,4 +113,5 @@ NAN_METHOD(Features::Similarity) {
   return;
 }
 
+#endif
 #endif
