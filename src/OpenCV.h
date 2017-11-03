@@ -87,6 +87,7 @@ public:
 
   static NAN_METHOD(ReadImage);
   static NAN_METHOD(ReadImageMulti);
+  static NAN_METHOD(ImDecode);
 };
 
 #endif

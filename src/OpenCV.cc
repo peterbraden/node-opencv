@@ -12,6 +12,7 @@ void OpenCV::Init(Local<Object> target) {
 
   Nan::SetMethod(target, "readImage", ReadImage);
   Nan::SetMethod(target, "readImageMulti", ReadImageMulti);
+  Nan::SetMethod(target, "imDecode", ImDecode);
 }
 
 NAN_METHOD(OpenCV::ReadImage) {
@@ -118,3 +119,83 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
   return;
 }
 #endif
+
+class AsyncImDecodeWorker: public Nan::AsyncWorker {
+public:
+
+  AsyncImDecodeWorker(Nan::Callback *callback, uint8_t *buf, unsigned len):
+      Nan::AsyncWorker(callback),
+      buf(buf),
+      len(len) {
+  }
+
+  ~AsyncImDecodeWorker() {
+  }
+
+  void Execute() {
+//      Local<Object> img_to_return =
+ //         Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+ //     img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
+      cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
+      outputmat = cv::imdecode(*mbuf, -1);
+  }
+
+  void HandleOKCallback() {
+    Nan::HandleScope scope;
+
+    Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
+    img->mat = outputmat;
+
+    
+    Local<Value> argv[] = {
+      Nan::Null(),
+      im_to_return
+    };
+
+    Nan::TryCatch try_catch;
+    callback->Call(2, argv);
+    if (try_catch.HasCaught()) {
+      Nan::FatalException(try_catch);
+    }
+  }
+
+private:
+    uint8_t *buf; 
+    unsigned len;
+    cv::Mat outputmat;
+    //Matrix *img;
+};
+
+
+NAN_METHOD(OpenCV::ImDecode) {
+    cv::Mat mat;
+    
+    int len = info.Length();
+
+    // if sync
+    if (len == 1){
+        if (Buffer::HasInstance(info[0])) {
+          Local<Object> img_to_return =
+              Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+          Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
+          uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
+          unsigned len = Buffer::Length(info[0]->ToObject());
+          cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
+          img->mat = cv::imdecode(*mbuf, -1);
+          info.GetReturnValue().Set(img_to_return);
+        } else {
+          //fail
+        }
+    } else {
+        if (len == 2){
+          // async
+          REQ_FUN_ARG(1, cb);
+          uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
+          unsigned len = Buffer::Length(info[0]->ToObject());
+          Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+          Nan::AsyncQueueWorker(new AsyncImDecodeWorker(callback, buf, len));
+        }
+    }
+}
+
