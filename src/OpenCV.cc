@@ -42,25 +42,41 @@ NAN_METHOD(OpenCV::ReadImage) {
 
     if (info[0]->IsNumber() && info[1]->IsNumber()) {
       int width, height;
+      int type = CV_64FC1;
+      // if we have a type arg
+      if ((numargs > 2) && info[2]->IsNumber()){
+        type = info[2]->Uint32Value(); 
+      }
       width = info[0]->Uint32Value();
       height = info[1]->Uint32Value();
-      mat = *(new cv::Mat(width, height, CV_64FC1));
+      mat = *(new cv::Mat(width, height, type));
 
     } else if (info[0]->IsString()) {
       std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
-      mat = cv::imread(filename, CV_LOAD_IMAGE_UNCHANGED);
+      int flags = CV_LOAD_IMAGE_UNCHANGED;
+      if (numargs > 1){
+        if (info[1]->IsNumber()){
+          flags = info[1]->Uint32Value();
+        }
+      }
+      mat = cv::imread(filename, flags);
 
     } else if (Buffer::HasInstance(info[0])) {
       uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
       unsigned len = Buffer::Length(info[0]->ToObject());
-
+      int flags = CV_LOAD_IMAGE_UNCHANGED;
+      if (numargs > 1){
+        if (info[1]->IsNumber()){
+          flags = info[1]->Uint32Value();
+        }
+      }
       cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
-      mat = cv::imdecode(*mbuf, CV_LOAD_IMAGE_UNCHANGED);
-
+      mat = cv::imdecode(*mbuf, flags);
       if (mat.empty()) {
         success = 0;
         argv[0] = Nan::Error("Error loading file");
       }
+      
     }
 
     img->mat = mat;
