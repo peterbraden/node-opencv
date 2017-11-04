@@ -17,7 +17,6 @@ void OpenCV::Init(Local<Object> target) {
 NAN_METHOD(OpenCV::ReadImage) {
   Nan::EscapableHandleScope scope;
 
-  REQ_FUN_ARG(1, cb);
 
   Local<Value> argv[2];
   argv[0] = Nan::Null();
@@ -26,12 +25,23 @@ NAN_METHOD(OpenCV::ReadImage) {
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
   argv[1] = im_h;
 
+  int callback_arg = -1;
+  int numargs = info.Length();
+  int success = 1;
+  
+  Local<Function> cb;
+
+  // deal with situation where we have int, int, cb
+  if (info[numargs-1]->IsFunction()){
+      callback_arg = numargs-1;
+      cb = Local<Function>::Cast(info[callback_arg]);
+  }
+  
   try {
     cv::Mat mat;
 
     if (info[0]->IsNumber() && info[1]->IsNumber()) {
       int width, height;
-
       width = info[0]->Uint32Value();
       height = info[1]->Uint32Value();
       mat = *(new cv::Mat(width, height, CV_64FC1));
@@ -48,6 +58,7 @@ NAN_METHOD(OpenCV::ReadImage) {
       mat = cv::imdecode(*mbuf, CV_LOAD_IMAGE_UNCHANGED);
 
       if (mat.empty()) {
+        success = 0;
         argv[0] = Nan::Error("Error loading file");
       }
     }
@@ -56,15 +67,24 @@ NAN_METHOD(OpenCV::ReadImage) {
   } catch (cv::Exception& e) {
     argv[0] = Nan::Error(e.what());
     argv[1] = Nan::Null();
+    success = 0;
   }
 
   Nan::TryCatch try_catch;
-  cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
-
+  // if we got a callback
+  if (callback_arg >= 0){
+    // if using callback
+    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+  } else {
+    // if to return the mat
+    if (success)
+      info.GetReturnValue().Set(im_h);
+    else
+      info.GetReturnValue().Set(Nan::New<Boolean>(false));
+  }
   if (try_catch.HasCaught()) {
     Nan::FatalException(try_catch);
   }
-
   return;
 }
 
