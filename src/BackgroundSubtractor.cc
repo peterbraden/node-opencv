@@ -53,18 +53,23 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
 
 #ifdef HAVE_OPENCV_BGSEGM
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
+  BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+
+  pt->Wrap(info.This());
+
+  info.GetReturnValue().Set(info.This());
 #else
   JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib)")
 #endif
   
 #else
   cv::Ptr<cv::BackgroundSubtractor> bg;
-#endif
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(info.This());
 
   info.GetReturnValue().Set(info.This());
+#endif
 }
 
 NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
@@ -87,16 +92,20 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
 #if CV_MAJOR_VERSION >= 3
 #ifdef HAVE_OPENCV_BGSEGM
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
+  BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+
+  pt->Wrap(n);
+  info.GetReturnValue().Set( n );
 #else
   JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib)")
 #endif
 #else
   cv::Ptr<cv::BackgroundSubtractor> bg;
-#endif
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
   info.GetReturnValue().Set( n );
+#endif
 }
 
 NAN_METHOD(BackgroundSubtractorWrap::CreateMOG2) {
@@ -147,16 +156,20 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateGMG) {
 #if CV_MAJOR_VERSION >= 3
 #ifdef HAVE_OPENCV_BGSEGM
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorGMG();
+  BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
+
+  pt->Wrap(n);
+  info.GetReturnValue().Set( n );
 #else
   JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib) - use MOG2")
 #endif
 #else
   cv::Ptr<cv::BackgroundSubtractor> bg;
-#endif
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
   info.GetReturnValue().Set( n );
+#endif
 }
 
 
