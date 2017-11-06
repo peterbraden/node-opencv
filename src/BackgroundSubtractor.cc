@@ -53,6 +53,9 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
 
 #ifdef HAVE_OPENCV_BGSEGM
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from cv::bgsegm::createBackgroundSubtractorMOG()");
+  }
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(info.This());
@@ -63,7 +66,10 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
 #endif
   
 #else
-  cv::Ptr<cv::BackgroundSubtractor> bg;
+  cv::Ptr<cv::BackgroundSubtractor> bg = new cv::BackgroundSubtractorMOG();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from new cv::BackgroundSubtractorMOG()");
+  }
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(info.This());
@@ -92,6 +98,9 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
 #if CV_MAJOR_VERSION >= 3
 #ifdef HAVE_OPENCV_BGSEGM
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from cv::bgsegm::createBackgroundSubtractorMOG()");
+  }
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
@@ -100,7 +109,10 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG) {
   JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib)")
 #endif
 #else
-  cv::Ptr<cv::BackgroundSubtractor> bg;
+  cv::Ptr<cv::BackgroundSubtractor> bg = new cv::BackgroundSubtractorMOG();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from new cv::BackgroundSubtractorMOG()");
+  }
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
@@ -127,8 +139,14 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateMOG2) {
 
 #if CV_MAJOR_VERSION >= 3
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::createBackgroundSubtractorMOG2();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from cv::createBackgroundSubtractorMOG2()");
+  }
 #else
-  cv::Ptr<cv::BackgroundSubtractor> bg;
+  cv::Ptr<cv::BackgroundSubtractor> bg = new cv::BackgroundSubtractorMOG();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from new cv::BackgroundSubtractorMOG()");
+  }
 #endif
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
@@ -156,6 +174,9 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateGMG) {
 #if CV_MAJOR_VERSION >= 3
 #ifdef HAVE_OPENCV_BGSEGM
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorGMG();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from cv::bgsegm::createBackgroundSubtractorGMG()");
+  }
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
@@ -164,7 +185,10 @@ NAN_METHOD(BackgroundSubtractorWrap::CreateGMG) {
   JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib) - use MOG2")
 #endif
 #else
-  cv::Ptr<cv::BackgroundSubtractor> bg;
+  cv::Ptr<cv::BackgroundSubtractor> bg = new cv::BackgroundSubtractorMOG();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from new cv::BackgroundSubtractorMOG()");
+  }
   BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(n);
@@ -186,6 +210,13 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     return;
   }
 
+  if (NULL == self->subtractor){
+    argv[0] = Nan::New("BackgroundSubtractor not created").ToLocalChecked();
+    argv[1] = Nan::Null();
+    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+    return;
+  }
+  
   try {
     Local<Object> fgMask =
         Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
@@ -302,7 +333,13 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
     cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
     return;
   }
-
+  if (NULL == self->subtractor){
+    argv[0] = Nan::New("BackgroundSubtractor not created").ToLocalChecked();
+    argv[1] = Nan::Null();
+    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+    return;
+  }
+  
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
   Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
   Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img));
