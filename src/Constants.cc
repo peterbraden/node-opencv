@@ -67,7 +67,11 @@ void Constants::Init(Local<Object> target) {
   CONST(CV_LOAD_IMAGE_COLOR);
   CONST(CV_LOAD_IMAGE_ANYDEPTH);
   CONST(CV_LOAD_IMAGE_ANYCOLOR);
+  
+  // this is 3.2+ only
+  #if ((CV_MAJOR_VERSION == 3) && (CV_MINOR_VERSION >=2))
   CONST(CV_LOAD_IMAGE_IGNORE_ORIENTATION);
+  #endif
   
   CONST_DOUBLE(CV_PI);
   CONST(CV_FILLED);
