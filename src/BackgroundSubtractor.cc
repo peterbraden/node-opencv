@@ -65,7 +65,15 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
 
   info.GetReturnValue().Set(info.This());
 #else
-  JSTHROW_TYPE("OpenCV built without bgsem (opencv_contrib)")
+  // if no bgsem, then default to MOG2
+  cv::Ptr<cv::BackgroundSubtractor> bg = cv::createBackgroundSubtractorMOG2();
+  if (NULL == bg){
+   JSTHROW_TYPE("OpenCV NULL from cv::createBackgroundSubtractorMOG2()");
+  }
+
+  pt->Wrap(info.This());
+
+  info.GetReturnValue().Set(info.This());
 #endif
   
 #else
