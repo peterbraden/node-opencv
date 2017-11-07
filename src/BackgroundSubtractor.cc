@@ -6,12 +6,23 @@
 #ifdef HAVE_BACKGROUNDSUBTRACTOR
 
 #ifdef HAVE_OPENCV_BGSEGM
+
+#ifdef __GNUC__
 #warning Building with HAVE_OPENCV_BGSEGM
+#else
+// vs style message pragma
+#pragma message ( "Building with HAVE_OPENCV_BGSEGM" )
+#endif
 cv::bgsegm::BackgroundSubtractorMOG* getMOG(BackgroundSubtractorWrap *wrap) {
   return dynamic_cast<cv::bgsegm::BackgroundSubtractorMOG *>(wrap->subtractor.get());
 }
 #else
+#ifdef __GNUC__
 #warning Building without HAVE_OPENCV_BGSEGM
+#else
+// vs style message pragma
+#pragma message ( "Building without HAVE_OPENCV_BGSEGM" )
+#endif
 // without bgsem, it can't be MOG anyway
 void* getMOG(BackgroundSubtractorWrap *wrap) {
   return NULL;
@@ -52,7 +63,12 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
 
   // Create MOG by default
 #if CV_MAJOR_VERSION >= 3
+#ifdef __GNUC__
 #warning Building OPENCV >= 3
+#else
+// vs style message pragma
+#pragma message ( "Building OPENCV >= 3" )
+#endif
 
 #ifdef HAVE_OPENCV_BGSEGM
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
@@ -78,7 +94,12 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
 #endif
   
 #else
+#ifdef __GNUC__
 #warning Building OPENCV < 3
+#else
+// vs style message pragma
+#pragma message ( "Building OPENCV < 3" )
+#endif
   cv::Ptr<cv::BackgroundSubtractor> bg = new cv::BackgroundSubtractorMOG();
   if (NULL == bg){
    JSTHROW_TYPE("OpenCV NULL from new cv::BackgroundSubtractorMOG()");
