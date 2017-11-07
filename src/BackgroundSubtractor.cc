@@ -30,6 +30,21 @@ void* getMOG(BackgroundSubtractorWrap *wrap) {
 #endif
 
 
+class BGAutoMutex {
+public:
+    BGAutoMutex(cv::Mutex &m){
+        mutex = &m;
+        mutex->lock();
+    };
+    
+    ~BGAutoMutex(){
+        mutex->unlock();
+        mutex = NULL;
+    };
+private:
+    cv::Mutex *mutex;
+};
+
 Nan::Persistent<FunctionTemplate> BackgroundSubtractorWrap::constructor;
 
 void BackgroundSubtractorWrap::Init(Local<Object> target) {
@@ -250,6 +265,7 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
     cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
     return;
   }
+
   
   try {
     Local<Object> fgMask =
@@ -272,13 +288,18 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
       return Nan::ThrowTypeError("Error loading file");
     }
 
+    
     cv::Mat _fgMask;
+    {
+    // wait here if already in apply - auto-release on scope exit
+    BGAutoMutex(self->applymutex);
 #if CV_MAJOR_VERSION >= 3
     self->subtractor->apply(mat, _fgMask);
 #else
     self->subtractor->operator()(mat, _fgMask);
 #endif
-
+    }
+    
     img->mat = _fgMask;
     mat.release();
 
@@ -319,6 +340,8 @@ public:
   // here, so everything we need for input and output
   // should go on `this`.
   void Execute() {
+    // wait here if already in apply - auto-release on scope exit
+    BGAutoMutex(bg->applymutex);
 #if CV_MAJOR_VERSION >= 3
     bg->subtractor->apply(this->img->mat, _fgMask);
 #else
@@ -358,26 +381,87 @@ private:
 // Fetch foreground mask
 NAN_METHOD(BackgroundSubtractorWrap::Apply) {
   SETUP_FUNCTION(BackgroundSubtractorWrap);
-  REQ_FUN_ARG(1, cb);
-
-  Local<Value> argv[2];
-  if (info.Length() == 0) {
-    argv[0] = Nan::New("Input image missing").ToLocalChecked();
-    argv[1] = Nan::Null();
-    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
-    return;
-  }
-  if (NULL == self->subtractor){
-    argv[0] = Nan::New("BackgroundSubtractor not created").ToLocalChecked();
-    argv[1] = Nan::Null();
-    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
-    return;
-  }
+  int callback_arg = -1;
+  int numargs = info.Length();
+  int success = 1;
   
-  Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-  Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
-  Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img));
-  return;
+  Local<Function> cb;
+
+  if (info[numargs-1]->IsFunction()){
+      callback_arg = numargs-1;
+      cb = Local<Function>::Cast(info[callback_arg]);
+  }
+
+  
+  
+  // if async
+  if (callback_arg){
+    Local<Value> argv[2];
+
+    if (info.Length() == 0) {
+      argv[0] = Nan::New("Input image missing").ToLocalChecked();
+      argv[1] = Nan::Null();
+      cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+      return;
+    }
+    if (NULL == self->subtractor){
+      argv[0] = Nan::New("BackgroundSubtractor not created").ToLocalChecked();
+      argv[1] = Nan::Null();
+      cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+      return;
+    }
+    
+    Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
+    Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img));
+    return;
+  } else { //syncronous - return the image
+
+    try {
+      Local<Object> fgMask =
+          Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+      Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(fgMask);
+      
+      cv::Mat mat;
+      if (Buffer::HasInstance(info[0])) {
+        uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
+        unsigned len = Buffer::Length(info[0]->ToObject());
+        cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
+        mat = cv::imdecode(*mbuf, -1);
+        //mbuf->release();
+      } else {
+        Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+        mat = (_img->mat).clone();
+      }
+
+      if (mat.empty()) {
+        return Nan::ThrowTypeError("Empty matrix?");
+      }
+
+      {
+      // wait here if already in apply - auto-release on scope exit
+      BGAutoMutex(self->applymutex);
+      cv::Mat _fgMask;
+  #if CV_MAJOR_VERSION >= 3
+      self->subtractor->apply(mat, _fgMask);
+  #else
+      self->subtractor->operator()(mat, _fgMask);
+  #endif
+      img->mat = _fgMask;
+      }
+      
+      mat.release();
+
+      info.GetReturnValue().Set(fgMask);
+      return;
+      
+    } catch (cv::Exception& e) {
+      const char* err_msg = e.what();
+      Nan::ThrowError(err_msg);
+      return;
+    }
+      
+  }
 }
 
 

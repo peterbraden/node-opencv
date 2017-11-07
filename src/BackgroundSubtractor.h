@@ -14,6 +14,7 @@
 class BackgroundSubtractorWrap: public Nan::ObjectWrap {
 public:
   cv::Ptr<cv::BackgroundSubtractor> subtractor;
+  cv::Mutex applymutex;
 
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Local<Object> target);
