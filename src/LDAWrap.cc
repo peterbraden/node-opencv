@@ -1,7 +1,12 @@
 #include "OpenCV.h"
 
 #if CV_MAJOR_VERSION >= 3
+#ifdef __GNUC__
 #warning TODO: port me to OpenCV 3
+#else
+// vs style message pragma
+#pragma message ( "TODO: port me to OpenCV 3" )
+#endif
 #endif
 
 #if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4) && (CV_SUBMINOR_VERSION>=4))
