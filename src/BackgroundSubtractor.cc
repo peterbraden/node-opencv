@@ -70,6 +70,7 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
   if (NULL == bg){
    JSTHROW_TYPE("OpenCV NULL from cv::createBackgroundSubtractorMOG2()");
   }
+  BackgroundSubtractorWrap *pt = new BackgroundSubtractorWrap(bg);
 
   pt->Wrap(info.This());
 
