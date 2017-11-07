@@ -22,15 +22,23 @@ NAN_METHOD(Histogram::CalcHist) {
 
     // Arg 1 is the channel
     Local<Array> nodeChannels = Local<Array>::Cast(info[1]->ToObject());
-    const unsigned int dims = nodeChannels->Length();
-    int channels[dims];
+    // vs does not like this const, no need for it?
+    /*const */unsigned int dims = nodeChannels->Length();
+              
+              
+    if(dims < 1 || dims > 3){
+      return Nan::ThrowTypeError("OPENCV nodejs binding error : only dimensions from 1 to 3 are allowed");
+    }
+              
+    // in vs, can't create an array of non-constant size; but since we have dims<3, just use 3..
+    int channels[3];
     for (unsigned int i = 0; i < dims; i++) {
       channels[i] = nodeChannels->Get(i)->IntegerValue();
     }
 
     // Arg 2 is histogram sizes in each dimension
     Local<Array> nodeHistSizes = Local<Array>::Cast(info[2]->ToObject());
-    int histSize[dims];
+    int histSize[3];
     for (unsigned int i = 0; i < dims; i++) {
       histSize[i] = nodeHistSizes->Get(i)->IntegerValue();
     }
@@ -38,8 +46,8 @@ NAN_METHOD(Histogram::CalcHist) {
     // Arg 3 is array of the histogram bin boundaries in each dimension
     Local<Array> nodeRanges = Local<Array>::Cast(info[3]->ToObject());
     /// Set the ranges ( for B,G,R) )
-    float histRanges[dims][2];
-    const float* ranges[dims];
+    float histRanges[3][2];
+    const float* ranges[3];
 
     for (unsigned int i = 0; i < dims; i++) {
       Local<Array> nodeRange = Local<Array>::Cast(nodeRanges->Get(i)->ToObject());
@@ -61,9 +69,6 @@ NAN_METHOD(Histogram::CalcHist) {
 
     v8::Local<v8::Array> arr = Nan::New<Array>(histSize[0]);
 
-    if(dims < 1 || dims > 3){
-      return Nan::ThrowTypeError("OPENCV nodejs binding error : only dimensions from 1 to 3 are allowed");
-    }
 
     for (unsigned int i=0; i < (unsigned int) histSize[0]; i++) {
       if(dims <= 1){
