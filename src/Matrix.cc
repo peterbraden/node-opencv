@@ -1895,14 +1895,14 @@ public:
   ResizeASyncWorker(Nan::Callback *callback, Matrix *image, cv::Size size, double fx, double fy, int interpolation) :
       Nan::AsyncWorker(callback),
       image(image),
+      dest(NULL),
       size(size),
       fx(fx),
       fy(fy),
       interpolation(interpolation),
-      success(0),
-      dest(NULL){
+      success(0) {
   }
-
+    
   ~ResizeASyncWorker() {
       // don't leave this if it was allocated
       // could happen if NaN does not call HandleSuccess?
