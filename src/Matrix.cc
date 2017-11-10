@@ -1919,22 +1919,35 @@ public:
     Nan::HandleScope scope;
     
     if (success){
-        Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-        Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
-        img->mat = dest->mat;
-        delete dest;
-        
-        //delete dest;
-        
-        Local<Value> argv[] = {
-          Nan::Null(), // err
-          im_to_return //result
-        };
+        try{
+            Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+            Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
+            img->mat = dest->mat;
+            delete dest;
 
-        Nan::TryCatch try_catch;
-        callback->Call(2, argv);
-        if (try_catch.HasCaught()) {
-          Nan::FatalException(try_catch);
+            //delete dest;
+
+            Local<Value> argv[] = {
+              Nan::Null(), // err
+              im_to_return //result
+            };
+
+            Nan::TryCatch try_catch;
+            callback->Call(2, argv);
+            if (try_catch.HasCaught()) {
+              Nan::FatalException(try_catch);
+            }
+        } catch (...){
+            Local<Value> argv[] = {
+              Nan::New("C++ exception wrapping response").ToLocalChecked(), // err
+              Nan::Null() // result
+            };
+
+            Nan::TryCatch try_catch;
+            callback->Call(2, argv);
+            if (try_catch.HasCaught()) {
+              Nan::FatalException(try_catch);
+            }
         }
     } else {
         delete dest;
@@ -2022,11 +2035,15 @@ NAN_METHOD(Matrix::Resize) {
     Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, self, size, fx, fy, interpolation));
     info.GetReturnValue().Set(Nan::Null());
   } else {
-    Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
-    cv::Mat res = cv::Mat(x, y, CV_32FC3);
-    cv::resize(self->mat, res, cv::Size(x, y), 0, 0, interpolation);
-    ~self->mat;
-    self->mat = res;
+    try{
+        Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+        cv::Mat res = cv::Mat(x, y, CV_32FC3);
+        cv::resize(self->mat, res, cv::Size(x, y), 0, 0, interpolation);
+        ~self->mat;
+        self->mat = res;
+    } catch (...){
+        return Nan::ThrowError("c++ Exception processing resize");
+    }
   }
 }
 
