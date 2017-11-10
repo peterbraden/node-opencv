@@ -1900,13 +1900,14 @@ public:
       fy(fy),
       interpolation(interpolation),
       success(0),
-      dest(null){
+      dest(NULL){
   }
 
   ~ResizeASyncWorker() {
       // don't leave this if it was allocated
       // could happen if NaN does not call HandleSuccess?
       delete dest;
+      dest = NULL;
   }
 
   void Execute() {
@@ -1928,7 +1929,7 @@ public:
             Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
             img->mat = dest->mat;
             delete dest;
-            dest = null;
+            dest = NULL;
 
             Local<Value> argv[] = {
               Nan::Null(), // err
@@ -1942,7 +1943,7 @@ public:
             }
         } catch (...){
             delete dest;
-            dest = null;
+            dest = NULL;
             Local<Value> argv[] = {
               Nan::New("C++ exception wrapping response").ToLocalChecked(), // err
               Nan::Null() // result
@@ -1956,7 +1957,7 @@ public:
         }
     } else {
         delete dest;
-        dest = null;
+        dest = NULL;
         
         Local<Value> argv[] = {
           Nan::New("C++ exception").ToLocalChecked(), // err
