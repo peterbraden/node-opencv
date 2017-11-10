@@ -24,30 +24,54 @@ public:
       Nan::AsyncWorker(callback),
       buf(buf),
       len(len),
-      flags(flags){
+      flags(flags),
+      success(0){
   }
 
   ~AsyncImDecodeWorker() {
   }
 
   void Execute() {
-//      Local<Object> img_to_return =
- //         Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
- //     img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
-      cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
-      outputmat = cv::imdecode(*mbuf, flags);
+      try{
+        // don't new; just have a local class which will be removed.
+        cv::Mat mbuf(len, 1, CV_64FC1, buf);
+        outputmat = cv::imdecode(mbuf, flags);
+        success = 1;
+      } catch(...){
+        success = 0;
+      }
   }
 
   void HandleOKCallback() {
-    Nan::HandleScope scope;
+      
+    if (success){
+        Nan::HandleScope scope;
 
-    Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
-    img->mat = outputmat;
+        try{
+            Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+            Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
+            img->mat = outputmat;
+
+            Local<Value> argv[] = {
+              Nan::Null(),
+              im_to_return
+            };
+
+            Nan::TryCatch try_catch;
+            callback->Call(2, argv);
+            if (try_catch.HasCaught()) {
+              Nan::FatalException(try_catch);
+            }
+            return;
+        } catch (...){
+        
+        }
+    }
     
+    // fall through here is !success or failed trying to callback.
     Local<Value> argv[] = {
-      Nan::Null(),
-      im_to_return
+      Nan::New("C++ exception executing imdecode").ToLocalChecked(), // err
+      Nan::Null()
     };
 
     Nan::TryCatch try_catch;
@@ -62,6 +86,7 @@ private:
     unsigned len;
     int flags;
     cv::Mat outputmat;
+    int success;
     //Matrix *img;
 };
 
