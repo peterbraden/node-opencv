@@ -50,15 +50,16 @@ extern "C" void init(Local<Object> target) {
   StereoBM::Init(target);
   StereoSGBM::Init(target);
   StereoGC::Init(target);
+
 #if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION >=4
-  #ifdef HAVE_OPENCV_VIDEO
-    BackgroundSubtractorWrap::Init(target);
-  #endif
   #ifdef HAVE_OPENCV_FEATURES2D
     Features::Init(target);
   #endif
   LDAWrap::Init(target);
 #endif
+#endif
+#ifdef HAVE_BACKGROUNDSUBTRACTOR
+  BackgroundSubtractorWrap::Init(target);
 #endif
 #ifdef HAVE_OPENCV_FACE
   FaceRecognizerWrap::Init(target);
