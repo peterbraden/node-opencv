@@ -3,6 +3,7 @@
 #include "OpenCV.h"
 #include <string.h>
 #include <nan.h>
+#include <opencv2/photo/photo.hpp>
 
 Nan::Persistent<FunctionTemplate> Matrix::constructor;
 
@@ -118,6 +119,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "shift", Shift);
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
   Nan::SetPrototypeMethod(ctor, "release", Release);
+  Nan::SetPrototypeMethod(ctor, "inpaint", Inpaint);
   Nan::SetPrototypeMethod(ctor, "subtract", Subtract);
   Nan::SetPrototypeMethod(ctor, "compare", Compare);
   Nan::SetPrototypeMethod(ctor, "mul", Mul);
@@ -3023,6 +3025,26 @@ NAN_METHOD(Matrix::Release) {
   self->mat.release();
 
   return;
+}
+
+NAN_METHOD(Matrix::Inpaint) {
+  SETUP_FUNCTION(Matrix)
+
+  if (!info[0]->IsObject()) {
+    Nan::ThrowTypeError("The argument must be an object");
+  }
+
+  Matrix *mask = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  mask->mat.convertTo(mask->mat, CV_8U);
+
+  cv::inpaint(self->mat, mask->mat, self->mat, 3, cv::INPAINT_TELEA);
+
+  Local < Object > img_to_return =
+      Nan::New(Matrix::constructor)->GetFunction()->NewInstance();
+  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
+  self->mat.copyTo(img->mat);
+
+  info.GetReturnValue().Set(img_to_return);
 }
 
 NAN_METHOD(Matrix::Subtract) {

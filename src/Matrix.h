@@ -136,6 +136,8 @@ public:
 
   JSFUNC(Release)
 
+  JSFUNC(Inpaint)
+
   JSFUNC(Subtract)
   JSFUNC(Compare)
   JSFUNC(Mul)
