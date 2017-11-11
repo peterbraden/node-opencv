@@ -382,7 +382,7 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
   
   
   // if async
-  if (callback_arg){
+  if (callback_arg > 0){
     Local<Value> argv[2];
 
     if (info.Length() == 0) {
@@ -402,7 +402,7 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
     Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
     Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img));
     return;
-  } else { //syncronous - return the image
+  } else { //synchronous - return the image
 
     try {
       Local<Object> fgMask =
