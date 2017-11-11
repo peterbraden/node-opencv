@@ -3,6 +3,9 @@ var path = require('path'),
 
 var bg = null;
 
+require("v8").setFlagsFromString('--expose_gc');
+
+var gc = require("vm").runInNewContext('gc');
 
 var do_sync = function(done){
 	// When opening a file, the full path must be passed to opencv
@@ -14,6 +17,7 @@ var do_sync = function(done){
 		vid.read(function(err, m2){
 		  if (err) throw err;
 		  var mat = bg.apply(m2);
+		  delete m2;
 		  // mat is a monochrome img where moving objects are white
 		  if (x++<100){
 		    //console.log("iter "+x);
@@ -21,6 +25,7 @@ var do_sync = function(done){
 		  } else {
 	        delete vid;
 		    console.log("bg sync done");
+			gc();
 			if (undefined !== done)
 			  done();
 		  }
@@ -40,6 +45,7 @@ var do_async = function(done){
 		vid.read(function(err, m2){
 		  if (err) throw err;
 		  bg.apply(m2, function(err, mat){
+	        delete mat;
 		    if (err) throw err;
 			// mat is a monochrome img where moving objects are white
 		    if (x++<100){
@@ -48,6 +54,7 @@ var do_async = function(done){
 		    } else {
 		      console.log("bg async done");
 		      delete vid;
+			  gc();
 			  if (undefined !== done)
 				done();
 		    }
@@ -70,9 +77,8 @@ var do_gmg = function( done ){
 	console.log("doing GMG");
 	bg = cv.BackgroundSubtractor.createGMG();
 	do_sync( function(){
-		console.log("not doing GMG Async - crashes my pi");
-		//do_async(done);
-		done();
+		//console.log("not doing GMG Async - crashes my pi");
+		do_async(done);
 	});
 }
 
