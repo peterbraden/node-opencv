@@ -77,6 +77,7 @@ NAN_METHOD(BackgroundSubtractorWrap::New) {
   }
 
   // Create MOG by default
+#if CV_MAJOR_VERSION >= 3
 #ifdef HAVE_OPENCV_BGSEGM
   cv::Ptr<cv::BackgroundSubtractor> bg = cv::bgsegm::createBackgroundSubtractorMOG();
   if (NULL == bg){
