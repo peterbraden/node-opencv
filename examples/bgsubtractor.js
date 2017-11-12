@@ -3,9 +3,10 @@ var path = require('path'),
 
 var bg = null;
 
-require("v8").setFlagsFromString('--expose_gc');
 
-var gc = require("vm").runInNewContext('gc');
+// gc stuff which we shojld not need with release() begin used
+//require("v8").setFlagsFromString('--expose_gc');
+//var gc = require("vm").runInNewContext('gc');
 
 var do_sync = function(done){
 	// When opening a file, the full path must be passed to opencv
@@ -17,15 +18,20 @@ var do_sync = function(done){
 		vid.read(function(err, m2){
 		  if (err) throw err;
 		  var mat = bg.apply(m2);
+		  m2.release();
 		  delete m2;
 		  // mat is a monochrome img where moving objects are white
+		  // do something with the return data
+		  // we are done with the return data
+		  mat.release();
+		  delete mat;
 		  if (x++<100){
 		    //console.log("iter "+x);
 			setTimeout(iter, 1);
 		  } else {
 	        delete vid;
 		    console.log("bg sync done");
-			gc();
+			// gc(); - no need to gc if we release both m2 and mat
 			if (undefined !== done)
 			  done();
 		  }
@@ -45,7 +51,10 @@ var do_async = function(done){
 		vid.read(function(err, m2){
 		  if (err) throw err;
 		  bg.apply(m2, function(err, mat){
-	        delete mat;
+			// do something with the return data
+			// we are done with the return data
+			mat.release();
+			delete mat;
 		    if (err) throw err;
 			// mat is a monochrome img where moving objects are white
 		    if (x++<100){
@@ -54,11 +63,12 @@ var do_async = function(done){
 		    } else {
 		      console.log("bg async done");
 		      delete vid;
-			  gc();
+			  // gc(); - no need to gc if we release both m2 and mat
 			  if (undefined !== done)
 				done();
 		    }
 		  });
+		  m2.release();
 		})
 	};
 
