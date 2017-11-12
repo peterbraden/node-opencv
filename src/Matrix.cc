@@ -117,7 +117,9 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "mean", Mean);
   Nan::SetPrototypeMethod(ctor, "shift", Shift);
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
+  Nan::SetPrototypeMethod(ctor, "addref", Addref);
   Nan::SetPrototypeMethod(ctor, "release", Release);
+  Nan::SetPrototypeMethod(ctor, "getrefCount", GetrefCount);
   Nan::SetPrototypeMethod(ctor, "subtract", Subtract);
   Nan::SetPrototypeMethod(ctor, "compare", Compare);
   Nan::SetPrototypeMethod(ctor, "mul", Mul);
@@ -3024,6 +3026,41 @@ NAN_METHOD(Matrix::Release) {
 
   return;
 }
+
+NAN_METHOD(Matrix::Addref) {
+  Nan::HandleScope scope;
+
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+  self->mat.addref();
+
+  return;
+}
+
+
+NAN_METHOD(Matrix::GetrefCount) {
+  Nan::HandleScope scope;
+  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+
+  int refcount = -1;
+  
+#if CV_MAJOR_VERSION >= 3
+    if (self->mat.u){
+        refcount = self->mat.u->refcount;
+    } else {
+        refcount = -1;
+    }
+#else
+    if (self->mat.refcount){
+        refcount = *self->mat.refcount);
+    } else {
+        refcount = -1;
+    }
+#endif    
+
+  info.GetReturnValue().Set(Nan::New<Number>(refcount));
+  return;
+}
+
 
 NAN_METHOD(Matrix::Subtract) {
   SETUP_FUNCTION(Matrix)

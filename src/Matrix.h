@@ -134,7 +134,10 @@ public:
   JSFUNC(Shift)
   JSFUNC(Reshape)
 
+          
+  JSFUNC(Addref)
   JSFUNC(Release)
+  JSFUNC(GetrefCount)
 
   JSFUNC(Subtract)
   JSFUNC(Compare)
