@@ -1893,9 +1893,9 @@ cv::Rect* setRect(Local<Object> objRect, cv::Rect &result) {
 
 class ResizeASyncWorker: public Nan::AsyncWorker {
 public:
-  ResizeASyncWorker(Nan::Callback *callback, Matrix *image, cv::Size size, double fx, double fy, int interpolation) :
+  ResizeASyncWorker(Nan::Callback *callback, cv::Mat image, cv::Size size, double fx, double fy, int interpolation) :
       Nan::AsyncWorker(callback),
-      image(image),
+      image(image), // here, the cv::Mat is duplicated, adding to refcount without data copy
       dest(NULL),
       size(size),
       fx(fx),
@@ -1909,12 +1909,13 @@ public:
       // could happen if NaN does not call HandleSuccess?
       delete dest;
       dest = NULL;
+      // cv::Mat image will be deleted, which will reduce refcount
   }
 
   void Execute() {
     try {
         dest = new Matrix();
-        cv::resize(image->mat, dest->mat, size, fx, fy, interpolation);
+        cv::resize(image, dest->mat, size, fx, fy, interpolation);
         success = 1;
     } catch(...){
         success = 0;
@@ -1974,7 +1975,7 @@ public:
   }
 
 private:
-  Matrix *image;
+  cv::Mat image;
   Matrix *dest;
   cv::Size size;
   double fx;
@@ -2040,7 +2041,7 @@ NAN_METHOD(Matrix::Resize) {
   if (isAsync){
     REQ_FUN_ARG(numargs-1, cb);
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-    Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, self, size, fx, fy, interpolation));
+    Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, self->mat, size, fx, fy, interpolation));
     info.GetReturnValue().Set(Nan::Null());
   } else {
     try{
