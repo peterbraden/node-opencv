@@ -1047,9 +1047,9 @@ NAN_METHOD(Matrix::Save) {
 // https://github.com/rvagg/nan/blob/c579ae858ae3208d7e702e8400042ba9d48fa64b/examples/async_pi_estimate/async.cc
 class AsyncSaveWorker: public Nan::AsyncWorker {
 public:
-  AsyncSaveWorker(Nan::Callback *callback, Matrix* matrix, char* filename) :
+  AsyncSaveWorker(Nan::Callback *callback, cv::Mat mat, char* filename) :
       Nan::AsyncWorker(callback),
-      matrix(matrix),
+      mat(mat),
       filename(filename) {
   }
 
@@ -1061,7 +1061,7 @@ public:
   // here, so everything we need for input and output
   // should go on `this`.
   void Execute() {
-    res = cv::imwrite(this->filename, this->matrix->mat);
+    res = cv::imwrite(this->filename, this->mat);
   }
 
   // Executed when the async work is complete
@@ -1083,7 +1083,7 @@ public:
   }
 
 private:
-  Matrix* matrix;
+  cv::Mat mat;
   std::string filename;
   int res;
 };
@@ -1100,7 +1100,7 @@ NAN_METHOD(Matrix::SaveAsync) {
   REQ_FUN_ARG(1, cb);
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-  Nan::AsyncQueueWorker(new AsyncSaveWorker(callback, self, *filename));
+  Nan::AsyncQueueWorker(new AsyncSaveWorker(callback, self->mat, *filename));
 
   return;
 }
