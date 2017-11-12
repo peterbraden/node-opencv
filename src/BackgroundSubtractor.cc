@@ -313,13 +313,15 @@ public:
   AsyncBackgroundSubtractorWorker( 
         Nan::Callback *callback, 
         BackgroundSubtractorWrap *bg, 
-        Matrix *img) :
+        cv::Mat &img_mat):
       Nan::AsyncWorker(callback),
       bg(bg),
-      img(img) {
+      img_mat(img_mat) { // note: this makes a new cv::Mat, and so increments the ref count for the data without copying it
+    
   }
 
   ~AsyncBackgroundSubtractorWorker() {
+      // upon destroy, img_mat will reduce refcount on data by one
   }
 
   // Executed inside the worker-thread.
@@ -330,9 +332,9 @@ public:
     // wait here if already in apply - auto-release on scope exit
     BGAutoMutex(bg->applymutex);
 #if CV_MAJOR_VERSION >= 3
-    bg->subtractor->apply(this->img->mat, _fgMask);
+    bg->subtractor->apply(this->img_mat, _fgMask);
 #else
-    bg->subtractor->operator()(this->img->mat, _fgMask);
+    bg->subtractor->operator()(this->img_mat, _fgMask);
 #endif
   }
 
@@ -360,7 +362,7 @@ public:
 
 private:
   BackgroundSubtractorWrap *bg;
-  Matrix *img;
+  cv::Mat img_mat;
   cv::Mat _fgMask;
 };
 
@@ -399,8 +401,8 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
     }
     
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-    Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
-    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img));
+    Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());      
+    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img->mat));
     return;
   } else { //synchronous - return the image
 
