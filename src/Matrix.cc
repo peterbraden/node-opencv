@@ -769,21 +769,22 @@ NAN_METHOD(Matrix::ToBuffer) {
 
 class AsyncToBufferWorker: public Nan::AsyncWorker {
 public:
-  AsyncToBufferWorker(Nan::Callback *callback, Matrix* matrix, std::string ext,
+  AsyncToBufferWorker(Nan::Callback *callback, cv::Mat mat, std::string ext,
     std::vector<int> params) :
       Nan::AsyncWorker(callback),
-      matrix(matrix),
+      mat(mat), // dulipcate mat, adding ref, but not copying data
       ext(ext),
       params(params) {
   }
 
   ~AsyncToBufferWorker() {
+      // mat is released, decrementing refcount
   }
 
   void Execute() {
     std::vector<uchar> vec(0);
     // std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
-    cv::imencode(ext, this->matrix->mat, vec, this->params);
+    cv::imencode(ext, this->mat, vec, this->params);
     res = vec;
   }
 
@@ -813,7 +814,7 @@ public:
   }
 
 private:
-  Matrix* matrix;
+  cv::Mat mat;
   std::string ext;
   std::vector<int> params;
   std::vector<uchar> res;
@@ -853,7 +854,7 @@ NAN_METHOD(Matrix::ToBufferAsync) {
   }
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-  Nan::AsyncQueueWorker(new AsyncToBufferWorker(callback, self, ext, params));
+  Nan::AsyncQueueWorker(new AsyncToBufferWorker(callback, self->mat, ext, params));
 
   return;
 }
