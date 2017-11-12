@@ -117,7 +117,8 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "mean", Mean);
   Nan::SetPrototypeMethod(ctor, "shift", Shift);
   Nan::SetPrototypeMethod(ctor, "reshape", Reshape);
-  Nan::SetPrototypeMethod(ctor, "addref", Addref);
+// leave this out - can't see a way it could be useful to us, as release() always completely forgets the data
+//  Nan::SetPrototypeMethod(ctor, "addref", Addref);
   Nan::SetPrototypeMethod(ctor, "release", Release);
   Nan::SetPrototypeMethod(ctor, "getrefCount", GetrefCount);
   Nan::SetPrototypeMethod(ctor, "subtract", Subtract);
@@ -3027,14 +3028,15 @@ NAN_METHOD(Matrix::Release) {
   return;
 }
 
-NAN_METHOD(Matrix::Addref) {
-  Nan::HandleScope scope;
-
-  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
-  self->mat.addref();
-
-  return;
-}
+// leave this out - can't see a way it could be useful to us, as release() always completely forgets the data
+//NAN_METHOD(Matrix::Addref) {
+//  Nan::HandleScope scope;
+//
+//  Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+//  self->mat.addref();
+//
+//  return;
+//}
 
 
 NAN_METHOD(Matrix::GetrefCount) {
@@ -3047,13 +3049,13 @@ NAN_METHOD(Matrix::GetrefCount) {
     if (self->mat.u){
         refcount = self->mat.u->refcount;
     } else {
-        refcount = -1;
+        refcount = -1; // indicates no reference ptr
     }
 #else
     if (self->mat.refcount){
         refcount = *(self->mat.refcount);
     } else {
-        refcount = -1;
+        refcount = -1; // indicates no reference ptr
     }
 #endif    
 
