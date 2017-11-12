@@ -90,10 +90,10 @@ NAN_METHOD(VideoWriterWrap::Release) {
 
 class AsyncVWWorker: public Nan::AsyncWorker {
 public:
-    AsyncVWWorker(Nan::Callback *callback, VideoWriterWrap *vw, Matrix *im) :
+    AsyncVWWorker(Nan::Callback *callback, VideoWriterWrap *vw, cv::Mat mat) :
             Nan::AsyncWorker(callback),
             vw(vw),
-            im(im) {
+            mat(mat) {
     }
 
     ~AsyncVWWorker() {
@@ -104,7 +104,7 @@ public:
     // here, so everything we need for input and output
     // should go on `this`.
     void Execute() {
-      this->vw->writer.write(im->mat);
+      this->vw->writer.write(mat);
     }
 
     // Executed when the async work is complete
@@ -126,7 +126,7 @@ public:
 
 private:
     VideoWriterWrap *vw;
-    Matrix* im;
+    cv::Mat mat;
 };
 
 NAN_METHOD(VideoWriterWrap::Write) {
@@ -137,7 +137,7 @@ NAN_METHOD(VideoWriterWrap::Write) {
     REQ_FUN_ARG(1, cb);
 
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-    Nan::AsyncQueueWorker(new AsyncVWWorker(callback, v, im));
+    Nan::AsyncQueueWorker(new AsyncVWWorker(callback, v, im->mat));
 
     return;
 }

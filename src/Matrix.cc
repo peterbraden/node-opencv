@@ -769,21 +769,22 @@ NAN_METHOD(Matrix::ToBuffer) {
 
 class AsyncToBufferWorker: public Nan::AsyncWorker {
 public:
-  AsyncToBufferWorker(Nan::Callback *callback, Matrix* matrix, std::string ext,
+  AsyncToBufferWorker(Nan::Callback *callback, cv::Mat mat, std::string ext,
     std::vector<int> params) :
       Nan::AsyncWorker(callback),
-      matrix(matrix),
+      mat(mat), // dulipcate mat, adding ref, but not copying data
       ext(ext),
       params(params) {
   }
 
   ~AsyncToBufferWorker() {
+      // mat is released, decrementing refcount
   }
 
   void Execute() {
     std::vector<uchar> vec(0);
     // std::vector<int> params(0);//CV_IMWRITE_JPEG_QUALITY 90
-    cv::imencode(ext, this->matrix->mat, vec, this->params);
+    cv::imencode(ext, this->mat, vec, this->params);
     res = vec;
   }
 
@@ -813,7 +814,7 @@ public:
   }
 
 private:
-  Matrix* matrix;
+  cv::Mat mat;
   std::string ext;
   std::vector<int> params;
   std::vector<uchar> res;
@@ -853,7 +854,7 @@ NAN_METHOD(Matrix::ToBufferAsync) {
   }
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-  Nan::AsyncQueueWorker(new AsyncToBufferWorker(callback, self, ext, params));
+  Nan::AsyncQueueWorker(new AsyncToBufferWorker(callback, self->mat, ext, params));
 
   return;
 }
@@ -1046,9 +1047,9 @@ NAN_METHOD(Matrix::Save) {
 // https://github.com/rvagg/nan/blob/c579ae858ae3208d7e702e8400042ba9d48fa64b/examples/async_pi_estimate/async.cc
 class AsyncSaveWorker: public Nan::AsyncWorker {
 public:
-  AsyncSaveWorker(Nan::Callback *callback, Matrix* matrix, char* filename) :
+  AsyncSaveWorker(Nan::Callback *callback, cv::Mat mat, char* filename) :
       Nan::AsyncWorker(callback),
-      matrix(matrix),
+      mat(mat),
       filename(filename) {
   }
 
@@ -1060,7 +1061,7 @@ public:
   // here, so everything we need for input and output
   // should go on `this`.
   void Execute() {
-    res = cv::imwrite(this->filename, this->matrix->mat);
+    res = cv::imwrite(this->filename, this->mat);
   }
 
   // Executed when the async work is complete
@@ -1082,7 +1083,7 @@ public:
   }
 
 private:
-  Matrix* matrix;
+  cv::Mat mat;
   std::string filename;
   int res;
 };
@@ -1099,7 +1100,7 @@ NAN_METHOD(Matrix::SaveAsync) {
   REQ_FUN_ARG(1, cb);
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-  Nan::AsyncQueueWorker(new AsyncSaveWorker(callback, self, *filename));
+  Nan::AsyncQueueWorker(new AsyncSaveWorker(callback, self->mat, *filename));
 
   return;
 }
@@ -1892,9 +1893,9 @@ cv::Rect* setRect(Local<Object> objRect, cv::Rect &result) {
 
 class ResizeASyncWorker: public Nan::AsyncWorker {
 public:
-  ResizeASyncWorker(Nan::Callback *callback, Matrix *image, cv::Size size, double fx, double fy, int interpolation) :
+  ResizeASyncWorker(Nan::Callback *callback, cv::Mat image, cv::Size size, double fx, double fy, int interpolation) :
       Nan::AsyncWorker(callback),
-      image(image),
+      image(image), // here, the cv::Mat is duplicated, adding to refcount without data copy
       dest(NULL),
       size(size),
       fx(fx),
@@ -1908,12 +1909,13 @@ public:
       // could happen if NaN does not call HandleSuccess?
       delete dest;
       dest = NULL;
+      // cv::Mat image will be deleted, which will reduce refcount
   }
 
   void Execute() {
     try {
         dest = new Matrix();
-        cv::resize(image->mat, dest->mat, size, fx, fy, interpolation);
+        cv::resize(image, dest->mat, size, fx, fy, interpolation);
         success = 1;
     } catch(...){
         success = 0;
@@ -1973,7 +1975,7 @@ public:
   }
 
 private:
-  Matrix *image;
+  cv::Mat image;
   Matrix *dest;
   cv::Size size;
   double fx;
@@ -2039,7 +2041,7 @@ NAN_METHOD(Matrix::Resize) {
   if (isAsync){
     REQ_FUN_ARG(numargs-1, cb);
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-    Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, self, size, fx, fy, interpolation));
+    Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, self->mat, size, fx, fy, interpolation));
     info.GetReturnValue().Set(Nan::Null());
   } else {
     try{

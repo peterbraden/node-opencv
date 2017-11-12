@@ -16,6 +16,8 @@ cv.readImage("./files/mona.png", function(err, im) {
     }
     img.save("./tmp/resize-async-image.png");
     console.log('Image saved to ./tmp/resize-async-image.png at '+img.width()+'x'+img.height());
+	img.release();
+	delete img;
   };
 
   var newwidth = width*0.95;
@@ -25,6 +27,8 @@ cv.readImage("./files/mona.png", function(err, im) {
   if (Async){
     // note - generates a new image
     im.resize(newwidth, newheight, AfterResize);
+	im.release(); // test release image before resize if done
+	delete im;
   } else {
     // sync - note - modifies the input image
     im.resize(newwidth, newheight);
