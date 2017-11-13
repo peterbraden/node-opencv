@@ -135,7 +135,8 @@ public:
   JSFUNC(Reshape)
 
           
-  JSFUNC(Addref)
+// leave this out - can't see a way it could be useful to us, as release() always completely forgets the data
+//JSFUNC(Addref)
   JSFUNC(Release)
   JSFUNC(GetrefCount)
 
