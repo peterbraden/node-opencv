@@ -18,6 +18,10 @@
 #include "LDAWrap.h"
 #include "Histogram.h"
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+#pragma message ( "Building with OpenCV" STR(CV_MAJOR_VERSION) "." STR(CV_MINOR_VERSION) )
+
 extern "C" void init(Local<Object> target) {
   Nan::HandleScope scope;
   OpenCV::Init(target);
