@@ -1683,14 +1683,21 @@ NAN_METHOD(Matrix::GoodFeaturesToTrack) {
   int maxCorners = info.Length() >= 1 ? info[0]->IntegerValue() : 500;
   double qualityLevel = info.Length() >= 2 ? (double) info[1]->NumberValue() : 0.01;
   double minDistance = info.Length() >= 3 ? (double) info[2]->NumberValue() : 10;
+  int blockSize = info.Length() >= 4 ? info[3]->IntegerValue() : 3;
+  bool useHarrisDetector = info.Length() >= 5 ? info[4]->BooleanValue() : false;
+  double k = info.Length() >= 6 ? (double) info[5]->NumberValue() : 0.04;
 
   std::vector<cv::Point2f> corners;
   cv::Mat gray;
 
-  cvtColor(self->mat, gray, CV_BGR2GRAY);
-  equalizeHist(gray, gray);
+   if (self->mat.channels() == 1) {
+     gray = self->mat;
+   } else {
+     cvtColor(self->mat, gray, CV_BGR2GRAY);
+     equalizeHist(gray, gray);
+   }
 
-  cv::goodFeaturesToTrack(gray, corners, maxCorners, qualityLevel, minDistance);
+  cv::goodFeaturesToTrack(gray, corners, maxCorners, qualityLevel, minDistance, cv::noArray(), blockSize, useHarrisDetector, k);
   v8::Local<v8::Array> arr = Nan::New<Array>(corners.size());
 
   for (unsigned int i=0; i<corners.size(); i++) {
@@ -3112,7 +3119,11 @@ NAN_METHOD(Matrix::Mul) {
 
   Matrix *other = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
 
-  cv::Mat res = self->mat.mul(other->mat);
+  double scale = 1;
+  if (info.Length() > 1) scale = info[1]->NumberValue();
+
+  cv::Mat res = self->mat.mul(other->mat, scale);
+
   Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
   m_out->mat = res;
