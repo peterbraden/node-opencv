@@ -7,7 +7,7 @@
     "buffers": "^0.1.1",
     "istanbul": "0.4.5",
     "nan": "^2.0.9",
-    "node-pre-gyp": "^0.6.30"
+    "node-pre-gyp": "^0.6.33"
   },
   "devDependencies": {
     "tape": "^3.0.0",
