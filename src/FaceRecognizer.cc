@@ -448,9 +448,7 @@ NAN_METHOD(FaceRecognizerWrap::GetMat) {
   m = self->rec->getMat(key);
 #endif
 
-  Local<Object> im = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im);
-  img->mat = m;
+  Local<Object> im = Matrix::CreateWrappedFromMat(m);
 
   info.GetReturnValue().Set(im);
 }

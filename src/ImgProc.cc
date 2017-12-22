@@ -36,9 +36,7 @@ NAN_METHOD(ImgProc::DistanceTransform) {
     cv::distanceTransform(inputImage, outputImage, distType, 0);
 
     // Wrap the output image
-    Local<Object> outMatrixWrap = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *outMatrix = Nan::ObjectWrap::Unwrap<Matrix>(outMatrixWrap);
-    outMatrix->mat = outputImage;
+    Local<Object> outMatrixWrap = Matrix::CreateWrappedFromMat(outputImage);
 
     // Return the output image
     info.GetReturnValue().Set(outMatrixWrap);
@@ -75,9 +73,7 @@ NAN_METHOD(ImgProc::Undistort) {
     cv::undistort(inputImage, outputImage, K, dist);
 
     // Wrap the output image
-    Local<Object> outMatrixWrap = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *outMatrix = Nan::ObjectWrap::Unwrap<Matrix>(outMatrixWrap);
-    outMatrix->mat = outputImage;
+    Local<Object> outMatrixWrap = Matrix::CreateWrappedFromMat(outputImage);
 
     // Return the output image
     info.GetReturnValue().Set(outMatrixWrap);
@@ -128,13 +124,8 @@ NAN_METHOD(ImgProc::InitUndistortRectifyMap) {
     cv::initUndistortRectifyMap(K, dist, R, newK, imageSize, m1type, map1, map2);
 
     // Wrap the output maps
-    Local<Object> map1Wrap = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *map1Matrix = Nan::ObjectWrap::Unwrap<Matrix>(map1Wrap);
-    map1Matrix->mat = map1;
-
-    Local<Object> map2Wrap = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *map2Matrix = Nan::ObjectWrap::Unwrap<Matrix>(map2Wrap);
-    map2Matrix->mat = map2;
+    Local<Object> map1Wrap = Matrix::CreateWrappedFromMat(map1);
+    Local<Object> map2Wrap = Matrix::CreateWrappedFromMat(map2); 
 
     // Make a return object with the two maps
     Local<Object> ret = Nan::New<Object>();
@@ -181,9 +172,7 @@ NAN_METHOD(ImgProc::Remap) {
     cv::remap(inputImage, outputImage, map1, map2, interpolation);
 
     // Wrap the output image
-    Local<Object> outMatrixWrap = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *outMatrix = Nan::ObjectWrap::Unwrap<Matrix>(outMatrixWrap);
-    outMatrix->mat = outputImage;
+    Local<Object> outMatrixWrap = Matrix::CreateWrappedFromMat(outputImage);
 
     // Return the image
     info.GetReturnValue().Set(outMatrixWrap);
@@ -223,9 +212,7 @@ NAN_METHOD(ImgProc::GetStructuringElement) {
     cv::Mat mat = cv::getStructuringElement(shape, ksize);
 
     // Wrap the output image
-    Local<Object> outMatrixWrap = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *outMatrix = ObjectWrap::Unwrap<Matrix>(outMatrixWrap);
-    outMatrix->mat = mat;
+    Local<Object> outMatrixWrap = Matrix::CreateWrappedFromMat(mat);
 
     // Return the image
     info.GetReturnValue().Set(outMatrixWrap);

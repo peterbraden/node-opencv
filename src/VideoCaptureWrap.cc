@@ -237,9 +237,7 @@ public:
   void HandleOKCallback() {
     Nan::HandleScope scope;
 
-    Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
-    img->mat = mat;
+    Local<Object> im_to_return = Matrix::CreateWrappedFromMat(mat);
 
     Local<Value> argv[] = {
       Nan::Null()
@@ -280,6 +278,7 @@ NAN_METHOD(VideoCaptureWrap::ReadSync) {
   Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
 
   v->cap.read(img->mat);
+  Nan::AdjustExternalMemory(img->mat.rows * img->mat.cols * img->mat.elemSize());
 
   info.GetReturnValue().Set(im_to_return);
 }

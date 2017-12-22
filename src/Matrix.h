@@ -7,11 +7,13 @@ public:
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Local<Object> target);
   static NAN_METHOD(New);
+  static Local<Object> CreateWrappedFromMat(cv::Mat mat);
   Matrix();
   Matrix(cv::Mat other, cv::Rect roi);
   Matrix(int rows, int cols);
   Matrix(int rows, int cols, int type);
   Matrix(int rows, int cols, int type, Local<Object> scalarObj);
+  ~Matrix();
 
   static double DblGet(cv::Mat mat, int i, int j);
 
