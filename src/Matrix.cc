@@ -2067,10 +2067,13 @@ NAN_METHOD(Matrix::Resize) {
   } else {
     try{
         Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
+        int oldSize = self->mat.rows * self->mat.cols * self->mat.elemSize();
         cv::Mat res = cv::Mat(x, y, CV_32FC3);
         cv::resize(self->mat, res, cv::Size(x, y), 0, 0, interpolation);
         ~self->mat;
         self->mat = res;
+        int newSize = self->mat.rows * self->mat.cols * self->mat.elemSize();
+        Nan::AdjustExternalMemory(newSize - oldSize);
     } catch (...){
         return Nan::ThrowError("c++ Exception processing resize");
     }
