@@ -49,6 +49,7 @@ public:
 
         try{
             Local<Object> im_to_return = Matrix::CreateWrappedFromMat(outputmat);
+            outputmat.release();
 
             Local<Value> argv[] = {
               Nan::Null(),
@@ -110,6 +111,7 @@ public:
     Nan::HandleScope scope;
 
     Local<Object> im_to_return = Matrix::CreateWrappedFromMat(outputmat);
+    outputmat.release();
     
     Local<Value> argv[] = {
       Nan::Null(),
@@ -165,7 +167,7 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
       
       width = info[0]->Uint32Value();
       height = info[1]->Uint32Value();
-      Local<Object> img_to_return = Matrix::CreateWrappedFromMat(*(new cv::Mat(width, height, type)));
+      Local<Object> img_to_return = Matrix::CreateWrappedFromMat(cv::Mat(width, height, type));
       if (callback_arg < 0){
         info.GetReturnValue().Set(img_to_return);
         return;
@@ -287,7 +289,7 @@ NAN_METHOD(OpenCV::ReadImage) {
       }
       width = info[0]->Uint32Value();
       height = info[1]->Uint32Value();
-      mat = *(new cv::Mat(width, height, type));
+      mat = cv::Mat(width, height, type);
 
     } else if (info[0]->IsString()) {
       std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
@@ -318,7 +320,7 @@ NAN_METHOD(OpenCV::ReadImage) {
     }
 
     img->mat = mat;
-    Nan::AdjustExternalMemory(img->mat.rows * img->mat.cols * img->mat.elemSize());
+    Nan::AdjustExternalMemory(img->mat.dataend - img->mat.datastart);
   } catch (cv::Exception& e) {
     argv[0] = Nan::Error(e.what());
     argv[1] = Nan::Null();

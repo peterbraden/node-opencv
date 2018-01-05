@@ -8,7 +8,10 @@ public:
   static void Init(Local<Object> target);
   static NAN_METHOD(New);
   static Local<Object> CreateWrappedFromMat(cv::Mat mat);
+  static Local<Object> CreateWrappedFromMatIfNotReferenced(cv::Mat mat, int baseRefCount);
+  int getWrappedRefCount();
   Matrix();
+  Matrix(Matrix *other);
   Matrix(cv::Mat other, cv::Rect roi);
   Matrix(int rows, int cols);
   Matrix(int rows, int cols, int type);

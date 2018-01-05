@@ -283,7 +283,7 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
 #endif
     }
     
-    Local<Object> fgMask = Matrix::CreateWrappedFromMat(_fgMask);
+    Local<Object> fgMask = Matrix::CreateWrappedFromMat(_fgMask.clone());
     mat.release();
 
     argv[0] = Nan::Null();
@@ -309,15 +309,15 @@ public:
   AsyncBackgroundSubtractorWorker( 
         Nan::Callback *callback, 
         BackgroundSubtractorWrap *bg, 
-        cv::Mat &img_mat):
+        Matrix *matrix):
       Nan::AsyncWorker(callback),
       bg(bg),
-      img_mat(img_mat) { // note: this makes a new cv::Mat, and so increments the ref count for the data without copying it
+      matrix(matrix) {
     
   }
 
   ~AsyncBackgroundSubtractorWorker() {
-      // upon destroy, img_mat will reduce refcount on data by one
+
   }
 
   // Executed inside the worker-thread.
@@ -328,9 +328,9 @@ public:
     // wait here if already in apply - auto-release on scope exit
     BGAutoMutex(bg->applymutex);
 #if CV_MAJOR_VERSION >= 3
-    bg->subtractor->apply(this->img_mat, _fgMask);
+    bg->subtractor->apply(matrix->mat, _fgMask);
 #else
-    bg->subtractor->operator()(this->img_mat, _fgMask);
+    bg->subtractor->operator()(matrix->mat, _fgMask);
 #endif
   }
 
@@ -340,7 +340,10 @@ public:
   void HandleOKCallback() {
     Nan::HandleScope scope;
 
-    Local<Object> im_to_return = Matrix::CreateWrappedFromMat(_fgMask);
+    delete matrix;
+    matrix = NULL;
+
+    Local<Object> im_to_return = Matrix::CreateWrappedFromMat(_fgMask.clone());
 
     Local<Value> argv[] = {
       Nan::Null()
@@ -356,7 +359,7 @@ public:
 
 private:
   BackgroundSubtractorWrap *bg;
-  cv::Mat img_mat;
+  Matrix *matrix;
   cv::Mat _fgMask;
 };
 
@@ -395,7 +398,7 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
     
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
     Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());      
-    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img->mat));
+    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, new Matrix::Matrix(_img)));
     return;
   } else { //synchronous - return the image
 
@@ -426,7 +429,7 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
   #else
       self->subtractor->operator()(mat, _fgMask);
   #endif
-      fgMask = Matrix::CreateWrappedFromMat(_fgMask);
+      fgMask = Matrix::CreateWrappedFromMat(_fgMask.clone());
       }
       
       mat.release();

@@ -40,7 +40,7 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "getFPS", GetFPS);
   Nan::SetPrototypeMethod(ctor, "setFPS", SetFPS);
   Nan::SetPrototypeMethod(ctor, "release", Release);
-  Nan::SetPrototypeMethod(ctor, "ReadSync", ReadSync);
+  Nan::SetPrototypeMethod(ctor, "readSync", ReadSync);
   Nan::SetPrototypeMethod(ctor, "grab", Grab);
   Nan::SetPrototypeMethod(ctor, "retrieve", Retrieve);
 
@@ -238,6 +238,7 @@ public:
     Nan::HandleScope scope;
 
     Local<Object> im_to_return = Matrix::CreateWrappedFromMat(mat);
+    mat.release();
 
     Local<Value> argv[] = {
       Nan::Null()
@@ -274,11 +275,10 @@ NAN_METHOD(VideoCaptureWrap::ReadSync) {
   Nan::HandleScope scope;
   VideoCaptureWrap *v = Nan::ObjectWrap::Unwrap<VideoCaptureWrap>(info.This());
 
-  Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
+  cv::Mat outputmat = cv::Mat();
+  v->cap.read(outputmat);
 
-  v->cap.read(img->mat);
-  Nan::AdjustExternalMemory(img->mat.rows * img->mat.cols * img->mat.elemSize());
+  Local<Object> im_to_return = Matrix::CreateWrappedFromMat(outputmat);
 
   info.GetReturnValue().Set(im_to_return);
 }
