@@ -809,7 +809,7 @@ public:
   AsyncToBufferWorker(Nan::Callback *callback, Matrix *matrix, std::string ext,
     std::vector<int> params) :
       Nan::AsyncWorker(callback),
-      matrix(matrix), // dulipcate mat, adding ref, but not copying data
+      matrix(new Matrix(matrix)), // dulipcate matrix, adding ref, but not copying data
       ext(ext),
       params(params) {
   }
@@ -894,7 +894,7 @@ NAN_METHOD(Matrix::ToBufferAsync) {
   }
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-  Nan::AsyncQueueWorker(new AsyncToBufferWorker(callback, new Matrix(self), ext, params));
+  Nan::AsyncQueueWorker(new AsyncToBufferWorker(callback, self, ext, params));
 
   return;
 }
@@ -1089,7 +1089,7 @@ class AsyncSaveWorker: public Nan::AsyncWorker {
 public:
   AsyncSaveWorker(Nan::Callback *callback, Matrix *matrix, char* filename) :
       Nan::AsyncWorker(callback),
-      matrix(matrix),
+      matrix(new Matrix(matrix)),
       filename(filename) {
   }
 
@@ -1143,7 +1143,7 @@ NAN_METHOD(Matrix::SaveAsync) {
   REQ_FUN_ARG(1, cb);
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-  Nan::AsyncQueueWorker(new AsyncSaveWorker(callback, new Matrix(self), *filename));
+  Nan::AsyncQueueWorker(new AsyncSaveWorker(callback, self, *filename));
 
   return;
 }
@@ -1942,7 +1942,7 @@ class ResizeASyncWorker: public Nan::AsyncWorker {
 public:
   ResizeASyncWorker(Nan::Callback *callback, Matrix *image, cv::Size size, double fx, double fy, int interpolation) :
       Nan::AsyncWorker(callback),
-      image(image),
+      image(new Matrix(image)),
       dest(cv::Mat()),
       size(size),
       fx(fx),
@@ -1968,12 +1968,13 @@ public:
 
   void HandleOKCallback() {
     Nan::HandleScope scope;
+
+    delete image;
+    image = NULL;
     
     if (success){
         try{
             Local<Object> im_to_return = Matrix::CreateWrappedFromMat(dest);
-            delete image;
-            image = NULL;
             dest.release(); //release our refcount before handing it back to the callback
 
             Local<Value> argv[] = {
@@ -2079,7 +2080,7 @@ NAN_METHOD(Matrix::Resize) {
   if (isAsync){
     REQ_FUN_ARG(numargs-1, cb);
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-    Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, new Matrix(self), size, fx, fy, interpolation));
+    Nan::AsyncQueueWorker(new ResizeASyncWorker(callback, self, size, fx, fy, interpolation));
     info.GetReturnValue().Set(Nan::Null());
   } else {
     try{

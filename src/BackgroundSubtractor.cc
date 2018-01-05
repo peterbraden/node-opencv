@@ -312,7 +312,7 @@ public:
         Matrix *matrix):
       Nan::AsyncWorker(callback),
       bg(bg),
-      matrix(matrix) {
+      matrix(new Matrix::Matrix(matrix)) {
     
   }
 
@@ -398,7 +398,7 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
     
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
     Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());      
-    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, new Matrix::Matrix(_img)));
+    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img));
     return;
   } else { //synchronous - return the image
 
