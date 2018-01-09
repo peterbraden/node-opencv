@@ -552,5 +552,40 @@ test('toArray/fromArray working in both ways', function(assert) {
   });
 });
 
+test('floodFill optional returned bounding rect', function(assert) {
+  var cv = require('../lib/opencv');
+  var solidImage = new cv.Matrix(
+    10, 15, // Create 15px wide by 10px tall image
+    cv.Constants.CV_8U);
+
+  // Define output rect
+  var rect = [
+    [0, 0], // x, y
+    [0, 0]  // width, height
+  ];
+
+  // Set all pixels to black/0
+  for (var y=0; y<solidImage.height(); y++) {
+    for (var x=0; x<solidImage.width(); x++) {
+      solidImage.pixel(y, x, [0]);
+    }
+  }
+  
+  // Fill entire image 
+  solidImage.floodFill({
+    seedPoint: [3, 2], // x=2, y=3
+    newColor: [128],
+    rect,
+    loDiff: 0,
+    upDiff: 0
+  });
+
+  assert.equal(rect[0][0], 0);  // Expect fill to go all the way to left edge
+  assert.equal(rect[0][1], 0);  // Expect fill to go all the way to top edge
+  assert.equal(rect[1][0], 15); // Expect fill to create 15px-wide bounding rect
+  assert.equal(rect[1][1], 10); // Expect fill to create 10px-tall bounding rect
+  assert.end();
+})
+
 // Test the examples folder.
 require('./examples')()
