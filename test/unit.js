@@ -585,7 +585,7 @@ test('floodFill optional returned bounding rect', function(assert) {
   assert.equal(rect[1][0], 15); // Expect fill to create 15px-wide bounding rect
   assert.equal(rect[1][1], 10); // Expect fill to create 10px-tall bounding rect
   assert.end();
-})
+});
 
 // Test the examples folder.
 require('./examples')()
