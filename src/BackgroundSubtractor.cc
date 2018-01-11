@@ -309,10 +309,10 @@ public:
   AsyncBackgroundSubtractorWorker( 
         Nan::Callback *callback, 
         BackgroundSubtractorWrap *bg, 
-        Matrix *matrix):
+        Matrix *matrix_in):
       Nan::AsyncWorker(callback),
       bg(bg),
-      matrix(new Matrix::Matrix(matrix)) {
+      matrix(new Matrix(matrix_in)) {
     
   }
 

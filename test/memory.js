@@ -7,7 +7,9 @@ var fs = require('fs')
   , cv = require('../lib/opencv');
 
  var IMAGE_PATH = path.resolve(__dirname, '../examples/files', 'mona.png');
+ var VIDEO_PATH = path.resolve(__dirname, '../examples/files', 'motion.mov');
  var TEMP_SAVE_PATH = path.resolve(__dirname, '../examples/tmp', 'out.jpg');
+ var TEMP_VIDEO_PATH = path.resolve(__dirname, '../examples/tmp', 'out.mp4');
 
 // These tests check that every function that creates or modifies a Matrix handles its externally tracked memory correctly.
 // Since the memory tracker uses OpenCV's reference counting to determine when to tell Node about memory changes,
@@ -978,3 +980,83 @@ test("MOG2 background subtractor async early release", t=>{
 test("GMG background subtractor async early release", t=>{
 	testAsyncBackgroundSubtractorEarlyRelease(t, cv.BackgroundSubtractor.createGMG());
 });
+
+//********************
+// cascade classifier
+//********************
+
+test("cascade classifier async", t=> {
+	gc();
+	var startingMemory = process.memoryUsage().external;
+
+	var image = new cv.readImage(path.resolve(__dirname, '../examples/files', 'mona.png'));
+
+	t.equal(process.memoryUsage().external - startingMemory, 1134000); //100 * 100 * 3
+
+	var classifier = new cv.CascadeClassifier(cv.FACE_CASCADE);
+
+	classifier.detectMultiScale(image, (err, faces) =>{
+		t.equal(image.getrefCount(), 1);
+		image.release();
+
+		var endingMemory = process.memoryUsage().external;
+		t.equal(endingMemory - startingMemory, 0);
+
+		t.end();
+	});
+});
+
+test("cascade classifier async early release", t=> {
+	gc();
+	var startingMemory = process.memoryUsage().external;
+
+	var image = new cv.readImage(path.resolve(__dirname, '../examples/files', 'mona.png'));
+
+	t.equal(process.memoryUsage().external - startingMemory, 1134000);
+
+	var classifier = new cv.CascadeClassifier(cv.FACE_CASCADE);
+
+	classifier.detectMultiScale(image, (err, faces) =>{
+		t.equal(image.getrefCount(), -1);
+
+		var endingMemory = process.memoryUsage().external;
+		t.equal(endingMemory - startingMemory, 0);
+
+		t.end();
+	});
+	image.release();
+});
+
+//********************
+// VideoWriter
+//********************
+
+
+test("Video writer async edge case", t=>{
+	gc();
+
+	var startingMemory = process.memoryUsage().external;
+
+	var reader = new cv.VideoCapture(VIDEO_PATH);
+
+	reader.read((err, image)=>{
+		t.equal(process.memoryUsage().external - startingMemory, 545280);
+		var writer = new cv.VideoWriter(TEMP_VIDEO_PATH, 'mp4v', 1, image.size(), true);
+
+		writer.write(image, err=>{
+			t.equal(image.getrefCount(), -1);  //this happens second, image should have been released already
+			var endingMemory = process.memoryUsage().external;
+			t.equal(endingMemory - startingMemory, 0);
+
+			writer.release();
+			fs.unlinkSync(TEMP_VIDEO_PATH);
+			t.end();
+		});
+
+		image.release();
+	});
+});
+
+//********************
+// Face Recognizer
+//********************

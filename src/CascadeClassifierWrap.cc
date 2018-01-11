@@ -50,7 +50,7 @@ public:
       Matrix* im, double scale, int neighbors, int minw, int minh) :
       Nan::AsyncWorker(callback),
       cc(cc),
-      im(im),
+      im(new Matrix(im)), //copy the matrix so we aren't affected if the original is released
       scale(scale),
       neighbors(neighbors),
       minw(minw),
@@ -82,7 +82,9 @@ public:
 
   void HandleOKCallback() {
     Nan::HandleScope scope;
-    //  this->matrix->Unref();
+
+    delete im;
+    im = NULL;
 
     Local < Value > argv[2];
     v8::Local < v8::Array > arr = Nan::New < v8::Array > (this->res.size());
