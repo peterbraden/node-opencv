@@ -10,6 +10,7 @@ public:
   static Local<Object> CreateWrappedFromMat(cv::Mat mat);
   static Local<Object> CreateWrappedFromMatIfNotReferenced(cv::Mat mat, int baseRefCount);
   int getWrappedRefCount();
+  void setMat(cv::Mat mat);
   Matrix();
   Matrix(Matrix *other);
   Matrix(cv::Mat other, cv::Rect roi);

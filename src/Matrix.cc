@@ -167,8 +167,7 @@ Local<Object> Matrix::CreateWrappedFromMat(cv::Mat mat){
   Local < Object > result =
       Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
   Matrix *m = Nan::ObjectWrap::Unwrap<Matrix>(result);
-  m->mat = mat;
-  Nan::AdjustExternalMemory(m->mat.dataend - m->mat.datastart);
+  m->setMat(mat);
 
   return result;
 }
@@ -236,6 +235,20 @@ Matrix::~Matrix(){
     int size = mat.dataend - mat.datastart;
     Nan::AdjustExternalMemory(-1 * size);
   }
+}
+
+// Set the wrapped Mat with correct memory tracking
+// For this to work correctly, there should be no external references held to our previous
+// wrapped Mat, and no other Matrix objects should wrap a Mat pointing at the same
+// memory as our new Mat.
+void Matrix::setMat(cv::Mat m){
+  int oldSize = 0;
+  if(getWrappedRefCount() == 1){ //if this holds the last reference to the Mat
+    oldSize = mat.dataend - mat.datastart;
+  }
+  mat = m;
+  int newSize = mat.dataend - mat.datastart;
+  Nan::AdjustExternalMemory(newSize - oldSize);
 }
 
 NAN_METHOD(Matrix::Empty) {
@@ -1323,14 +1336,10 @@ NAN_METHOD(Matrix::Sobel) {
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
 
-  Local<Object> result_to_return =
-      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *result = Nan::ObjectWrap::Unwrap<Matrix>(result_to_return);
+  cv::Mat result;
+  cv::Sobel(self->mat, result, ddepth, xorder, yorder, ksize, scale, delta, borderType);
 
-  cv::Sobel(self->mat, result->mat, ddepth, xorder, yorder, ksize, scale, delta, borderType);
-  Nan::AdjustExternalMemory(result->mat.dataend - result->mat.datastart);
-
-  info.GetReturnValue().Set(result_to_return);
+  info.GetReturnValue().Set(CreateWrappedFromMat(result));
 }
 
 NAN_METHOD(Matrix::Copy) {
@@ -1338,13 +1347,10 @@ NAN_METHOD(Matrix::Copy) {
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
 
-  Local<Object> img_to_return =
-      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
-  self->mat.copyTo(img->mat);
-  Nan::AdjustExternalMemory(img->mat.dataend - img->mat.datastart);
+  cv::Mat result;
+  self->mat.copyTo(result);
 
-  info.GetReturnValue().Set(img_to_return);
+  info.GetReturnValue().Set(CreateWrappedFromMat(result));
 }
 
 NAN_METHOD(Matrix::Flip) {
@@ -1359,12 +1365,10 @@ NAN_METHOD(Matrix::Flip) {
 
   int flipCode = Nan::To<int>(info[0]).FromJust();
 
-  Local<Object> img_to_return = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
-  cv::flip(self->mat, img->mat, flipCode);
-  Nan::AdjustExternalMemory(img->mat.dataend - img->mat.datastart);
+  cv::Mat result;
+  cv::flip(self->mat, result, flipCode);
 
-  info.GetReturnValue().Set(img_to_return);
+  info.GetReturnValue().Set(CreateWrappedFromMat(result));
 }
 
 NAN_METHOD(Matrix::ROI) {
@@ -1422,14 +1426,11 @@ NAN_METHOD(Matrix::Dct) {
   int cols = self->mat.cols;
   int rows = self->mat.rows;
 
-  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
-  m_out->mat.create(cols, rows, CV_32F);
-  Nan::AdjustExternalMemory(m_out->mat.dataend - m_out->mat.datastart);
+  cv::Mat result(cols, rows, CV_32F);
 
-  cv::dct(self->mat, m_out->mat);
+  cv::dct(self->mat, result);
 
-  info.GetReturnValue().Set(out);
+  info.GetReturnValue().Set(CreateWrappedFromMat(result));
 }
 
 NAN_METHOD(Matrix::Idct) {
@@ -1439,14 +1440,11 @@ NAN_METHOD(Matrix::Idct) {
   int cols = self->mat.cols;
   int rows = self->mat.rows;
 
-  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
-  m_out->mat.create(cols, rows, CV_32F);
-  Nan::AdjustExternalMemory(m_out->mat.dataend - m_out->mat.datastart);
+  cv::Mat result(cols, rows, CV_32F);
 
-  cv::idct(self->mat, m_out->mat);
+  cv::idct(self->mat, result);
 
-  info.GetReturnValue().Set(out);
+  info.GetReturnValue().Set(CreateWrappedFromMat(result));
 }
 
 NAN_METHOD(Matrix::AddWeighted) {
@@ -2085,13 +2083,9 @@ NAN_METHOD(Matrix::Resize) {
   } else {
     try{
         Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
-        int oldSize = (self->getWrappedRefCount() == 1) ? self->mat.dataend - self->mat.datastart : 0;
         cv::Mat res = cv::Mat(x, y, CV_32FC3);
         cv::resize(self->mat, res, cv::Size(x, y), 0, 0, interpolation);
-        ~self->mat;
-        self->mat = res;
-        int newSize = self->mat.dataend - self->mat.datastart;
-        Nan::AdjustExternalMemory(newSize - oldSize);
+        self->setMat(res);
     } catch (...){
         return Nan::ThrowError("c++ Exception processing resize");
     }
@@ -2120,8 +2114,7 @@ NAN_METHOD(Matrix::Rotate) {
     // See if we do right angle rotation, we transpose the matrix:
     if (angle2 % 180) {
       cv::transpose(self->mat, res);
-      ~self->mat;
-      self->mat = res;
+      self->setMat(res);
     }
     // Now flip the image
     int mode = -1;// flip around both axes
@@ -2143,8 +2136,7 @@ NAN_METHOD(Matrix::Rotate) {
   rotMatrix = getRotationMatrix2D(center, angle, 1.0);
 
   cv::warpAffine(self->mat, res, rotMatrix, self->mat.size());
-  ~self->mat;
-  self->mat = res;
+  self->setMat(res);
 
   return;
 }
@@ -2180,8 +2172,7 @@ NAN_METHOD(Matrix::WarpAffine) {
   cv::Size resSize = cv::Size(dstRows, dstCols);
 
   cv::warpAffine(self->mat, res, rotMatrix->mat, resSize);
-  ~self->mat;
-  self->mat = res;
+  self->setMat(res);
 
   return;
 }
@@ -2701,12 +2692,9 @@ NAN_METHOD(Matrix::MatchTemplateByMatrix) {
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
   Matrix *templ = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
 
-  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
   int cols = self->mat.cols - templ->mat.cols + 1;
   int rows = self->mat.rows - templ->mat.rows + 1;
-  m_out->mat.create(cols, rows, CV_32FC1);
-  Nan::AdjustExternalMemory(m_out->mat.dataend - m_out->mat.datastart);
+  cv::Mat result(cols, rows, CV_32FC1);
 
   /*
    TM_SQDIFF        =0
@@ -2719,8 +2707,8 @@ NAN_METHOD(Matrix::MatchTemplateByMatrix) {
 
   int method = (info.Length() < 2) ? (int)cv::TM_CCORR_NORMED : info[1]->Uint32Value();
   if (!(method >= 0 && method <= 5)) method = (int)cv::TM_CCORR_NORMED;
-  cv::matchTemplate(self->mat, templ->mat, m_out->mat, method);
-  info.GetReturnValue().Set(out);
+  cv::matchTemplate(self->mat, templ->mat, result, method);
+  info.GetReturnValue().Set(CreateWrappedFromMat(result));
 }
 
 // @author ytham
@@ -2736,12 +2724,9 @@ NAN_METHOD(Matrix::MatchTemplate) {
   cv::Mat templ;
   templ = cv::imread(filename, -1);
 
-  Local<Object> out = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *m_out = Nan::ObjectWrap::Unwrap<Matrix>(out);
   int cols = self->mat.cols - templ.cols + 1;
   int rows = self->mat.rows - templ.rows + 1;
-  m_out->mat.create(cols, rows, CV_32FC1);
-  Nan::AdjustExternalMemory(m_out->mat.dataend - m_out->mat.datastart);
+  cv::Mat result(cols, rows, CV_32FC1);
 
   /*
    TM_SQDIFF        =0
@@ -2753,15 +2738,15 @@ NAN_METHOD(Matrix::MatchTemplate) {
    */
 
   int method = (info.Length() < 2) ? (int)cv::TM_CCORR_NORMED : info[1]->Uint32Value();
-  cv::matchTemplate(self->mat, templ, m_out->mat, method);
-  cv::normalize(m_out->mat, m_out->mat, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+  cv::matchTemplate(self->mat, templ, result, method);
+  cv::normalize(result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
   double minVal;
   double maxVal;
   cv::Point minLoc;
   cv::Point maxLoc;
   cv::Point matchLoc;
 
-  minMaxLoc(m_out->mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
+  minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
 
   if(method  == CV_TM_SQDIFF || method == CV_TM_SQDIFF_NORMED) {
     matchLoc = minLoc;
@@ -2782,10 +2767,10 @@ NAN_METHOD(Matrix::MatchTemplate) {
     cv::rectangle(self->mat, roi, cv::Scalar(0,0,255));
   }
 
-  m_out->mat.convertTo(m_out->mat, CV_8UC1, 255, 0);
+  result.convertTo(result, CV_8UC1, 255, 0);
 
   v8::Local <v8::Array> arr = Nan::New<v8::Array>(5);
-  arr->Set(0, out);
+  arr->Set(0, CreateWrappedFromMat(result));
   arr->Set(1, Nan::New<Number>(roi_x));
   arr->Set(2, Nan::New<Number>(roi_y));
   arr->Set(3, Nan::New<Number>(roi_width));
@@ -2923,8 +2908,7 @@ NAN_METHOD(Matrix::WarpPerspective) {
   cv::warpPerspective(self->mat, res, xfrm->mat, cv::Size(width, height), flags,
       borderMode, borderColor);
 
-  ~self->mat;
-  self->mat = res;
+  self->setMat(res);
 
   info.GetReturnValue().Set(Nan::Null());
 }
@@ -3025,8 +3009,8 @@ NAN_METHOD(Matrix::Shift) {
   cv::Rect roi = cv::Rect(std::max(-deltai.x, 0), std::max(-deltai.y, 0), 0, 0)
       + self->mat.size();
   res = padded(roi);
-  ~self->mat;
-  self->mat = res;
+
+  self->setMat(res);
 
   return;
 }

@@ -48,8 +48,8 @@ Matrix *CreateFromMatrixOrFilename(Local<Value> v) {
   if (v->IsString()) {
     Matrix *im = new Matrix();
     std::string filename = std::string(*Nan::Utf8String(v->ToString()));
-    im->mat = cv::imread(filename);
-    Nan::AdjustExternalMemory(im->mat.dataend - im->mat.datastart);
+    im->setMat(cv::imread(filename));
+    return im;
     // std::cout<< im.size();
   } else {
     return new Matrix(Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject()));
@@ -404,11 +404,9 @@ NAN_METHOD(FaceRecognizerWrap::Predict) {
 
   Matrix *m = CreateFromMatrixOrFilename(info[0]);
   if (m->mat.channels() == 3) {
-    Matrix *replacement = new Matrix();
-    cv::cvtColor(m->mat, replacement->mat, CV_RGB2GRAY);
-    Nan::AdjustExternalMemory(replacement->mat.dataend - replacement->mat.datastart);
-    delete m;
-    m = replacement;
+    cv::Mat grayMat;
+    cv::cvtColor(m->mat, grayMat, CV_RGB2GRAY);
+    m->setMat(grayMat);
   }
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
