@@ -2180,14 +2180,20 @@ NAN_METHOD(Matrix::WarpAffine) {
 NAN_METHOD(Matrix::PyrDown) {
   SETUP_FUNCTION(Matrix)
 
+  int oldSize = self->mat.dataend - self->mat.datastart;
   cv::pyrDown(self->mat, self->mat);
+  int newSize = self->mat.dataend - self->mat.datastart;
+  Nan::AdjustExternalMemory(newSize - oldSize);
   return;
 }
 
 NAN_METHOD(Matrix::PyrUp) {
   SETUP_FUNCTION(Matrix)
 
+  int oldSize = self->mat.dataend - self->mat.datastart;
   cv::pyrUp(self->mat, self->mat);
+  int newSize = self->mat.dataend - self->mat.datastart;
+  Nan::AdjustExternalMemory(newSize - oldSize);
   return;
 }
 

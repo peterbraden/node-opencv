@@ -825,6 +825,43 @@ test("Matrix reshape", t=>{
 	t.end();
 });
 
+test("Matrix pyrDown", t=>{
+	gc();
+	var startingMemory = process.memoryUsage().external;
+
+	var image = new cv.Matrix(100, 100, cv.Constants.CV_8UC3, [0,0,0]);
+	t.equal(process.memoryUsage().external - startingMemory, 30000); //100 * 100 * 3
+
+	image.pyrDown();
+
+	t.equal(process.memoryUsage().external - startingMemory, 7500); //50 * 50 * 3
+
+	image.release();
+
+	var endingMemory = process.memoryUsage().external;
+	t.equal(endingMemory - startingMemory, 0);
+	t.end();
+});
+
+test("Matrix pyrUp", t=>{
+	gc();
+	var startingMemory = process.memoryUsage().external;
+
+	var image = new cv.Matrix(100, 100, cv.Constants.CV_8UC3, [0,0,0]);
+	t.equal(process.memoryUsage().external - startingMemory, 30000); //100 * 100 * 3
+
+	image.pyrUp();
+
+	t.equal(process.memoryUsage().external - startingMemory, 120000); //200 * 200 * 3
+
+	image.release();
+
+	var endingMemory = process.memoryUsage().external;
+	t.equal(endingMemory - startingMemory, 0);
+	t.end();
+});
+
+
 //********************
 // Additional Asynchronous Matrix Functions
 //********************
