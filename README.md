@@ -20,6 +20,7 @@ that OpenCV 3.x is not yet fully supported.
 Install OpenCV using brew
 ```bash
 brew tap homebrew/science
+brew install pkg-config
 brew install opencv@2
 brew link --force opencv@2
 ```
