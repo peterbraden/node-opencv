@@ -4,6 +4,8 @@
 
 #ifdef HAVE_OPENCV_FEATURES2D
 
+#define HAVE_NODE_OPENCV_FEATURES2D
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
