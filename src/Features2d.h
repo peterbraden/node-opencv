@@ -1,6 +1,6 @@
 #include "OpenCV.h"
 
-#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4))
+#if (((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4)) || (CV_MAJOR_VERSION == 3))
 
 #ifdef HAVE_OPENCV_FEATURES2D
 
