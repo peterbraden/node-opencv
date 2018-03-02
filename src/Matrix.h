@@ -11,6 +11,7 @@ public:
   Matrix(cv::Mat other, cv::Rect roi);
   Matrix(int rows, int cols);
   Matrix(int rows, int cols, int type);
+  Matrix(Matrix *m);
   Matrix(int rows, int cols, int type, Local<Object> scalarObj);
 
   static double DblGet(cv::Mat mat, int i, int j);
