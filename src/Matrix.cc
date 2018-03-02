@@ -176,6 +176,11 @@ Matrix::Matrix(int rows, int cols, int type) :
   mat = cv::Mat(rows, cols, type);
 }
 
+Matrix::Matrix(Matrix *m) :
+    node_opencv::Matrix() {
+  mat = cv::Mat(m->mat);
+}
+
 Matrix::Matrix(cv::Mat m, cv::Rect roi) :
     node_opencv::Matrix() {
   mat = cv::Mat(m, roi);

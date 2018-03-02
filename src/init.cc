@@ -50,15 +50,14 @@ extern "C" void init(Local<Object> target) {
   ImgProc::Init(target);
   Histogram::Init(target);
 #endif
+#ifdef HAVE_NODE_OPENCV_FEATURES2D
+  Features::Init(target);
+#endif
 #if CV_MAJOR_VERSION < 3
   StereoBM::Init(target);
   StereoSGBM::Init(target);
   StereoGC::Init(target);
-
 #if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION >=4
-  #ifdef HAVE_OPENCV_FEATURES2D
-    Features::Init(target);
-  #endif
   LDAWrap::Init(target);
 #endif
 #endif

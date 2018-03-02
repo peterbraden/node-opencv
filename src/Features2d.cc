@@ -1,6 +1,6 @@
 #include "OpenCV.h"
 
-#if ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4))
+#if (((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >=4)) || (CV_MAJOR_VERSION == 3))
 #include "Features2d.h"
 #include "Matrix.h"
 #include <nan.h>
@@ -16,10 +16,10 @@ void Features::Init(Local<Object> target) {
 
 class AsyncDetectSimilarity: public Nan::AsyncWorker {
 public:
-  AsyncDetectSimilarity(Nan::Callback *callback, cv::Mat image1, cv::Mat image2) :
+  AsyncDetectSimilarity(Nan::Callback *callback, Matrix *image1, Matrix *image2) :
       Nan::AsyncWorker(callback),
-      image1(image1),
-      image2(image2),
+      image1(new Matrix(image1)),
+      image2(new Matrix(image2)),
       dissimilarity(0) {
   }
 
@@ -28,9 +28,15 @@ public:
 
   void Execute() {
 
+#if    (CV_MAJOR_VERSION == 3)
+    cv::Ptr<cv::Feature2D> detector = cv::ORB::create();
+#else
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("ORB");
     cv::Ptr<cv::DescriptorExtractor> extractor =
         cv::DescriptorExtractor::create("ORB");
+#endif    
+    
+    
     cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(
         "BruteForce-Hamming");
 
@@ -42,11 +48,17 @@ public:
     std::vector<cv::KeyPoint> keypoints1;
     std::vector<cv::KeyPoint> keypoints2;
 
-    detector->detect(image1, keypoints1);
-    detector->detect(image2, keypoints2);
-
-    extractor->compute(image1, keypoints1, descriptors1);
-    extractor->compute(image2, keypoints2, descriptors2);
+#if    (CV_MAJOR_VERSION == 3)
+    detector->detect(image1->mat, keypoints1);
+    detector->detect(image2->mat, keypoints2);
+    detector->compute(image1->mat, keypoints1, descriptors1);
+    detector->compute(image2->mat, keypoints2, descriptors2);
+#else
+    detector->detect(image1->mat, keypoints1);
+    detector->detect(image2->mat, keypoints2);
+    extractor->compute(image1->mat, keypoints1, descriptors1);
+    extractor->compute(image2->mat, keypoints2, descriptors2);
+#endif    
 
     matcher->match(descriptors1, descriptors2, matches);
 
@@ -85,6 +97,11 @@ public:
   void HandleOKCallback() {
     Nan::HandleScope scope;
 
+    delete image1;
+    delete image2;
+    image1 = NULL;
+    image2 = NULL;
+
     Local<Value> argv[2];
 
     argv[0] = Nan::Null();
@@ -94,8 +111,8 @@ public:
   }
 
 private:
-  cv::Mat image1;
-  cv::Mat image2;
+  Matrix *image1;
+  Matrix *image2;
   double dissimilarity;
 };
 
@@ -104,8 +121,8 @@ NAN_METHOD(Features::Similarity) {
 
   REQ_FUN_ARG(2, cb);
 
-  cv::Mat image1 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject())->mat;
-  cv::Mat image2 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject())->mat;
+  Matrix *image1 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  Matrix *image2 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
 
