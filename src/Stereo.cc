@@ -93,10 +93,7 @@ NAN_METHOD(StereoBM::Compute) {
     self->stereo(left, right, disparity, type);
 
     // Wrap the returned disparity map
-    Local < Object > disparityWrap =
-        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *disp = Nan::ObjectWrap::Unwrap<Matrix>(disparityWrap);
-    disp->mat = disparity;
+    Local < Object > disparityWrap = Matrix::CreateWrappedFromMat(disparity);
 
     info.GetReturnValue().Set(disparityWrap);
 
@@ -228,10 +225,7 @@ NAN_METHOD(StereoSGBM::Compute) {
     self->stereo(left, right, disparity);
 
     // Wrap the returned disparity map
-    Local < Object > disparityWrap =
-        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *disp = Nan::ObjectWrap::Unwrap<Matrix>(disparityWrap);
-    disp->mat = disparity;
+    Local < Object > disparityWrap = Matrix::CreateWrappedFromMat(disparity);
 
     info.GetReturnValue().Set(disparityWrap);
   } catch (cv::Exception &e) {
@@ -312,10 +306,7 @@ NAN_METHOD(StereoGC::Compute) {
     disp16.convertTo(disparity, CV_8U, -16);
 
     // Wrap the returned disparity map
-    Local < Object > disparityWrap =
-        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *disp = Nan::ObjectWrap::Unwrap<Matrix>(disparityWrap);
-    disp->mat = disparity;
+    Local < Object > disparityWrap = Matrix::CreateWrappedFromMat(disparity);
 
     info.GetReturnValue().Set(disparityWrap);
   } catch (cv::Exception &e) {
