@@ -17,9 +17,6 @@ function main(){
             if(process.platform === "win32"){
                 fallback();
             }
-            else{
-                throw new Error("ERROR: failed to run: pkg-config", opencv, flag);
-            }
         }
         else{
             console.log(stdout);
