@@ -149,6 +149,9 @@ public:
   JSFUNC(Subtract)
   JSFUNC(Compare)
   JSFUNC(Mul)
+  JSFUNC(Div)
+  JSFUNC(Pow)
+
   /*
    static Handle<Value> Val(const Arguments& info);
    static Handle<Value> RowRange(const Arguments& info);
