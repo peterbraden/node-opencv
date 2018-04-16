@@ -124,6 +124,8 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "subtract", Subtract);
   Nan::SetPrototypeMethod(ctor, "compare", Compare);
   Nan::SetPrototypeMethod(ctor, "mul", Mul);
+  Nan::SetPrototypeMethod(ctor, "div", Div);
+  Nan::SetPrototypeMethod(ctor, "pow", Pow);
 
   target->Set(Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction());
 };
@@ -2489,6 +2491,8 @@ NAN_METHOD(Matrix::CvtColor) {
     iTransform = CV_BayerGR2BGR;
   } else if (!strcmp(sTransform, "CV_BGR2RGB")) {
     iTransform = CV_BGR2RGB;
+  } else if (!strcmp(sTransform, "CV_BGRA2BGR")) {
+    iTransform = CV_BGRA2BGR;
   } else {
     iTransform = 0;  // to avoid compiler warning
     Nan::ThrowTypeError("Conversion code is unsupported");
@@ -3160,3 +3164,32 @@ NAN_METHOD(Matrix::Mul) {
   info.GetReturnValue().Set(out);
   return;
 }
+
+NAN_METHOD(Matrix::Div) {
+  SETUP_FUNCTION(Matrix)
+
+  if (info.Length() < 1) {
+    Nan::ThrowTypeError("Invalid number of arguments");
+  }
+
+  Matrix *other = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+
+  cv::divide(self->mat, other->mat, self->mat);
+
+  return;
+}
+
+NAN_METHOD(Matrix::Pow) {
+  SETUP_FUNCTION(Matrix)
+
+  if (info.Length() < 1) {
+    Nan::ThrowTypeError("Invalid number of arguments");
+  }
+
+  double power = info[0]->NumberValue();
+
+  cv::pow(self->mat, power, self->mat);
+
+  return;
+}
+
