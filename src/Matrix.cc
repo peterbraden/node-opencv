@@ -1237,7 +1237,9 @@ NAN_METHOD(Matrix::GaussianBlur) {
   cv::Mat blurred;
 
   Matrix *self = Nan::ObjectWrap::Unwrap<Matrix>(info.This());
-  double sigma = 0;
+  double sigmaX = 0;
+  double sigmaY = 0;
+  int borderType = cv::BORDER_DEFAULT;
 
   if (info.Length() < 1) {
     ksize = cv::Size(5, 5);
@@ -1254,12 +1256,16 @@ NAN_METHOD(Matrix::GaussianBlur) {
       Nan::ThrowTypeError("'ksize' argument must be a 2 double array");
     }
     ksize = cv::Size(x->NumberValue(), y->NumberValue());
-    if (info[1]->IsNumber()) {
-      sigma = Nan::To<double>(info[1]).FromJust();
+
+    sigmaX = info.Length() < 2 ? 0 : info[1]->NumberValue();
+    sigmaY = info.Length() < 3 ? 0 : info[2]->NumberValue();
+
+    if (info.Length() == 4) {
+      borderType = info[3]->IntegerValue();
     }
   }
 
-  cv::GaussianBlur(self->mat, blurred, ksize, sigma);
+  cv::GaussianBlur(self->mat, blurred, ksize, sigmaX, sigmaY, borderType);
   blurred.copyTo(self->mat);
 
   info.GetReturnValue().Set(Nan::Null());
