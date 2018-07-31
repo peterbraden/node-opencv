@@ -90,10 +90,10 @@ NAN_METHOD(VideoWriterWrap::Release) {
 
 class AsyncVWWorker: public Nan::AsyncWorker {
 public:
-    AsyncVWWorker(Nan::Callback *callback, VideoWriterWrap *vw, cv::Mat mat) :
+    AsyncVWWorker(Nan::Callback *callback, VideoWriterWrap *vw, Matrix *matrix_in) :
             Nan::AsyncWorker(callback),
             vw(vw),
-            mat(mat) {
+            matrix(new Matrix(matrix_in)) {
     }
 
     ~AsyncVWWorker() {
@@ -104,7 +104,7 @@ public:
     // here, so everything we need for input and output
     // should go on `this`.
     void Execute() {
-      this->vw->writer.write(mat);
+      this->vw->writer.write(matrix->mat);
     }
 
     // Executed when the async work is complete
@@ -112,6 +112,9 @@ public:
     // so it is safe to use V8 again
     void HandleOKCallback() {
       Nan::HandleScope scope;
+
+      delete matrix;
+      matrix = NULL;
 
       Local<Value> argv[] = {
               Nan::Null()
@@ -126,7 +129,7 @@ public:
 
 private:
     VideoWriterWrap *vw;
-    cv::Mat mat;
+    Matrix *matrix;
 };
 
 NAN_METHOD(VideoWriterWrap::Write) {
@@ -137,7 +140,7 @@ NAN_METHOD(VideoWriterWrap::Write) {
     REQ_FUN_ARG(1, cb);
 
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-    Nan::AsyncQueueWorker(new AsyncVWWorker(callback, v, im->mat));
+    Nan::AsyncQueueWorker(new AsyncVWWorker(callback, v, im));
 
     return;
 }

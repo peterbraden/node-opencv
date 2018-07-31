@@ -3,15 +3,6 @@
 
 #ifdef HAVE_OPENCV_CALIB3D
 
-inline Local<Object> matrixFromMat(cv::Mat &input) {
-  Local<Object> matrixWrap =
-      Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *matrix = Nan::ObjectWrap::Unwrap<Matrix>(matrixWrap);
-  matrix->mat = input;
-
-  return matrixWrap;
-}
-
 inline cv::Mat matFromMatrix(Local<Value> matrix) {
   Matrix* m = Nan::ObjectWrap::Unwrap<Matrix>(matrix->ToObject());
   return m->mat;
@@ -237,11 +228,11 @@ NAN_METHOD(Calib3D::CalibrateCamera) {
     ret->Set(Nan::New<String>("reprojectionError").ToLocalChecked(), Nan::New<Number>(error));
 
     // K
-    Local<Object> KMatrixWrap = matrixFromMat(K);
+    Local<Object> KMatrixWrap = Matrix::CreateWrappedFromMat(K);
     ret->Set(Nan::New<String>("K").ToLocalChecked(), KMatrixWrap);
 
     // dist
-    Local<Object> distMatrixWrap = matrixFromMat(dist);
+    Local<Object> distMatrixWrap = Matrix::CreateWrappedFromMat(dist);
     ret->Set(Nan::New<String>("distortion").ToLocalChecked(), distMatrixWrap);
 
     // Per frame R and t, skiping for now
@@ -287,11 +278,11 @@ NAN_METHOD(Calib3D::SolvePnP) {
     Local<Object> ret = Nan::New<Object>();
 
     // rvec
-    Local<Object> rMatrixWrap = matrixFromMat(rvec);
+    Local<Object> rMatrixWrap = Matrix::CreateWrappedFromMat(rvec);
     ret->Set(Nan::New<String>("rvec").ToLocalChecked(), rMatrixWrap);
 
     // tvec
-    Local<Object> tMatrixWrap = matrixFromMat(tvec);
+    Local<Object> tMatrixWrap = Matrix::CreateWrappedFromMat(tvec);
     ret->Set(Nan::New<String>("tvec").ToLocalChecked(), tMatrixWrap);
 
     // Return
@@ -334,7 +325,7 @@ NAN_METHOD(Calib3D::GetOptimalNewCameraMatrix) {
         newImageSize);
 
     // Wrap the output K
-    Local<Object> KMatrixWrap = matrixFromMat(Kout);
+    Local<Object> KMatrixWrap = Matrix::CreateWrappedFromMat(Kout);
 
     // Return the new K matrix
     info.GetReturnValue().Set(KMatrixWrap);
@@ -394,28 +385,28 @@ NAN_METHOD(Calib3D::StereoCalibrate) {
     // Make the output arguments
 
     // k1
-    Local<Object> K1MatrixWrap = matrixFromMat(k1);
+    Local<Object> K1MatrixWrap = Matrix::CreateWrappedFromMat(k1);
 
     // d1
-    Local<Object> d1MatrixWrap = matrixFromMat(d1);
+    Local<Object> d1MatrixWrap = Matrix::CreateWrappedFromMat(d1);
 
     // k2
-    Local<Object> K2MatrixWrap = matrixFromMat(k2);
+    Local<Object> K2MatrixWrap = Matrix::CreateWrappedFromMat(k2);
 
     // d2
-    Local<Object> d2MatrixWrap = matrixFromMat(d2);
+    Local<Object> d2MatrixWrap = Matrix::CreateWrappedFromMat(d2);
 
     // R
-    Local<Object> RMatrixWrap = matrixFromMat(R);
+    Local<Object> RMatrixWrap = Matrix::CreateWrappedFromMat(R);
 
     // t
-    Local<Object> tMatrixWrap = matrixFromMat(t);
+    Local<Object> tMatrixWrap = Matrix::CreateWrappedFromMat(t);
 
     // E
-    Local<Object> EMatrixWrap = matrixFromMat(E);
+    Local<Object> EMatrixWrap = Matrix::CreateWrappedFromMat(E);
 
     // F
-    Local<Object> FMatrixWrap = matrixFromMat(F);
+    Local<Object> FMatrixWrap = Matrix::CreateWrappedFromMat(F);
 
     // Add to return object
     ret->Set(Nan::New<String>("K1").ToLocalChecked(), K1MatrixWrap);
@@ -479,11 +470,11 @@ NAN_METHOD(Calib3D::StereoRectify) {
     // Make the return object
     Local<Object> ret = Nan::New<Object>();
 
-    ret->Set(Nan::New<String>("R1").ToLocalChecked(), matrixFromMat(R1));
-    ret->Set(Nan::New<String>("R2").ToLocalChecked(), matrixFromMat(R2));
-    ret->Set(Nan::New<String>("P1").ToLocalChecked(), matrixFromMat(P1));
-    ret->Set(Nan::New<String>("P2").ToLocalChecked(), matrixFromMat(P2));
-    ret->Set(Nan::New<String>("Q").ToLocalChecked(), matrixFromMat(Q));
+    ret->Set(Nan::New<String>("R1").ToLocalChecked(), Matrix::CreateWrappedFromMat(R1));
+    ret->Set(Nan::New<String>("R2").ToLocalChecked(), Matrix::CreateWrappedFromMat(R2));
+    ret->Set(Nan::New<String>("P1").ToLocalChecked(), Matrix::CreateWrappedFromMat(P1));
+    ret->Set(Nan::New<String>("P2").ToLocalChecked(), Matrix::CreateWrappedFromMat(P2));
+    ret->Set(Nan::New<String>("Q").ToLocalChecked(), Matrix::CreateWrappedFromMat(Q));
 
     // Return the rectification parameters
     info.GetReturnValue().Set(ret);
@@ -557,7 +548,7 @@ NAN_METHOD(Calib3D::ReprojectImageTo3D) {
     cv::reprojectImageTo3D(disparity, depthImage, Q);
 
     // Wrap the depth image
-    Local<Object> depthImageMatrix = matrixFromMat(depthImage);
+    Local<Object> depthImageMatrix = Matrix::CreateWrappedFromMat(depthImage);
 
     info.GetReturnValue().Set(depthImageMatrix);
   } catch (cv::Exception &e) {

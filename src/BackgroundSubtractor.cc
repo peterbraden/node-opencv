@@ -255,10 +255,6 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
 
   
   try {
-    Local<Object> fgMask =
-        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(fgMask);
-
     cv::Mat mat;
     if (Buffer::HasInstance(info[0])) {
       uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
@@ -287,7 +283,7 @@ NAN_METHOD(BackgroundSubtractorWrap::ApplyMOG) {
 #endif
     }
     
-    img->mat = _fgMask;
+    Local<Object> fgMask = Matrix::CreateWrappedFromMat(_fgMask.clone());
     mat.release();
 
     argv[0] = Nan::Null();
@@ -313,15 +309,15 @@ public:
   AsyncBackgroundSubtractorWorker( 
         Nan::Callback *callback, 
         BackgroundSubtractorWrap *bg, 
-        cv::Mat &img_mat):
+        Matrix *matrix_in):
       Nan::AsyncWorker(callback),
       bg(bg),
-      img_mat(img_mat) { // note: this makes a new cv::Mat, and so increments the ref count for the data without copying it
+      matrix(new Matrix(matrix_in)) {
     
   }
 
   ~AsyncBackgroundSubtractorWorker() {
-      // upon destroy, img_mat will reduce refcount on data by one
+
   }
 
   // Executed inside the worker-thread.
@@ -332,9 +328,9 @@ public:
     // wait here if already in apply - auto-release on scope exit
     BGAutoMutex(bg->applymutex);
 #if CV_MAJOR_VERSION >= 3
-    bg->subtractor->apply(this->img_mat, _fgMask);
+    bg->subtractor->apply(matrix->mat, _fgMask);
 #else
-    bg->subtractor->operator()(this->img_mat, _fgMask);
+    bg->subtractor->operator()(matrix->mat, _fgMask);
 #endif
   }
 
@@ -344,9 +340,10 @@ public:
   void HandleOKCallback() {
     Nan::HandleScope scope;
 
-    Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *imgout = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
-    imgout->mat = _fgMask;
+    delete matrix;
+    matrix = NULL;
+
+    Local<Object> im_to_return = Matrix::CreateWrappedFromMat(_fgMask.clone());
 
     Local<Value> argv[] = {
       Nan::Null()
@@ -362,7 +359,7 @@ public:
 
 private:
   BackgroundSubtractorWrap *bg;
-  cv::Mat img_mat;
+  Matrix *matrix;
   cv::Mat _fgMask;
 };
 
@@ -372,7 +369,6 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
   SETUP_FUNCTION(BackgroundSubtractorWrap);
   int callback_arg = -1;
   int numargs = info.Length();
-  int success = 1;
   
   Local<Function> cb;
 
@@ -402,15 +398,12 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
     
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
     Matrix *_img = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());      
-    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img->mat));
+    Nan::AsyncQueueWorker(new AsyncBackgroundSubtractorWorker( callback, self, _img));
     return;
   } else { //synchronous - return the image
 
     try {
-      Local<Object> fgMask =
-          Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-      Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(fgMask);
-      
+      Local<Object> fgMask;
       cv::Mat mat;
       if (Buffer::HasInstance(info[0])) {
         uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
@@ -436,7 +429,7 @@ NAN_METHOD(BackgroundSubtractorWrap::Apply) {
   #else
       self->subtractor->operator()(mat, _fgMask);
   #endif
-      img->mat = _fgMask;
+      fgMask = Matrix::CreateWrappedFromMat(_fgMask.clone());
       }
       
       mat.release();
