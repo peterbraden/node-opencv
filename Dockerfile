@@ -26,11 +26,10 @@ deb http://us.archive.ubuntu.com/ubuntu/ precise-updates multiverse\n\
 deb-src http://us.archive.ubuntu.com/ubuntu/ precise-updates multiverse\n"\
 >> /etc/apt/sources.list
 
-
+RUN apt-get update -qq
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     software-properties-common
 RUN add-apt-repository ppa:george-edison55/cmake-3.x
-RUN apt-get update -qq
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
 curl \
 cmake \
