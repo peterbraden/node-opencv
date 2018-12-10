@@ -54,7 +54,7 @@ endif
 # The location of the `node-pre-gyp` module builder. Try and get a globally
 # installed version, falling back to a local install.
 NODE_PRE_GYP = $(shell which node-pre-gyp)
-ifeq ($(NODE_GYP),)
+ifeq ($(NODE_PRE_GYP),)
 	NODE_PRE_GYP = ./node_modules/.bin/node-pre-gyp
 endif
 
