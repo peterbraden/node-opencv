@@ -20,6 +20,7 @@ void Matrix::Init(Local<Object> target) {
   ctor->SetClassName(Nan::New("Matrix").ToLocalChecked());
 
   // Prototype
+  Nan::SetPrototypeMethod(ctor, "copyMakeBorder", CopyMakeBorder);
   Nan::SetPrototypeMethod(ctor, "row", Row);
   Nan::SetPrototypeMethod(ctor, "col", Col);
   Nan::SetPrototypeMethod(ctor, "pixelRow", PixelRow);
@@ -2987,6 +2988,61 @@ NAN_METHOD(Matrix::Mean) {
   arr->Set(3, Nan::New<Number>(means[3]));
 
   info.GetReturnValue().Set(arr);
+}
+
+// http://docs.opencv.org/2.4/modules/imgproc/doc/filtering.html#copymakeborder
+NAN_METHOD(Matrix::CopyMakeBorder) {
+  SETUP_FUNCTION(Matrix)
+
+  double t = info[0]->NumberValue();
+  double b = info[1]->NumberValue();
+  double l = info[2]->NumberValue();
+  double r = info[3]->NumberValue();
+
+  int borderType = cv::BORDER_DEFAULT;
+  cv::Scalar value;
+  if (info.Length() > 4) {
+    borderType = info[4]->IntegerValue();
+    value = cv::Scalar(0, 0, 0, 0);
+    if (borderType == cv::BORDER_CONSTANT) {
+      if (!info[5]->IsArray()) {
+        Nan::ThrowTypeError("The argument must be an array");
+      }
+      v8::Local<v8::Array> objColor = v8::Local<v8::Array>::Cast(info[5]);
+      unsigned int length = objColor->Length();
+
+      Local<Value> valB = objColor->Get(0);
+      Local<Value> valG = objColor->Get(1);
+      Local<Value> valR = objColor->Get(2);
+
+      if (length == 3) {
+        value = cv::Scalar(
+          valB->IntegerValue(),
+          valG->IntegerValue(),
+          valR->IntegerValue()
+        );
+      } else if (length == 4) {
+        Local<Value> valA = objColor->Get(3);
+
+        value = cv::Scalar(
+          valB->IntegerValue(),
+          valG->IntegerValue(),
+          valR->IntegerValue(),
+          valA->IntegerValue()
+        );
+      } else {
+        Nan::ThrowError("Fill must include 3 or 4 colors");
+      }
+    }
+  }
+
+  cv::Mat padded;
+  cv::copyMakeBorder(self->mat, padded, t, b, l, r, borderType, value);
+
+  ~self->mat;
+  self->mat = padded;
+
+  return;
 }
 
 NAN_METHOD(Matrix::Shift) {
