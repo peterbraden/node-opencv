@@ -36,19 +36,6 @@ before_install:
   - COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
   # put local node-pre-gyp on PATH
   - export PATH=./node_modules/.bin/:$PATH
-    # install node-pre-gyp so it is available for packaging and publishing
-  - npm install node-gyp -g
-    # install node-pre-gyp so it is available for packaging and publishing
-  - npm install node-pre-gyp
-  # install aws-sdk so it is available for publishing to AS3
-  - npm install aws-sdk
-  # figure out if we should publish
-  - PUBLISH_BINARY=false
-  # if we are building a tag then publish
-  - if [[ $TRAVIS_BRANCH == `git describe --tags --always HEAD` ]]; then PUBLISH_BINARY=true; fi;
-  # or if we put [publish binary] in the commit message
-  - if test "${COMMIT_MESSAGE#*'[publish binary]'}" != "$COMMIT_MESSAGE"; then PUBLISH_BINARY=true; fi;
-  - platform=$(uname -s | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
 
 install:
   # install dependencies first
@@ -58,11 +45,6 @@ install:
   - docker build -t peterbraden/node-opencv-ubuntu-14-04 -f test/Dockerfile-ubuntu-14-04 .
 
 before_script:
-  - echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
-  # if publishing, do it
-  - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish || true; fi;
-  # cleanup
-  - node-pre-gyp clean
   - node-gyp clean
   - sudo apt-get purge --yes libcv-dev
   - sudo apt-get purge --yes libopencv-dev
