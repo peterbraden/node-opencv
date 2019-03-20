@@ -6,8 +6,7 @@
   "dependencies": {
     "buffers": "^0.1.1",
     "istanbul": "0.4.5",
-    "nan": "^2.0.9",
-    "node-pre-gyp": "^0.6.33"
+    "nan": "^2.0.9"
   },
   "devDependencies": {
     "tape": "^3.0.0",
@@ -21,8 +20,7 @@
   "license": "MIT",
   "scripts": {
     "build": "node-gyp build",
-    "test": "node test/unit.js",
-    "install": "node-pre-gyp install --build-from-source"
+    "test": "node test/unit.js"
   },
   "keywords": [
     "opencv",
@@ -37,12 +35,5 @@
   },
   "engines": {
     "node": ">=0.12"
-  },
-  "binary": {
-    "module_name": "opencv",
-    "module_path": "./build/{module_name}/v{version}/{configuration}/{node_abi}-{platform}-{arch}/",
-    "remote_path": "./{module_name}/v{version}/{configuration}/",
-    "package_name": "{node_abi}-{platform}-{arch}.tar.gz",
-    "host": "https://node-opencv.s3.amazonaws.com"
   }
 }
