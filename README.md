@@ -18,6 +18,7 @@ You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.
 ## Specific for macOS
 Install OpenCV using brew
 ```bash
+brew install pkg-config
 brew install opencv@2
 brew link --force opencv@2
 ```
