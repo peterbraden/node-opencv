@@ -17,6 +17,7 @@ You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.
 ## Specific for macOS
 Install OpenCV using brew
 ```bash
+brew install pkg-config
 brew install opencv@2
 brew link --force opencv@2
 ```
@@ -135,7 +136,7 @@ var mat = new cv.Matrix.Eye(4,4); // Create identity matrix
 mat.get(0,0) // 1
 
 mat.row(0)  // [1,0,0,0]
-mat.col(4)  // [0,0,0,1]
+mat.col(3)  // [0,0,0,1]
 ```
 
 ##### Save
