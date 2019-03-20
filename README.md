@@ -1,7 +1,6 @@
 # node-opencv
 
 [![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.svg)](http://travis-ci.org/peterbraden/node-opencv)
-[![Coverage](http://codecov.io/github/peterbraden/node-opencv/coverage.svg?branch=master)](https://codecov.io/gh/peterbraden/node-opencv)
 
 [OpenCV](http://opencv.org) bindings for Node.js. OpenCV is
 the defacto computer vision library - by interfacing with it natively in node,
@@ -298,14 +297,6 @@ forEachFileInDir('./_bench', (f) => predictIt(fr, f));
 Using [tape](https://github.com/substack/tape). Run with command:
 
 `npm test`.
-
-## Code coverage
-
-Using [istanbul](http://gotwarlost.github.io/istanbul/) and [lcov](http://ltp.sourceforge.net/coverage/lcov.php). Run with command:
-
-`make cover`
-
-Build version of `opencv.node` will be generated, and coverage files will be put in `coverage/` directory. These files can be remvoved automatically by running `make clean`.
 
 ## MIT License
 The library is distributed under the MIT License - if for some reason that

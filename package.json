@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "tape": "^3.0.0",
-    "istanbul": "0.4.5",
     "glob": "^5.0.3",
     "request": "^2.44.0"
   },
