@@ -1,10 +1,14 @@
 
 # Changelog
 
+## 6.2.0
+- Remove prebuilt binaries
+- Housekeeping
+- Security fix.
 
 ## 6.0.0
 
-# Enhancements
+### Enhancements
 - @wenq added `contour.moments` method.
 - @andreasgal added `matrix.substract` method.
 - @jainanshul added `matrix.mean` method.
@@ -14,7 +18,7 @@
 - @Evilcat325 added `matrix.MatchTemplateByMatrix` method.
 - @danschultzer added code coverage.
 
-# Bug fixes
+### Bug fixes
 - @dominikdolancic fixed image load issue in `matrix.matchTemplate()`.
 - @AwooOOoo fixed `type_info` errors in Visual Studio with std namespace pollution.
 - @mvines fixed issue that prevented `AsyncSaveWorker` from using de-allocated memory.
@@ -23,7 +27,7 @@
 - @andreasgal fixed an issue with `matrix.crop` (and potentially others), where `matrix.getData` ends up returning less than full matrix.
 - @danschultzer fixed `examples/test.js` channel issue, and problematic Vec3b casting (instead of Vec3f) in `matrix.set`.
 
-## Backwards incompatible changes
+### Backwards incompatible changes
 - @dxprog changed readImage to load image with `CV_LOAD_IMAGE_UNCHANGED` instead of `CV_LOAD_IMAGE_COLOR`. The latter returned the image as 3-channel.
 - @danschultzer changed `VideoCapture.close` to `VideoCapture.release`.
 
