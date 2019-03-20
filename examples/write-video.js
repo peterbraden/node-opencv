@@ -6,7 +6,7 @@ var vid = new cv.VideoCapture(path.join(__dirname, 'files', 'motion.mov'));
 vid.read(function(err, mat) {
   if (err) throw err;
 
-  var filename = './tmp/output-'+new Date().getTime()+'.avi';
+  var filename = './output-'+new Date().getTime()+'.avi';
   var writer = new cv.VideoWriter(filename, 'DIVX', vid.getFPS(), mat.size(), true);
   writer.writeSync(mat);
 
@@ -31,7 +31,7 @@ vid.read(function(err, mat) {
 // restart video read
 var vid2 = new cv.VideoCapture(path.join(__dirname, 'files', 'motion.mov'));
 
-var filename2 = './tmp/output-async-'+new Date().getTime()+'.avi';
+var filename2 = './output-async-'+new Date().getTime()+'.avi';
 var writer2 = null;
 var x = 0;
 
