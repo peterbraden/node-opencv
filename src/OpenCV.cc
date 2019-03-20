@@ -48,9 +48,8 @@ public:
         Nan::HandleScope scope;
 
         try{
-            Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-            Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
-            img->mat = outputmat;
+            Local<Object> im_to_return = Matrix::CreateWrappedFromMat(outputmat);
+            outputmat.release();
 
             Local<Value> argv[] = {
               Nan::Null(),
@@ -111,9 +110,8 @@ public:
   void HandleOKCallback() {
     Nan::HandleScope scope;
 
-    Local<Object> im_to_return= Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_to_return);
-    img->mat = outputmat;
+    Local<Object> im_to_return = Matrix::CreateWrappedFromMat(outputmat);
+    outputmat.release();
     
     Local<Value> argv[] = {
       Nan::Null(),
@@ -142,7 +140,7 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
   argv[0] = Nan::Null();
   argv[1] = Nan::Null();
 
-    int callback_arg = -1;
+  int callback_arg = -1;
   int numargs = info.Length();
   
   Local<Function> cb;
@@ -169,10 +167,7 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
       
       width = info[0]->Uint32Value();
       height = info[1]->Uint32Value();
-      Local<Object> img_to_return =
-        Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-      Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
-      img->mat = *(new cv::Mat(width, height, type));
+      Local<Object> img_to_return = Matrix::CreateWrappedFromMat(cv::Mat(width, height, type));
       if (callback_arg < 0){
         info.GetReturnValue().Set(img_to_return);
         return;
@@ -197,10 +192,7 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
         }
       }
       if (callback_arg < 0){
-        Local<Object> img_to_return =
-            Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-        Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
-        img->mat = cv::imread(filename, flags);
+        Local<Object> img_to_return = Matrix::CreateWrappedFromMat(cv::imread(filename, flags));
         info.GetReturnValue().Set(img_to_return);
         return;
       } else {
@@ -222,13 +214,10 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
         }
       }
       if (callback_arg < 0){
-        Local<Object> img_to_return =
-            Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-        Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(img_to_return);
         uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
         unsigned len = Buffer::Length(info[0]->ToObject());
         cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
-        img->mat = cv::imdecode(*mbuf, flags);
+        Local<Object> img_to_return = Matrix::CreateWrappedFromMat(cv::imdecode(*mbuf, flags));
         info.GetReturnValue().Set(img_to_return);
         return;
       } else {
@@ -268,13 +257,9 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
 NAN_METHOD(OpenCV::ReadImage) {
   Nan::EscapableHandleScope scope;
 
-
   Local<Value> argv[2];
   argv[0] = Nan::Null();
-
-  Local<Object> im_h = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
-  argv[1] = im_h;
+  argv[1] = Nan::Null();
 
   int callback_arg = -1;
   int numargs = info.Length();
@@ -300,7 +285,7 @@ NAN_METHOD(OpenCV::ReadImage) {
       }
       width = info[0]->Uint32Value();
       height = info[1]->Uint32Value();
-      mat = *(new cv::Mat(width, height, type));
+      mat = cv::Mat(width, height, type);
 
     } else if (info[0]->IsString()) {
       std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
@@ -330,7 +315,7 @@ NAN_METHOD(OpenCV::ReadImage) {
       
     }
 
-    img->mat = mat;
+    argv[1] = Matrix::CreateWrappedFromMat(mat);
   } catch (cv::Exception& e) {
     argv[0] = Nan::Error(e.what());
     argv[1] = Nan::Null();
@@ -345,7 +330,7 @@ NAN_METHOD(OpenCV::ReadImage) {
   } else {
     // if to return the mat
     if (success)
-      info.GetReturnValue().Set(im_h);
+      info.GetReturnValue().Set(argv[1]);
     else
       info.GetReturnValue().Set(Nan::New<Boolean>(false));
   }
@@ -383,10 +368,7 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
   argv[1] = output;
 
   for (std::vector<cv::Mat>::size_type i = 0; i < mats.size(); i ++) {
-    Local<Object> im_h = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
-    img->mat = mats[i];
-
+    Local<Object> im_h = Matrix::CreateWrappedFromMat(mats[i]);
     output->Set(i, im_h);
   }
 

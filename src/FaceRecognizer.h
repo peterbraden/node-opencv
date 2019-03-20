@@ -8,6 +8,7 @@ namespace cv {
   using cv::face::FaceRecognizer;
 }
 #else
+#warning using opencv2 contrib
 #include "opencv2/contrib/contrib.hpp"
 #endif
 

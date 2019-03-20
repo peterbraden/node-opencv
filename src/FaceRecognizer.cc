@@ -27,6 +27,8 @@ namespace cv {
 #define FISHER 2
 
 // Todo, move somewhere useful
+// Note: References to the returned object here should not be retained past the end of the calling function.
+// Otherwise, node might not keep track of external memory usage correctly.
 cv::Mat fromMatrixOrFilename(Local<Value> v) {
   cv::Mat im;
   if (v->IsString()) {
@@ -38,6 +40,20 @@ cv::Mat fromMatrixOrFilename(Local<Value> v) {
     im = img->mat;
   }
   return im;
+}
+
+// Note: Use this function when you might need to retain the returned object past the end of the calling function,
+// such as in asynchronous methods
+Matrix *CreateFromMatrixOrFilename(Local<Value> v) {
+  if (v->IsString()) {
+    Matrix *im = new Matrix();
+    std::string filename = std::string(*Nan::Utf8String(v->ToString()));
+    im->setMat(cv::imread(filename));
+    return im;
+    // std::cout<< im.size();
+  } else {
+    return new Matrix(Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject()));
+  }
 }
 
 Nan::Persistent<FunctionTemplate> FaceRecognizerWrap::constructor;
@@ -188,7 +204,7 @@ Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
     }
 
     int label = valarr->Get(0)->Uint32Value();
-    cv::Mat im = fromMatrixOrFilename(valarr->Get(1));
+    cv::Mat im = fromMatrixOrFilename(valarr->Get(1)); //this is ok because we clone the image
     im = im.clone();
     if (im.channels() == 3) {
       cv::cvtColor(im, im, CV_RGB2GRAY);
@@ -295,7 +311,9 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
 
   cv::Mat im = fromMatrixOrFilename(info[0]);  // TODO CHECK!
   if (im.channels() == 3) {
-    cv::cvtColor(im, im, CV_RGB2GRAY);
+    cv::Mat previous = im;
+    im = cv::Mat();
+    cv::cvtColor(previous, im, CV_RGB2GRAY);
   }
 
   int predictedLabel = -1;
@@ -322,10 +340,10 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
 
 class PredictASyncWorker: public Nan::AsyncWorker {
 public:
-  PredictASyncWorker(Nan::Callback *callback, cv::Ptr<cv::FaceRecognizer> rec, cv::Mat im) :
+  PredictASyncWorker(Nan::Callback *callback, cv::Ptr<cv::FaceRecognizer> rec, Matrix *matrix_in) :
       Nan::AsyncWorker(callback),
       rec(rec),
-      im(im) {
+      matrix(new Matrix(matrix_in)) {
     predictedLabel = -1;
     confidence = 0.0;
   }
@@ -334,7 +352,7 @@ public:
   }
 
   void Execute() {
-     this->rec->predict(this->im, this->predictedLabel, this->confidence);
+     rec->predict(matrix->mat, predictedLabel, confidence);
 #if CV_MAJOR_VERSION >= 3
     // Older versions of OpenCV3 incorrectly returned label=0 at
     // confidence=DBL_MAX instead of label=-1 on failure.  This can be removed
@@ -349,6 +367,9 @@ public:
 
   void HandleOKCallback() {
     Nan::HandleScope scope;
+
+    delete matrix;
+    matrix = NULL;
 
     v8::Local<v8::Object> res = Nan::New<Object>();
     res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
@@ -367,7 +388,7 @@ public:
 
 private:
   cv::Ptr<cv::FaceRecognizer> rec;
-  cv::Mat im;
+  Matrix *matrix;
   int predictedLabel;
   double confidence;
 };
@@ -381,13 +402,17 @@ NAN_METHOD(FaceRecognizerWrap::Predict) {
 
   REQ_FUN_ARG(1, cb);
 
-  cv::Mat im = fromMatrixOrFilename(info[0]);
-  if (im.channels() == 3) {
-    cv::cvtColor(im, im, CV_RGB2GRAY);
+  Matrix *m = CreateFromMatrixOrFilename(info[0]);
+  if (m->mat.channels() == 3) {
+    cv::Mat grayMat;
+    cv::cvtColor(m->mat, grayMat, CV_RGB2GRAY);
+    m->setMat(grayMat);
   }
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-  Nan::AsyncQueueWorker(new PredictASyncWorker(callback, self->rec, im));
+  Nan::AsyncQueueWorker(new PredictASyncWorker(callback, self->rec, m));
+
+  delete m;
 
   return;
 }
@@ -448,9 +473,7 @@ NAN_METHOD(FaceRecognizerWrap::GetMat) {
   m = self->rec->getMat(key);
 #endif
 
-  Local<Object> im = Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
-  Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(im);
-  img->mat = m;
+  Local<Object> im = Matrix::CreateWrappedFromMat(m);
 
   info.GetReturnValue().Set(im);
 }

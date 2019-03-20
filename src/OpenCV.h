@@ -22,7 +22,7 @@
 #include <node_buffer.h>
 #include <opencv2/opencv.hpp>
 
-#if ((CV_MAJOR_VERSION <= 2) && (CV_MINOR_VERSION <= 4) && (CV_MINOR_VERSION < 10))
+#if ((CV_MAJOR_VERSION <= 2) && (CV_MINOR_VERSION <= 4))
 #include <opencv/highgui.h>
 #else
 #include <opencv2/imgcodecs/imgcodecs_c.h>

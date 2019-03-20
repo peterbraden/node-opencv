@@ -7,11 +7,17 @@ public:
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Init(Local<Object> target);
   static NAN_METHOD(New);
+  static Local<Object> CreateWrappedFromMat(cv::Mat mat);
+  static Local<Object> CreateWrappedFromMatIfNotReferenced(cv::Mat mat, int baseRefCount);
+  int getWrappedRefCount();
+  void setMat(cv::Mat mat);
   Matrix();
+  Matrix(Matrix *other);
   Matrix(cv::Mat other, cv::Rect roi);
   Matrix(int rows, int cols);
   Matrix(int rows, int cols, int type);
   Matrix(int rows, int cols, int type, Local<Object> scalarObj);
+  ~Matrix();
 
   static double DblGet(cv::Mat mat, int i, int j);
 
@@ -143,6 +149,9 @@ public:
   JSFUNC(Subtract)
   JSFUNC(Compare)
   JSFUNC(Mul)
+  JSFUNC(Div)
+  JSFUNC(Pow)
+
   /*
    static Handle<Value> Val(const Arguments& info);
    static Handle<Value> RowRange(const Arguments& info);
