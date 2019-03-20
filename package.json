@@ -12,9 +12,6 @@
     "glob": "^5.0.3",
     "request": "^2.44.0"
   },
-  "bundledDependencies": [
-    "node-pre-gyp"
-  ],
   "license": "MIT",
   "scripts": {
     "build": "node-gyp build",
