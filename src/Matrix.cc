@@ -2599,6 +2599,19 @@ NAN_METHOD(Matrix::FloodFill) {
       setColor(obj->Get(Nan::New<String>("loDiff").ToLocalChecked())->ToObject()),
       setColor(obj->Get(Nan::New<String>("upDiff").ToLocalChecked())->ToObject()), 4);
 
+  // Documentation notes that parameter "rect" is an optional output
+  // parameter which will hold the smallest possible bounding box of
+  // affected pixels. If "rect" was provided, let's update the values.
+  // (https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html#floodfill)
+  if (!obj->Get(Nan::New<String>("rect").ToLocalChecked())->IsUndefined()) {
+    Local< Object > rectArgument =
+      obj->Get(Nan::New<String>("rect").ToLocalChecked())->ToObject();
+    rectArgument->Get(0)->ToObject()->Set(0, Nan::New<Number>(rect.x));
+    rectArgument->Get(0)->ToObject()->Set(1, Nan::New<Number>(rect.y));
+    rectArgument->Get(1)->ToObject()->Set(0, Nan::New<Number>(rect.width));
+    rectArgument->Get(1)->ToObject()->Set(1, Nan::New<Number>(rect.height));
+  }
+
   info.GetReturnValue().Set(Nan::New<Number>(ret));
 }
 
