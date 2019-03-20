@@ -113,7 +113,6 @@
       "include_dirs": [
         "<!@(node utils/find-opencv.js --cflags)",
         "<!(node -e \"require('nan')\")",
-        "<!(node -e \"require('./include_dirs')\")"
       ],
 
       "cflags!" : [ "-fno-exceptions"],
