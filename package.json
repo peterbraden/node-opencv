@@ -10,7 +10,6 @@
   "devDependencies": {
     "tape": "^3.0.0",
     "istanbul": "0.4.5",
-    "aws-sdk": "~2.1.20",
     "glob": "^5.0.3",
     "request": "^2.44.0"
   },
