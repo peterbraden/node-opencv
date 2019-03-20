@@ -54,7 +54,6 @@ install:
   # install dependencies first
   - npm install
   # build from source, run test and generate code coverage
-  - make cover
   - NODE_OPENCV_DEBUG=true node lib/opencv.js
   - docker build -t peterbraden/node-opencv-ubuntu-14-04 -f test/Dockerfile-ubuntu-14-04 .
 
@@ -70,14 +69,7 @@ before_script:
   - sudo apt-get purge --yes libhighgui-dev
 
 script:
-  # if publishing, test installing from remote
-  - INSTALL_RESULT=0
-  - if [[ $PUBLISH_BINARY == true ]]; then INSTALL_RESULT=$(npm install --fallback-to-build=false > /dev/null)$? || true; fi;
-  # if install returned non zero (errored) then we first unpublish and then call false so travis will bail at this line
-  - if [[ $INSTALL_RESULT != 0 ]]; then echo "returned $INSTALL_RESULT";node-pre-gyp unpublish;false; fi
-  # If success then we arrive here so lets clean up
-  - node-pre-gyp clean
-  # Can't compile opencv 32bit in 64 bit env.
+  - npm test
 
 after_success:
   # if success then query and display all published binaries
