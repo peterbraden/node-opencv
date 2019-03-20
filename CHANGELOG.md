@@ -1,6 +1,9 @@
 
 # Changelog
 
+## 6.3.0
+- Housekeeping
+
 ## 6.2.0
 - Remove prebuilt binaries
 - Housekeeping
