@@ -2,7 +2,14 @@
 
 var exec = require("child_process").exec;
 var fs = require("fs");
-var flag = "--exists";
+
+var flags = {
+  '--cflags' : '--cflags',
+  '--libs' : '--libs'
+}
+var flag = flags[process.argv[2]] || '--exists'
+
+
 
 // Normally |pkg-config opencv ...| could report either OpenCV 2.x or OpenCV 3.y
 // depending on what is installed.  To enable both 2.x and 3.y to co-exist on

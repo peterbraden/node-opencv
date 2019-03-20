@@ -13,8 +13,7 @@ cool, I'd love to hear about it!
 
 ## Install
 
-You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.  Note
-that OpenCV 3.x is not yet fully supported.
+You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.
 
 ## Specific for macOS
 Install OpenCV using brew
