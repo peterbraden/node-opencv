@@ -1171,7 +1171,7 @@ NAN_METHOD(Matrix::Zeros) {
   int h = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
-  cv::Mat mat = cv::Mat::zeros(w, h, type);
+  cv::Mat mat = cv::Mat::zeros(h, w, type);
   Local<Object> im_h = Matrix::CreateWrappedFromMat(mat);
   info.GetReturnValue().Set(im_h);
 }
@@ -1183,7 +1183,7 @@ NAN_METHOD(Matrix::Ones) {
   int h = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
-  cv::Mat mat = cv::Mat::ones(w, h, type);
+  cv::Mat mat = cv::Mat::ones(h, w, type);
   Local<Object> im_h = Matrix::CreateWrappedFromMat(mat);
 
   info.GetReturnValue().Set(im_h);
@@ -1196,7 +1196,7 @@ NAN_METHOD(Matrix::Eye) {
   int h = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
-  cv::Mat mat = cv::Mat::eye(w, h, type);
+  cv::Mat mat = cv::Mat::eye(h, w, type);
   Local<Object> im_h = Matrix::CreateWrappedFromMat(mat);
 
   info.GetReturnValue().Set(im_h);
