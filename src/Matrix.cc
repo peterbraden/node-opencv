@@ -1167,8 +1167,8 @@ NAN_METHOD(Matrix::SaveAsync) {
 NAN_METHOD(Matrix::Zeros) {
   Nan::HandleScope scope;
 
-  int w = info[0]->Uint32Value();
-  int h = info[1]->Uint32Value();
+  int h = info[0]->Uint32Value();
+  int w = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
   cv::Mat mat = cv::Mat::zeros(h, w, type);
@@ -1179,8 +1179,8 @@ NAN_METHOD(Matrix::Zeros) {
 NAN_METHOD(Matrix::Ones) {
   Nan::HandleScope scope;
 
-  int w = info[0]->Uint32Value();
-  int h = info[1]->Uint32Value();
+  int h = info[0]->Uint32Value();
+  int w = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
   cv::Mat mat = cv::Mat::ones(h, w, type);
@@ -1192,8 +1192,8 @@ NAN_METHOD(Matrix::Ones) {
 NAN_METHOD(Matrix::Eye) {
   Nan::HandleScope scope;
 
-  int w = info[0]->Uint32Value();
-  int h = info[1]->Uint32Value();
+  int h = info[0]->Uint32Value();
+  int w = info[1]->Uint32Value();
   int type = (info.Length() > 2) ? info[2]->IntegerValue() : CV_64FC1;
 
   cv::Mat mat = cv::Mat::eye(h, w, type);
