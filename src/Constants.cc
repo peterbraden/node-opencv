@@ -1,6 +1,10 @@
 #include "OpenCV.h"
 #include "Constants.h"
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
+
 #define CONST(C) \
   obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>(C));
 
@@ -25,7 +29,9 @@ void Constants::Init(Local<Object> target) {
   CONST(CV_32S);
   CONST(CV_32F);
   CONST(CV_64F);
+#if CV_MAJOR_VERSION <= 3
   CONST(CV_USRTYPE1);
+#endif
 
   CONST(CV_8UC1);
   CONST(CV_8UC2);

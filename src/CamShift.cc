@@ -8,6 +8,10 @@
 #include <opencv2/video/tracking.hpp>
 #endif
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/imgproc/types_c.h>
+#endif
+
 #define CHANNEL_HUE 0
 #define CHANNEL_SATURATION 1
 #define CHANNEL_VALUE 2

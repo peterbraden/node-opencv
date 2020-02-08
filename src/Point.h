@@ -2,6 +2,10 @@
 
 #include "OpenCV.h"
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/core/types_c.h>
+#endif
+
 class Point: public Nan::ObjectWrap {
 public:
   CvPoint2D32f point;

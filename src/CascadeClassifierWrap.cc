@@ -3,6 +3,10 @@
 #include "Matrix.h"
 #include <nan.h>
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/imgproc/types_c.h>
+#endif
+
 #ifdef HAVE_OPENCV_OBJDETECT
 
 Nan::Persistent<FunctionTemplate> CascadeClassifierWrap::constructor;
@@ -73,7 +77,7 @@ public:
         gray = this->im->mat;
       }
       this->cc->cc.detectMultiScale(gray, objects, this->scale, this->neighbors,
-          0 | CV_HAAR_SCALE_IMAGE, cv::Size(this->minw, this->minh));
+          0 | cv::CASCADE_SCALE_IMAGE, cv::Size(this->minw, this->minh));
       res = objects;
     } catch (cv::Exception& e) {
       SetErrorMessage(e.what());

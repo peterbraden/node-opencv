@@ -16,6 +16,7 @@ var flag = flags[process.argv[2]] || '--exists'
 // the same machine, the opencv.pc for 3.y can be installed as opencv3.pc and
 // then selected by |export PKG_CONFIG_OPENCV3=1| before building node-opencv.
 var opencv = process.env.PKG_CONFIG_OPENCV3 === "1" ? "opencv3" : ' "opencv >= 2.3.1"';
+opencv = process.env.PKG_CONFIG_OPENCV4 === "1" ? "opencv4" : opencv;
 
 function main(){
     //Try using pkg-config, but if it fails and it is on Windows, try the fallback

@@ -4,6 +4,11 @@
 #include <string.h>
 #include <nan.h>
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/imgproc/types_c.h>
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
+
 Nan::Persistent<FunctionTemplate> Matrix::constructor;
 
 cv::Scalar setColor(Local<Object> objColor);
@@ -1609,7 +1614,9 @@ NAN_METHOD(Matrix::Canny) {
   int lowThresh = info[0]->NumberValue();
   int highThresh = info[1]->NumberValue();
 
-  cv::Canny(self->mat, self->mat, lowThresh, highThresh);
+  cv::Mat newMat;
+  cv::Canny(self->mat, newMat, lowThresh, highThresh);
+  newMat.copyTo(self->mat);
 
   info.GetReturnValue().Set(Nan::Null());
 }
