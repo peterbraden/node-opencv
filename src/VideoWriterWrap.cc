@@ -2,6 +2,10 @@
 #include "Matrix.h"
 #include "OpenCV.h"
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/videoio/legacy/constants_c.h>
+#endif
+
 #include  <iostream>
 
 #ifdef HAVE_OPENCV_VIDEOIO

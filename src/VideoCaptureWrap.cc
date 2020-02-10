@@ -4,6 +4,10 @@
 
 #include  <iostream>
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/videoio/legacy/constants_c.h>
+#endif
+
 #ifdef HAVE_OPENCV_VIDEOIO
 
 Nan::Persistent<FunctionTemplate> VideoCaptureWrap::constructor;
