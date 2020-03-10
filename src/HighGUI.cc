@@ -21,7 +21,7 @@ void NamedWindow::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "blockingWaitKey", BlockingWaitKey);
   Nan::SetPrototypeMethod(ctor, "resizeWindow", ResizeWindow);
 
-  target->Set(Nan::New("NamedWindow").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::New("NamedWindow").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(NamedWindow::New) {
@@ -33,10 +33,10 @@ NAN_METHOD(NamedWindow::New) {
 
   NamedWindow* win;
   if (info.Length() == 1) {
-    win = new NamedWindow(std::string(*Nan::Utf8String(info[0]->ToString())), 0);
+    win = new NamedWindow(std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()))), 0);
   } else {  //if (info.Length() == 2){
-    win = new NamedWindow(std::string(*Nan::Utf8String(info[0]->ToString())), 
-            info[1]->IntegerValue());
+    win = new NamedWindow(std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()))), 
+            info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   }
 
   win->Wrap(info.Holder());
@@ -51,7 +51,7 @@ NamedWindow::NamedWindow(const std::string& name, int f) {
 
 NAN_METHOD(NamedWindow::Show) {
   SETUP_FUNCTION(NamedWindow)
-  Matrix *im = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  Matrix *im = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
   try {
     cv::imshow(self->winname, im->mat);
@@ -73,10 +73,10 @@ NAN_METHOD(NamedWindow::BlockingWaitKey) {
   int time = 0;
 
   if (info.Length() > 1) {
-    time = info[1]->IntegerValue();
+    time = info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
   } else {
     if (info.Length() > 0) {
-      time = info[0]->IntegerValue();
+      time = info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
     }
   }
 
@@ -92,8 +92,8 @@ NAN_METHOD(NamedWindow::ResizeWindow) {
     throw "expected 2 argurments: width, height";
   }//otherwise
 
-  int width = info[0]->IntegerValue();
-  int height = info[1]->IntegerValue();
+  int width = info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+  int height = info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
   cv::resizeWindow(self->winname, width, height);
 }
 

@@ -75,12 +75,12 @@ using namespace node;
 
 #define INT_FROM_ARGS(NAME, IND) \
   if (info[IND]->IsInt32()){ \
-    NAME = info[IND]->Uint32Value(); \
+    NAME = info[IND].As<Uint32>()->Value(); \
   }
 
 #define DOUBLE_FROM_ARGS(NAME, IND) \
   if (info[IND]->IsNumber()){ \
-    NAME = info[IND]->NumberValue(); \
+    NAME = info[IND].As<Number>()->Value(); \
   }
 
 class OpenCV: public Nan::ObjectWrap {

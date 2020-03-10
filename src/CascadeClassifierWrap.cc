@@ -24,7 +24,7 @@ void CascadeClassifierWrap::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "detectMultiScale", DetectMultiScale);
 
-  target->Set(Nan::New("CascadeClassifier").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::New("CascadeClassifier").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(CascadeClassifierWrap::New) {
@@ -41,7 +41,7 @@ NAN_METHOD(CascadeClassifierWrap::New) {
 
 CascadeClassifierWrap::CascadeClassifierWrap(v8::Value* fileName) {
   std::string filename;
-  filename = std::string(*Nan::Utf8String(fileName->ToString()));
+  filename = std::string(*Nan::Utf8String(fileName->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
 
   if (!cc.load(filename.c_str())) {
     Nan::ThrowTypeError("Error loading file");
@@ -131,24 +131,24 @@ NAN_METHOD(CascadeClassifierWrap::DetectMultiScale) {
     Nan::ThrowTypeError("detectMultiScale takes at least 2 info");
   }
 
-  Matrix *im = Nan::ObjectWrap::Unwrap < Matrix > (info[0]->ToObject());
+  Matrix *im = Nan::ObjectWrap::Unwrap < Matrix > (Nan::To<v8::Object>(info[0]).ToLocalChecked());
   REQ_FUN_ARG(1, cb);
 
   double scale = 1.1;
   if (info.Length() > 2 && info[2]->IsNumber()) {
-    scale = info[2]->NumberValue();
+    scale = info[2].As<Number>()->Value();
   }
 
   int neighbors = 2;
   if (info.Length() > 3 && info[3]->IsInt32()) {
-    neighbors = info[3]->IntegerValue();
+    neighbors = info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
   }
 
   int minw = 30;
   int minh = 30;
   if (info.Length() > 5 && info[4]->IsInt32() && info[5]->IsInt32()) {
-    minw = info[4]->IntegerValue();
-    minh = info[5]->IntegerValue();
+    minw = info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    minh = info[5]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
   }
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());

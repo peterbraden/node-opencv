@@ -17,11 +17,11 @@ NAN_METHOD(Histogram::CalcHist) {
 
   try {
     // Arg 0 is the image
-    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
     cv::Mat inputImage = m0->mat;
 
     // Arg 1 is the channel
-    Local<Array> nodeChannels = Local<Array>::Cast(info[1]->ToObject());
+    Local<Array> nodeChannels = Local<Array>::Cast(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     // vs does not like this const, no need for it?
     /*const */unsigned int dims = nodeChannels->Length();
               
@@ -33,33 +33,33 @@ NAN_METHOD(Histogram::CalcHist) {
     // in vs, can't create an array of non-constant size; but since we have dims<3, just use 3..
     int channels[3];
     for (unsigned int i = 0; i < dims; i++) {
-      channels[i] = nodeChannels->Get(i)->IntegerValue();
+      channels[i] = nodeChannels->Get(i)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
     }
 
     // Arg 2 is histogram sizes in each dimension
-    Local<Array> nodeHistSizes = Local<Array>::Cast(info[2]->ToObject());
+    Local<Array> nodeHistSizes = Local<Array>::Cast(info[2]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     int histSize[3];
     for (unsigned int i = 0; i < dims; i++) {
-      histSize[i] = nodeHistSizes->Get(i)->IntegerValue();
+      histSize[i] = nodeHistSizes->Get(i)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
     }
 
     // Arg 3 is array of the histogram bin boundaries in each dimension
-    Local<Array> nodeRanges = Local<Array>::Cast(info[3]->ToObject());
+    Local<Array> nodeRanges = Local<Array>::Cast(info[3]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     /// Set the ranges ( for B,G,R) )
     float histRanges[3][2];
     const float* ranges[3];
 
     for (unsigned int i = 0; i < dims; i++) {
-      Local<Array> nodeRange = Local<Array>::Cast(nodeRanges->Get(i)->ToObject());
-      float lower = nodeRange->Get(0)->NumberValue();
-      float higher = nodeRange->Get(1)->NumberValue();
+      Local<Array> nodeRange = Local<Array>::Cast(nodeRanges->Get(i)->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
+      float lower = nodeRange->Get(0).As<Number>()->Value();
+      float higher = nodeRange->Get(1).As<Number>()->Value();
       histRanges[i][0] = lower;
       histRanges[i][1] = higher;
       ranges[i] = histRanges[i];
     }
 
     // Arg 4 is uniform flag
-    bool uniform = info[4]->BooleanValue();
+    bool uniform = info[4]->BooleanValue( Nan::GetCurrentContext() ).FromJust();
 
     // Make a mat to hold the result image
     cv::Mat outputHist;
@@ -104,23 +104,23 @@ NAN_METHOD(Histogram::Emd) {
 
   try {
     // Arg 0 is the first signature
-    //std::vector<std::vector<float>> sig1 = nodeArrayToVec(info[0]->ToObject());
-    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+    //std::vector<std::vector<float>> sig1 = nodeArrayToVec(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
     cv::Mat sig1 = m0->mat;
 
     // Arg 1 is the second signature
-    //std::vector<std::vector<float>> sig2 = nodeArrayToVec(info[1]->ToObject());
-    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+    //std::vector<std::vector<float>> sig2 = nodeArrayToVec(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
+    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     cv::Mat sig2 = m1->mat;
 
     // Arg 2 is the distance type
-    int distType = info[2]->IntegerValue();
+    int distType = info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
     float emd;
 
     // Arg 3 is the cost matrix
     if (info.Length() > 3) {
-      Matrix* m3 = Nan::ObjectWrap::Unwrap<Matrix>(info[3]->ToObject());
+      Matrix* m3 = Nan::ObjectWrap::Unwrap<Matrix>(info[3]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
       cv::Mat costs = m3->mat;
 
       emd = cv::EMD(sig1, sig2, distType, costs);

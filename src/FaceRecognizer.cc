@@ -32,11 +32,11 @@ namespace cv {
 cv::Mat fromMatrixOrFilename(Local<Value> v) {
   cv::Mat im;
   if (v->IsString()) {
-    std::string filename = std::string(*Nan::Utf8String(v->ToString()));
+    std::string filename = std::string(*Nan::Utf8String(v->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
     im = cv::imread(filename);
     // std::cout<< im.size();
   } else {
-    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject());
+    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     im = img->mat;
   }
   return im;
@@ -47,12 +47,12 @@ cv::Mat fromMatrixOrFilename(Local<Value> v) {
 Matrix *CreateFromMatrixOrFilename(Local<Value> v) {
   if (v->IsString()) {
     Matrix *im = new Matrix();
-    std::string filename = std::string(*Nan::Utf8String(v->ToString()));
+    std::string filename = std::string(*Nan::Utf8String(v->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
     im->setMat(cv::imread(filename));
     return im;
     // std::cout<< im.size();
   } else {
-    return new Matrix(Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject()));
+    return new Matrix(Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject(Nan::GetCurrentContext()).ToLocalChecked()));
   }
 }
 
@@ -81,7 +81,7 @@ void FaceRecognizerWrap::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "getMat", GetMat);
 
-  target->Set(Nan::New("FaceRecognizer").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::New("FaceRecognizer").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(FaceRecognizerWrap::New) {
@@ -203,7 +203,7 @@ Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
       JSTHROW("train takes a list of [label, image] tuples")
     }
 
-    int label = valarr->Get(0)->Uint32Value();
+    int label = valarr->Get(0)->Uint32Value(Nan::GetCurrentContext()).ToChecked();
     cv::Mat im = fromMatrixOrFilename(valarr->Get(1)); //this is ok because we clone the image
     im = im.clone();
     if (im.channels() == 3) {
@@ -422,7 +422,7 @@ NAN_METHOD(FaceRecognizerWrap::SaveSync) {
   if (!info[0]->IsString()) {
     JSTHROW("Save takes a filename")
   }
-  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
 #if CV_MAJOR_VERSION >= 4 || (CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3)
   self->rec->write(filename);
 #else
@@ -436,7 +436,7 @@ NAN_METHOD(FaceRecognizerWrap::LoadSync) {
   if (!info[0]->IsString()) {
     JSTHROW("Load takes a filename")
   }
-  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
 #if CV_MAJOR_VERSION >= 4 || (CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3)
   self->rec->read(filename);
 #else
@@ -450,7 +450,7 @@ NAN_METHOD(FaceRecognizerWrap::GetMat) {
   if (!info[0]->IsString()) {
     JSTHROW("getMat takes a key")
   }
-  std::string key = std::string(*Nan::Utf8String(info[0]->ToString()));
+  std::string key = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
   cv::Mat m;
 #if CV_MAJOR_VERSION >= 3
   cv::face::BasicFaceRecognizer *bfr =
