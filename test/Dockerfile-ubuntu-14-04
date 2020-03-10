@@ -5,7 +5,7 @@ run apt-get install -y software-properties-common python-software-properties
 run add-apt-repository -y ppa:kubuntu-ppa/backports
 run apt-get update
 run apt-get install -y libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
-run curl -sL https://deb.nodesource.com/setup_6.x | bash -
+run curl -sL https://deb.nodesource.com/setup_12.x | bash -
 run apt-get install -y nodejs
 WORKDIR /root/node-opencv
 add . /root/node-opencv

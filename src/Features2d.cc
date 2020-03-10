@@ -109,8 +109,8 @@ NAN_METHOD(Features::Similarity) {
 
   REQ_FUN_ARG(2, cb);
 
-  Matrix *image1 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
-  Matrix *image2 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+  Matrix *image1 = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  Matrix *image2 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
   Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
 

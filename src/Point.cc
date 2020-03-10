@@ -19,7 +19,7 @@ void Point::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "dot", Dot);
 
-  target->Set(Nan::New("Point").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::New("Point").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(Point::New) {
@@ -31,10 +31,10 @@ NAN_METHOD(Point::New) {
 
   double x = 0, y = 0;
   if (info[0]->IsNumber()) {
-    x = info[0]->NumberValue();
+    x = info[0].As<Number>()->Value();
   }
   if (info[1]->IsNumber()) {
-    y = info[1]->NumberValue();
+    y = info[1].As<Number>()->Value();
   }
   Point *pt = new Point(x, y);
   pt->Wrap(info.This());
@@ -60,7 +60,7 @@ NAN_SETTER(Point::RaiseImmutable) {
 NAN_METHOD(Point::Dot) {
   Nan::HandleScope scope;
   Point *p1 = Nan::ObjectWrap::Unwrap<Point>(info.This());
-  Point *p2 = Nan::ObjectWrap::Unwrap<Point>(info[0]->ToObject());
+  Point *p2 = Nan::ObjectWrap::Unwrap<Point>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
   // Since V 2.3 Native Dot no longer supported
   info.GetReturnValue().Set(Nan::New<Number>(p1->point.x * p2->point.x + p1->point.y * p2->point.y));

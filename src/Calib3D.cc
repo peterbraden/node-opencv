@@ -4,7 +4,7 @@
 #ifdef HAVE_OPENCV_CALIB3D
 
 inline cv::Mat matFromMatrix(Local<Value> matrix) {
-  Matrix* m = Nan::ObjectWrap::Unwrap<Matrix>(matrix->ToObject());
+  Matrix* m = Nan::ObjectWrap::Unwrap<Matrix>(matrix->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
   return m->mat;
 }
 
@@ -12,10 +12,10 @@ inline cv::Size sizeFromArray(Local<Value> jsArray) {
   cv::Size patternSize;
 
   if (jsArray->IsArray()) {
-    Local<Object> v8sz = jsArray->ToObject();
+    Local<Object> v8sz = jsArray->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
-    patternSize = cv::Size(v8sz->Get(0)->IntegerValue(),
-        v8sz->Get(1)->IntegerValue());
+    patternSize = cv::Size(v8sz->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+        v8sz->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   } else {
     JSTHROW_TYPE("Size is not a valid array");
   }
@@ -26,10 +26,10 @@ inline cv::Size sizeFromArray(Local<Value> jsArray) {
 inline std::vector<cv::Point2f> points2fFromArray(Local<Value> array) {
   std::vector<cv::Point2f> points;
   if (array->IsArray()) {
-    Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
+    Local<Array> pointsArray = Local<Array>::Cast(array->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
-      Local<Object> pt = Nan::Get(pointsArray, i).ToLocalChecked()->ToObject();
+      Local<Object> pt = Nan::Get(pointsArray, i).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
       points.push_back(
           cv::Point2f(
               Nan::To<double>(Nan::Get(pt, Nan::New<String>("x").ToLocalChecked()).ToLocalChecked()).FromJust(),
@@ -47,10 +47,10 @@ inline std::vector<cv::Point2f> points2fFromArray(Local<Value> array) {
 inline std::vector<cv::Point3f> points3fFromArray(Local<Value> array) {
   std::vector<cv::Point3f> points;
   if (array->IsArray()) {
-    Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
+    Local<Array> pointsArray = Local<Array>::Cast(array->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
-      Local<Object> pt = pointsArray->Get(i)->ToObject();
+      Local<Object> pt = pointsArray->Get(i)->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
       points.push_back(
           cv::Point3f(
               Nan::To<double>(Nan::Get(pt, Nan::New<String>("x").ToLocalChecked()).ToLocalChecked()).FromJust(),
@@ -70,7 +70,7 @@ inline std::vector<std::vector<cv::Point2f> > points2fFromArrayOfArrays(
     Local<Value> array) {
   std::vector<std::vector<cv::Point2f> > points;
   if (array->IsArray()) {
-    Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
+    Local<Array> pointsArray = Local<Array>::Cast(array->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
       points.push_back(points2fFromArray(pointsArray->Get(i)));
@@ -86,7 +86,7 @@ inline std::vector<std::vector<cv::Point3f> > points3fFromArrayOfArrays(
     Local<Value> array) {
   std::vector<std::vector<cv::Point3f> > points;
   if (array->IsArray()) {
-    Local<Array> pointsArray = Local<Array>::Cast(array->ToObject());
+    Local<Array> pointsArray = Local<Array>::Cast(array->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
       points.push_back(points3fFromArray(pointsArray->Get(i)));
@@ -176,7 +176,7 @@ NAN_METHOD(Calib3D::DrawChessboardCorners) {
     std::vector<cv::Point2f> corners = points2fFromArray(info[2]);
 
     // Arg 3, pattern found boolean
-    bool patternWasFound = info[3]->ToBoolean()->Value();
+    bool patternWasFound = info[3]->ToBoolean( v8::Isolate::GetCurrent() )->Value();
 
     // Draw the corners
     cv::drawChessboardCorners(mat, patternSize, corners, patternWasFound);

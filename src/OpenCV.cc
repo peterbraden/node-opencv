@@ -162,11 +162,11 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
 
       // if we have a type arg
       if ((numargs > 2) && info[2]->IsNumber()){
-        type = info[2]->Uint32Value(); 
+        type = info[2]->Uint32Value(Nan::GetCurrentContext()).ToChecked(); 
       }
       
-      width = info[0]->Uint32Value();
-      height = info[1]->Uint32Value();
+      width = info[0]->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+      height = info[1]->Uint32Value(Nan::GetCurrentContext()).ToChecked();
       Local<Object> img_to_return = Matrix::CreateWrappedFromMat(cv::Mat(width, height, type));
       if (callback_arg < 0){
         info.GetReturnValue().Set(img_to_return);
@@ -174,7 +174,7 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
       } else {
         argv[0] = Nan::Null();
         argv[1] = img_to_return;
-        cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+        cb->Call( Nan::GetCurrentContext(), Nan::GetCurrentContext()->Global(), 2, argv);
         return;
       }
       // WILL have returned by here unless exception
@@ -184,11 +184,11 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
       
       //////////////////////////////
       // read image from a filename
-      std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+      std::string filename = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
       int flags = CV_LOAD_IMAGE_UNCHANGED;
       if (numargs > 1){
         if (info[1]->IsNumber()){
-          flags = info[1]->Uint32Value();
+          flags = info[1]->Uint32Value(Nan::GetCurrentContext()).ToChecked();
         }
       }
       if (callback_arg < 0){
@@ -210,20 +210,20 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
       int flags = CV_LOAD_IMAGE_UNCHANGED;
       if (numargs > 1){
         if (info[1]->IsNumber()){
-          flags = info[1]->Uint32Value();
+          flags = info[1]->Uint32Value(Nan::GetCurrentContext()).ToChecked();
         }
       }
       if (callback_arg < 0){
-        uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
-        unsigned len = Buffer::Length(info[0]->ToObject());
+        uint8_t *buf = (uint8_t *) Buffer::Data(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+        unsigned len = Buffer::Length(Nan::To<v8::Object>(info[0]).ToLocalChecked());
         cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
         Local<Object> img_to_return = Matrix::CreateWrappedFromMat(cv::imdecode(*mbuf, flags));
         info.GetReturnValue().Set(img_to_return);
         return;
       } else {
         // async
-        uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
-        unsigned len = Buffer::Length(info[0]->ToObject());
+        uint8_t *buf = (uint8_t *) Buffer::Data(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+        unsigned len = Buffer::Length(Nan::To<v8::Object>(info[0]).ToLocalChecked());
         Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
         Nan::AsyncQueueWorker(new AsyncImDecodeWorker(callback, buf, len, flags));
         return;
@@ -241,7 +241,7 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
   // if we got a callback
   if (callback_arg >= 0){
     // if using callback
-    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+    cb->Call( Nan::GetCurrentContext(), Nan::GetCurrentContext()->Global(), 2, argv);
   } else {
     // can only get here by exception
     info.GetReturnValue().Set(Nan::New<Boolean>(false));
@@ -281,29 +281,29 @@ NAN_METHOD(OpenCV::ReadImage) {
       int type = CV_64FC1;
       // if we have a type arg
       if ((numargs > 2) && info[2]->IsNumber()){
-        type = info[2]->Uint32Value(); 
+        type = info[2]->Uint32Value(Nan::GetCurrentContext()).ToChecked(); 
       }
-      width = info[0]->Uint32Value();
-      height = info[1]->Uint32Value();
+      width = info[0]->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+      height = info[1]->Uint32Value(Nan::GetCurrentContext()).ToChecked();
       mat = cv::Mat(width, height, type);
 
     } else if (info[0]->IsString()) {
-      std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+      std::string filename = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
       int flags = CV_LOAD_IMAGE_UNCHANGED;
       if (numargs > 1){
         if (info[1]->IsNumber()){
-          flags = info[1]->Uint32Value();
+          flags = info[1]->Uint32Value(Nan::GetCurrentContext()).ToChecked();
         }
       }
       mat = cv::imread(filename, flags);
 
     } else if (Buffer::HasInstance(info[0])) {
-      uint8_t *buf = (uint8_t *) Buffer::Data(info[0]->ToObject());
-      unsigned len = Buffer::Length(info[0]->ToObject());
+      uint8_t *buf = (uint8_t *) Buffer::Data(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+      unsigned len = Buffer::Length(Nan::To<v8::Object>(info[0]).ToLocalChecked());
       int flags = CV_LOAD_IMAGE_UNCHANGED;
       if (numargs > 1){
         if (info[1]->IsNumber()){
-          flags = info[1]->Uint32Value();
+          flags = info[1]->Uint32Value(Nan::GetCurrentContext()).ToChecked();
         }
       }
       cv::Mat *mbuf = new cv::Mat(len, 1, CV_64FC1, buf);
@@ -326,7 +326,7 @@ NAN_METHOD(OpenCV::ReadImage) {
   // if we got a callback
   if (callback_arg >= 0){
     // if using callback
-    cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+    cb->Call( Nan::GetCurrentContext(), Nan::GetCurrentContext()->Global(), 2, argv);
   } else {
     // if to return the mat
     if (success)
@@ -352,7 +352,7 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
   std::vector<cv::Mat> mats;
   try {
     if (info[0]->IsString()) {
-      std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+      std::string filename = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
       cv::imreadmulti(filename, mats);
 
       if (mats.empty()) {
@@ -373,7 +373,7 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
   }
 
   Nan::TryCatch try_catch;
-  cb->Call(Nan::GetCurrentContext()->Global(), 2, argv);
+  cb->Call( Nan::GetCurrentContext(), Nan::GetCurrentContext()->Global(), 2, argv);
 
   if (try_catch.HasCaught()) {
     Nan::FatalException(try_catch);

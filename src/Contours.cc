@@ -33,7 +33,7 @@ void Contour::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "hierarchy", Hierarchy);
   Nan::SetPrototypeMethod(ctor, "serialize", Serialize);
   Nan::SetPrototypeMethod(ctor, "deserialize", Deserialize);
-  target->Set(Nan::New("Contours").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::New("Contours").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(Contour::New) {
@@ -58,8 +58,8 @@ NAN_METHOD(Contour::Point) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
-  int index = info[1]->NumberValue();
+  int pos = info[0].As<Number>()->Value();
+  int index = info[1].As<Number>()->Value();
 
   cv::Point point = self->contours[pos][index];
 
@@ -74,7 +74,7 @@ NAN_METHOD(Contour::Points) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
+  int pos = info[0].As<Number>()->Value();
 
   std::vector<cv::Point> points = self->contours[pos];
   Local<Array> data = Nan::New<Array>(points.size());
@@ -105,7 +105,7 @@ NAN_METHOD(Contour::CornerCount) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
+  int pos = info[0].As<Number>()->Value();
 
   info.GetReturnValue().Set(Nan::New<Number>(self->contours[pos].size()));
 }
@@ -114,8 +114,8 @@ NAN_METHOD(Contour::Area) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
-  bool orientation = (info.Length() > 1 && info[1]->BooleanValue());
+  int pos = info[0].As<Number>()->Value();
+  bool orientation = (info.Length() > 1 && info[1]->BooleanValue( Nan::GetCurrentContext() ).FromJust());
 
   // info.GetReturnValue().Set(Nan::New<Number>(contourArea(self->contours)));
   info.GetReturnValue().Set(Nan::New<Number>(contourArea(cv::Mat(self->contours[pos]), orientation)));
@@ -125,8 +125,8 @@ NAN_METHOD(Contour::ArcLength) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
-  bool isClosed = info[1]->BooleanValue();
+  int pos = info[0].As<Number>()->Value();
+  bool isClosed = info[1]->BooleanValue( Nan::GetCurrentContext() ).FromJust();
 
   info.GetReturnValue().Set(Nan::New<Number>(arcLength(cv::Mat(self->contours[pos]), isClosed)));
 }
@@ -135,9 +135,9 @@ NAN_METHOD(Contour::ApproxPolyDP) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
-  double epsilon = info[1]->NumberValue();
-  bool isClosed = info[2]->BooleanValue();
+  int pos = info[0].As<Number>()->Value();
+  double epsilon = info[1].As<Number>()->Value();
+  bool isClosed = info[2]->BooleanValue( Nan::GetCurrentContext() ).FromJust();
 
   cv::Mat approxed;
   approxPolyDP(cv::Mat(self->contours[pos]), approxed, epsilon, isClosed);
@@ -151,8 +151,8 @@ NAN_METHOD(Contour::ConvexHull) {
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
 
-  int pos = info[0]->NumberValue();
-  bool clockwise = info[1]->BooleanValue();
+  int pos = info[0].As<Number>()->Value();
+  bool clockwise = info[1]->BooleanValue( Nan::GetCurrentContext() ).FromJust();
 
   cv::Mat hull;
   cv::convexHull(cv::Mat(self->contours[pos]), hull, clockwise);
@@ -165,7 +165,7 @@ NAN_METHOD(Contour::BoundingRect) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
+  int pos = info[0].As<Number>()->Value();
 
   cv::Rect bounding = cv::boundingRect(cv::Mat(self->contours[pos]));
   Local<Object> rect = Nan::New<Object>();
@@ -182,7 +182,7 @@ NAN_METHOD(Contour::MinAreaRect) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
+  int pos = info[0].As<Number>()->Value();
 
   cv::RotatedRect minimum = cv::minAreaRect(cv::Mat(self->contours[pos]));
 
@@ -219,7 +219,7 @@ NAN_METHOD(Contour::FitEllipse) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
+  int pos = info[0].As<Number>()->Value();
 
   if (self->contours[pos].size() >= 5) {  // Minimum number for an ellipse
     cv::RotatedRect ellipse = cv::fitEllipse(cv::Mat(self->contours[pos]));
@@ -247,7 +247,7 @@ NAN_METHOD(Contour::IsConvex) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
+  int pos = info[0].As<Number>()->Value();
 
   info.GetReturnValue().Set(Nan::New<Boolean>(isContourConvex(cv::Mat(self->contours[pos]))));
 }
@@ -256,7 +256,7 @@ NAN_METHOD(Contour::Moments) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->NumberValue();
+  int pos = info[0].As<Number>()->Value();
 
   // Get the moments
   cv::Moments mu = moments( self->contours[pos], false );
@@ -275,7 +275,7 @@ NAN_METHOD(Contour::Hierarchy) {
   Nan::HandleScope scope;
 
   Contour *self = Nan::ObjectWrap::Unwrap<Contour>(info.This());
-  int pos = info[0]->IntegerValue();
+  int pos = info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
   cv::Vec4i hierarchy = self->hierarchy[pos];
 
@@ -348,8 +348,8 @@ NAN_METHOD(Contour::Deserialize) {
     int contour_length = contour_data->Length();
     for (int j = 0; j < contour_length; j++) {
       Local<Array> point_data = Local<Array>::Cast(contour_data->Get(j));
-      int x = point_data->Get(0)->IntegerValue();
-      int y = point_data->Get(1)->IntegerValue();
+      int x = point_data->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+      int y = point_data->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
       points.push_back(cv::Point(x, y));
     }
 
@@ -361,10 +361,10 @@ NAN_METHOD(Contour::Deserialize) {
 
   for (int i = 0; i < hierarchy_length; i++) {
     Local<Array> contour_data = Local<Array>::Cast(hierarchy_data->Get(i));
-    int a = contour_data->Get(0)->IntegerValue();
-    int b = contour_data->Get(1)->IntegerValue();
-    int c = contour_data->Get(2)->IntegerValue();
-    int d = contour_data->Get(3)->IntegerValue();
+    int a = contour_data->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int b = contour_data->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int c = contour_data->Get(2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int d = contour_data->Get(3)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
     hierarchy_res.push_back(cv::Vec4i(a, b, c, d));
   }
 

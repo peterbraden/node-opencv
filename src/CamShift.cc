@@ -33,7 +33,7 @@ void TrackedObject::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "track", Track);
 
-  target->Set(Nan::New("TrackedObject").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::New("TrackedObject").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(TrackedObject::New) {
@@ -43,26 +43,26 @@ NAN_METHOD(TrackedObject::New) {
     JSTHROW_TYPE("Cannot Instantiate without new")
   }
 
-  Matrix* m = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  Matrix* m = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
   cv::Rect r;
   int channel = CHANNEL_HUE;
 
   if (info[1]->IsArray()) {
-    Local<Object> v8rec = info[1]->ToObject();
+    Local<Object> v8rec = info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
     r = cv::Rect(
-        v8rec->Get(0)->IntegerValue(),
-        v8rec->Get(1)->IntegerValue(),
-        v8rec->Get(2)->IntegerValue() - v8rec->Get(0)->IntegerValue(),
-        v8rec->Get(3)->IntegerValue() - v8rec->Get(1)->IntegerValue());
+        v8rec->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+        v8rec->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+        v8rec->Get(2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked() - v8rec->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+        v8rec->Get(3)->IntegerValue( Nan::GetCurrentContext() ).ToChecked() - v8rec->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   } else {
     JSTHROW_TYPE("Must pass rectangle to track")
   }
 
   if (info[2]->IsObject()) {
-    Local<Object> opts = info[2]->ToObject();
+    Local<Object> opts = info[2]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
     if (opts->Get(Nan::New("channel").ToLocalChecked())->IsString()) {
-      v8::String::Utf8Value c(opts->Get(Nan::New("channel").ToLocalChecked())->ToString());
+      v8::String::Utf8Value c(v8::Isolate::GetCurrent(),opts->Get(Nan::New("channel").ToLocalChecked())->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
       std::string cc = std::string(*c);
 
       if (cc == "hue" || cc == "h") {
@@ -131,7 +131,7 @@ NAN_METHOD(TrackedObject::Track) {
     return;
   }
 
-  Matrix *im = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  Matrix *im = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
   cv::RotatedRect r;
 
   if ((self->prev_rect.x < 0) || (self->prev_rect.y < 0)

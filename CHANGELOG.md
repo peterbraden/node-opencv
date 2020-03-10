@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 7.0.0
+- Support Node v12 thanks to @guangmingwan
+- Support OpenCV 4 thanks to @grandpaul
+
 ## 6.3.0
 - Housekeeping
 
