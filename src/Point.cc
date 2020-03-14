@@ -19,7 +19,7 @@ void Point::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "dot", Dot);
 
-  target->Set(Nan::New("Point").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("Point").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(Point::New) {

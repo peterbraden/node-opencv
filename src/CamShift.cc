@@ -33,7 +33,7 @@ void TrackedObject::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "track", Track);
 
-  target->Set(Nan::New("TrackedObject").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("TrackedObject").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(TrackedObject::New) {
@@ -50,10 +50,10 @@ NAN_METHOD(TrackedObject::New) {
   if (info[1]->IsArray()) {
     Local<Object> v8rec = info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
     r = cv::Rect(
-        v8rec->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
-        v8rec->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
-        v8rec->Get(2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked() - v8rec->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
-        v8rec->Get(3)->IntegerValue( Nan::GetCurrentContext() ).ToChecked() - v8rec->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
+        v8rec->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+        v8rec->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+        v8rec->Get(Nan::GetCurrentContext(),2).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked() - v8rec->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+        v8rec->Get(Nan::GetCurrentContext(),3).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked() - v8rec->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   } else {
     JSTHROW_TYPE("Must pass rectangle to track")
   }
@@ -61,8 +61,8 @@ NAN_METHOD(TrackedObject::New) {
   if (info[2]->IsObject()) {
     Local<Object> opts = info[2]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
-    if (opts->Get(Nan::New("channel").ToLocalChecked())->IsString()) {
-      v8::String::Utf8Value c(v8::Isolate::GetCurrent(),opts->Get(Nan::New("channel").ToLocalChecked())->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
+    if (opts->Get(Nan::GetCurrentContext(),Nan::New("channel").ToLocalChecked()).ToLocalChecked()->IsString()) {
+      v8::String::Utf8Value c(v8::Isolate::GetCurrent(),opts->Get(Nan::GetCurrentContext(),Nan::New("channel").ToLocalChecked()).ToLocalChecked()->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
       std::string cc = std::string(*c);
 
       if (cc == "hue" || cc == "h") {
@@ -166,17 +166,17 @@ NAN_METHOD(TrackedObject::Track) {
 
   v8::Local<v8::Array> arr = Nan::New<Array>(4);
 
-  arr->Set(0, Nan::New<Number>(bounds.x));
-  arr->Set(1, Nan::New<Number>(bounds.y));
-  arr->Set(2, Nan::New<Number>(bounds.x + bounds.width));
-  arr->Set(3, Nan::New<Number>(bounds.y + bounds.height));
+  arr->Set(Nan::GetCurrentContext(),0, Nan::New<Number>(bounds.x));
+  arr->Set(Nan::GetCurrentContext(),1, Nan::New<Number>(bounds.y));
+  arr->Set(Nan::GetCurrentContext(),2, Nan::New<Number>(bounds.x + bounds.width));
+  arr->Set(Nan::GetCurrentContext(),3, Nan::New<Number>(bounds.y + bounds.height));
 
   /*
   cv::Point2f pts[4];
   r.points(pts);
 
   for (int i = 0; i < 8; i += 2) {
-    arr->Set(i, Nan::New<Number>(pts[i].x));
+    arr->Set(Nan::GetCurrentContext(), i, Nan::New<Number>(pts[i].x));
     arr->Set(i + 1, Nan::New<Number>(pts[i].y));
   } */
 

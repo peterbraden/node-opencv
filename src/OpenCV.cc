@@ -8,7 +8,7 @@ void OpenCV::Init(Local<Object> target) {
   // Version string.
   char out [21];
   int n = sprintf(out, "%i.%i", CV_MAJOR_VERSION, CV_MINOR_VERSION);
-  target->Set(Nan::New<String>("version").ToLocalChecked(), Nan::New<String>(out, n).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New<String>("version").ToLocalChecked(), Nan::New<String>(out, n).ToLocalChecked());
 
   Nan::SetMethod(target, "readImage", ReadImage);
   Nan::SetMethod(target, "readImageAsync", ReadImageAsync);
@@ -369,7 +369,7 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
 
   for (std::vector<cv::Mat>::size_type i = 0; i < mats.size(); i ++) {
     Local<Object> im_h = Matrix::CreateWrappedFromMat(mats[i]);
-    output->Set(i, im_h);
+    output->Set(Nan::GetCurrentContext(), i, im_h);
   }
 
   Nan::TryCatch try_catch;

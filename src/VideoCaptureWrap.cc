@@ -48,7 +48,7 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "grab", Grab);
   Nan::SetPrototypeMethod(ctor, "retrieve", Retrieve);
 
-  target->Set(Nan::New("VideoCapture").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("VideoCapture").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(VideoCaptureWrap::New) {

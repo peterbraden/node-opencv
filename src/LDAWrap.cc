@@ -28,7 +28,7 @@ void LDAWrap::Init(Local<Object> target) {
   Nan::SetMethod(ctor, "subspaceProject", SubspaceProject);
   Nan::SetMethod(ctor, "subspaceReconstruct", SubspaceReconstruct);
 
-  target->Set(Nan::New("LDA").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("LDA").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(LDAWrap::New) {

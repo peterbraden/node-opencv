@@ -133,7 +133,7 @@ void Matrix::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "div", Div);
   Nan::SetPrototypeMethod(ctor, "pow", Pow);
 
-  target->Set(Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  Nan::Set(target, Nan::New("Matrix").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(Matrix::New) {
@@ -225,14 +225,20 @@ Matrix::Matrix(int rows, int cols, int type, Local<Object> scalarObj) {
   mat = cv::Mat(rows, cols, type);
   Nan::AdjustExternalMemory(mat.dataend - mat.datastart);
   if (mat.channels() == 3) {
-    mat.setTo(cv::Scalar(scalarObj->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
-        scalarObj->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
-        scalarObj->Get(2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked()));
+    mat.setTo(cv::Scalar(  
+        Nan::To<double>( Nan::Get(scalarObj,0).ToLocalChecked() ).FromJust(),
+        Nan::To<double>( Nan::Get(scalarObj,1).ToLocalChecked() ).FromJust(),
+        Nan::To<double>( Nan::Get(scalarObj,2).ToLocalChecked() ).FromJust() 
+    ));
   } else if (mat.channels() == 2) {
-    mat.setTo(cv::Scalar(scalarObj->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
-        scalarObj->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked()));
+    mat.setTo(cv::Scalar(
+        Nan::To<double>( Nan::Get(scalarObj,0).ToLocalChecked() ).FromJust(),
+        Nan::To<double>( Nan::Get(scalarObj,1).ToLocalChecked() ).FromJust()
+    ));
   } else if (mat.channels() == 1) {
-    mat.setTo(cv::Scalar(scalarObj->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked()));
+    mat.setTo(cv::Scalar(
+        Nan::To<double>( Nan::Get(scalarObj,0).ToLocalChecked() ).FromJust()
+    ));
   } else {
     Nan::ThrowError("Only 1-3 channels are supported");
   }
@@ -305,13 +311,13 @@ NAN_METHOD(Matrix::Pixel) {
 
     if (self->mat.channels() == 3) {
       self->mat.at<cv::Vec3b>(y, x)[0] =
-          (uchar) objColor->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+          (uchar) Nan::To<uint32_t>( Nan::Get(objColor,0).ToLocalChecked() ).FromJust();
       self->mat.at<cv::Vec3b>(y, x)[1] =
-          (uchar) objColor->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+          (uchar) Nan::To<uint32_t>( Nan::Get(objColor,1).ToLocalChecked() ).FromJust();
       self->mat.at<cv::Vec3b>(y, x)[2] =
-          (uchar) objColor->Get(2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+          (uchar) Nan::To<uint32_t>( Nan::Get(objColor,2).ToLocalChecked() ).FromJust();
     } else if (self->mat.channels() == 1)
-      self->mat.at<uchar>(y, x) = (uchar) objColor->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+      self->mat.at<uchar>(y, x) = Nan::To<uint32_t>( Nan::Get(objColor,0).ToLocalChecked() ).FromJust();;
 
     info.GetReturnValue().Set(info[2]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
   } else {
@@ -319,9 +325,9 @@ NAN_METHOD(Matrix::Pixel) {
       cv::Vec3b intensity = self->mat.at<cv::Vec3b>(y, x);
 
       v8::Local < v8::Array > arr = Nan::New<v8::Array>(3);
-      arr->Set(0, Nan::New<Number>(intensity[0]));
-      arr->Set(1, Nan::New<Number>(intensity[1]));
-      arr->Set(2, Nan::New<Number>(intensity[2]));
+      Nan::Set(arr, 0, Nan::New<Number>(intensity[0]));
+      Nan::Set(arr, 1, Nan::New<Number>(intensity[1]));
+      Nan::Set(arr, 2, Nan::New<Number>(intensity[2]));
       info.GetReturnValue().Set(arr);
     } else if (self->mat.channels() == 1) {
       uchar intensity = self->mat.at<uchar>(y, x);
@@ -353,17 +359,17 @@ NAN_METHOD(Matrix::GetPixel) {
   if (self->mat.channels() == 4) {
     v8::Local < v8::Array > arr = Nan::New<Array>(4);
     cv::Vec4b pixel = self->mat.at<cv::Vec4b>(y, x);
-    arr->Set(0, Nan::New<Number>((double) pixel.val[0]));
-    arr->Set(1, Nan::New<Number>((double) pixel.val[1]));
-    arr->Set(2, Nan::New<Number>((double) pixel.val[2]));
-    arr->Set(3, Nan::New<Number>((double) pixel.val[3]));
+     Nan::Set(arr, 0, Nan::New<Number>((double) pixel.val[0]));
+     Nan::Set(arr, 1, Nan::New<Number>((double) pixel.val[1]));
+     Nan::Set(arr, 2, Nan::New<Number>((double) pixel.val[2]));
+     Nan::Set(arr, 3, Nan::New<Number>((double) pixel.val[3]));
     info.GetReturnValue().Set(arr);
   } else if (self->mat.channels() == 3) {
     v8::Local < v8::Array > arr = Nan::New<Array>(3);
     cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
-    arr->Set(0, Nan::New<Number>((double) pixel.val[0]));
-    arr->Set(1, Nan::New<Number>((double) pixel.val[1]));
-    arr->Set(2, Nan::New<Number>((double) pixel.val[2]));
+     Nan::Set(arr, 0, Nan::New<Number>((double) pixel.val[0]));
+     Nan::Set(arr, 1, Nan::New<Number>((double) pixel.val[1]));
+     Nan::Set(arr, 2, Nan::New<Number>((double) pixel.val[2]));
     info.GetReturnValue().Set(arr);
   } else if(self->mat.channels() == 1) {
     int pixel = (int)self->mat.at<unsigned char>(y, x);
@@ -439,7 +445,7 @@ NAN_METHOD(Matrix::GetData) {
   }
 
   v8::Local<v8::Object> globalObj = Nan::GetCurrentContext()->Global();
-  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
+  v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(Nan::Get(globalObj,Nan::New<String>("Buffer").ToLocalChecked()).ToLocalChecked());
   v8::Local<v8::Value> constructorArgs[3] = {buf, Nan::New<v8::Integer>((unsigned) size), Nan::New<v8::Integer>(0)};
   v8::Local<v8::Object> actualBuffer = Nan::NewInstance(bufferConstructor, 3, constructorArgs).ToLocalChecked();
 
@@ -596,8 +602,8 @@ NAN_METHOD(Matrix::Size) {
   SETUP_FUNCTION(Matrix)
 
   v8::Local < v8::Array > arr = Nan::New<Array>(2);
-  arr->Set(0, Nan::New<Number>(self->mat.size().height));
-  arr->Set(1, Nan::New<Number>(self->mat.size().width));
+   Nan::Set(arr, 0, Nan::New<Number>(self->mat.size().height));
+   Nan::Set(arr, 1, Nan::New<Number>(self->mat.size().width));
 
   info.GetReturnValue().Set(arr);
 }
@@ -646,7 +652,7 @@ NAN_METHOD(Matrix::Row) {
 
   for (int x = 0; x < width; x++) {
     double v = Matrix::DblGet(self->mat, y, x);
-    arr->Set(x, Nan::New<Number>(v));
+     Nan::Set(arr, x, Nan::New<Number>(v));
   }
 
   info.GetReturnValue().Set(arr);
@@ -664,25 +670,25 @@ NAN_METHOD(Matrix::PixelRow) {
     for (int x = 0; x < width; x++) {
       cv::Vec4b pixel = self->mat.at<cv::Vec4b>(y, x);
       int offset = x * 4;
-      arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
-      arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
-      arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
-      arr->Set(offset + 3, Nan::New<Number>((double) pixel.val[3]));
+       Nan::Set(arr, offset, Nan::New<Number>((double) pixel.val[0]));
+       Nan::Set(arr, offset + 1, Nan::New<Number>((double) pixel.val[1]));
+       Nan::Set(arr, offset + 2, Nan::New<Number>((double) pixel.val[2]));
+       Nan::Set(arr, offset + 3, Nan::New<Number>((double) pixel.val[3]));
     }
   } else if(self->mat.channels() == 3){
     arr = Nan::New<Array>(width * 3);
     for (int x = 0; x < width; x++) {
       cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
       int offset = x * 3;
-      arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
-      arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
-      arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
+       Nan::Set(arr, offset, Nan::New<Number>((double) pixel.val[0]));
+       Nan::Set(arr, offset + 1, Nan::New<Number>((double) pixel.val[1]));
+       Nan::Set(arr, offset + 2, Nan::New<Number>((double) pixel.val[2]));
     }
   } else if(self->mat.channels() == 1){
     arr = Nan::New<Array>(width);
     for (int x = 0; x < width; x++) {
       int pixel = (int)self->mat.at<unsigned char>(y, x);
-      arr->Set(x, Nan::New<Number>(pixel));
+       Nan::Set(arr, x, Nan::New<Number>(pixel));
     }
   } else {
       Nan::ThrowTypeError("Only 4, 3 and 1 channel matrix are supported");
@@ -700,7 +706,7 @@ NAN_METHOD(Matrix::Col) {
 
   for (int y = 0; y < height; y++) {
     double v = Matrix::DblGet(self->mat, y, x);
-    arr->Set(y, Nan::New<Number>(v));
+     Nan::Set(arr, y, Nan::New<Number>(v));
   }
   info.GetReturnValue().Set(arr);
 }
@@ -717,25 +723,25 @@ NAN_METHOD(Matrix::PixelCol) {
     for (int y = 0; y < height; y++) {
       cv::Vec4b pixel = self->mat.at<cv::Vec4b>(y, x);
       int offset = y * 4;
-      arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
-      arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
-      arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
-      arr->Set(offset + 3, Nan::New<Number>((double) pixel.val[3]));
+       Nan::Set(arr, offset, Nan::New<Number>((double) pixel.val[0]));
+       Nan::Set(arr, offset + 1, Nan::New<Number>((double) pixel.val[1]));
+       Nan::Set(arr, offset + 2, Nan::New<Number>((double) pixel.val[2]));
+       Nan::Set(arr, offset + 3, Nan::New<Number>((double) pixel.val[3]));
     }
   } else if (self->mat.channels() == 3) {
     arr = Nan::New<Array>(height * 3);
     for (int y = 0; y < height; y++) {
       cv::Vec3b pixel = self->mat.at<cv::Vec3b>(y, x);
       int offset = y * 3;
-      arr->Set(offset, Nan::New<Number>((double) pixel.val[0]));
-      arr->Set(offset + 1, Nan::New<Number>((double) pixel.val[1]));
-      arr->Set(offset + 2, Nan::New<Number>((double) pixel.val[2]));
+       Nan::Set(arr, offset, Nan::New<Number>((double) pixel.val[0]));
+       Nan::Set(arr, offset + 1, Nan::New<Number>((double) pixel.val[1]));
+       Nan::Set(arr, offset + 2, Nan::New<Number>((double) pixel.val[2]));
     }
   } else if(self->mat.channels() == 1) {
     arr = Nan::New<Array>(height);
     for (int y = 0; y < height; y++) {
       int pixel = (int)self->mat.at<unsigned char>(y, x);
-      arr->Set(y, Nan::New<Number>(pixel));
+       Nan::Set(arr, y, Nan::New<Number>(pixel));
     }
   } else {
     Nan::ThrowTypeError("Only 4, 3 and 1 channel matrix are supported");
@@ -788,19 +794,19 @@ NAN_METHOD(Matrix::ToBuffer) {
     // If the extension (image format) is provided
     if (options->Has( Nan::GetCurrentContext(), Nan::New<String>("ext").ToLocalChecked()).ToChecked() ) {
       v8::String::Utf8Value str(v8::Isolate::GetCurrent(),
-          options->Get(Nan::New<String>("ext").ToLocalChecked())->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
+          options->Get(Nan::GetCurrentContext(), Nan::New<String>("ext").ToLocalChecked()).ToLocalChecked()->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
       optExt = *str;
       ext = (const char *) optExt.c_str();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("jpegQuality").ToLocalChecked()).ToChecked() ) {
       int compression =
-          options->Get(Nan::New<String>("jpegQuality").ToLocalChecked())->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+          options->Get(Nan::GetCurrentContext(), Nan::New<String>("jpegQuality").ToLocalChecked()).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
       params.push_back(CV_IMWRITE_JPEG_QUALITY);
       params.push_back(compression);
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("pngCompression").ToLocalChecked()).ToChecked() ) {
       int compression =
-          options->Get(Nan::New<String>("pngCompression").ToLocalChecked())->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+          options->Get(Nan::GetCurrentContext(), Nan::New<String>("pngCompression").ToLocalChecked()).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
       params.push_back(CV_IMWRITE_PNG_COMPRESSION);
       params.push_back(compression);
     }
@@ -817,7 +823,7 @@ NAN_METHOD(Matrix::ToBuffer) {
 
   v8::Local < v8::Object > globalObj = Nan::GetCurrentContext()->Global();
   v8::Local < v8::Function > bufferConstructor = v8::Local < v8::Function
-      > ::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
+      > ::Cast(globalObj->Get(Nan::GetCurrentContext(), Nan::New<String>("Buffer").ToLocalChecked()).ToLocalChecked());
   v8::Local<v8::Value> constructorArgs[3] =
       {buf, Nan::New<v8::Integer>((unsigned)vec.size()), Nan::New<v8::Integer>(0)};
   v8::Local < v8::Object > actualBuffer = Nan::NewInstance(bufferConstructor, 3, constructorArgs).ToLocalChecked();
@@ -857,7 +863,7 @@ public:
     memcpy(data, &res[0], res.size());
 
     v8::Local<v8::Object> globalObj = Nan::GetCurrentContext()->Global();
-    v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(Nan::New<String>("Buffer").ToLocalChecked()));
+    v8::Local<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(Nan::GetCurrentContext(), Nan::New<String>("Buffer").ToLocalChecked()).ToLocalChecked());
     v8::Local<v8::Value> constructorArgs[3] = {buf, Nan::New<v8::Integer>((unsigned)res.size()), Nan::New<v8::Integer>(0)};
     v8::Local<v8::Object> actualBuffer = Nan::NewInstance(bufferConstructor, 3, constructorArgs).ToLocalChecked();;
 
@@ -896,19 +902,19 @@ NAN_METHOD(Matrix::ToBufferAsync) {
     // If the extension (image format) is provided
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("ext").ToLocalChecked()).ToChecked() ) {
       v8::String::Utf8Value str(v8::Isolate::GetCurrent(),
-          options->Get(Nan::New<String>("ext").ToLocalChecked())->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
+          options->Get(Nan::GetCurrentContext(), Nan::New<String>("ext").ToLocalChecked()).ToLocalChecked()->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
       std::string str2 = std::string(*str);
       ext = str2;
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("jpegQuality").ToLocalChecked()).ToChecked() ) {
       int compression =
-          options->Get(Nan::New<String>("jpegQuality").ToLocalChecked())->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+          options->Get(Nan::GetCurrentContext(), Nan::New<String>("jpegQuality").ToLocalChecked()).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
       params.push_back(CV_IMWRITE_JPEG_QUALITY);
       params.push_back(compression);
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("pngCompression").ToLocalChecked()).ToChecked() ) {
       int compression =
-          options->Get(Nan::New<String>("pngCompression").ToLocalChecked())->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+          options->Get(Nan::GetCurrentContext(), Nan::New<String>("pngCompression").ToLocalChecked()).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
       params.push_back(CV_IMWRITE_PNG_COMPRESSION);
       params.push_back(compression);
     }
@@ -939,36 +945,36 @@ NAN_METHOD(Matrix::Ellipse) {
     v8::Local < v8::Object > options = v8::Local<v8::Object>::Cast(info[0]);
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("center").ToLocalChecked()).ToChecked() ) {
       Local < Object > center =
-          options->Get(Nan::New<String>("center").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-      x = center->Get(Nan::New<String>("x").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).ToChecked();
-      y = center->Get(Nan::New<String>("y").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+          options->Get(Nan::GetCurrentContext(), Nan::New<String>("center").ToLocalChecked()).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+      x = center->Get(Nan::GetCurrentContext(), Nan::New<String>("x").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+      y = center->Get(Nan::GetCurrentContext(), Nan::New<String>("y").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("axes").ToLocalChecked()).ToChecked() ) {
-      Local < Object > axes = options->Get(Nan::New<String>("axes").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-      width = axes->Get(Nan::New<String>("width").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).ToChecked();
-      height = axes->Get(Nan::New<String>("height").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+      Local < Object > axes = options->Get(Nan::GetCurrentContext(), Nan::New<String>("axes").ToLocalChecked()).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+      width = axes->Get(Nan::GetCurrentContext(), Nan::New<String>("width").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+      height = axes->Get(Nan::GetCurrentContext(), Nan::New<String>("height").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("thickness").ToLocalChecked()).ToChecked() ) {
-      thickness = options->Get(Nan::New<String>("thickness").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+      thickness = options->Get(Nan::GetCurrentContext(), Nan::New<String>("thickness").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("angle").ToLocalChecked()).ToChecked() ) {
-      angle = options->Get(Nan::New<String>("angle").ToLocalChecked()).As<Number>()->Value();
+      angle = options->Get(Nan::GetCurrentContext(), Nan::New<String>("angle").ToLocalChecked()).ToLocalChecked().As<Number>()->Value();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("startAngle").ToLocalChecked()).ToChecked() ) {
-      startAngle = options->Get(Nan::New<String>("startAngle").ToLocalChecked()).As<Number>()->Value();
+      startAngle = options->Get(Nan::GetCurrentContext(), Nan::New<String>("startAngle").ToLocalChecked()).ToLocalChecked().As<Number>()->Value();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("endAngle").ToLocalChecked()).ToChecked() ) {
-      endAngle = options->Get(Nan::New<String>("endAngle").ToLocalChecked()).As<Number>()->Value();
+      endAngle = options->Get(Nan::GetCurrentContext(), Nan::New<String>("endAngle").ToLocalChecked()).ToLocalChecked().As<Number>()->Value();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("lineType").ToLocalChecked()).ToChecked() ) {
-      lineType = options->Get(Nan::New<String>("lineType").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+      lineType = options->Get(Nan::GetCurrentContext(), Nan::New<String>("lineType").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("shift").ToLocalChecked()).ToChecked() ) {
-      shift = options->Get(Nan::New<String>("shift").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+      shift = options->Get(Nan::GetCurrentContext(), Nan::New<String>("shift").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked();
     }
     if (options->Has( Nan::GetCurrentContext(),Nan::New<String>("color").ToLocalChecked()).ToChecked() ) {
       Local < Object > objColor =
-          options->Get(Nan::New<String>("color").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+          options->Get(Nan::GetCurrentContext(), Nan::New<String>("color").ToLocalChecked()).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
       color = setColor(objColor);
     }
   } else {
@@ -1005,11 +1011,11 @@ NAN_METHOD(Matrix::Rectangle) {
       color = setColor(objColor);
     }
 
-    int x = xy->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    int y = xy->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int x = xy->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int y = xy->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
-    int width = width_height->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    int height = width_height->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int width = width_height->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int height = width_height->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
     int thickness = 1;
 
@@ -1037,11 +1043,11 @@ NAN_METHOD(Matrix::Line) {
       color = setColor(objColor);
     }
 
-    int x1 = xy1->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    int y1 = xy1->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int x1 = xy1->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int y1 = xy1->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
-    int x2 = xy2->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    int y2 = xy2->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int x2 = xy2->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    int y2 = xy2->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
     int thickness = 1;
 
@@ -1063,14 +1069,14 @@ NAN_METHOD(Matrix::FillPoly) {
     cv::Point **polygons = new cv::Point*[polyArray->Length()];
     int *polySizes = new int[polyArray->Length()];
     for (unsigned int i = 0; i < polyArray->Length(); i++) {
-      Local<Array> singlePoly = Local<Array> ::Cast(polyArray->Get(i)->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
+      Local<Array> singlePoly = Local<Array> ::Cast(polyArray->Get(Nan::GetCurrentContext(),i).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
       polygons[i] = new cv::Point[singlePoly->Length()];
       polySizes[i] = singlePoly->Length();
 
       for (unsigned int j = 0; j < singlePoly->Length(); j++) {
-        Local<Array> point = Local<Array> ::Cast(singlePoly->Get(j)->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
-        polygons[i][j].x = point->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-        polygons[i][j].y = point->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+        Local<Array> point = Local<Array> ::Cast(singlePoly->Get(Nan::GetCurrentContext(),j).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
+        polygons[i][j].x = point->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+        polygons[i][j].y = point->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
       }
     }
 
@@ -1258,8 +1264,8 @@ NAN_METHOD(Matrix::GaussianBlur) {
     }
     Local<Object> array = Nan::To<v8::Object>(info[0]).ToLocalChecked();
     // TODO: Length check
-    Local<Value> x = array->Get(0);
-    Local<Value> y = array->Get(1);
+    Local<Value> x = array->Get(Nan::GetCurrentContext(),0).ToLocalChecked();
+    Local<Value> y = array->Get(Nan::GetCurrentContext(),1).ToLocalChecked();
     if (!x->IsNumber() || !y->IsNumber()) {
       Nan::ThrowTypeError("'ksize' argument must be a 2 double array");
     }
@@ -1577,32 +1583,32 @@ NAN_METHOD(Matrix::Moments) {
 
   Local<Object> res = Nan::New<Object>();
 
-  res->Set(Nan::New("m00").ToLocalChecked(), Nan::New<Number>(mo.m00));
-  res->Set(Nan::New("m10").ToLocalChecked(), Nan::New<Number>(mo.m10));
-  res->Set(Nan::New("m01").ToLocalChecked(), Nan::New<Number>(mo.m01));
-  res->Set(Nan::New("m20").ToLocalChecked(), Nan::New<Number>(mo.m20));
-  res->Set(Nan::New("m11").ToLocalChecked(), Nan::New<Number>(mo.m11));
-  res->Set(Nan::New("m02").ToLocalChecked(), Nan::New<Number>(mo.m02));
-  res->Set(Nan::New("m30").ToLocalChecked(), Nan::New<Number>(mo.m30));
-  res->Set(Nan::New("m21").ToLocalChecked(), Nan::New<Number>(mo.m21));
-  res->Set(Nan::New("m12").ToLocalChecked(), Nan::New<Number>(mo.m12));
-  res->Set(Nan::New("m03").ToLocalChecked(), Nan::New<Number>(mo.m03));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m00").ToLocalChecked(), Nan::New<Number>(mo.m00));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m10").ToLocalChecked(), Nan::New<Number>(mo.m10));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m01").ToLocalChecked(), Nan::New<Number>(mo.m01));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m20").ToLocalChecked(), Nan::New<Number>(mo.m20));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m11").ToLocalChecked(), Nan::New<Number>(mo.m11));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m02").ToLocalChecked(), Nan::New<Number>(mo.m02));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m30").ToLocalChecked(), Nan::New<Number>(mo.m30));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m21").ToLocalChecked(), Nan::New<Number>(mo.m21));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m12").ToLocalChecked(), Nan::New<Number>(mo.m12));
+  res->Set(Nan::GetCurrentContext(),Nan::New("m03").ToLocalChecked(), Nan::New<Number>(mo.m03));
 
-  res->Set(Nan::New("mu20").ToLocalChecked(), Nan::New<Number>(mo.mu20));
-  res->Set(Nan::New("mu11").ToLocalChecked(), Nan::New<Number>(mo.mu11));
-  res->Set(Nan::New("mu02").ToLocalChecked(), Nan::New<Number>(mo.mu02));
-  res->Set(Nan::New("mu30").ToLocalChecked(), Nan::New<Number>(mo.mu30));
-  res->Set(Nan::New("mu21").ToLocalChecked(), Nan::New<Number>(mo.mu21));
-  res->Set(Nan::New("mu12").ToLocalChecked(), Nan::New<Number>(mo.mu12));
-  res->Set(Nan::New("mu03").ToLocalChecked(), Nan::New<Number>(mo.mu03));
+  res->Set(Nan::GetCurrentContext(),Nan::New("mu20").ToLocalChecked(), Nan::New<Number>(mo.mu20));
+  res->Set(Nan::GetCurrentContext(),Nan::New("mu11").ToLocalChecked(), Nan::New<Number>(mo.mu11));
+  res->Set(Nan::GetCurrentContext(),Nan::New("mu02").ToLocalChecked(), Nan::New<Number>(mo.mu02));
+  res->Set(Nan::GetCurrentContext(),Nan::New("mu30").ToLocalChecked(), Nan::New<Number>(mo.mu30));
+  res->Set(Nan::GetCurrentContext(),Nan::New("mu21").ToLocalChecked(), Nan::New<Number>(mo.mu21));
+  res->Set(Nan::GetCurrentContext(),Nan::New("mu12").ToLocalChecked(), Nan::New<Number>(mo.mu12));
+  res->Set(Nan::GetCurrentContext(),Nan::New("mu03").ToLocalChecked(), Nan::New<Number>(mo.mu03));
 
-  res->Set(Nan::New("nu20").ToLocalChecked(), Nan::New<Number>(mo.nu20));
-  res->Set(Nan::New("nu11").ToLocalChecked(), Nan::New<Number>(mo.nu11));
-  res->Set(Nan::New("nu02").ToLocalChecked(), Nan::New<Number>(mo.nu02));
-  res->Set(Nan::New("nu30").ToLocalChecked(), Nan::New<Number>(mo.nu30));
-  res->Set(Nan::New("nu21").ToLocalChecked(), Nan::New<Number>(mo.nu21));
-  res->Set(Nan::New("nu12").ToLocalChecked(), Nan::New<Number>(mo.nu12));
-  res->Set(Nan::New("nu03").ToLocalChecked(), Nan::New<Number>(mo.nu03));
+  res->Set(Nan::GetCurrentContext(),Nan::New("nu20").ToLocalChecked(), Nan::New<Number>(mo.nu20));
+  res->Set(Nan::GetCurrentContext(),Nan::New("nu11").ToLocalChecked(), Nan::New<Number>(mo.nu11));
+  res->Set(Nan::GetCurrentContext(),Nan::New("nu02").ToLocalChecked(), Nan::New<Number>(mo.nu02));
+  res->Set(Nan::GetCurrentContext(),Nan::New("nu30").ToLocalChecked(), Nan::New<Number>(mo.nu30));
+  res->Set(Nan::GetCurrentContext(),Nan::New("nu21").ToLocalChecked(), Nan::New<Number>(mo.nu21));
+  res->Set(Nan::GetCurrentContext(),Nan::New("nu12").ToLocalChecked(), Nan::New<Number>(mo.nu12));
+  res->Set(Nan::GetCurrentContext(),Nan::New("nu03").ToLocalChecked(), Nan::New<Number>(mo.nu03));
 
   info.GetReturnValue().Set(res);
 }
@@ -1735,7 +1741,7 @@ NAN_METHOD(Matrix::GoodFeaturesToTrack) {
   double qualityLevel = info.Length() >= 2 ? (double) info[1].As<Number>()->Value() : 0.01;
   double minDistance = info.Length() >= 3 ? (double) info[2].As<Number>()->Value() : 10;
   int blockSize = info.Length() >= 4 ? info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked() : 3;
-  bool useHarrisDetector = info.Length() >= 5 ? info[4]->BooleanValue( Nan::GetCurrentContext() ).FromJust() : false;
+  bool useHarrisDetector = info.Length() >= 5 ? info[4]->BooleanValue( v8::Isolate::GetCurrent() ) : false;
   double k = info.Length() >= 6 ? (double) info[5].As<Number>()->Value() : 0.04;
 
   std::vector<cv::Point2f> corners;
@@ -1753,9 +1759,9 @@ NAN_METHOD(Matrix::GoodFeaturesToTrack) {
 
   for (unsigned int i=0; i<corners.size(); i++) {
     v8::Local<v8::Array> pt = Nan::New<Array>(2);
-    pt->Set(0, Nan::New<Number>((double) corners[i].x));
-    pt->Set(1, Nan::New<Number>((double) corners[i].y));
-    arr->Set(i, pt);
+    pt->Set(Nan::GetCurrentContext(),0, Nan::New<Number>((double) corners[i].x));
+    pt->Set(Nan::GetCurrentContext(),1, Nan::New<Number>((double) corners[i].y));
+     Nan::Set(arr, i, pt);
   }
 
   info.GetReturnValue().Set(arr);
@@ -1771,14 +1777,14 @@ NAN_METHOD(Matrix::CalcOpticalFlowPyrLK) {
   std::vector<cv::Point2f> old_points;
 
   for (unsigned int i=0; i<points->Length(); i++) {
-    Local<Object> pt = points->Get(i)->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    old_points.push_back(cv::Point2f(pt->Get(0).As<Number>()->Value(), pt->Get(1).As<Number>()->Value()));
+    Local<Object> pt = points->Get(Nan::GetCurrentContext(),i).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+    old_points.push_back(cv::Point2f(pt->Get(Nan::GetCurrentContext(),0).ToLocalChecked().As<Number>()->Value(), pt->Get(Nan::GetCurrentContext(),1).ToLocalChecked().As<Number>()->Value()));
   }
 
   cv::Size winSize;
   if (info.Length() >= 3 && info[2]->IsArray()) {
     Local<Object> winSizeObj = info[2]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    winSize = cv::Size(winSizeObj->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), winSizeObj->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
+    winSize = cv::Size(winSizeObj->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), winSizeObj->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   } else {
     winSize = cv::Size(21, 21);
   }
@@ -1788,7 +1794,7 @@ NAN_METHOD(Matrix::CalcOpticalFlowPyrLK) {
   cv::TermCriteria criteria;
   if (info.Length() >= 5 && info[4]->IsArray()) {
     Local<Object> criteriaObj = info[4]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    criteria = cv::TermCriteria(criteriaObj->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), criteriaObj->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), (double) criteriaObj->Get(2).As<Number>()->Value());
+    criteria = cv::TermCriteria(criteriaObj->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), criteriaObj->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), (double) criteriaObj->Get(Nan::GetCurrentContext(),2).ToLocalChecked().As<Number>()->Value());
   } else {
     criteria = cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01);
   }
@@ -1814,27 +1820,27 @@ NAN_METHOD(Matrix::CalcOpticalFlowPyrLK) {
 
   for (unsigned int i=0; i<old_points.size(); i++) {
     v8::Local<v8::Array> pt = Nan::New<Array>(2);
-    pt->Set(0, Nan::New<Number>((double) old_points[i].x));
-    pt->Set(1, Nan::New<Number>((double) old_points[i].y));
-    old_arr->Set(i, pt);
+    pt->Set(Nan::GetCurrentContext(),0, Nan::New<Number>((double) old_points[i].x));
+    pt->Set(Nan::GetCurrentContext(),1, Nan::New<Number>((double) old_points[i].y));
+    new_arr->Set(Nan::GetCurrentContext(), i, pt);
   }
 
   for (unsigned int i=0; i<new_points.size(); i++) {
     v8::Local<v8::Array> pt = Nan::New<Array>(2);
-    pt->Set(0, Nan::New<Number>((double) new_points[i].x));
-    pt->Set(1, Nan::New<Number>((double) new_points[i].y));
-    new_arr->Set(i, pt);
+    pt->Set(Nan::GetCurrentContext(),0, Nan::New<Number>((double) new_points[i].x));
+    pt->Set(Nan::GetCurrentContext(),1, Nan::New<Number>((double) new_points[i].y));
+    new_arr->Set(Nan::GetCurrentContext(), i, pt);
   }
 
   for (unsigned int i=0; i<status.size(); i++) {
     v8::Local<v8::Integer> pt = Nan::New<Integer>((int)status[i]);
-    found->Set(i, pt);
+    found->Set(Nan::GetCurrentContext(),i, pt);
   }
 
   Local<Object> data = Nan::New<Object>();
-  data->Set(Nan::New<String>("old_points").ToLocalChecked(), old_arr);
-  data->Set(Nan::New<String>("new_points").ToLocalChecked(), new_arr);
-  data->Set(Nan::New<String>("found").ToLocalChecked(), found);
+  data->Set(Nan::GetCurrentContext(),Nan::New<String>("old_points").ToLocalChecked(), old_arr);
+  data->Set(Nan::GetCurrentContext(),Nan::New<String>("new_points").ToLocalChecked(), new_arr);
+  data->Set(Nan::GetCurrentContext(),Nan::New<String>("found").ToLocalChecked(), found);
 
   info.GetReturnValue().Set(data);
 }
@@ -1861,11 +1867,11 @@ NAN_METHOD(Matrix::HoughLinesP) {
 
   for (unsigned int i=0; i<lines.size(); i++) {
     v8::Local<v8::Array> pt = Nan::New<Array>(4);
-    pt->Set(0, Nan::New<Number>((double) lines[i][0]));
-    pt->Set(1, Nan::New<Number>((double) lines[i][1]));
-    pt->Set(2, Nan::New<Number>((double) lines[i][2]));
-    pt->Set(3, Nan::New<Number>((double) lines[i][3]));
-    arr->Set(i, pt);
+    pt->Set(Nan::GetCurrentContext(),0, Nan::New<Number>((double) lines[i][0]));
+    pt->Set(Nan::GetCurrentContext(),1, Nan::New<Number>((double) lines[i][1]));
+    pt->Set(Nan::GetCurrentContext(),2, Nan::New<Number>((double) lines[i][2]));
+    pt->Set(Nan::GetCurrentContext(),3, Nan::New<Number>((double) lines[i][3]));
+     Nan::Set(arr, i, pt);
   }
 
   info.GetReturnValue().Set(arr);
@@ -1895,10 +1901,10 @@ NAN_METHOD(Matrix::HoughCircles) {
 
   for (unsigned int i=0; i < circles.size(); i++) {
     v8::Local<v8::Array> pt = Nan::New<Array>(3);
-    pt->Set(0, Nan::New<Number>((double) circles[i][0]));  // center x
-    pt->Set(1, Nan::New<Number>((double) circles[i][1]));// center y
-    pt->Set(2, Nan::New<Number>((double) circles[i][2]));// radius
-    arr->Set(i, pt);
+    pt->Set(Nan::GetCurrentContext(),0, Nan::New<Number>((double) circles[i][0]));  // center x
+    pt->Set(Nan::GetCurrentContext(),1, Nan::New<Number>((double) circles[i][1]));// center y
+    pt->Set(Nan::GetCurrentContext(),2, Nan::New<Number>((double) circles[i][2]));// radius
+     Nan::Set(arr, i, pt);
   }
 
   info.GetReturnValue().Set(arr);
@@ -1910,43 +1916,43 @@ cv::Scalar setColor(Local<Object> objColor) {
   // We'll accomodate a channel count up to 4 and fall back to the old
   // "assume it's always 3" in the default case
   if (!objColor->HasRealIndexedProperty( Nan::GetCurrentContext() , 1).ToChecked()) {
-    channels[0] = objColor->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[0] = objColor->Get(Nan::GetCurrentContext(), 0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
   } else if (!objColor->HasRealIndexedProperty( Nan::GetCurrentContext() , 2).ToChecked()) {
-    channels[0] = objColor->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    channels[1] = objColor->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[0] = objColor->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[1] = objColor->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
   } else if (!objColor->HasRealIndexedProperty( Nan::GetCurrentContext() , 4).ToChecked()) {
-    channels[0] = objColor->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    channels[1] = objColor->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    channels[2] = objColor->Get(2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    channels[3] = objColor->Get(3)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[0] = objColor->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[1] = objColor->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[2] = objColor->Get(Nan::GetCurrentContext(),2).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[3] = objColor->Get(Nan::GetCurrentContext(),3).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
   } else {
-    channels[0] = objColor->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    channels[1] = objColor->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-    channels[2] = objColor->Get(2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[0] = objColor->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[1] = objColor->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+    channels[2] = objColor->Get(Nan::GetCurrentContext(),2).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
   }
 
   return cv::Scalar(channels[0], channels[1], channels[2], channels[3]);
 }
 
 cv::Point setPoint(Local<Object> objPoint) {
-  return cv::Point(objPoint->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
-      objPoint->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
+  return cv::Point(objPoint->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+      objPoint->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
 }
 
 cv::Rect* setRect(Local<Object> objRect, cv::Rect &result) {
-  if (!objRect->IsArray() || !objRect->Get(0)->IsArray()
-      || !objRect->Get(0)->IsArray()) {
+  if (!objRect->IsArray() || !objRect->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IsArray()
+      || !objRect->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IsArray()) {
     printf("error");
     return 0;
   };
 
-  Local < Object > point = objRect->Get(0)->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-  Local < Object > size = objRect->Get(1)->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+  Local < Object > point =  Nan::To<Object>( Nan::Get(objRect,0).ToLocalChecked() ).ToLocalChecked();;
+  Local < Object > size =  Nan::To<Object>( Nan::Get(objRect,1).ToLocalChecked() ).ToLocalChecked();
 
-  result.x = point->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-  result.y = point->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-  result.width = size->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
-  result.height = size->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
+  result.x = Nan::To<int32_t>( Nan::Get(point,0).ToLocalChecked() ).FromJust();
+  result.y = Nan::To<int32_t>( Nan::Get(point,1).ToLocalChecked() ).FromJust();
+  result.width = Nan::To<int32_t>( Nan::Get(size,0).ToLocalChecked() ).FromJust();
+  result.height = Nan::To<int32_t>( Nan::Get(size,1).ToLocalChecked() ).FromJust();
 
   return &result;
 }
@@ -2259,10 +2265,10 @@ NAN_METHOD(Matrix::LocateROI) {
   self->mat.locateROI(wholeSize, ofs);
 
   v8::Local < v8::Array > arr = Nan::New<Array>(4);
-  arr->Set(0, Nan::New<Number>(wholeSize.width));
-  arr->Set(1, Nan::New<Number>(wholeSize.height));
-  arr->Set(2, Nan::New<Number>(ofs.x));
-  arr->Set(3, Nan::New<Number>(ofs.y));
+   Nan::Set(arr, 0, Nan::New<Number>(wholeSize.width));
+   Nan::Set(arr, 1, Nan::New<Number>(wholeSize.height));
+   Nan::Set(arr, 2, Nan::New<Number>(ofs.x));
+   Nan::Set(arr, 3, Nan::New<Number>(ofs.y));
 
   info.GetReturnValue().Set(arr);
 }
@@ -2374,8 +2380,8 @@ NAN_METHOD(Matrix::MeanStdDev) {
   cv::meanStdDev(self->mat, meanMat, stddevMat);
 
   Local<Object> data = Nan::New<Object>();
-  data->Set(Nan::New<String>("mean").ToLocalChecked(), CreateWrappedFromMat(meanMat));
-  data->Set(Nan::New<String>("stddev").ToLocalChecked(), CreateWrappedFromMat(stddevMat));
+  Nan::Set(data,Nan::New<String>("mean").ToLocalChecked(), CreateWrappedFromMat(meanMat));
+  Nan::Set(data,Nan::New<String>("stddev").ToLocalChecked(), CreateWrappedFromMat(stddevMat));
 
   info.GetReturnValue().Set(data);
 }
@@ -2536,7 +2542,7 @@ NAN_METHOD(Matrix::Split) {
   v8::Local<v8::Array> arrChannels = Nan::New<Array>(size);
   for (unsigned int i = 0; i < size; i++) {
     Local<Object> matObject = Matrix::CreateWrappedFromMatIfNotReferenced(channels[i], 1);
-    arrChannels->Set(i, matObject);
+    Nan::Set(arrChannels, i, matObject);
   }
 
   info.GetReturnValue().Set(arrChannels);
@@ -2557,7 +2563,7 @@ NAN_METHOD(Matrix::Merge) {
   unsigned int L = jsChannels->Length();
   std::vector<cv::Mat> vChannels(L);
   for (unsigned int i = 0; i < L; i++) {
-    Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
+    Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>( Nan::To<v8::Object>(  Nan::Get(jsChannels,i).ToLocalChecked() ).ToLocalChecked() );
     vChannels[i] = matObject->mat;
   }
   cv::merge(vChannels, self->mat);
@@ -2581,7 +2587,7 @@ NAN_METHOD(Matrix::EqualizeHist) {
 
 NAN_METHOD(Matrix::FloodFill) {
   SETUP_FUNCTION(Matrix)
-  // obj->Get(Nan::New<String>("x").ToLocalChecked())
+  // obj->Get(Nan::GetCurrentContext(), Nan::New<String>("x").ToLocalChecked())
   // int cv::floodFill(cv::InputOutputArray, cv::Point, cv::Scalar, cv::Rect*, cv::Scalar, cv::Scalar, int)
 
   /*  mat.floodFill( {seedPoint: [1,1] ,
@@ -2599,24 +2605,32 @@ NAN_METHOD(Matrix::FloodFill) {
   cv::Rect rect;
 
   int ret = cv::floodFill(self->mat,
-      setPoint(obj->Get(Nan::New<String>("seedPoint").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked()),
-      setColor(obj->Get(Nan::New<String>("newColor").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked()),
-      obj->Get(Nan::New<String>("rect").ToLocalChecked())->IsUndefined() ?
-          0 : setRect(obj->Get(Nan::New<String>("rect").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked(), rect),
-      setColor(obj->Get(Nan::New<String>("loDiff").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked()),
-      setColor(obj->Get(Nan::New<String>("upDiff").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked()), 4);
+      setPoint( Nan::To<v8::Object>( Nan::Get(obj,Nan::New<String>("seedPoint").ToLocalChecked()).ToLocalChecked() ).ToLocalChecked()),
+      setColor( Nan::To<v8::Object>( Nan::Get(obj,Nan::New<String>("newColor").ToLocalChecked()).ToLocalChecked() ).ToLocalChecked()),
+      Nan::Get(obj,Nan::New<String>("rect").ToLocalChecked()).IsEmpty() ?
+          0 : setRect( Nan::To<Object>( Nan::Get(obj,Nan::New<String>("rect").ToLocalChecked()).ToLocalChecked() ).ToLocalChecked(), rect),
+      setColor( Nan::To<v8::Object>( Nan::Get(obj,Nan::New<String>("loDiff").ToLocalChecked()).ToLocalChecked() ).ToLocalChecked()),
+      setColor( Nan::To<v8::Object>( Nan::Get(obj,Nan::New<String>("upDiff").ToLocalChecked()).ToLocalChecked() ).ToLocalChecked()), 
+      
+      4);
 
   // Documentation notes that parameter "rect" is an optional output
   // parameter which will hold the smallest possible bounding box of
   // affected pixels. If "rect" was provided, let's update the values.
   // (https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html#floodfill)
-  if (!obj->Get(Nan::New<String>("rect").ToLocalChecked())->IsUndefined()) {
-    Local< Object > rectArgument =
-      obj->Get(Nan::New<String>("rect").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    rectArgument->Get(0)->ToObject(Nan::GetCurrentContext()).ToLocalChecked()->Set(0, Nan::New<Number>(rect.x));
-    rectArgument->Get(0)->ToObject(Nan::GetCurrentContext()).ToLocalChecked()->Set(1, Nan::New<Number>(rect.y));
-    rectArgument->Get(1)->ToObject(Nan::GetCurrentContext()).ToLocalChecked()->Set(0, Nan::New<Number>(rect.width));
-    rectArgument->Get(1)->ToObject(Nan::GetCurrentContext()).ToLocalChecked()->Set(1, Nan::New<Number>(rect.height));
+  if (! Nan::Get(obj,Nan::New<String>("rect").ToLocalChecked()).IsEmpty()) {
+    Local< Object > rectArgument = Nan::To<v8::Object>( Nan::Get(obj,Nan::New<String>("rect").ToLocalChecked()).ToLocalChecked() ).ToLocalChecked();
+    //obj->Get(Nan::GetCurrentContext(), Nan::New<String>("rect").ToLocalChecked())->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+
+    
+    //Nan::Get(rectArgument,0)->ToObject(Nan::GetCurrentContext()).ToLocalChecked()->Set(Nan::GetCurrentContext(),0, Nan::New<Number>(rect.x));
+     Nan::Set( Nan::To<v8::Object>( Nan::Get(rectArgument,0).ToLocalChecked() ).ToLocalChecked(), 0, Nan::New<Number>(rect.x) );
+    //Nan::Get(rectArgument,0)->ToObject(Nan::GetCurrentContext()).ToLocalChecked()->Set(Nan::GetCurrentContext(),1, Nan::New<Number>(rect.y));
+     Nan::Set( Nan::To<v8::Object>( Nan::Get(rectArgument,0).ToLocalChecked() ).ToLocalChecked(), 1, Nan::New<Number>(rect.y) );
+    //Nan::Get(rectArgument,1)->ToObject(Nan::GetCurrentContext()).ToLocalChecked()->Set(Nan::GetCurrentContext(),0, Nan::New<Number>(rect.width));
+     Nan::Set( Nan::To<v8::Object>( Nan::Get(rectArgument,1).ToLocalChecked() ).ToLocalChecked(), 0, Nan::New<Number>(rect.width) );
+    //Nan::Get(rectArgument,1)->ToObject(Nan::GetCurrentContext()).ToLocalChecked()->Set(Nan::GetCurrentContext(),1, Nan::New<Number>(rect.height));
+     Nan::Set( Nan::To<v8::Object>( Nan::Get(rectArgument,1).ToLocalChecked() ).ToLocalChecked(), 1, Nan::New<Number>(rect.height) );
   }
 
   info.GetReturnValue().Set(Nan::New<Number>(ret));
@@ -2635,7 +2649,7 @@ NAN_METHOD(Matrix::TemplateMatches) {
   double min_probability = filter_min_probability ? info[0].As<Number>()->Value() : 0;
   double max_probability = filter_max_probability ? info[1].As<Number>()->Value() : 0;
   int limit = (info.Length() >= 3) ? info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked() : 0;
-  bool ascending = (info.Length() >= 4) ? info[3]->BooleanValue( Nan::GetCurrentContext() ).FromJust() : false;
+  bool ascending = (info.Length() >= 4) ? Nan::To<bool>(info[3] ).FromJust() : false;
   int min_x_distance = (info.Length() >= 5) ? info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked() : 0;
   int min_y_distance = (info.Length() >= 6) ? info[5]->IntegerValue( Nan::GetCurrentContext() ).ToChecked() : 0;
 
@@ -2709,11 +2723,11 @@ NAN_METHOD(Matrix::TemplateMatches) {
     Local<Value> probability_value = Nan::New<Number>(probability);
 
     Local < Object > probability_object = Nan::New<Object>();
-    probability_object->Set(Nan::New<String>("x").ToLocalChecked(), x_value);
-    probability_object->Set(Nan::New<String>("y").ToLocalChecked(), y_value);
-    probability_object->Set(Nan::New<String>("probability").ToLocalChecked(), probability_value);
+    Nan::Set(probability_object,Nan::New<String>("x").ToLocalChecked(), x_value);
+    Nan::Set(probability_object,Nan::New<String>("y").ToLocalChecked(), y_value);
+    Nan::Set(probability_object,Nan::New<String>("probability").ToLocalChecked(), probability_value);
 
-    probabilites_array->Set(index, probability_object);
+    Nan::Set(probabilites_array,index, probability_object);
     index++;
   }
 
@@ -2807,11 +2821,11 @@ NAN_METHOD(Matrix::MatchTemplate) {
   result.convertTo(result, CV_8UC1, 255, 0);
 
   v8::Local <v8::Array> arr = Nan::New<v8::Array>(5);
-  arr->Set(0, CreateWrappedFromMat(result));
-  arr->Set(1, Nan::New<Number>(roi_x));
-  arr->Set(2, Nan::New<Number>(roi_y));
-  arr->Set(3, Nan::New<Number>(roi_width));
-  arr->Set(4, Nan::New<Number>(roi_height));
+   Nan::Set(arr, 0, CreateWrappedFromMat(result));
+   Nan::Set(arr, 1, Nan::New<Number>(roi_x));
+   Nan::Set(arr, 2, Nan::New<Number>(roi_y));
+   Nan::Set(arr, 3, Nan::New<Number>(roi_width));
+   Nan::Set(arr, 4, Nan::New<Number>(roi_height));
 
   info.GetReturnValue().Set(arr);
 }
@@ -2833,19 +2847,19 @@ NAN_METHOD(Matrix::MinMaxLoc) {
   Local<Value> v_maxLoc_y = Nan::New<Number>(maxLoc.y);
 
   Local<Object> o_minLoc = Nan::New<Object>();
-  o_minLoc->Set(Nan::New<String>("x").ToLocalChecked(), v_minLoc_x);
-  o_minLoc->Set(Nan::New<String>("y").ToLocalChecked(), v_minLoc_y);
+  Nan::Set(o_minLoc,Nan::New<String>("x").ToLocalChecked(), v_minLoc_x);
+  Nan::Set(o_minLoc,Nan::New<String>("y").ToLocalChecked(), v_minLoc_y);
 
   Local<Object> o_maxLoc = Nan::New<Object>();
-  o_maxLoc->Set(Nan::New<String>("x").ToLocalChecked(), v_maxLoc_x);
-  o_maxLoc->Set(Nan::New<String>("y").ToLocalChecked(), v_maxLoc_y);
+  Nan::Set(o_maxLoc,Nan::New<String>("x").ToLocalChecked(), v_maxLoc_x);
+  Nan::Set(o_maxLoc,Nan::New<String>("y").ToLocalChecked(), v_maxLoc_y);
 
   // Output result object
   Local<Object> result = Nan::New<Object>();
-  result->Set(Nan::New<String>("minVal").ToLocalChecked(), v_minVal);
-  result->Set(Nan::New<String>("maxVal").ToLocalChecked(), v_maxVal);
-  result->Set(Nan::New<String>("minLoc").ToLocalChecked(), o_minLoc);
-  result->Set(Nan::New<String>("maxLoc").ToLocalChecked(), o_maxLoc);
+  Nan::Set(result,Nan::New<String>("minVal").ToLocalChecked(), v_minVal);
+  Nan::Set(result,Nan::New<String>("maxVal").ToLocalChecked(), v_maxVal);
+  Nan::Set(result,Nan::New<String>("minLoc").ToLocalChecked(), o_minLoc);
+  Nan::Set(result, Nan::New<String>("maxLoc").ToLocalChecked(), o_maxLoc);
 
   info.GetReturnValue().Set(result);
 }
@@ -2913,10 +2927,10 @@ NAN_METHOD(Matrix::GetPerspectiveTransform) {
   std::vector<cv::Point2f> src_corners(4);
   std::vector<cv::Point2f> tgt_corners(4);
   for (unsigned int i = 0; i < 4; i++) {
-    src_corners[i] = cvPoint(srcArray->Get(i*2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),srcArray->Get(i*2+1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
-    tgt_corners[i] = cvPoint(tgtArray->Get(i*2)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),tgtArray->Get(i*2+1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
+    src_corners[i] = cvPoint(Nan::To<int32_t>( Nan::Get(srcArray,i*2).ToLocalChecked()).FromJust(), Nan::To<int32_t>( Nan::Get(srcArray,i*2+1).ToLocalChecked()).FromJust());
+    tgt_corners[i] = cvPoint(Nan::To<int32_t>( Nan::Get(tgtArray,i*2).ToLocalChecked()).FromJust(), Nan::To<int32_t>( Nan::Get(tgtArray,i*2+1).ToLocalChecked()).FromJust());
   }
-
+ 
   Local<Object> xfrm = Matrix::CreateWrappedFromMat(cv::getPerspectiveTransform(src_corners, tgt_corners));
 
   info.GetReturnValue().Set(xfrm);
@@ -2969,10 +2983,9 @@ NAN_METHOD(Matrix::SetWithMask) {
   // param 0 - target value:
   Local < Object > valArray = Nan::To<v8::Object>(info[0]).ToLocalChecked();
   cv::Scalar newvals;
-  newvals.val[0] = valArray->Get(0).As<Number>()->Value();
-  newvals.val[1] = valArray->Get(1).As<Number>()->Value();
-  newvals.val[2] = valArray->Get(2).As<Number>()->Value();
-
+  newvals.val[0] = Nan::To<double>( Nan::Get(valArray,0).ToLocalChecked()).FromJust() ;
+  newvals.val[1] = Nan::To<double>( Nan::Get(valArray,1).ToLocalChecked()).FromJust() ;
+  newvals.val[2] = Nan::To<double>( Nan::Get(valArray,2).ToLocalChecked()).FromJust() ;
   // param 1 - mask. same size as src and dest
   Matrix *mask = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
@@ -2989,10 +3002,10 @@ NAN_METHOD(Matrix::MeanWithMask) {
 
   cv::Scalar means = cv::mean(self->mat, mask->mat);
   v8::Local < v8::Array > arr = Nan::New<Array>(4);
-  arr->Set(0, Nan::New<Number>(means[0]));
-  arr->Set(1, Nan::New<Number>(means[1]));
-  arr->Set(2, Nan::New<Number>(means[2]));
-  arr->Set(3, Nan::New<Number>(means[3]));
+   Nan::Set(arr, 0, Nan::New<Number>(means[0]));
+   Nan::Set(arr, 1, Nan::New<Number>(means[1]));
+   Nan::Set(arr, 2, Nan::New<Number>(means[2]));
+   Nan::Set(arr, 3, Nan::New<Number>(means[3]));
 
   info.GetReturnValue().Set(arr);
 }
@@ -3002,10 +3015,10 @@ NAN_METHOD(Matrix::Mean) {
 
   cv::Scalar means = cv::mean(self->mat);
   v8::Local<v8::Array> arr = Nan::New<Array>(4);
-  arr->Set(0, Nan::New<Number>(means[0]));
-  arr->Set(1, Nan::New<Number>(means[1]));
-  arr->Set(2, Nan::New<Number>(means[2]));
-  arr->Set(3, Nan::New<Number>(means[3]));
+   Nan::Set(arr, 0, Nan::New<Number>(means[0]));
+   Nan::Set(arr, 1, Nan::New<Number>(means[1]));
+   Nan::Set(arr, 2, Nan::New<Number>(means[2]));
+   Nan::Set(arr, 3, Nan::New<Number>(means[3]));
 
   info.GetReturnValue().Set(arr);
 }
@@ -3031,9 +3044,9 @@ NAN_METHOD(Matrix::CopyMakeBorder) {
       v8::Local<v8::Array> objColor = v8::Local<v8::Array>::Cast(info[5]);
       unsigned int length = objColor->Length();
 
-      Local<Value> valB = objColor->Get(0);
-      Local<Value> valG = objColor->Get(1);
-      Local<Value> valR = objColor->Get(2);
+      Local<Value> valB = Nan::Get(objColor,0).ToLocalChecked();
+      Local<Value> valG = Nan::Get(objColor,1).ToLocalChecked();
+      Local<Value> valR = Nan::Get(objColor,2).ToLocalChecked();
 
       if (length == 3) {
         value = cv::Scalar(
@@ -3042,7 +3055,7 @@ NAN_METHOD(Matrix::CopyMakeBorder) {
           valR->IntegerValue( Nan::GetCurrentContext() ).ToChecked() 
         );
       } else if (length == 4) {
-        Local<Value> valA = objColor->Get(3);
+        Local<Value> valA = Nan::Get(objColor,3).ToLocalChecked();
 
         value = cv::Scalar(
           Nan::To<int>(valB).FromJust(),

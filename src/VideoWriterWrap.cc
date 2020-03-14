@@ -34,7 +34,7 @@ void VideoWriterWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "writeSync", WriteSync);
   Nan::SetPrototypeMethod(ctor, "release", Release);
 
-  target->Set(Nan::New("VideoWriter").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("VideoWriter").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(VideoWriterWrap::New) {
@@ -60,13 +60,13 @@ NAN_METHOD(VideoWriterWrap::New) {
     cv::Size imageSize;
     if (info[3]->IsArray()) {
       Local<Object> v8sz = info[3]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-      imageSize = cv::Size(v8sz->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), v8sz->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
+      imageSize = cv::Size(v8sz->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), v8sz->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
     } else {
       JSTHROW_TYPE("Must pass image size");
     }
 
     // Arg 4 is the color flag
-    bool isColor = info[4]->BooleanValue( Nan::GetCurrentContext() ).FromJust();
+    bool isColor = info[4]->BooleanValue( v8::Isolate::GetCurrent() );
     v = new VideoWriterWrap(filename, fourcc,  fps, imageSize, isColor);
 
     v->Wrap(info.This());
