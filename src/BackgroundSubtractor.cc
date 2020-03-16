@@ -66,7 +66,7 @@ void BackgroundSubtractorWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "noiseSigma", NoiseSigma);
   Nan::SetPrototypeMethod(ctor, "backgroundRatio", BackgroundRatio);
 
-  target->Set(Nan::New("BackgroundSubtractor").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("BackgroundSubtractor").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(BackgroundSubtractorWrap::New) {

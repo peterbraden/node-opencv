@@ -81,7 +81,7 @@ void FaceRecognizerWrap::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "getMat", GetMat);
 
-  target->Set(Nan::New("FaceRecognizer").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("FaceRecognizer").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(FaceRecognizerWrap::New) {
@@ -191,7 +191,7 @@ Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
 
   const uint32_t length = tuples->Length();
   for (uint32_t i = 0; i < length; ++i) {
-    const Local<Value> val = tuples->Get(i);
+    const Local<Value> val = tuples->Get(Nan::GetCurrentContext(),i).ToLocalChecked();
 
     if (!val->IsArray()) {
       JSTHROW("train takes a list of [label, image] tuples")
@@ -199,12 +199,12 @@ Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
 
     Local<Array> valarr = Local<Array>::Cast(val);
 
-    if (valarr->Length() != 2 || !valarr->Get(0)->IsInt32()) {
+    if (valarr->Length() != 2 || !valarr->Get(Nan::GetCurrentContext(),0)->IsInt32()) {
       JSTHROW("train takes a list of [label, image] tuples")
     }
 
-    int label = valarr->Get(0)->Uint32Value(Nan::GetCurrentContext()).ToChecked();
-    cv::Mat im = fromMatrixOrFilename(valarr->Get(1)); //this is ok because we clone the image
+    int label = valarr->Get(Nan::GetCurrentContext(),0)->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+    cv::Mat im = fromMatrixOrFilename(valarr->Get(Nan::GetCurrentContext(),1)); //this is ok because we clone the image
     im = im.clone();
     if (im.channels() == 3) {
       cv::cvtColor(im, im, CV_RGB2GRAY);
@@ -332,8 +332,8 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
 #endif
 
   v8::Local<v8::Object> res = Nan::New<Object>();
-  res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
-  res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
+  res->Set(Nan::GetCurrentContext(), Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
+  res->Set(Nan::GetCurrentContext(), Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
 
   info.GetReturnValue().Set(res);
 }
@@ -372,8 +372,8 @@ public:
     matrix = NULL;
 
     v8::Local<v8::Object> res = Nan::New<Object>();
-    res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
-    res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
+    res->Set(Nan::GetCurrentContext(), Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
+    res->Set(Nan::GetCurrentContext(), Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
 
     Local<Value> argv[] = {
       res

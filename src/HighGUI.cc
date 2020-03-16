@@ -21,7 +21,7 @@ void NamedWindow::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "blockingWaitKey", BlockingWaitKey);
   Nan::SetPrototypeMethod(ctor, "resizeWindow", ResizeWindow);
 
-  target->Set(Nan::New("NamedWindow").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("NamedWindow").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(NamedWindow::New) {

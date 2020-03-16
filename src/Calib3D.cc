@@ -14,8 +14,8 @@ inline cv::Size sizeFromArray(Local<Value> jsArray) {
   if (jsArray->IsArray()) {
     Local<Object> v8sz = jsArray->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
-    patternSize = cv::Size(v8sz->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
-        v8sz->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
+    patternSize = cv::Size(v8sz->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+        v8sz->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   } else {
     JSTHROW_TYPE("Size is not a valid array");
   }
@@ -50,7 +50,7 @@ inline std::vector<cv::Point3f> points3fFromArray(Local<Value> array) {
     Local<Array> pointsArray = Local<Array>::Cast(array->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
-      Local<Object> pt = pointsArray->Get(i)->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+      Local<Object> pt = pointsArray->Get(Nan::GetCurrentContext(),i).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
       points.push_back(
           cv::Point3f(
               Nan::To<double>(Nan::Get(pt, Nan::New<String>("x").ToLocalChecked()).ToLocalChecked()).FromJust(),
@@ -73,7 +73,7 @@ inline std::vector<std::vector<cv::Point2f> > points2fFromArrayOfArrays(
     Local<Array> pointsArray = Local<Array>::Cast(array->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
-      points.push_back(points2fFromArray(pointsArray->Get(i)));
+      points.push_back(points2fFromArray(pointsArray->Get(Nan::GetCurrentContext(),i).ToLocalChecked()));
     }
   } else {
     JSTHROW_TYPE("Must pass array of object points for each frame")
@@ -89,7 +89,7 @@ inline std::vector<std::vector<cv::Point3f> > points3fFromArrayOfArrays(
     Local<Array> pointsArray = Local<Array>::Cast(array->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
     for (unsigned int i = 0; i < pointsArray->Length(); i++) {
-      points.push_back(points3fFromArray(pointsArray->Get(i)));
+      points.push_back(points3fFromArray(pointsArray->Get(Nan::GetCurrentContext(),i).ToLocalChecked()));
     }
   } else {
     JSTHROW_TYPE("Must pass array of object points for each frame")
@@ -113,7 +113,7 @@ void Calib3D::Init(Local<Object> target) {
   Nan::SetMethod(obj, "computeCorrespondEpilines", ComputeCorrespondEpilines);
   Nan::SetMethod(obj, "reprojectImageTo3d", ReprojectImageTo3D);
 
-  target->Set(Nan::New("calib3d").ToLocalChecked(), obj);
+  target->Set(Nan::GetCurrentContext(), Nan::New("calib3d").ToLocalChecked(), obj);
 }
 
 // cv::findChessboardCorners
@@ -138,18 +138,18 @@ NAN_METHOD(Calib3D::FindChessboardCorners) {
 
     // Make the return value
     Local<Object> ret = Nan::New<Object>();
-    ret->Set(Nan::New<String>("found").ToLocalChecked(), Nan::New<Boolean>(found));
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("found").ToLocalChecked(), Nan::New<Boolean>(found));
 
     Local<Array> cornersArray = Nan::New<Array>(corners.size());
     for (unsigned int i = 0; i < corners.size(); i++) {
       Local<Object> point_data = Nan::New<Object>();
-      point_data->Set(Nan::New<String>("x").ToLocalChecked(), Nan::New<Number>(corners[i].x));
-      point_data->Set(Nan::New<String>("y").ToLocalChecked(), Nan::New<Number>(corners[i].y));
+      point_data->Set(Nan::GetCurrentContext(), Nan::New<String>("x").ToLocalChecked(), Nan::New<Number>(corners[i].x));
+      point_data->Set(Nan::GetCurrentContext(), Nan::New<String>("y").ToLocalChecked(), Nan::New<Number>(corners[i].y));
 
-      cornersArray->Set(Nan::New<Number>(i), point_data);
+      cornersArray->Set(Nan::GetCurrentContext(), Nan::New<Number>(i), point_data);
     }
 
-    ret->Set(Nan::New<String>("corners").ToLocalChecked(), cornersArray);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("corners").ToLocalChecked(), cornersArray);
 
     info.GetReturnValue().Set(ret);
   } catch (cv::Exception &e) {
@@ -225,15 +225,15 @@ NAN_METHOD(Calib3D::CalibrateCamera) {
     Local<Object> ret = Nan::New<Object>();
 
     // Reprojection error
-    ret->Set(Nan::New<String>("reprojectionError").ToLocalChecked(), Nan::New<Number>(error));
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("reprojectionError").ToLocalChecked(), Nan::New<Number>(error));
 
     // K
     Local<Object> KMatrixWrap = Matrix::CreateWrappedFromMat(K);
-    ret->Set(Nan::New<String>("K").ToLocalChecked(), KMatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("K").ToLocalChecked(), KMatrixWrap);
 
     // dist
     Local<Object> distMatrixWrap = Matrix::CreateWrappedFromMat(dist);
-    ret->Set(Nan::New<String>("distortion").ToLocalChecked(), distMatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("distortion").ToLocalChecked(), distMatrixWrap);
 
     // Per frame R and t, skiping for now
 
@@ -279,11 +279,11 @@ NAN_METHOD(Calib3D::SolvePnP) {
 
     // rvec
     Local<Object> rMatrixWrap = Matrix::CreateWrappedFromMat(rvec);
-    ret->Set(Nan::New<String>("rvec").ToLocalChecked(), rMatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("rvec").ToLocalChecked(), rMatrixWrap);
 
     // tvec
     Local<Object> tMatrixWrap = Matrix::CreateWrappedFromMat(tvec);
-    ret->Set(Nan::New<String>("tvec").ToLocalChecked(), tMatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("tvec").ToLocalChecked(), tMatrixWrap);
 
     // Return
     info.GetReturnValue().Set(ret);
@@ -409,14 +409,14 @@ NAN_METHOD(Calib3D::StereoCalibrate) {
     Local<Object> FMatrixWrap = Matrix::CreateWrappedFromMat(F);
 
     // Add to return object
-    ret->Set(Nan::New<String>("K1").ToLocalChecked(), K1MatrixWrap);
-    ret->Set(Nan::New<String>("distortion1").ToLocalChecked(), d1MatrixWrap);
-    ret->Set(Nan::New<String>("K2").ToLocalChecked(), K2MatrixWrap);
-    ret->Set(Nan::New<String>("distortion2").ToLocalChecked(), d2MatrixWrap);
-    ret->Set(Nan::New<String>("R").ToLocalChecked(), RMatrixWrap);
-    ret->Set(Nan::New<String>("t").ToLocalChecked(), tMatrixWrap);
-    ret->Set(Nan::New<String>("E").ToLocalChecked(), EMatrixWrap);
-    ret->Set(Nan::New<String>("F").ToLocalChecked(), FMatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("K1").ToLocalChecked(), K1MatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("distortion1").ToLocalChecked(), d1MatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("K2").ToLocalChecked(), K2MatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("distortion2").ToLocalChecked(), d2MatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("R").ToLocalChecked(), RMatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("t").ToLocalChecked(), tMatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("E").ToLocalChecked(), EMatrixWrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("F").ToLocalChecked(), FMatrixWrap);
 
     // Return
     info.GetReturnValue().Set(ret);
@@ -470,11 +470,11 @@ NAN_METHOD(Calib3D::StereoRectify) {
     // Make the return object
     Local<Object> ret = Nan::New<Object>();
 
-    ret->Set(Nan::New<String>("R1").ToLocalChecked(), Matrix::CreateWrappedFromMat(R1));
-    ret->Set(Nan::New<String>("R2").ToLocalChecked(), Matrix::CreateWrappedFromMat(R2));
-    ret->Set(Nan::New<String>("P1").ToLocalChecked(), Matrix::CreateWrappedFromMat(P1));
-    ret->Set(Nan::New<String>("P2").ToLocalChecked(), Matrix::CreateWrappedFromMat(P2));
-    ret->Set(Nan::New<String>("Q").ToLocalChecked(), Matrix::CreateWrappedFromMat(Q));
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("R1").ToLocalChecked(), Matrix::CreateWrappedFromMat(R1));
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("R2").ToLocalChecked(), Matrix::CreateWrappedFromMat(R2));
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("P1").ToLocalChecked(), Matrix::CreateWrappedFromMat(P1));
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("P2").ToLocalChecked(), Matrix::CreateWrappedFromMat(P2));
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("Q").ToLocalChecked(), Matrix::CreateWrappedFromMat(Q));
 
     // Return the rectification parameters
     info.GetReturnValue().Set(ret);
@@ -510,11 +510,11 @@ NAN_METHOD(Calib3D::ComputeCorrespondEpilines) {
     for(unsigned int i = 0; i < lines.size(); i++)
     {
       Local<Object> line_data = Nan::New<Object>();
-      line_data->Set(Nan::New<String>("a").ToLocalChecked(), Nan::New<Number>(lines[i][0]));
-      line_data->Set(Nan::New<String>("b").ToLocalChecked(), Nan::New<Number>(lines[i][1]));
-      line_data->Set(Nan::New<String>("c").ToLocalChecked(), Nan::New<Number>(lines[i][2]));
+      line_data->Set(Nan::GetCurrentContext(), Nan::New<String>("a").ToLocalChecked(), Nan::New<Number>(lines[i][0]));
+      line_data->Set(Nan::GetCurrentContext(), Nan::New<String>("b").ToLocalChecked(), Nan::New<Number>(lines[i][1]));
+      line_data->Set(Nan::GetCurrentContext(), Nan::New<String>("c").ToLocalChecked(), Nan::New<Number>(lines[i][2]));
 
-      linesArray->Set(Nan::New<Number>(i), line_data);
+      linesArray->Set(Nan::GetCurrentContext(), Nan::New<Number>(i), line_data);
     }
 
     // Return the lines

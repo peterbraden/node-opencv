@@ -24,7 +24,7 @@ void CascadeClassifierWrap::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "detectMultiScale", DetectMultiScale);
 
-  target->Set(Nan::New("CascadeClassifier").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("CascadeClassifier").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(CascadeClassifierWrap::New) {
@@ -95,11 +95,11 @@ public:
 
     for (unsigned int i = 0; i < this->res.size(); i++) {
       v8::Local < v8::Object > x = Nan::New<v8::Object>();
-      x->Set(Nan::New("x").ToLocalChecked(), Nan::New < Number > (this->res[i].x));
-      x->Set(Nan::New("y").ToLocalChecked(), Nan::New < Number > (this->res[i].y));
-      x->Set(Nan::New("width").ToLocalChecked(), Nan::New < Number > (this->res[i].width));
-      x->Set(Nan::New("height").ToLocalChecked(), Nan::New < Number > (this->res[i].height));
-      arr->Set(i, x);
+      x->Set(Nan::GetCurrentContext(), Nan::New("x").ToLocalChecked(), Nan::New < Number > (this->res[i].x));
+      x->Set(Nan::GetCurrentContext(), Nan::New("y").ToLocalChecked(), Nan::New < Number > (this->res[i].y));
+      x->Set(Nan::GetCurrentContext(), Nan::New("width").ToLocalChecked(), Nan::New < Number > (this->res[i].width));
+      x->Set(Nan::GetCurrentContext(), Nan::New("height").ToLocalChecked(), Nan::New < Number > (this->res[i].height));
+      arr->Set(Nan::GetCurrentContext(), i, x);
     }
 
     argv[0] = Nan::Null();

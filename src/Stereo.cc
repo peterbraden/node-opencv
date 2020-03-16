@@ -32,7 +32,7 @@ void StereoBM::Init(Local<Object> target) {
   ctor->Set(Nan::New<String>("FISH_EYE_PRESET").ToLocalChecked(), Nan::New<Integer>((int)cv::StereoBM::FISH_EYE_PRESET));
   ctor->Set(Nan::New<String>("NARROW_PRESET").ToLocalChecked(), Nan::New<Integer>((int)cv::StereoBM::NARROW_PRESET));
 
-  target->Set(Nan::New("StereoBM").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(),Nan::New("StereoBM").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(StereoBM::New) {
@@ -117,7 +117,7 @@ void StereoSGBM::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "compute", Compute);
 
-  target->Set(Nan::New("StereoSGBM").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(), Nan::New("StereoSGBM").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(StereoSGBM::New) {
@@ -249,7 +249,7 @@ void StereoGC::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "compute", Compute);
 
-  target->Set(Nan::New("StereoGC").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
+  target->Set(Nan::GetCurrentContext(),Nan::New("StereoGC").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(StereoGC::New) {

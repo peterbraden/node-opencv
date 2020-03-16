@@ -14,7 +14,7 @@ void ImgProc::Init(Local<Object> target) {
   Nan::SetMethod(obj, "distanceTransform", DistanceTransform);
   Nan::SetMethod(obj, "getStructuringElement", GetStructuringElement);
 
-  target->Set(Nan::New("imgproc").ToLocalChecked(), obj);
+  target->Set(Nan::GetCurrentContext(), Nan::New("imgproc").ToLocalChecked(), obj);
 }
 
 // cv::distanceTransform
@@ -109,7 +109,7 @@ NAN_METHOD(ImgProc::InitUndistortRectifyMap) {
     cv::Size imageSize;
     if (info[4]->IsArray()) {
       Local<Object> v8sz = info[4]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-      imageSize = cv::Size(v8sz->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), v8sz->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
+      imageSize = cv::Size(v8sz->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), v8sz->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
     } else {
       JSTHROW_TYPE("Must pass image size");
     }
@@ -129,8 +129,8 @@ NAN_METHOD(ImgProc::InitUndistortRectifyMap) {
 
     // Make a return object with the two maps
     Local<Object> ret = Nan::New<Object>();
-    ret->Set(Nan::New<String>("map1").ToLocalChecked(), map1Wrap);
-    ret->Set(Nan::New<String>("map2").ToLocalChecked(), map2Wrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("map1").ToLocalChecked(), map1Wrap);
+    ret->Set(Nan::GetCurrentContext(), Nan::New<String>("map2").ToLocalChecked(), map2Wrap);
 
     // Return the maps
     info.GetReturnValue().Set(ret);
@@ -206,7 +206,7 @@ NAN_METHOD(ImgProc::GetStructuringElement) {
       JSTHROW_TYPE("'ksize' argument must be a 2 double array");
     }
     Local<Object> v8sz = info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    ksize = cv::Size(v8sz->Get(0)->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), v8sz->Get(1)->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
+    ksize = cv::Size(v8sz->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), v8sz->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
 
     // GetStructuringElement
     cv::Mat mat = cv::getStructuringElement(shape, ksize);
