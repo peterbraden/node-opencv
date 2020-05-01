@@ -4,7 +4,7 @@
   native code:
 
   NAN_METHOD(UnwrapMatrix) {
-    cv::Mat mat = Nan::ObjectWrap::Unwrap<node_opencv::Matrix>(info[0]->ToObject())->mat;
+    cv::Mat mat = Nan::ObjectWrap::Unwrap<node_opencv::Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked())->mat;
     // ...
   }
 

@@ -28,7 +28,7 @@ void LDAWrap::Init(Local<Object> target) {
   Nan::SetMethod(ctor, "subspaceProject", SubspaceProject);
   Nan::SetMethod(ctor, "subspaceReconstruct", SubspaceReconstruct);
 
-  target->Set(Nan::New("LDA").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::GetCurrentContext(), Nan::New("LDA").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(LDAWrap::New) {
@@ -56,13 +56,13 @@ NAN_METHOD(LDAWrap::SubspaceProject) {
   }
 
   // param 0 - eigenvectors
-  Matrix *w = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  Matrix *w = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
   // param 1 - mean
-  Matrix *mean = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+  Matrix *mean = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
   // param 2 - src
-  Matrix *src = Nan::ObjectWrap::Unwrap<Matrix>(info[2]->ToObject());
+  Matrix *src = Nan::ObjectWrap::Unwrap<Matrix>(info[2]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
   cv::Mat m = cv::subspaceProject(w->mat, mean->mat, src->mat);
 
@@ -80,13 +80,13 @@ NAN_METHOD(LDAWrap::SubspaceReconstruct) {
   }
 
   // param 0 - eigenvectors
-  Matrix *w = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+  Matrix *w = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
   // param 1 - mean
-  Matrix *mean = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+  Matrix *mean = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
   // param 2 - src
-  Matrix *src = Nan::ObjectWrap::Unwrap<Matrix>(info[2]->ToObject());
+  Matrix *src = Nan::ObjectWrap::Unwrap<Matrix>(info[2]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
 
   cv::Mat m = cv::subspaceReconstruct(w->mat, mean->mat, src->mat);
 

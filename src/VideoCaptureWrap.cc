@@ -4,6 +4,10 @@
 
 #include  <iostream>
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/videoio/legacy/constants_c.h>
+#endif
+
 #ifdef HAVE_OPENCV_VIDEOIO
 
 Nan::Persistent<FunctionTemplate> VideoCaptureWrap::constructor;
@@ -44,7 +48,7 @@ void VideoCaptureWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "grab", Grab);
   Nan::SetPrototypeMethod(ctor, "retrieve", Retrieve);
 
-  target->Set(Nan::New("VideoCapture").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::GetCurrentContext(), Nan::New("VideoCapture").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(VideoCaptureWrap::New) {
@@ -56,10 +60,10 @@ NAN_METHOD(VideoCaptureWrap::New) {
   VideoCaptureWrap *v;
 
   if (info[0]->IsNumber()) {
-    v = new VideoCaptureWrap(info[0]->NumberValue());
+    v = new VideoCaptureWrap(info[0].As<Number>()->Value());
   } else {
     //TODO - assumes that we have string, verify
-    v = new VideoCaptureWrap(std::string(*Nan::Utf8String(info[0]->ToString())));
+    v = new VideoCaptureWrap(std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()))));
   }
 
   v->Wrap(info.This());
@@ -101,7 +105,7 @@ NAN_METHOD(VideoCaptureWrap::SetWidth) {
   if(info.Length() != 1)
   return;
 
-  int w = info[0]->IntegerValue();
+  int w = info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
   if(v->cap.isOpened())
   v->cap.set(CV_CAP_PROP_FRAME_WIDTH, w);
@@ -134,7 +138,7 @@ NAN_METHOD(VideoCaptureWrap::SetFPS) {
 
   if (info.Length() > 0) {
     if (info[0]->IsNumber()) {
-        int fps = info[0]->IntegerValue();
+        int fps = info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
         v->cap.set(CV_CAP_PROP_FPS, fps);
     }
   }
@@ -160,7 +164,7 @@ NAN_METHOD(VideoCaptureWrap::SetHeight) {
   if(info.Length() != 1)
   return;
 
-  int h = info[0]->IntegerValue();
+  int h = info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
   v->cap.set(CV_CAP_PROP_FRAME_HEIGHT, h);
 
@@ -174,7 +178,7 @@ NAN_METHOD(VideoCaptureWrap::SetPosition) {
   if(info.Length() != 1)
   return;
 
-  int pos = info[0]->IntegerValue();
+  int pos = info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
   v->cap.set(CV_CAP_PROP_POS_FRAMES, pos);
 
@@ -188,7 +192,7 @@ NAN_METHOD(VideoCaptureWrap::GetFrameAt) {
   if(info.Length() != 1)
   return;
 
-  int pos = info[0]->IntegerValue();
+  int pos = info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
 
   v->cap.set(CV_CAP_PROP_POS_MSEC, pos);
 

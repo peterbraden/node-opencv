@@ -2,6 +2,10 @@
 #include "Matrix.h"
 #include "OpenCV.h"
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/videoio/legacy/constants_c.h>
+#endif
+
 #include  <iostream>
 
 #ifdef HAVE_OPENCV_VIDEOIO
@@ -30,7 +34,7 @@ void VideoWriterWrap::Init(Local<Object> target) {
   Nan::SetPrototypeMethod(ctor, "writeSync", WriteSync);
   Nan::SetPrototypeMethod(ctor, "release", Release);
 
-  target->Set(Nan::New("VideoWriter").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::GetCurrentContext(), Nan::New("VideoWriter").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(VideoWriterWrap::New) {
@@ -43,10 +47,10 @@ NAN_METHOD(VideoWriterWrap::New) {
 
 
     // Arg 0 is the output filename
-    std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
+    std::string filename = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
 
     // Arg 1 is the fourcc code
-    const char *fourccStr = std::string(*Nan::Utf8String(info[1]->ToString())).c_str();
+    const char *fourccStr = std::string(*Nan::Utf8String(info[1]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()))).c_str();
     int fourcc = CV_FOURCC(fourccStr[0],fourccStr[1],fourccStr[2],fourccStr[3]);
 
     // Arg 2 is the output fps
@@ -55,14 +59,14 @@ NAN_METHOD(VideoWriterWrap::New) {
     // Arg 3 is the image size
     cv::Size imageSize;
     if (info[3]->IsArray()) {
-      Local<Object> v8sz = info[3]->ToObject();
-      imageSize = cv::Size(v8sz->Get(1)->IntegerValue(), v8sz->Get(0)->IntegerValue());
+      Local<Object> v8sz = info[3]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+      imageSize = cv::Size(v8sz->Get(Nan::GetCurrentContext(),1).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), v8sz->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
     } else {
       JSTHROW_TYPE("Must pass image size");
     }
 
     // Arg 4 is the color flag
-    bool isColor = info[4]->BooleanValue();
+    bool isColor = info[4]->BooleanValue( v8::Isolate::GetCurrent() );
     v = new VideoWriterWrap(filename, fourcc,  fps, imageSize, isColor);
 
     v->Wrap(info.This());
@@ -136,7 +140,7 @@ NAN_METHOD(VideoWriterWrap::Write) {
     Nan::HandleScope scope;
     VideoWriterWrap *v = Nan::ObjectWrap::Unwrap<VideoWriterWrap>(info.This());
 
-    Matrix *im = Nan::ObjectWrap::Unwrap < Matrix > (info[0]->ToObject());
+    Matrix *im = Nan::ObjectWrap::Unwrap < Matrix > (Nan::To<v8::Object>(info[0]).ToLocalChecked());
     REQ_FUN_ARG(1, cb);
 
     Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
@@ -148,7 +152,7 @@ NAN_METHOD(VideoWriterWrap::Write) {
 NAN_METHOD(VideoWriterWrap::WriteSync) {
     Nan::HandleScope scope;
     VideoWriterWrap *v = Nan::ObjectWrap::Unwrap<VideoWriterWrap>(info.This());
-    Matrix *im = Nan::ObjectWrap::Unwrap < Matrix > (info[0]->ToObject());
+    Matrix *im = Nan::ObjectWrap::Unwrap < Matrix > (Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
     v->writer.write(im->mat);
 

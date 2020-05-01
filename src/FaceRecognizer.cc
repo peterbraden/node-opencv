@@ -4,9 +4,9 @@
 #include "FaceRecognizer.h"
 #include "Matrix.h"
 #include <nan.h>
+#include <opencv2/imgproc/types_c.h>
 
-#if CV_MAJOR_VERSION < 3
-#elif CV_MINOR_VERSION < 3
+#if CV_MAJOR_VERSION < 3 || (CV_MAJOR_VERSION == 3 && CV_MINOR_VERSION < 3)
 namespace cv {
   using std::vector;
   using cv::face::createEigenFaceRecognizer;
@@ -32,11 +32,11 @@ namespace cv {
 cv::Mat fromMatrixOrFilename(Local<Value> v) {
   cv::Mat im;
   if (v->IsString()) {
-    std::string filename = std::string(*Nan::Utf8String(v->ToString()));
+    std::string filename = std::string(*Nan::Utf8String(v->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
     im = cv::imread(filename);
     // std::cout<< im.size();
   } else {
-    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject());
+    Matrix *img = Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     im = img->mat;
   }
   return im;
@@ -47,12 +47,12 @@ cv::Mat fromMatrixOrFilename(Local<Value> v) {
 Matrix *CreateFromMatrixOrFilename(Local<Value> v) {
   if (v->IsString()) {
     Matrix *im = new Matrix();
-    std::string filename = std::string(*Nan::Utf8String(v->ToString()));
+    std::string filename = std::string(*Nan::Utf8String(v->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
     im->setMat(cv::imread(filename));
     return im;
     // std::cout<< im.size();
   } else {
-    return new Matrix(Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject()));
+    return new Matrix(Nan::ObjectWrap::Unwrap<Matrix>(v->ToObject(Nan::GetCurrentContext()).ToLocalChecked()));
   }
 }
 
@@ -81,7 +81,7 @@ void FaceRecognizerWrap::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "getMat", GetMat);
 
-  target->Set(Nan::New("FaceRecognizer").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::GetCurrentContext(), Nan::New("FaceRecognizer").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 };
 
 NAN_METHOD(FaceRecognizerWrap::New) {
@@ -92,7 +92,7 @@ NAN_METHOD(FaceRecognizerWrap::New) {
   }
 
   // By default initialize LBPH
-#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+#if CV_MAJOR_VERSION >= 4 || (CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3)
   cv::Ptr<cv::FaceRecognizer> f = cv::LBPHFaceRecognizer::create(1, 8, 8, 8, 80.0);
 #else 
   cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(1, 8, 8, 8, 80.0);
@@ -119,7 +119,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateLBPH) {
   DOUBLE_FROM_ARGS(threshold, 4)
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
-#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+#if CV_MAJOR_VERSION >= 4 || (CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3)
   cv::Ptr<cv::FaceRecognizer> f = cv::LBPHFaceRecognizer::create(radius, neighbors, grid_x, grid_y, threshold);
 #else 
   cv::Ptr<cv::FaceRecognizer> f = cv::createLBPHFaceRecognizer(radius, neighbors, grid_x, grid_y, threshold);
@@ -140,7 +140,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateEigen) {
   DOUBLE_FROM_ARGS(threshold, 1)
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
-#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+#if CV_MAJOR_VERSION >= 4 || (CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3)
   cv::Ptr<cv::FaceRecognizer> f = cv::EigenFaceRecognizer::create(components, threshold);
 #else
   cv::Ptr<cv::FaceRecognizer> f = cv::createEigenFaceRecognizer(components, threshold);
@@ -161,7 +161,7 @@ NAN_METHOD(FaceRecognizerWrap::CreateFisher) {
   DOUBLE_FROM_ARGS(threshold, 1)
 
   Local<Object> n = Nan::NewInstance(Nan::GetFunction(Nan::New(FaceRecognizerWrap::constructor)).ToLocalChecked()).ToLocalChecked();
-#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+#if CV_MAJOR_VERSION >= 4 || (CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3)
   cv::Ptr<cv::FaceRecognizer> f = cv::FisherFaceRecognizer::create(components, threshold);
 #else
   cv::Ptr<cv::FaceRecognizer> f = cv::createFisherFaceRecognizer(components, threshold);
@@ -191,7 +191,7 @@ Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
 
   const uint32_t length = tuples->Length();
   for (uint32_t i = 0; i < length; ++i) {
-    const Local<Value> val = tuples->Get(i);
+    const Local<Value> val = tuples->Get(Nan::GetCurrentContext(),i).ToLocalChecked();
 
     if (!val->IsArray()) {
       JSTHROW("train takes a list of [label, image] tuples")
@@ -199,12 +199,12 @@ Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
 
     Local<Array> valarr = Local<Array>::Cast(val);
 
-    if (valarr->Length() != 2 || !valarr->Get(0)->IsInt32()) {
+    if (valarr->Length() != 2 || !valarr->Get(Nan::GetCurrentContext(),0)->IsInt32()) {
       JSTHROW("train takes a list of [label, image] tuples")
     }
 
-    int label = valarr->Get(0)->Uint32Value();
-    cv::Mat im = fromMatrixOrFilename(valarr->Get(1)); //this is ok because we clone the image
+    int label = valarr->Get(Nan::GetCurrentContext(),0)->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+    cv::Mat im = fromMatrixOrFilename(valarr->Get(Nan::GetCurrentContext(),1)); //this is ok because we clone the image
     im = im.clone();
     if (im.channels() == 3) {
       cv::cvtColor(im, im, CV_RGB2GRAY);
@@ -332,8 +332,8 @@ NAN_METHOD(FaceRecognizerWrap::PredictSync) {
 #endif
 
   v8::Local<v8::Object> res = Nan::New<Object>();
-  res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
-  res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
+  res->Set(Nan::GetCurrentContext(), Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
+  res->Set(Nan::GetCurrentContext(), Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
 
   info.GetReturnValue().Set(res);
 }
@@ -372,8 +372,8 @@ public:
     matrix = NULL;
 
     v8::Local<v8::Object> res = Nan::New<Object>();
-    res->Set(Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
-    res->Set(Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
+    res->Set(Nan::GetCurrentContext(), Nan::New("id").ToLocalChecked(), Nan::New<Number>(predictedLabel));
+    res->Set(Nan::GetCurrentContext(), Nan::New("confidence").ToLocalChecked(), Nan::New<Number>(confidence));
 
     Local<Value> argv[] = {
       res
@@ -422,8 +422,8 @@ NAN_METHOD(FaceRecognizerWrap::SaveSync) {
   if (!info[0]->IsString()) {
     JSTHROW("Save takes a filename")
   }
-  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
-#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3
+  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
+#if CV_MAJOR_VERSION >= 4 || (CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3)
   self->rec->write(filename);
 #else
   self->rec->save(filename);
@@ -436,8 +436,8 @@ NAN_METHOD(FaceRecognizerWrap::LoadSync) {
   if (!info[0]->IsString()) {
     JSTHROW("Load takes a filename")
   }
-  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString()));
-#if CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3  
+  std::string filename = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
+#if CV_MAJOR_VERSION >= 4 || (CV_MAJOR_VERSION >= 3  && CV_MINOR_VERSION >= 3)
   self->rec->read(filename);
 #else
   self->rec->load(filename);
@@ -450,7 +450,7 @@ NAN_METHOD(FaceRecognizerWrap::GetMat) {
   if (!info[0]->IsString()) {
     JSTHROW("getMat takes a key")
   }
-  std::string key = std::string(*Nan::Utf8String(info[0]->ToString()));
+  std::string key = std::string(*Nan::Utf8String(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>())));
   cv::Mat m;
 #if CV_MAJOR_VERSION >= 3
   cv::face::BasicFaceRecognizer *bfr =

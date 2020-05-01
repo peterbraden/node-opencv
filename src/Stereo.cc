@@ -32,7 +32,7 @@ void StereoBM::Init(Local<Object> target) {
   ctor->Set(Nan::New<String>("FISH_EYE_PRESET").ToLocalChecked(), Nan::New<Integer>((int)cv::StereoBM::FISH_EYE_PRESET));
   ctor->Set(Nan::New<String>("NARROW_PRESET").ToLocalChecked(), Nan::New<Integer>((int)cv::StereoBM::NARROW_PRESET));
 
-  target->Set(Nan::New("StereoBM").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::GetCurrentContext(),Nan::New("StereoBM").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(StereoBM::New) {
@@ -48,14 +48,14 @@ NAN_METHOD(StereoBM::New) {
     stereo = new StereoBM();
   } else if (info.Length() == 1) {
     // preset
-    stereo = new StereoBM(info[0]->IntegerValue());
+    stereo = new StereoBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   } else if (info.Length() == 2) {
     // preset, disparity search range
-    stereo = new StereoBM(info[0]->IntegerValue(), info[1]->IntegerValue());
+    stereo = new StereoBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   } else {
-    stereo = new StereoBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
+    stereo = new StereoBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
         // preset, disparity search range, sum of absolute differences window size
-        info[2]->IntegerValue());
+        info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   }
 
   stereo->Wrap(info.Holder());
@@ -75,17 +75,17 @@ NAN_METHOD(StereoBM::Compute) {
     // Get the arguments
 
     // Arg 0, the 'left' image
-    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
     cv::Mat left = m0->mat;
 
     // Arg 1, the 'right' image
-    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     cv::Mat right = m1->mat;
 
     // Optional 3rd arg, the disparty depth
     int type = CV_16S;
     if (info.Length() > 2) {
-      type = info[2]->IntegerValue();
+      type = info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked();
     }
 
     // Compute stereo using the block matching algorithm
@@ -117,7 +117,7 @@ void StereoSGBM::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "compute", Compute);
 
-  target->Set(Nan::New("StereoSGBM").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::GetCurrentContext(), Nan::New("StereoSGBM").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(StereoSGBM::New) {
@@ -136,49 +136,49 @@ NAN_METHOD(StereoSGBM::New) {
     if (info.Length() >= 3) {
       switch (info.Length()) {
         case 3:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
         break;
         case 4:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue(), info[3]->IntegerValue());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
         break;
         case 5:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue(), info[3]->IntegerValue(), info[4]->IntegerValue());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
         break;
         case 6:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue(), info[3]->IntegerValue(), info[4]->IntegerValue(),
-            info[5]->IntegerValue());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[5]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
         break;
         case 7:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue(), info[3]->IntegerValue(), info[4]->IntegerValue(),
-            info[5]->IntegerValue(), info[6]->IntegerValue());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[5]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[6]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
         break;
         case 8:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue(), info[3]->IntegerValue(), info[4]->IntegerValue(),
-            info[5]->IntegerValue(), info[6]->IntegerValue(), info[7]->IntegerValue());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[5]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[6]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[7]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
         break;
         case 9:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue(), info[3]->IntegerValue(), info[4]->IntegerValue(),
-            info[5]->IntegerValue(), info[6]->IntegerValue(), info[7]->IntegerValue(),
-            info[8]->IntegerValue());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[5]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[6]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[7]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[8]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
         break;
         case 10:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue(), info[3]->IntegerValue(), info[4]->IntegerValue(),
-            info[5]->IntegerValue(), info[6]->IntegerValue(), info[7]->IntegerValue(),
-            info[8]->IntegerValue(), info[9]->IntegerValue());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[5]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[6]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[7]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[8]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[9]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
         break;
         default:
-        stereo = new StereoSGBM(info[0]->IntegerValue(), info[1]->IntegerValue(),
-            info[2]->IntegerValue(), info[3]->IntegerValue(), info[4]->IntegerValue(),
-            info[5]->IntegerValue(), info[6]->IntegerValue(), info[7]->IntegerValue(),
-            info[8]->IntegerValue(), info[9]->IntegerValue(), info[10]->ToBoolean()->Value());
+        stereo = new StereoSGBM(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[2]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[3]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[4]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[5]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[6]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[7]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(),
+            info[8]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[9]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[10]->ToBoolean( v8::Isolate::GetCurrent() )->Value());
         break;
       }
     } else {
@@ -213,11 +213,11 @@ NAN_METHOD(StereoSGBM::Compute) {
     // Get the arguments
 
     // Arg 0, the 'left' image
-    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
     cv::Mat left = m0->mat;
 
     // Arg 1, the 'right' image
-    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     cv::Mat right = m1->mat;
 
     // Compute stereo using the block matching algorithm
@@ -249,7 +249,7 @@ void StereoGC::Init(Local<Object> target) {
 
   Nan::SetPrototypeMethod(ctor, "compute", Compute);
 
-  target->Set(Nan::New("StereoGC").ToLocalChecked(), ctor->GetFunction());
+  target->Set(Nan::GetCurrentContext(),Nan::New("StereoGC").ToLocalChecked(), ctor->GetFunction( Nan::GetCurrentContext() ).ToLocalChecked());
 }
 
 NAN_METHOD(StereoGC::New) {
@@ -264,10 +264,10 @@ NAN_METHOD(StereoGC::New) {
     stereo = new StereoGC();
   } else if (info.Length() == 1) {
     // numberOfDisparities
-    stereo = new StereoGC(info[0]->IntegerValue());
+    stereo = new StereoGC(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   } else {
     // max iterations
-    stereo = new StereoGC(info[0]->IntegerValue(), info[1]->IntegerValue());
+    stereo = new StereoGC(info[0]->IntegerValue( Nan::GetCurrentContext() ).ToChecked(), info[1]->IntegerValue( Nan::GetCurrentContext() ).ToChecked());
   }
 
   stereo->Wrap(info.Holder());
@@ -287,11 +287,11 @@ NAN_METHOD(StereoGC::Compute) {
     // Get the arguments
 
     // Arg 0, the 'left' image
-    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(info[0]->ToObject());
+    Matrix* m0 = Nan::ObjectWrap::Unwrap<Matrix>(Nan::To<v8::Object>(info[0]).ToLocalChecked());
     cv::Mat left = m0->mat;
 
     // Arg 1, the 'right' image
-    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject());
+    Matrix* m1 = Nan::ObjectWrap::Unwrap<Matrix>(info[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
     cv::Mat right = m1->mat;
 
     // Compute stereo using the block matching algorithm

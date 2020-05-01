@@ -1,17 +1,21 @@
 #include "OpenCV.h"
 #include "Constants.h"
 
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
+
 #define CONST(C) \
-  obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>(C));
+  obj->Set(Nan::GetCurrentContext(), Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>(C));
 
 #define CONST_INT(C) \
-  obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)C));
+  obj->Set(Nan::GetCurrentContext(), Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)C));
 
 #define CONST_DOUBLE(C) \
-  obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Number>(C));
+  obj->Set(Nan::GetCurrentContext(), Nan::New<String>(#C).ToLocalChecked(), Nan::New<Number>(C));
 
 #define CONST_ENUM(C) \
-  obj->Set(Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)(cv::C)));
+  obj->Set(Nan::GetCurrentContext(), Nan::New<String>(#C).ToLocalChecked(), Nan::New<Integer>((int)(cv::C)));
 
 void Constants::Init(Local<Object> target) {
   Nan::Persistent<Object> inner;
@@ -25,7 +29,9 @@ void Constants::Init(Local<Object> target) {
   CONST(CV_32S);
   CONST(CV_32F);
   CONST(CV_64F);
+#if CV_MAJOR_VERSION <= 3
   CONST(CV_USRTYPE1);
+#endif
 
   CONST(CV_8UC1);
   CONST(CV_8UC2);
@@ -120,10 +126,10 @@ void Constants::Init(Local<Object> target) {
   CONST_ENUM(CMP_LE)
   CONST_ENUM(CMP_NE)
 
-  target->Set(Nan::New("TERM_CRITERIA_EPS").ToLocalChecked(), Nan::New<Integer>((int)cv::TermCriteria::EPS));
-  target->Set(Nan::New("TERM_CRITERIA_COUNT").ToLocalChecked(), Nan::New<Integer>((int)cv::TermCriteria::COUNT));
+  target->Set(Nan::GetCurrentContext(), Nan::New("TERM_CRITERIA_EPS").ToLocalChecked(), Nan::New<Integer>((int)cv::TermCriteria::EPS));
+  target->Set(Nan::GetCurrentContext(), Nan::New("TERM_CRITERIA_COUNT").ToLocalChecked(), Nan::New<Integer>((int)cv::TermCriteria::COUNT));
 
-  target->Set(Nan::New("Constants").ToLocalChecked(), obj);
+  target->Set(Nan::GetCurrentContext(), Nan::New("Constants").ToLocalChecked(), obj);
 }
 
 #undef CONST

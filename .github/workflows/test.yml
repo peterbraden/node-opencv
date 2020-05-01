@@ -1,0 +1,13 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Test Ubuntu
+      run: docker build -t peterbraden/node-opencv-ubuntu-14-04 -f test/Dockerfile-ubuntu-14-04 .

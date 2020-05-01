@@ -24,6 +24,8 @@
 
 #if ((CV_MAJOR_VERSION <= 2) && (CV_MINOR_VERSION <= 4))
 #include <opencv/highgui.h>
+#elif CV_MAJOR_VERSION >= 4
+#include <opencv2/imgcodecs/legacy/constants_c.h>
 #else
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #endif
@@ -73,12 +75,12 @@ using namespace node;
 
 #define INT_FROM_ARGS(NAME, IND) \
   if (info[IND]->IsInt32()){ \
-    NAME = info[IND]->Uint32Value(); \
+    NAME = info[IND].As<Uint32>()->Value(); \
   }
 
 #define DOUBLE_FROM_ARGS(NAME, IND) \
   if (info[IND]->IsNumber()){ \
-    NAME = info[IND]->NumberValue(); \
+    NAME = info[IND].As<Number>()->Value(); \
   }
 
 class OpenCV: public Nan::ObjectWrap {

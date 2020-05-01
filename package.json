@@ -1,16 +1,16 @@
 {
   "name": "opencv",
-  "version": "6.3.0",
+  "version": "7.0.0",
   "description": "Node Bindings to OpenCV",
   "author": "Peter Braden <peterbraden@peterbraden.co.uk>",
   "dependencies": {
     "buffers": "^0.1.1",
-    "nan": "^2.13.1"
+    "nan": "^2.14.0"
   },
   "devDependencies": {
-    "tape": "^3.0.0",
     "glob": "^5.0.3",
-    "request": "^2.44.0"
+    "request": "^2.88.2",
+    "tape": "^3.0.0"
   },
   "license": "MIT",
   "scripts": {
