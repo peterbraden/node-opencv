@@ -37,6 +37,7 @@ public:
         cv::Mat mbuf(len, 1, CV_64FC1, buf);
         outputmat = cv::imdecode(mbuf, flags);
         success = 1;
+        free(buf);
       } catch(...){
         success = 0;
       }
@@ -224,8 +225,10 @@ NAN_METHOD(OpenCV::ReadImageAsync) {
         // async
         uint8_t *buf = (uint8_t *) Buffer::Data(Nan::To<v8::Object>(info[0]).ToLocalChecked());
         unsigned len = Buffer::Length(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+        uint8_t *buf_new = (uint8_t *) malloc(len);
+        memcpy(buf_new, buf, len);
         Nan::Callback *callback = new Nan::Callback(cb.As<Function>());
-        Nan::AsyncQueueWorker(new AsyncImDecodeWorker(callback, buf, len, flags));
+        Nan::AsyncQueueWorker(new AsyncImDecodeWorker(callback, buf_new, len, flags));
         return;
       }
       // WILL have returned by here unless exception
