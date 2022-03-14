@@ -18,9 +18,10 @@ You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.
 Install OpenCV using brew
 ```bash
 brew install pkg-config
-brew install opencv@2
-brew link --force opencv@2
+brew install opencv@3
+brew link --force opencv@3
 ```
+*(opencv@2 has been deprecated)*
 
 
 ## Specific for Windows
