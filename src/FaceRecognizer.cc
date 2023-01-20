@@ -199,12 +199,12 @@ Local<Value> UnwrapTrainingData(Nan::NAN_METHOD_ARGS_TYPE info,
 
     Local<Array> valarr = Local<Array>::Cast(val);
 
-    if (valarr->Length() != 2 || !valarr->Get(Nan::GetCurrentContext(),0)->IsInt32()) {
+    if (valarr->Length() != 2 || !valarr->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->IsInt32()) {
       JSTHROW("train takes a list of [label, image] tuples")
     }
 
-    int label = valarr->Get(Nan::GetCurrentContext(),0)->Uint32Value(Nan::GetCurrentContext()).ToChecked();
-    cv::Mat im = fromMatrixOrFilename(valarr->Get(Nan::GetCurrentContext(),1)); //this is ok because we clone the image
+    int label = valarr->Get(Nan::GetCurrentContext(),0).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked();
+    cv::Mat im = fromMatrixOrFilename(valarr->Get(Nan::GetCurrentContext(),1).ToLocalChecked()); //this is ok because we clone the image
     im = im.clone();
     if (im.channels() == 3) {
       cv::cvtColor(im, im, CV_RGB2GRAY);
