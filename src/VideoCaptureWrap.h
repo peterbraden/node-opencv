@@ -29,12 +29,25 @@ public:
 
   // to set frame position
   static NAN_METHOD(SetPosition);
-  static NAN_METHOD(GetFrameCount);
 
+  // to set frame position in milliseconds
+  static NAN_METHOD(SetPositionMS);
+  static NAN_METHOD(GetFrameAt); // would deprecate as naming is confusing
+
+  // to get 0-based index of the frame to be decoded/captured next
+  static NAN_METHOD(GetPosition);
+
+  // to get frame position in milliseconds
+  static NAN_METHOD(GetPositionMS);
+
+  // to get frame rate
   static NAN_METHOD(GetFPS);
   static NAN_METHOD(SetFPS);
 
-  static NAN_METHOD(GetFrameAt);
+  // to get 4-character code of codec
+  static NAN_METHOD(GetFourCC);
+
+  static NAN_METHOD(GetFrameCount);
 
   // release the stream
   static NAN_METHOD(Release);
