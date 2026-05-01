@@ -13,9 +13,9 @@ void Point::Init(Local<Object> target) {
   ctor->SetClassName(Nan::New("Point").ToLocalChecked());
 
   // Prototype
-  Local<ObjectTemplate> proto = ctor->PrototypeTemplate();
-  Nan::SetAccessor(proto, Nan::New("x").ToLocalChecked(), GetX, RaiseImmutable);
-  Nan::SetAccessor(proto, Nan::New("y").ToLocalChecked(), GetY, RaiseImmutable);
+  Local<ObjectTemplate> inst = ctor->InstanceTemplate();
+  Nan::SetAccessor(inst, Nan::New("x").ToLocalChecked(), GetX, RaiseImmutable);
+  Nan::SetAccessor(inst, Nan::New("y").ToLocalChecked(), GetY, RaiseImmutable);
 
   Nan::SetPrototypeMethod(ctor, "dot", Dot);
 
