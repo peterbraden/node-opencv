@@ -304,6 +304,10 @@ NAN_METHOD(Matrix::Pixel) {
   int y = Nan::To<int>(info[0]).FromJust();
   int x = Nan::To<int>(info[1]).FromJust();
 
+  if (y < 0 || x < 0 || y >= self->mat.rows || x >= self->mat.cols) {
+    return Nan::ThrowRangeError("row and column are outside the matrix");
+  }
+
   // cv::Scalar scal = self->mat.at<uchar>(y, x);
 
   if (info.Length() == 3) {
@@ -346,6 +350,10 @@ NAN_METHOD(Matrix::Get) {
   int i = Nan::To<int>(info[0]).FromJust();
   int j = Nan::To<int>(info[1]).FromJust();
 
+  if (i < 0 || j < 0 || i >= self->mat.rows || j >= self->mat.cols) {
+    return Nan::ThrowRangeError("row and column are outside the matrix");
+  }
+
   double val = Matrix::DblGet(self->mat, i, j);
   info.GetReturnValue().Set(Nan::New<Number>(val));
 }
@@ -355,6 +363,10 @@ NAN_METHOD(Matrix::GetPixel) {
 
   int y = Nan::To<int>(info[0]).FromJust();
   int x = Nan::To<int>(info[1]).FromJust();
+
+  if (y < 0 || x < 0 || y >= self->mat.rows || x >= self->mat.cols) {
+    return Nan::ThrowRangeError("row and column are outside the matrix");
+  }
 
   if (self->mat.channels() == 4) {
     v8::Local < v8::Array > arr = Nan::New<Array>(4);
@@ -387,8 +399,16 @@ NAN_METHOD(Matrix::Set) {
   double val = info[2].As<Number>()->Value();
   int vint = 0;
 
+  if (i < 0 || j < 0 || i >= self->mat.rows || j >= self->mat.cols) {
+    return Nan::ThrowRangeError("row and column are outside the matrix");
+  }
+
   if (info.Length() == 4) {
-    self->mat.at<cv::Vec3b>(i, j)[info[3].As<Number>()->Value()] = val;
+    int channel = Nan::To<int>(info[3]).FromJust();
+    if (self->mat.channels() != 3 || channel < 0 || channel > 2) {
+      return Nan::ThrowRangeError("channel is outside the matrix");
+    }
+    self->mat.at<cv::Vec3b>(i, j)[channel] = val;
   } else if (info.Length() == 3) {
     switch (self->mat.type()) {
       case CV_32FC3:
@@ -419,10 +439,18 @@ NAN_METHOD(Matrix::Put) {
   SETUP_FUNCTION(Matrix)
 
   if (!Buffer::HasInstance(info[0])) {
-    Nan::ThrowTypeError("Not a buffer");
+    return Nan::ThrowTypeError("Not a buffer");
   }
   const char* buffer_data = Buffer::Data(info[0]);
   size_t buffer_length = Buffer::Length(info[0]);
+
+  if (self->mat.data == NULL || !self->mat.isContinuous()) {
+    return Nan::ThrowError("Matrix has no continuous buffer to write into");
+  }
+  if (buffer_length > self->mat.total() * self->mat.elemSize()) {
+    return Nan::ThrowRangeError("Buffer is larger than the matrix data");
+  }
+
   memcpy(self->mat.data, buffer_data, buffer_length);
   return;
 }
